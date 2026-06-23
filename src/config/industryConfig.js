@@ -2704,9 +2704,9 @@ export const INDUSTRY_CONFIG = {
   },
 
   // ─── RESTAURANTS ─────────────────────────────────────────────────────────────
-  restaurants: {
-    subdomain: "restaurants",
-    label: "Restaurants",
+  restaurant: {
+    subdomain: "restaurant",
+    label: "Restaurant",
     headline: "Invoicing for Caterers, Events & Food Businesses",
     subheadline:
       "Send professional catering quotes and event invoices — and get deposits paid before you lift a pan.",

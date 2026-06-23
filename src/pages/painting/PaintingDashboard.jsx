@@ -18,7 +18,7 @@ import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import ScheduleView from "./ScheduleView";
-import ReportsView  from "./ReportsView";
+import ReportsView from "./ReportsView";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -50,7 +50,7 @@ import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import SignatureStamp from "../SignatureStamp";
-import AIInvoiceWindow from '../AIInvoiceWindow';
+import AIInvoiceWindow from "../AIInvoiceWindow";
 import {
   ChevronDown,
   ChevronLeft,
@@ -91,6 +91,10 @@ import {
   Layers,
 } from "lucide-react";
 import PaintingSidebar from "./PaintingSidebar";
+// ── New views: Paint & Materials / Colour Library / Area Calculator ───────
+import InventoryView from "./InventoryView";
+import ColourLibraryView from "./ColourLibraryView";
+import AreaCalculatorView from "./AreaCalculatorView";
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -147,7 +151,7 @@ const PaintingDashboard = () => {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
-  const [aiDocType, setAiDocType] = useState('invoice');
+  const [aiDocType, setAiDocType] = useState("invoice");
   // ── customers ────────────────────────────────────────────────────────────
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
@@ -174,7 +178,7 @@ const PaintingDashboard = () => {
     enabled: true,
   });
   const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [stampConfig, setStampConfig] = useState(null);
   // ── client / site fields ─────────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("Meridian Developments");
   const [customerEmail, setCustomerEmail] = useState("projects@meridian.co.za");
@@ -832,7 +836,8 @@ const [stampConfig, setStampConfig] = useState(null);
         userId: user.uid,
         to: userEmail,
         subject: "✅ Test Email - Email Configuration Successful",
-        message: `Hello,\n\nThis is a test email from your construction quote/invoice system.\n\n✓ Your email configuration is working correctly!\n\nBest regards,\nYour Construction Quote System`.trim(),
+        message:
+          `Hello,\n\nThis is a test email from your construction quote/invoice system.\n\n✓ Your email configuration is working correctly!\n\nBest regards,\nYour Construction Quote System`.trim(),
         documentType: "test",
         documentNumber: "TEST-001",
       };
@@ -919,7 +924,6 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold rounded-lg hover:from-amber-700 transition-colors shadow-sm whitespace-nowrap",
     },
-    
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -962,30 +966,40 @@ const [stampConfig, setStampConfig] = useState(null);
 
   return (
     <div className="flex h-screen w-screen bg-gradient-to-br from-amber-50 via-orange-50 to-stone-50 overflow-hidden">
-     <PaintingSidebar        // if using React Router, else omit
-    user={user}
-    activeView={activeView}
-    setActiveView={setActiveView}
-    sidebarOpen={sidebarOpen}
-    setSidebarOpen={setSidebarOpen}
-    setShowSettings={setShowSettings}
-    handleNewInvoice={() => { /* your logic */ }}
-    handleNewQuote={() => { /* your logic */ }}
-    businessInfo={businessInfo}
-    savedQuotes={savedQuotes}
-    savedCustomers={savedCustomers}
-    handleLogout={() => { /* your logout logic */ }}
-    showQuotesList={showQuotesList}
-    setShowQuotesList={setShowQuotesList}
-    setShowCustomersListModal={setShowCustomersListModal}
-    handleAddNewCustomer={() => { /* your logic */ }}
-    documentType={documentType}
-    isQuotesInvoicesOpen2={isQuotesInvoicesOpen2}
-    setIsQuotesInvoicesOpen2={setIsQuotesInvoicesOpen2}
-    newRequestCount={0}
-  />
+      <PaintingSidebar // if using React Router, else omit
+        user={user}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        setShowSettings={setShowSettings}
+        handleNewInvoice={() => {
+          /* your logic */
+        }}
+        handleNewQuote={() => {
+          /* your logic */
+        }}
+        businessInfo={businessInfo}
+        savedQuotes={savedQuotes}
+        savedCustomers={savedCustomers}
+        handleLogout={() => {
+          /* your logout logic */
+        }}
+        showQuotesList={showQuotesList}
+        setShowQuotesList={setShowQuotesList}
+        setShowCustomersListModal={setShowCustomersListModal}
+        handleAddNewCustomer={() => {
+          /* your logic */
+        }}
+        documentType={documentType}
+        isQuotesInvoicesOpen2={isQuotesInvoicesOpen2}
+        setIsQuotesInvoicesOpen2={setIsQuotesInvoicesOpen2}
+        newRequestCount={0}
+      />
       {/* ── Main Content Area ────────────────────────────────────────────── */}
-      <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "md:ml-2" : "md:ml-4"}`}>
+      <div
+        className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "md:ml-2" : "md:ml-4"}`}
+      >
         {/* ── App Header ──────────────────────────────────────────────── */}
         <AppHeader
           actions={headerActions}
@@ -1013,23 +1027,25 @@ const [stampConfig, setStampConfig] = useState(null);
           existingCustomer={selectedCustomer}
           onCustomerSaved={handleCustomerSaved}
         />
-{showStampModal && (
-  <StampSignatureModal
-    isOpen={showStampModal}
-    onClose={() => setShowStampModal(false)}
-    onConfirm={(cfg) => {
-      setStampConfig(cfg);
-      setShowStampModal(false);
-    }}
-    previewContent={
-      activeView === "purchase-orders"
-        ? <POTemplateRenderer  />
-        : <TemplateRenderer {...templateProps} />
-    }
-    businessInfo={businessInfo}
-    existingConfig={stampConfig}
-  />
-)}
+        {showStampModal && (
+          <StampSignatureModal
+            isOpen={showStampModal}
+            onClose={() => setShowStampModal(false)}
+            onConfirm={(cfg) => {
+              setStampConfig(cfg);
+              setShowStampModal(false);
+            }}
+            previewContent={
+              activeView === "purchase-orders" ? (
+                <POTemplateRenderer />
+              ) : (
+                <TemplateRenderer {...templateProps} />
+              )
+            }
+            businessInfo={businessInfo}
+            existingConfig={stampConfig}
+          />
+        )}
         {showPaymentModal && selectedQuoteForPayment && (
           <PaymentProcessor
             showModal={showPaymentModal}
@@ -1059,8 +1075,8 @@ const [stampConfig, setStampConfig] = useState(null);
               <div className="overflow-auto p-4">
                 {savedQuotes.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    No saved{" "}
-                    {documentType === "quote" ? "quotes" : "invoices"} yet
+                    No saved {documentType === "quote" ? "quotes" : "invoices"}{" "}
+                    yet
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -1128,8 +1144,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   </div>
                   <div>
                     <h2 className="text-sm font-semibold text-[#1e293b]">
-                      {documentType === "quote" ? "Quote" : "Invoice"}{" "}
-                      Preview
+                      {documentType === "quote" ? "Quote" : "Invoice"} Preview
                     </h2>
                     <p className="text-xs text-[#64748b]">
                       {quoteNumber || "Draft"}
@@ -1164,26 +1179,33 @@ const [stampConfig, setStampConfig] = useState(null);
               <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                 <div
                   className="mx-auto bg-white shadow-xl"
-                  style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
+                  style={{
+                    position: "relative",
+                    width: "210mm",
+                    minHeight: "297mm",
+                  }}
                 >
                   <TemplateRenderer {...templateProps} />
-                  <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
-
+                  <StampOverlay
+                    stampConfig={stampConfig}
+                    pageNumber={1}
+                    businessInfo={businessInfo}
+                  />
                 </div>
               </div>
             </div>
           </div>
         )}
         {showAIWindow && (
-                <AIInvoiceWindow
-                  user={user}
-                  businessInfo={businessInfo}
-                  documentType={documentType}
-                  onExit={() => setShowAIWindow(false)}
-                  industry="painting"
-                  TemplateRenderer={TemplateRenderer}
-                />
-              )}
+          <AIInvoiceWindow
+            user={user}
+            businessInfo={businessInfo}
+            documentType={documentType}
+            onExit={() => setShowAIWindow(false)}
+            industry="painting"
+            TemplateRenderer={TemplateRenderer}
+          />
+        )}
         {/* ── Main scrollable content ──────────────────────────────────── */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {/* ── Alternate Views ──────────────────────────────────────── */}
@@ -1208,53 +1230,69 @@ const [stampConfig, setStampConfig] = useState(null);
             </div>
           )}
           {activeView === "schedule" && (
-  <div className="flex-1 overflow-y-auto p-4">
-    <ScheduleView user={user} />
-  </div>
-)}
-{activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+            <div className="flex-1 overflow-y-auto p-4">
+              <ScheduleView user={user} />
+            </div>
+          )}
+          {activeView === "marketplace" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
 
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
-{activeView === "reports" && (
-  <div className="flex-1 overflow-y-auto p-4">
-    <ReportsView user={user} />
-  </div>
-)}
-         {activeView === "home" && (
-                     <div className="flex-1 overflow-y-auto p-4">
-                       <HomeView
-                         user={user}
-                         onNavigate={(view, docType) => {
-                           if (docType) setDocumentType(docType);
-                           setActiveView(view);
-                         }}
-                         onGoToDashboard={() => setActiveView("quote")}
-                         onSidebarToggle={() => setSidebarOpen((p) => !p)}
-                         sidebarOpen={sidebarOpen}
-                       />
-                     </div>
-                   )}
-            {activeView === "purchase-orders" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <PurchaseOrders user={user} />
-  </div>
-)}
+          {activeView === "incoming-requests" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceRequestsView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
+          {activeView === "reports" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <ReportsView user={user} />
+            </div>
+          )}
+          {/* ── New: Paint & Materials inventory ─────────────────────── */}
+          {activeView === "inventory" && (
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <InventoryView user={user} />
+            </div>
+          )}
+          {/* ── New: Colour Library ──────────────────────────────────── */}
+          {activeView === "colours" && (
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <ColourLibraryView user={user} />
+            </div>
+          )}
+          {/* ── New: Area Calculator ─────────────────────────────────── */}
+          {activeView === "calculator" && (
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <AreaCalculatorView user={user} />
+            </div>
+          )}
+          {activeView === "home" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <HomeView
+                user={user}
+                onNavigate={(view, docType) => {
+                  if (docType) setDocumentType(docType);
+                  setActiveView(view);
+                }}
+                onGoToDashboard={() => setActiveView("quote")}
+                onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                sidebarOpen={sidebarOpen}
+              />
+            </div>
+          )}
+          {activeView === "purchase-orders" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <PurchaseOrders user={user} />
+            </div>
+          )}
           {/* ── Quote / Invoice Builder — split layout ──────────────── */}
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
-
               {/* ── LEFT: Form panel ─────────────────────────────────── */}
               <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
                 <div className="space-y-5">
-
                   {/* Tab: Manual / AI */}
                   <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div className="flex border-b border-slate-200">
@@ -1279,7 +1317,6 @@ const [stampConfig, setStampConfig] = useState(null);
                         AI Mode
                       </button>
                     </div>
-                    
                   </div>
 
                   {inputMode === "manual" && (
@@ -1362,7 +1399,9 @@ const [stampConfig, setStampConfig] = useState(null);
                                 </div>
                                 <div>
                                   <div className="font-bold text-emerald-900">
-                                    {documentType === "quote" ? "Quote" : "Invoice"}{" "}
+                                    {documentType === "quote"
+                                      ? "Quote"
+                                      : "Invoice"}{" "}
                                     Fully Paid
                                   </div>
                                   <div className="text-sm text-emerald-700">
@@ -1417,7 +1456,6 @@ const [stampConfig, setStampConfig] = useState(null);
 
                       {/* ── Stepped Form ──────────────────────────────────── */}
                       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-
                         {/* Step indicator */}
                         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
                           <div className="flex items-center gap-0">
@@ -1427,7 +1465,9 @@ const [stampConfig, setStampConfig] = useState(null);
                                   <div
                                     className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${currentStep === step.number ? "bg-amber-600 text-white" : currentStep > step.number ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-500" : "bg-slate-200 text-slate-400"}`}
                                   >
-                                    {currentStep > step.number ? "✓" : step.number}
+                                    {currentStep > step.number
+                                      ? "✓"
+                                      : step.number}
                                   </div>
                                   <span
                                     className={`text-xs font-medium hidden sm:block ${currentStep === step.number ? "text-amber-600" : currentStep > step.number ? "text-emerald-600" : "text-slate-400"}`}
@@ -1548,9 +1588,13 @@ const [stampConfig, setStampConfig] = useState(null);
                                   className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white hover:border-slate-400"
                                 >
                                   <option value="Commercial">Commercial</option>
-                                  <option value="Residential">Residential</option>
+                                  <option value="Residential">
+                                    Residential
+                                  </option>
                                   <option value="Industrial">Industrial</option>
-                                  <option value="Infrastructure">Infrastructure</option>
+                                  <option value="Infrastructure">
+                                    Infrastructure
+                                  </option>
                                   <option value="Renovation">Renovation</option>
                                   <option value="Government">Government</option>
                                 </select>
@@ -1654,21 +1698,43 @@ const [stampConfig, setStampConfig] = useState(null);
                                       }
                                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-sm font-medium hover:border-slate-400"
                                     >
-                                      <option value="Foundation Work">Foundation Work</option>
-                                      <option value="Structural Steel">Structural Steel</option>
-                                      <option value="Concrete & Masonry">Concrete & Masonry</option>
-                                      <option value="Electrical">Electrical</option>
+                                      <option value="Foundation Work">
+                                        Foundation Work
+                                      </option>
+                                      <option value="Structural Steel">
+                                        Structural Steel
+                                      </option>
+                                      <option value="Concrete & Masonry">
+                                        Concrete & Masonry
+                                      </option>
+                                      <option value="Electrical">
+                                        Electrical
+                                      </option>
                                       <option value="Plumbing">Plumbing</option>
                                       <option value="Roofing">Roofing</option>
-                                      <option value="Finishing & Plastering">Finishing & Plastering</option>
-                                      <option value="Earthworks">Earthworks</option>
-                                      <option value="Landscaping">Landscaping</option>
-                                      <option value="Site Preparation">Site Preparation</option>
+                                      <option value="Finishing & Plastering">
+                                        Finishing & Plastering
+                                      </option>
+                                      <option value="Earthworks">
+                                        Earthworks
+                                      </option>
+                                      <option value="Landscaping">
+                                        Landscaping
+                                      </option>
+                                      <option value="Site Preparation">
+                                        Site Preparation
+                                      </option>
                                       <option value="HVAC">HVAC</option>
-                                      <option value="Windows & Doors">Windows & Doors</option>
+                                      <option value="Windows & Doors">
+                                        Windows & Doors
+                                      </option>
                                       <option value="Painting">Painting</option>
-                                      <option value="Tiling & Flooring">Tiling & Flooring</option>
-                                      <option value="Materials Supply">Materials Supply</option>
+                                      <option value="Tiling & Flooring">
+                                        Tiling & Flooring
+                                      </option>
+                                      <option value="Materials Supply">
+                                        Materials Supply
+                                      </option>
                                     </select>
                                   </div>
                                   <div>
@@ -1787,14 +1853,30 @@ const [stampConfig, setStampConfig] = useState(null);
                                   <table className="w-full">
                                     <thead>
                                       <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Description</th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Category</th>
-                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">Phase</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Unit Rate</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Qty</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">VAT</th>
-                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">Total</th>
-                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">Action</th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                          Description
+                                        </th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                          Category
+                                        </th>
+                                        <th className="px-4 py-4 text-left text-sm font-bold text-slate-700">
+                                          Phase
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          Unit Rate
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          Qty
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          VAT
+                                        </th>
+                                        <th className="px-4 py-4 text-right text-sm font-bold text-slate-700">
+                                          Total
+                                        </th>
+                                        <th className="px-4 py-4 text-center text-sm font-bold text-slate-700">
+                                          Action
+                                        </th>
                                       </tr>
                                     </thead>
                                     <tbody className="bg-white">
@@ -1830,7 +1912,9 @@ const [stampConfig, setStampConfig] = useState(null);
                                           </td>
                                           <td className="px-4 py-4 text-center">
                                             <button
-                                              onClick={() => handleRemoveItem(index)}
+                                              onClick={() =>
+                                                handleRemoveItem(index)
+                                              }
                                               className="text-rose-600 hover:text-rose-700 text-sm font-semibold hover:bg-rose-50 px-3 py-1 rounded-lg transition-all flex items-center gap-1 mx-auto"
                                             >
                                               <Trash2 className="w-3 h-3" />
@@ -1878,7 +1962,9 @@ const [stampConfig, setStampConfig] = useState(null);
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-amber-300">
-                                    <span className="text-slate-900">Total:</span>
+                                    <span className="text-slate-900">
+                                      Total:
+                                    </span>
                                     <span className="text-amber-700 text-2xl">
                                       R{total.toFixed(2)}
                                     </span>
@@ -1892,11 +1978,11 @@ const [stampConfig, setStampConfig] = useState(null);
                         {/* Step 4 – Schedule & Payment */}
                         {currentStep === 4 && (
                           <div className="p-8">
-                        
-
                             {/* Client & Site Summary */}
                             <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
-                              <h3 className="text-lg font-bold text-slate-900 mb-4">Quote Summary</h3>
+                              <h3 className="text-lg font-bold text-slate-900 mb-4">
+                                Quote Summary
+                              </h3>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                   <h4 className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
@@ -1904,7 +1990,9 @@ const [stampConfig, setStampConfig] = useState(null);
                                     Client Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">{customerName}</p>
+                                    <p className="font-semibold text-slate-900">
+                                      {customerName}
+                                    </p>
                                     <p>{customerEmail}</p>
                                     <p>{customerPhone}</p>
                                   </div>
@@ -1915,21 +2003,60 @@ const [stampConfig, setStampConfig] = useState(null);
                                     Site Details:
                                   </h4>
                                   <div className="text-sm text-slate-600 space-y-1">
-                                    <p className="font-semibold text-slate-900">{propertyAddress}</p>
-                                    <p><span className="font-semibold">Type:</span> {siteType}</p>
-                                    <p><span className="font-semibold">Area:</span> {siteSize} sqm</p>
-                                    <p><span className="font-semibold">Floors:</span> {floors} | Phases: {phases}</p>
+                                    <p className="font-semibold text-slate-900">
+                                      {propertyAddress}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Type:
+                                      </span>{" "}
+                                      {siteType}
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Area:
+                                      </span>{" "}
+                                      {siteSize} sqm
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        Floors:
+                                      </span>{" "}
+                                      {floors} | Phases: {phases}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
 
                               <div className="mt-6 pt-6 border-t border-slate-300">
-                                <h4 className="text-sm font-semibold text-slate-700 mb-2">Quote Details:</h4>
+                                <h4 className="text-sm font-semibold text-slate-700 mb-2">
+                                  Quote Details:
+                                </h4>
                                 <div className="text-sm text-slate-600 space-y-1">
-                                  <p><span className="font-semibold">Number:</span> {quoteNumber}</p>
-                                  <p><span className="font-semibold">Date:</span> {new Date().toLocaleDateString()}</p>
-                                  <p><span className="font-semibold">Type:</span> {documentType === "quote" ? "Quote" : "Invoice"}</p>
-                                  <p><span className="font-semibold">Status:</span>{" "}<span className="text-amber-600 font-bold">Pending</span></p>
+                                  <p>
+                                    <span className="font-semibold">
+                                      Number:
+                                    </span>{" "}
+                                    {quoteNumber}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">Date:</span>{" "}
+                                    {new Date().toLocaleDateString()}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">Type:</span>{" "}
+                                    {documentType === "quote"
+                                      ? "Quote"
+                                      : "Invoice"}
+                                  </p>
+                                  <p>
+                                    <span className="font-semibold">
+                                      Status:
+                                    </span>{" "}
+                                    <span className="text-amber-600 font-bold">
+                                      Pending
+                                    </span>
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -1978,7 +2105,8 @@ const [stampConfig, setStampConfig] = useState(null);
                               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-md hover:shadow-lg"
                             >
                               <Save className="w-5 h-5" />
-                              Save {documentType === "quote" ? "Quote" : "Invoice"}
+                              Save{" "}
+                              {documentType === "quote" ? "Quote" : "Invoice"}
                             </button>
                           )}
                         </div>
@@ -2028,20 +2156,23 @@ const [stampConfig, setStampConfig] = useState(null);
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
-
+                    <StampOverlay
+                      stampConfig={stampConfig}
+                      pageNumber={1}
+                      businessInfo={businessInfo}
+                    />
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}
-<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-  <button
-    onClick={() => setShowStampModal(true)}
-    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <Stamp className="w-4 h-4" />
-    Stamp &amp; Signature
-  </button>
-</div>
+                <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                  <button
+                    onClick={() => setShowStampModal(true)}
+                    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <Stamp className="w-4 h-4" />
+                    Stamp &amp; Signature
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -2061,8 +2192,11 @@ const [stampConfig, setStampConfig] = useState(null);
         }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
-
+        <StampOverlay
+          stampConfig={stampConfig}
+          pageNumber={1}
+          businessInfo={businessInfo}
+        />
       </div>
     </div>
   );

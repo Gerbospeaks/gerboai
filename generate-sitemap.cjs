@@ -15,7 +15,7 @@ const INDUSTRY_SLUGS = [
   "mechanics", "electrical", "carpentry", "plumbing", "logistics",
   "construction", "accounting", "cleaning", "education", "health",
   "hospitality", "hvac", "landscaping", "legal", "painting",
-  "pest-control", "photography", "pool", "realestate", "restaurants",
+  "pest-control", "photography", "pool", "realestate", "restaurant",
   "retail", "security", "solar", "towing", "welding", "flooring", "windows",
 ];
 

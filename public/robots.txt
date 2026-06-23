@@ -27,7 +27,7 @@ Allow: /pest-control
 Allow: /photography
 Allow: /pool
 Allow: /realestate
-Allow: /restaurants
+Allow: /restaurant
 Allow: /retail
 Allow: /security
 Allow: /solar

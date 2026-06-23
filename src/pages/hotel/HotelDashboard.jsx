@@ -399,7 +399,6 @@ const [stampConfig, setStampConfig] = useState(null);
 
   const mobileDashboardActions = [
     { label: "Save",  icon: Save,     onClick: handleSaveInvoice, className: "flex items-center gap-1.5 px-3 py-2 bg-[#d97706] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
-    { label: "Send",  icon: Send,                                 className: "flex items-center gap-1.5 px-3 py-2 bg-[#059669] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
     { label: "PDF",   icon: Download, onClick: handleSavePDF,    className: "flex items-center gap-1.5 px-3 py-2 bg-[#0891b2] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
     { label: "Print", icon: Printer,  onClick: handlePrint,      className: "flex items-center gap-1.5 px-3 py-2 bg-white border border-[#e2e8f0] text-[#374151] rounded-md text-xs font-medium active:scale-95 whitespace-nowrap" },
   ];

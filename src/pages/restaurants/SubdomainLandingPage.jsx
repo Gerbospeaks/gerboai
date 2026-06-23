@@ -1,208 +1,926 @@
-
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
+import logo from "../../assets/img/restaurants-logo.png"
+const fontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap');
+`;
 
-// ─── Smooth scroll helper ─────────────────────────────────────────────────────
-function scrollTo(id) {
+/* ─── Design tokens ─────────────────────────────────────────────────────── */
+const T = {
+  white: "#FFFFFF",
+  bg: "#F7F9FC",
+  bgAlt: "#FEF3EE", // warm orange tint for restaurant
+  border: "#DDE3EE",
+  borderL: "#E8ECF4",
+  text: "#1B2A3D",
+  sub: "#4A5568",
+  muted: "#718096",
+  shadow: "rgba(27,42,61,0.07)",
+};
+
+/* ─── Scroll helper ─────────────────────────────────────────────────────── */
+const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+/* ─── Chip ──────────────────────────────────────────────────────────────── */
+function Chip({ children, accent }) {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        background: `${accent}14`,
+        border: `1px solid ${accent}30`,
+        color: accent,
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        padding: "4px 12px",
+        borderRadius: 4,
+        fontFamily: "'Barlow', sans-serif",
+      }}
+    >
+      {children}
+    </span>
+  );
 }
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
+/* ─── Section header ────────────────────────────────────────────────────── */
+function SectionHead({ overline, title, sub, accent, center = true }) {
+  return (
+    <div style={{ textAlign: center ? "center" : "left", marginBottom: 48 }}>
+      <Chip accent={accent}>{overline}</Chip>
+      <h2
+        style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 900,
+          fontSize: "clamp(26px,3.5vw,42px)",
+          color: T.text,
+          margin: "12px 0 10px",
+          letterSpacing: "-0.3px",
+          lineHeight: 1.1,
+        }}
+      >
+        {title}
+      </h2>
+      {sub && (
+        <p
+          style={{
+            color: T.muted,
+            fontSize: 15,
+            lineHeight: 1.7,
+            maxWidth: 540,
+            margin: center ? "0 auto" : 0,
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          {sub}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ─── Mock Invoice (restaurant-flavoured) ───────────────────────────────── */
+function MockInvoice({ config }) {
+  const lineItems = config.mockLineItems || [
+    {
+      desc: "Grilled Chicken Platter ×4",
+      qty: 4,
+      unit: "R165.00",
+      total: "R660.00",
+    },
+    { desc: "Craft Beer Bucket ×2", qty: 2, unit: "R220.00", total: "R440.00" },
+    { desc: "Dessert Selection", qty: 1, unit: "R180.00", total: "R180.00" },
+    {
+      desc: "Private Dining Room Hire",
+      qty: 1,
+      unit: "R350.00",
+      total: "R350.00",
+    },
+  ];
+  const subtotal = config.mockSubtotal || "R1 630.00";
+  const vat = config.mockVat || "R244.50";
+  const total = config.mockTotal || "R1 874.50";
+  const refNo = config.mockRef || "INV-0089";
+  const bizName =
+    config.mockBizName || `${config.label || "The Kitchen"} Restaurant`;
+
+  return (
+    <div
+      style={{
+        background: T.white,
+        borderRadius: 12,
+        border: `1px solid ${T.border}`,
+        overflow: "hidden",
+        fontFamily: "'Barlow', sans-serif",
+        width: "100%",
+        maxWidth: 480,
+        boxShadow: `0 20px 60px ${T.shadow}`,
+      }}
+    >
+      {/* Chrome bar */}
+      <div
+        style={{
+          background: "#F1F5F9",
+          padding: "9px 14px",
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+        }}
+      >
+        {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
+          <span
+            key={c}
+            style={{
+              width: 11,
+              height: 11,
+              borderRadius: "50%",
+              background: c,
+              display: "inline-block",
+            }}
+          />
+        ))}
+        <div
+          style={{
+            flex: 1,
+            background: T.white,
+            borderRadius: 4,
+            height: 20,
+            margin: "0 10px",
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: 9,
+          }}
+        >
+          <span style={{ fontSize: 10, color: T.muted }}>
+            solidflo.co.za/invoice/{refNo}
+          </span>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div
+        style={{
+          padding: "18px 22px 14px",
+          borderBottom: `2px solid ${config.accent}`,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900,
+                fontSize: 20,
+                color: config.color,
+                marginBottom: 2,
+              }}
+            >
+              🍽️ {bizName}
+            </div>
+            <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>
+              Table Invoice · Dine-in &amp; Takeaway
+            </p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <span
+              style={{
+                background: "#DCFCE7",
+                color: "#16A34A",
+                fontSize: 10,
+                fontWeight: 700,
+                padding: "2px 9px",
+                borderRadius: 3,
+              }}
+            >
+              PAID
+            </span>
+            <p
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 800,
+                fontSize: 18,
+                color: config.color,
+                margin: "5px 0 0",
+              }}
+            >
+              {refNo}
+            </p>
+            <p style={{ fontSize: 10, color: T.muted, margin: 0 }}>
+              Issued 18 Jun 2025
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Line items */}
+      <div style={{ padding: "0 22px" }}>
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}
+        >
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${T.borderL}` }}>
+              {["Description", "Qty", "Unit", "Total"].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: "9px 0 7px",
+                    color: T.muted,
+                    fontWeight: 600,
+                    textAlign: h === "Description" ? "left" : "right",
+                    fontSize: 10,
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {lineItems.map((r, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${T.borderL}` }}>
+                <td style={{ padding: "8px 0", color: T.text }}>{r.desc}</td>
+                <td
+                  style={{
+                    padding: "8px 0",
+                    textAlign: "right",
+                    color: T.muted,
+                  }}
+                >
+                  {r.qty}
+                </td>
+                <td
+                  style={{
+                    padding: "8px 0",
+                    textAlign: "right",
+                    color: T.muted,
+                  }}
+                >
+                  {r.unit}
+                </td>
+                <td
+                  style={{
+                    padding: "8px 0",
+                    textAlign: "right",
+                    fontWeight: 600,
+                    color: config.color,
+                  }}
+                >
+                  {r.total}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Totals */}
+      <div
+        style={{
+          padding: "10px 22px 18px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 4,
+        }}
+      >
+        {[
+          ["Subtotal", subtotal],
+          ["VAT (15%)", vat],
+        ].map(([l, v]) => (
+          <div key={l} style={{ display: "flex", gap: 28, fontSize: 11 }}>
+            <span style={{ color: T.muted }}>{l}</span>
+            <span style={{ color: T.text, minWidth: 72, textAlign: "right" }}>
+              {v}
+            </span>
+          </div>
+        ))}
+        <div
+          style={{
+            display: "flex",
+            gap: 28,
+            background: config.color,
+            borderRadius: 6,
+            padding: "5px 12px",
+            marginTop: 5,
+          }}
+        >
+          <span
+            style={{
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            Total Due
+          </span>
+          <span
+            style={{
+              color: T.white,
+              fontWeight: 800,
+              fontSize: 14,
+              minWidth: 72,
+              textAlign: "right",
+            }}
+          >
+            {total}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Navbar ────────────────────────────────────────────────────────────── */
 function Navbar({ config, onLogin, onRegister }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  const links = [
+    { id: "features", label: "Features" },
+    { id: "dashboard", label: "Platform" },
+    { id: "pricing", label: "Pricing" },
+    { id: "testimonials", label: "Reviews" },
+    { id: "faq", label: "FAQ" },
+  ];
+
+  const linkColor = scrolled ? T.sub : "rgba(255,255,255,0.7)";
+  const linkHover = scrolled ? T.text : T.white;
 
   return (
     <nav
-      style={{ background: config.color, borderBottom: `1px solid rgba(255,255,255,0.08)` }}
-      className="sticky top-0 z-50"
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        background: scrolled ? T.white : config.color,
+        borderBottom: scrolled
+          ? `1px solid ${T.border}`
+          : "1px solid rgba(255,255,255,0.12)",
+        boxShadow: scrolled ? `0 1px 12px ${T.shadow}` : "none",
+        transition: "background 0.3s, box-shadow 0.3s",
+      }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 28px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 62,
+        }}
+      >
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{config.icon}</span>
-          <div>
-            <span className="text-white font-bold text-sm">SolidFlo</span>
-            <span className="text-white/40 text-xs ml-1.5">{config.label}</span>
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img src={logo} width={160} alt="" />
         </div>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-6">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
+        {/* Desktop links */}
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          {links.map((l) => (
             <button
-              key={s}
-              onClick={() => scrollTo(s)}
-              className="text-white/60 hover:text-white text-sm capitalize transition-colors"
+              key={l.id}
+              onClick={() => scrollTo(l.id)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: linkColor,
+                fontSize: 13.5,
+                fontFamily: "'Barlow', sans-serif",
+                fontWeight: 500,
+                padding: "6px 12px",
+                borderRadius: 6,
+                transition: "color 0.2s, background 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = linkHover;
+                e.target.style.background = scrolled
+                  ? T.bg
+                  : "rgba(255,255,255,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = linkColor;
+                e.target.style.background = "transparent";
+              }}
             >
-              {s}
+              {l.label}
             </button>
           ))}
         </div>
 
-        {/* CTA buttons */}
-        <div className="hidden md:flex items-center gap-2">
+        {/* CTAs */}
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <button
             onClick={onLogin}
-            className="px-4 py-1.5 text-sm text-white/70 hover:text-white transition-colors"
+            style={{
+              background: "none",
+              border: `1px solid ${scrolled ? T.border : "rgba(255,255,255,0.25)"}`,
+              borderRadius: 6,
+              padding: "7px 18px",
+              color: scrolled ? T.sub : "rgba(255,255,255,0.8)",
+              fontSize: 13,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+            }}
           >
             Sign In
           </button>
           <button
             onClick={onRegister}
-            className="px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors"
-            style={{ background: config.accent, color: "#fff" }}
+            style={{
+              background: config.accent,
+              border: "none",
+              borderRadius: 6,
+              padding: "8px 20px",
+              color: T.white,
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+              boxShadow: `0 2px 8px ${config.accent}50`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = `0 4px 14px ${config.accent}60`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = `0 2px 8px ${config.accent}50`;
+            }}
           >
-            {config.cta}
+            Get Started Free
           </button>
         </div>
-
-        {/* Mobile hamburger */}
-        <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-white/60 hover:text-white">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            {open ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
-          </svg>
-        </button>
       </div>
-
-      {/* Mobile menu */}
-      {open && (
-        <div style={{ background: config.color }} className="md:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-2">
-          {["features", "pricing", "testimonials", "faq"].map((s) => (
-            <button
-              key={s}
-              onClick={() => { scrollTo(s); setOpen(false); }}
-              className="block w-full text-left text-white/60 hover:text-white py-1.5 text-sm capitalize"
-            >
-              {s}
-            </button>
-          ))}
-          <div className="flex gap-2 pt-2">
-            <button onClick={onLogin} className="flex-1 py-2 text-sm text-white border border-white/20 rounded-lg hover:border-white/40 transition-colors">
-              Sign In
-            </button>
-            <button
-              onClick={onRegister}
-              className="flex-1 py-2 text-sm font-semibold rounded-lg"
-              style={{ background: config.accent, color: "#fff" }}
-            >
-              Sign Up Free
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+/* ─── Hero ──────────────────────────────────────────────────────────────── */
 function Hero({ config, onRegister }) {
+  const stats = config.heroStats || [
+    ["800+", "Restaurants"],
+    ["R12M+", "Billed monthly"],
+    ["< 60s", "Invoice time"],
+  ];
+
+  const trustedBy = config.trustedBy || [
+    "Braai Brothers Grill",
+    "Cape Harvest Kitchen",
+    "Joburg Street Eats",
+    "Durban Spice House",
+  ];
+
   return (
     <section
-      className="relative overflow-hidden py-20 sm:py-28"
-      style={{ background: config.color }}
+      style={{
+        background: `linear-gradient(150deg, ${config.color} 0%, ${config.colorMid || config.color} 55%, ${config.colorDark || config.color} 100%)`,
+        padding: "80px 28px 90px",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
     >
-      {/* Subtle grid pattern */}
+     
+      {/* Glow blob */}
       <div
-        className="absolute inset-0 opacity-5"
         style={{
-          backgroundImage: `linear-gradient(${config.accent}33 1px, transparent 1px), linear-gradient(90deg, ${config.accent}33 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
+          position: "absolute",
+          top: -100,
+          right: -100,
+          width: 480,
+          height: 480,
+          borderRadius: "50%",
+          background: config.accent,
+          opacity: 0.12,
+          filter: "blur(90px)",
+          zIndex: 1,
         }}
       />
 
-      {/* Glow blob */}
+      {/* Content */}
       <div
-        className="absolute -top-20 -right-20 w-96 h-96 rounded-full blur-3xl opacity-20"
-        style={{ background: config.accent }}
-      />
-
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        {/* Industry badge */}
-        <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-6"
-          style={{ background: `${config.accent}22`, color: config.accent, border: `1px solid ${config.accent}44` }}
-        >
-          <span>{config.icon}</span>
-          <span>Built for {config.label} Businesses</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-5">
-          {config.headline}
-        </h1>
-        <p className="text-base sm:text-xl text-white/60 leading-relaxed max-w-2xl mx-auto mb-10">
-          {config.subheadline}
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={onRegister}
-            className="px-8 py-3.5 rounded-xl font-bold text-white text-base shadow-lg transition-transform hover:scale-105"
-            style={{ background: config.accent }}
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          position: "relative",
+          zIndex: 2,
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 64,
+          flexWrap: "wrap",
+        }}
+      >
+        {/* LEFT */}
+        <div style={{ flex: "1 1 420px" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: 4,
+              padding: "5px 14px",
+              marginBottom: 24,
+            }}
           >
-            {config.cta}
-          </button>
-          <button
-            onClick={() => scrollTo("features")}
-            className="px-8 py-3.5 rounded-xl font-semibold text-sm text-white/70 border border-white/20 hover:border-white/40 transition-colors"
-          >
-            See how it works →
-          </button>
-        </div>
-
-        {/* Trust badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-white/30 text-xs">
-          {["No credit card required", "Free plan available", "Cancel anytime", "South African business"].map((t) => (
-            <span key={t} className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" style={{ color: config.accent }} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {t}
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: config.accent,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: "rgba(255,255,255,0.9)",
+                fontSize: 12,
+                fontWeight: 600,
+                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.05em",
+              }}
+            >
+              Built for {config.label || "Restaurant"} Businesses
             </span>
-          ))}
+          </div>
+
+          <h1
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(38px,5vw,66px)",
+              lineHeight: 1.02,
+              color: T.white,
+              margin: "0 0 18px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            {config.headline || "Invoice every table. Get paid the same night."}
+          </h1>
+
+          <p
+            style={{
+              color: "rgba(255,255,255,0.6)",
+              fontSize: 16,
+              lineHeight: 1.75,
+              margin: "0 0 36px",
+              fontFamily: "'Barlow', sans-serif",
+              maxWidth: 460,
+            }}
+          >
+            {config.subheadline ||
+              "From dine-in bills to catering quotes — SolidFlo handles the paperwork so your kitchen can focus on the food."}
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              flexWrap: "wrap",
+              marginBottom: 36,
+            }}
+          >
+            <button
+              onClick={onRegister}
+              style={{
+                background: config.accent,
+                border: "none",
+                borderRadius: 7,
+                padding: "13px 28px",
+                color: T.white,
+                fontSize: 14,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+                boxShadow: `0 6px 20px ${config.accent}55`,
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-2px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
+            >
+              {config.cta || "Start for Free"} →
+            </button>
+            <button
+              onClick={() => scrollTo("features")}
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 7,
+                padding: "13px 22px",
+                color: "rgba(255,255,255,0.8)",
+                fontSize: 14,
+                fontWeight: 500,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
+            >
+              Explore Features
+            </button>
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
+            {(
+              config.trustBadges || [
+                "Free forever plan",
+                "VAT-compliant invoices",
+                "WhatsApp delivery",
+                "SA-built & hosted",
+              ]
+            ).map((t) => (
+              <span
+                key={t}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: "rgba(255,255,255,0.4)",
+                  fontSize: 12,
+                  fontFamily: "'Barlow', sans-serif",
+                }}
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 20 20"
+                  fill={config.accent}
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
+
+        {/* RIGHT — Invoice card */}
+        <div
+          style={{
+            flex: "1 1 340px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ position: "relative", width: "100%", maxWidth: 480 }}>
+            {/* Floating payment badge */}
+            <div
+              style={{
+                position: "absolute",
+                top: -16,
+                right: -10,
+                zIndex: 2,
+                background: "#16A34A",
+                color: T.white,
+                borderRadius: 8,
+                padding: "7px 14px",
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                boxShadow: "0 6px 18px rgba(22,163,74,0.35)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              💰 Payment received!
+            </div>
+            <MockInvoice config={config} />
+            {/* Mini stats */}
+            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+              {stats.map(([v, l]) => (
+                <div
+                  key={l}
+                  style={{
+                    flex: 1,
+                    background: "rgba(255,255,255,0.07)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 8,
+                    padding: "10px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800,
+                      fontSize: 17,
+                      color: T.white,
+                    }}
+                  >
+                    {v}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.4)",
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {l}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trusted bar */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "56px auto 0",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          paddingTop: 26,
+          display: "flex",
+          gap: 36,
+          flexWrap: "wrap",
+          alignItems: "center",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        <span
+          style={{
+            color: "rgba(255,255,255,0.28)",
+            fontSize: 11,
+            fontFamily: "'Barlow', sans-serif",
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          }}
+        >
+          Trusted by SA restaurants
+        </span>
+        {trustedBy.map((b) => (
+          <span
+            key={b}
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 700,
+              fontSize: 14,
+              color: "rgba(255,255,255,0.2)",
+              letterSpacing: 0.4,
+            }}
+          >
+            {b}
+          </span>
+        ))}
       </div>
     </section>
   );
 }
 
-// ─── Features ─────────────────────────────────────────────────────────────────
-function Features({ config }) {
-  return (
-    <section id="features" className="py-16 sm:py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <p
-            className="text-xs font-bold uppercase tracking-widest mb-3"
-            style={{ color: config.accent }}
-          >
-            Features
-          </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
-            Everything your {config.label.toLowerCase()} business needs
-          </h2>
-          <p className="text-gray-400 mt-3 max-w-xl mx-auto text-sm sm:text-base">
-            No unnecessary extras. Just the tools that matter for how you work.
-          </p>
-        </div>
+/* ─── How It Works ──────────────────────────────────────────────────────── */
+function HowItWorks({ config }) {
+  const steps = config.howItWorks || [
+    {
+      icon: "🧾",
+      title: "Build the Bill",
+      desc: "Add menu items, covers, and any extras. Your prices and VAT are calculated instantly.",
+    },
+    {
+      icon: "📲",
+      title: "Send to the Customer",
+      desc: "Share a professional invoice via WhatsApp, email or a QR code at the table.",
+    },
+    {
+      icon: "💳",
+      title: "Get Paid on the Spot",
+      desc: "Customers pay via EFT, card or cash. Your dashboard updates the moment it clears.",
+    },
+  ];
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {config.features.map((f) => (
+  return (
+    <section
+      style={{
+        background: T.white,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <SectionHead
+          overline="How It Works"
+          accent={config.accent}
+          title="Bill a table in under 60 seconds."
+          sub="Three steps from order to payment — no cashier training required."
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
+            gap: 0,
+            position: "relative",
+          }}
+        >
+          {steps.map((s, i) => (
             <div
-              key={f.title}
-              className="group p-6 rounded-2xl border border-gray-100 hover:border-transparent transition-all hover:shadow-lg"
-              style={{ "--hover-bg": config.lightBg }}
+              key={i}
+              style={{
+                padding: "32px 28px",
+                position: "relative",
+                borderLeft: i > 0 ? `1px solid ${T.border}` : "none",
+              }}
             >
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-4"
-                style={{ background: config.lightBg }}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background:
+                    i === 0 ? config.color : i === 1 ? config.accent : T.bg,
+                  border: `2px solid ${i === 2 ? T.border : "transparent"}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 15,
+                  color: i === 2 ? T.muted : T.white,
+                  marginBottom: 18,
+                  flexShrink: 0,
+                }}
               >
-                {f.icon}
+                {String(i + 1).padStart(2, "0")}
               </div>
-              <h3 className="font-bold text-gray-800 mb-1.5 text-sm">{f.title}</h3>
-              <p className="text-gray-400 text-xs leading-relaxed">{f.desc}</p>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>{s.icon}</div>
+              <h3
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 20,
+                  color: T.text,
+                  margin: "0 0 8px",
+                }}
+              >
+                {s.title}
+              </h3>
+              <p
+                style={{
+                  color: T.muted,
+                  fontSize: 14,
+                  lineHeight: 1.7,
+                  margin: 0,
+                  fontFamily: "'Barlow', sans-serif",
+                }}
+              >
+                {s.desc}
+              </p>
+              {i < steps.length - 1 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: -14,
+                    transform: "translateY(-50%)",
+                    width: 28,
+                    height: 28,
+                    background: T.white,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1,
+                    fontSize: 12,
+                    color: T.muted,
+                  }}
+                >
+                  →
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -211,84 +929,709 @@ function Features({ config }) {
   );
 }
 
-// ─── Pricing ──────────────────────────────────────────────────────────────────
-function Pricing({ config, onRegister }) {
+/* ─── Dashboard Features ── tabbed platform showcase ───────────────────── */
+function DashboardFeatures({ config, onRegister }) {
+  const [activeTab, setActiveTab] = useState("all");
+
+  const allFeatures = config.dashboardFeatures || [
+    {
+      category: "billing",
+      icon: "🧾",
+      title: "Table Invoicing",
+      desc: "Generate itemised bills per table, split bills between guests, and add covers charges in seconds.",
+      tags: ["Split billing", "Table numbers"],
+    },
+    {
+      category: "billing",
+      icon: "📦",
+      title: "Catering Quotes",
+      desc: "Build detailed catering proposals with per-head pricing, deposits and event breakdowns. Convert to invoice in one click.",
+      tags: ["Per-head pricing", "Deposit tracking"],
+    },
+    {
+      category: "billing",
+      icon: "🔁",
+      title: "Recurring Orders",
+      desc: "Set up repeat invoices for corporate lunch accounts, office delivery clients or monthly regulars.",
+      tags: ["Auto-billing", "Corporate accounts"],
+    },
+    {
+      category: "billing",
+      icon: "💳",
+      title: "Deposit Management",
+      desc: "Collect booking deposits upfront. Track what's owed and auto-apply deposits to the final event bill.",
+      tags: ["Booking deposits", "Event billing"],
+    },
+    {
+      category: "operations",
+      icon: "📋",
+      title: "Menu & Pricing",
+      desc: "Manage your full menu with prices, descriptions and categories. Update once — all invoices reflect the change.",
+      tags: ["Centralised menu", "Easy updates"],
+    },
+    {
+      category: "operations",
+      icon: "📅",
+      title: "Reservations Log",
+      desc: "Track upcoming bookings, covers and special requests. Link reservations directly to invoices when the table pays.",
+      tags: ["Covers tracking", "Special requests"],
+    },
+    {
+      category: "operations",
+      icon: "🧑‍🍳",
+      title: "Staff & Sections",
+      desc: "Assign waitstaff to sections or tables. Track which server raised each invoice for tips and performance.",
+      tags: ["Waiter tracking", "Section management"],
+    },
+    {
+      category: "operations",
+      icon: "📊",
+      title: "Daily Sales Report",
+      desc: "Close the day with a breakdown of covers, revenue, top-selling items and outstanding payments.",
+      tags: ["End-of-day", "Revenue summary"],
+    },
+    {
+      category: "payments",
+      icon: "💰",
+      title: "Multi-Payment Types",
+      desc: "Accept cash, EFT, card and split payments on the same bill. Reconcile in one view.",
+      tags: ["Split payments", "Cash & card"],
+    },
+    {
+      category: "payments",
+      icon: "📤",
+      title: "WhatsApp Invoicing",
+      desc: "Send a PDF invoice directly to a customer's WhatsApp — no app download, no portal login required.",
+      tags: ["Instant delivery", "No app needed"],
+    },
+    {
+      category: "compliance",
+      icon: "🛡️",
+      title: "VAT Invoices",
+      desc: "Every invoice is SARS-compliant with your VAT number, correct line-item tax and totals automatically calculated.",
+      tags: ["SARS-compliant", "Auto VAT"],
+    },
+    {
+      category: "compliance",
+      icon: "📁",
+      title: "Invoice History",
+      desc: "Search, filter and export your full invoice archive by date, client or amount. Always audit-ready.",
+      tags: ["Full archive", "Export to CSV"],
+    },
+  ];
+
+  const tabs = [
+    { key: "all", label: "All", count: allFeatures.length },
+    {
+      key: "billing",
+      label: "Billing",
+      count: allFeatures.filter((f) => f.category === "billing").length,
+    },
+    {
+      key: "operations",
+      label: "Operations",
+      count: allFeatures.filter((f) => f.category === "operations").length,
+    },
+    {
+      key: "payments",
+      label: "Payments",
+      count: allFeatures.filter((f) => f.category === "payments").length,
+    },
+    {
+      key: "compliance",
+      label: "Compliance",
+      count: allFeatures.filter((f) => f.category === "compliance").length,
+    },
+  ];
+
+  const visible =
+    activeTab === "all"
+      ? allFeatures
+      : allFeatures.filter((f) => f.category === activeTab);
+
+  const categoryColors = {
+    billing: { bg: "#FFF7ED", color: "#EA580C" },
+    operations: { bg: "#EEF3FB", color: "#2563EB" },
+    payments: { bg: "#F0FDF4", color: "#16A34A" },
+    compliance: { bg: "#F5F3FF", color: "#7C3AED" },
+  };
+
   return (
-    <section id="pricing" style={{ background: config.lightBg }} className="py-16 sm:py-24">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
-            Pricing
-          </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Simple, honest pricing</h2>
-          <p className="text-gray-500 mt-3 text-sm sm:text-base">
-            Start free. Upgrade when you're ready. No hidden fees.
-          </p>
+    <section
+      id="dashboard"
+      style={{
+        background: T.bg,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 1160, margin: "0 auto" }}>
+        <SectionHead
+          overline="Platform"
+          accent={config.accent}
+          title="Your whole restaurant, one dashboard"
+          sub="Beyond invoicing — SolidFlo gives your front-of-house and back-office a single connected hub."
+        />
+
+        {/* Tabs */}
+        <div
+          style={{
+            display: "flex",
+            gap: 0,
+            justifyContent: "center",
+            marginBottom: 40,
+            borderBottom: `1px solid ${T.border}`,
+          }}
+        >
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              style={{
+                padding: "10px 20px",
+                background: "none",
+                border: "none",
+                borderBottom:
+                  activeTab === t.key
+                    ? `2px solid ${config.color}`
+                    : "2px solid transparent",
+                marginBottom: -1,
+                color: activeTab === t.key ? config.color : T.muted,
+                fontSize: 13.5,
+                fontWeight: activeTab === t.key ? 700 : 500,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {t.label}
+              <span
+                style={{
+                  background:
+                    activeTab === t.key ? `${config.color}18` : T.bgAlt,
+                  color: activeTab === t.key ? config.color : T.muted,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: "1px 7px",
+                  borderRadius: 99,
+                }}
+              >
+                {t.count}
+              </span>
+            </button>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {config.pricing.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-2xl p-6 flex flex-col ${
-                plan.highlight
-                  ? "shadow-xl text-white"
-                  : "bg-white border border-gray-200"
-              }`}
-              style={plan.highlight ? { background: config.color } : {}}
-            >
-              {plan.highlight && (
+        {/* Feature cards */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gap: 14,
+          }}
+        >
+          {visible.map((f, i) => {
+            const cc = categoryColors[f.category] || {
+              bg: T.bgAlt,
+              color: config.color,
+            };
+            return (
+              <div
+                key={i}
+                style={{
+                  background: T.white,
+                  borderRadius: 8,
+                  padding: "20px 18px",
+                  border: `1px solid ${T.border}`,
+                  borderLeft: `3px solid ${cc.color}`,
+                  transition: "box-shadow 0.2s, transform 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = `0 4px 20px ${T.shadow}`;
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
                 <div
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full text-white"
-                  style={{ background: config.accent }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    background: cc.bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 18,
+                    marginBottom: 12,
+                  }}
                 >
-                  Most Popular
+                  {f.icon}
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 16,
+                    color: T.text,
+                    margin: "0 0 6px",
+                  }}
+                >
+                  {f.title}
+                </h3>
+                <p
+                  style={{
+                    color: T.muted,
+                    fontSize: 12.5,
+                    lineHeight: 1.6,
+                    margin: "0 0 12px",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {f.desc}
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {f.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: 3,
+                        background: cc.bg,
+                        color: cc.color,
+                        fontFamily: "'Barlow', sans-serif",
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Connected callout */}
+        <div
+          style={{
+            marginTop: 48,
+            background: config.color,
+            borderRadius: 8,
+            padding: "28px 32px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 24,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ flex: "1 1 260px" }}>
+            <h3
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900,
+                fontSize: 22,
+                color: T.white,
+                margin: "0 0 6px",
+              }}
+            >
+              Everything talks to each other
+            </h3>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.5)",
+                fontSize: 13,
+                margin: 0,
+                lineHeight: 1.65,
+                fontFamily: "'Barlow', sans-serif",
+                maxWidth: 380,
+              }}
+            >
+              Reservations link to bills, menu prices update everywhere,
+              catering quotes convert to invoices — one connected system.
+            </p>
+          </div>
+          <button
+            onClick={onRegister}
+            style={{
+              background: config.accent,
+              border: "none",
+              borderRadius: 7,
+              padding: "12px 26px",
+              color: T.white,
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              boxShadow: `0 4px 14px ${config.accent}55`,
+            }}
+          >
+            See the dashboard →
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Features ──────────────────────────────────────────────────────────── */
+function Features({ config }) {
+  return (
+    <section
+      id="features"
+      style={{
+        background: T.white,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <SectionHead
+          overline="Features"
+          accent={config.accent}
+          title={`Everything your ${(config.label || "restaurant").toLowerCase()} business needs`}
+          sub="No unnecessary extras. Just the tools that matter for how you run your kitchen."
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px,1fr))",
+            gap: 14,
+          }}
+        >
+          {(
+            config.features || [
+              {
+                icon: "🧾",
+                title: "Instant Table Bills",
+                desc: "Generate a full itemised bill per table with one tap. VAT, covers and extras calculated automatically.",
+              },
+              {
+                icon: "📲",
+                title: "WhatsApp Invoicing",
+                desc: "Send invoices via WhatsApp PDF — no app download needed for your customers.",
+              },
+              {
+                icon: "🍽️",
+                title: "Menu Management",
+                desc: "Keep your menu and prices in one place. Every invoice always reflects the latest pricing.",
+              },
+              {
+                icon: "📅",
+                title: "Catering & Events",
+                desc: "Quote for functions, track deposits and convert accepted quotes to final invoices automatically.",
+              },
+              {
+                icon: "💰",
+                title: "Split Billing",
+                desc: "Split the bill between guests or by item. Handle group bookings without the headache.",
+              },
+              {
+                icon: "📊",
+                title: "Sales Dashboard",
+                desc: "See today's revenue, top sellers, outstanding payments and daily covers at a glance.",
+              },
+            ]
+          ).map((f, i) => (
+            <div
+              key={i}
+              style={{
+                background: T.bg,
+                borderRadius: 8,
+                padding: "22px 20px",
+                border: `1px solid ${T.borderL}`,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 14,
+                transition: "box-shadow 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.boxShadow = `0 4px 16px ${T.shadow}`)
+              }
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+            >
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 8,
+                  flexShrink: 0,
+                  background: `${config.accent}12`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 20,
+                }}
+              >
+                {f.icon}
+              </div>
+              <div>
+                <h3
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 17,
+                    color: T.text,
+                    margin: "0 0 5px",
+                  }}
+                >
+                  {f.title}
+                </h3>
+                <p
+                  style={{
+                    color: T.muted,
+                    fontSize: 13,
+                    lineHeight: 1.65,
+                    margin: 0,
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {f.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Pricing ───────────────────────────────────────────────────────────── */
+function Pricing({ config, onRegister }) {
+  return (
+    <section
+      id="pricing"
+      style={{
+        background: T.bg,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 1020, margin: "0 auto" }}>
+        <SectionHead
+          overline="Pricing"
+          accent={config.accent}
+          title="Honest pricing. No surprises."
+          sub="Start free. Upgrade when your restaurant is ready to scale."
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(270px,1fr))",
+            gap: 16,
+          }}
+        >
+          {(
+            config.pricing || [
+              {
+                name: "Starter",
+                price: "Free",
+                period: "forever",
+                desc: "Perfect for a single outlet just getting started.",
+                features: [
+                  "Up to 30 invoices/month",
+                  "Menu management",
+                  "WhatsApp delivery",
+                  "VAT invoices",
+                  "Basic sales report",
+                ],
+                cta: "Get Started Free",
+                highlight: false,
+              },
+              {
+                name: "Professional",
+                price: "R299",
+                period: "/month",
+                desc: "For busy restaurants billing daily.",
+                features: [
+                  "Unlimited invoices",
+                  "Table & catering billing",
+                  "Split billing",
+                  "Staff & section tracking",
+                  "Daily sales dashboard",
+                  "Priority support",
+                ],
+                cta: "Start 14-Day Trial",
+                highlight: true,
+              },
+              {
+                name: "Enterprise",
+                price: "R699",
+                period: "/month",
+                desc: "Multi-outlet groups and franchises.",
+                features: [
+                  "Everything in Pro",
+                  "Multiple locations",
+                  "Franchise reporting",
+                  "Custom branding",
+                  "Dedicated account manager",
+                  "API access",
+                ],
+                cta: "Contact Sales",
+                highlight: false,
+              },
+            ]
+          ).map((p, i) => (
+            <div
+              key={i}
+              style={{
+                borderRadius: 10,
+                padding: "32px 26px",
+                background: p.highlight ? config.color : T.white,
+                border: p.highlight
+                  ? `2px solid ${config.accent}`
+                  : `1px solid ${T.border}`,
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                boxShadow: p.highlight
+                  ? `0 8px 32px ${config.color}30`
+                  : "none",
+              }}
+            >
+              {p.highlight && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -13,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: config.accent,
+                    color: T.white,
+                    fontSize: 10,
+                    fontWeight: 800,
+                    padding: "4px 14px",
+                    borderRadius: 99,
+                    fontFamily: "'Barlow', sans-serif",
+                    letterSpacing: "0.06em",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  MOST POPULAR
                 </div>
               )}
 
-              <div className="mb-4">
-                <p className={`font-bold text-sm mb-0.5 ${plan.highlight ? "text-white/70" : "text-gray-500"}`}>
-                  {plan.name}
+              <div style={{ marginBottom: 22 }}>
+                <p
+                  style={{
+                    color: p.highlight ? "rgba(255,255,255,0.55)" : T.muted,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    margin: "0 0 8px",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {p.name}
                 </p>
-                <div className="flex items-baseline gap-1">
-                  <span className={`text-3xl font-extrabold ${plan.highlight ? "text-white" : "text-gray-900"}`}>
-                    {plan.price}
+                <div
+                  style={{ display: "flex", alignItems: "baseline", gap: 4 }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 900,
+                      fontSize: 42,
+                      color: p.highlight ? T.white : T.text,
+                    }}
+                  >
+                    {p.price}
                   </span>
-                  <span className={`text-sm ${plan.highlight ? "text-white/50" : "text-gray-400"}`}>
-                    {plan.period}
+                  <span
+                    style={{
+                      color: p.highlight ? "rgba(255,255,255,0.45)" : T.muted,
+                      fontSize: 13,
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {p.period}
                   </span>
                 </div>
-                <p className={`text-xs mt-1 ${plan.highlight ? "text-white/50" : "text-gray-400"}`}>
-                  {plan.desc}
+                <p
+                  style={{
+                    color: p.highlight ? "rgba(255,255,255,0.4)" : T.muted,
+                    fontSize: 12,
+                    margin: "4px 0 0",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {p.desc}
                 </p>
               </div>
 
-              <ul className="space-y-2.5 flex-1 mb-6">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-xs">
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: "0 0 24px",
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 9,
+                }}
+              >
+                {p.features.map((f, j) => (
+                  <li
+                    key={j}
+                    style={{
+                      display: "flex",
+                      gap: 9,
+                      alignItems: "flex-start",
+                    }}
+                  >
                     <svg
-                      className="w-4 h-4 flex-shrink-0 mt-0.5"
-                      style={{ color: config.accent }}
-                      fill="currentColor"
+                      width="14"
+                      height="14"
                       viewBox="0 0 20 20"
+                      fill={config.accent}
+                      style={{ flexShrink: 0, marginTop: 2 }}
                     >
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
-                    <span className={plan.highlight ? "text-white/80" : "text-gray-600"}>{f}</span>
+                    <span
+                      style={{
+                        color: p.highlight ? "rgba(255,255,255,0.8)" : T.sub,
+                        fontSize: 13,
+                        fontFamily: "'Barlow', sans-serif",
+                      }}
+                    >
+                      {f}
+                    </span>
                   </li>
                 ))}
               </ul>
 
               <button
                 onClick={onRegister}
-                className="w-full py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90"
-                style={
-                  plan.highlight
-                    ? { background: config.accent, color: "#fff" }
-                    : { background: config.lightBg, color: config.accentDark }
-                }
+                style={{
+                  background: p.highlight ? config.accent : "transparent",
+                  border: p.highlight ? "none" : `1.5px solid ${config.color}`,
+                  borderRadius: 7,
+                  padding: 11,
+                  color: p.highlight ? T.white : config.color,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  fontFamily: "'Barlow', sans-serif",
+                  cursor: "pointer",
+                  boxShadow: p.highlight
+                    ? `0 4px 14px ${config.accent}45`
+                    : "none",
+                }}
               >
-                {plan.cta}
+                {p.cta}
               </button>
             </div>
           ))}
@@ -298,45 +1641,192 @@ function Pricing({ config, onRegister }) {
   );
 }
 
-// ─── Testimonials ─────────────────────────────────────────────────────────────
+/* ─── Testimonials ──────────────────────────────────────────────────────── */
 function Testimonials({ config }) {
-  return (
-    <section id="testimonials" className="py-16 sm:py-24 bg-white">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
-            Testimonials
-          </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
-            Trusted by {config.label.toLowerCase()} businesses across SA
-          </h2>
-        </div>
+  const statsStrip = config.statsStrip || [
+    ["800+", "SA Restaurants onboarded"],
+    ["R12M+", "Invoiced monthly"],
+    ["4.9/5", "App store rating"],
+    ["< 60s", "Avg invoice time"],
+  ];
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {config.testimonials.map((t) => (
-            <div key={t.name} className="p-6 rounded-2xl border border-gray-100 flex flex-col gap-4">
-              {/* Stars */}
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-4 h-4" style={{ color: config.accent }} fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+  const testimonials = config.testimonials || [
+    {
+      quote:
+        "We used to hand-write bills and chase payments for days. Now every table gets a WhatsApp invoice and we're done by closing time.",
+      name: "Sipho M.",
+      role: "Owner, Braai Brothers Grill · Soweto",
+      avatar: "SM",
+    },
+    {
+      quote:
+        "Our catering side grew 40% once we could send proper quotes and invoices. Clients finally took us seriously.",
+      name: "Fatima A.",
+      role: "Head Chef & Owner, Cape Harvest Kitchen",
+      avatar: "FA",
+    },
+    {
+      quote:
+        "Split billing for large groups used to be a nightmare. SolidFlo handles it in seconds — customers love it.",
+      name: "Ruan V.",
+      role: "Manager, The Boma Steakhouse · Pretoria",
+      avatar: "RV",
+    },
+  ];
+
+  return (
+    <section
+      id="testimonials"
+      style={{
+        background: T.white,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <SectionHead
+          overline="Testimonials"
+          accent={config.accent}
+          title={`Loved by SA ${(config.label || "restaurant").toLowerCase()} businesses`}
+          sub="Hear from restaurant owners and chefs across South Africa."
+        />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(290px,1fr))",
+            gap: 16,
+          }}
+        >
+          {testimonials.map((t, i) => (
+            <div
+              key={i}
+              style={{
+                background: T.bg,
+                borderRadius: 8,
+                padding: "26px 22px",
+                border: `1px solid ${T.borderL}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
+              <div style={{ display: "flex", gap: 2 }}>
+                {[...Array(5)].map((_, j) => (
+                  <span key={j} style={{ color: "#F59E0B", fontSize: 14 }}>
+                    ★
+                  </span>
                 ))}
               </div>
-
-              <p className="text-gray-600 text-sm leading-relaxed flex-1">"{t.quote}"</p>
-
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+              <p
+                style={{
+                  color: T.sub,
+                  fontSize: 13.5,
+                  lineHeight: 1.75,
+                  fontFamily: "'Barlow', sans-serif",
+                  margin: 0,
+                  flex: 1,
+                }}
+              >
+                "{t.quote}"
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  paddingTop: 12,
+                  borderTop: `1px solid ${T.border}`,
+                }}
+              >
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                  style={{ background: config.accent }}
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    background: config.color,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: T.white,
+                    flexShrink: 0,
+                  }}
                 >
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-800">{t.name}</p>
-                  <p className="text-xs text-gray-400">{t.role}</p>
+                  <p
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      color: T.text,
+                      margin: 0,
+                    }}
+                  >
+                    {t.name}
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: "'Barlow', sans-serif",
+                      fontSize: 11,
+                      color: T.muted,
+                      margin: 0,
+                    }}
+                  >
+                    {t.role}
+                  </p>
                 </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats band */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))",
+            background: config.color,
+            borderRadius: 8,
+            marginTop: 44,
+            overflow: "hidden",
+          }}
+        >
+          {statsStrip.map(([v, l], i) => (
+            <div
+              key={i}
+              style={{
+                padding: "26px 22px",
+                textAlign: "center",
+                borderRight:
+                  i < statsStrip.length - 1
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "none",
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 34,
+                  color: config.accent,
+                }}
+              >
+                {v}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Barlow', sans-serif",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.45)",
+                  marginTop: 3,
+                }}
+              >
+                {l}
               </div>
             </div>
           ))}
@@ -346,45 +1836,123 @@ function Testimonials({ config }) {
   );
 }
 
-// ─── FAQ ─────────────────────────────────────────────────────────────────────
+/* ─── FAQ ───────────────────────────────────────────────────────────────── */
 function FAQ({ config }) {
   const [open, setOpen] = useState(null);
 
-  return (
-    <section id="faq" style={{ background: config.lightBg }} className="py-16 sm:py-24">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>
-            FAQ
-          </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Common questions</h2>
-        </div>
+  const faqs = config.faqs || [
+    {
+      q: "Can I use SolidFlo for both dine-in and takeaway?",
+      a: "Yes — you can create table invoices for dine-in customers and separate delivery or takeaway invoices. Both are VAT-compliant and can be sent via WhatsApp or email.",
+    },
+    {
+      q: "Does it handle catering and event invoicing?",
+      a: "Absolutely. Build a catering quote with per-head pricing, collect a deposit, and convert the accepted quote to a final invoice when the event is done.",
+    },
+    {
+      q: "Can I split a bill between multiple guests?",
+      a: "Yes. SolidFlo supports splitting by item or equally between a set number of guests. Each person gets their own invoice or you can issue one combined bill.",
+    },
+    {
+      q: "Is the invoice SARS VAT-compliant?",
+      a: "Every invoice includes your registered VAT number, correct line-item tax and total VAT — meeting all SARS requirements for a valid tax invoice.",
+    },
+    {
+      q: "Do my customers need to download an app?",
+      a: "No. Customers receive a PDF via WhatsApp or email and can view or pay from any device without downloading anything.",
+    },
+    {
+      q: "Can I manage multiple restaurant locations?",
+      a: "Yes — the Enterprise plan supports multiple outlets under one account, with consolidated reporting and separate branding per location.",
+    },
+  ];
 
-        <div className="space-y-3">
-          {config.faqs.map((faq, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  return (
+    <section
+      id="faq"
+      style={{
+        background: T.bg,
+        padding: "80px 28px",
+        borderBottom: `1px solid ${T.border}`,
+      }}
+    >
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <SectionHead
+          overline="FAQ"
+          accent={config.accent}
+          title="Common questions"
+        />
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {faqs.map((faq, i) => (
+            <div
+              key={i}
+              style={{
+                background: T.white,
+                borderRadius: 8,
+                border: `1px solid ${open === i ? config.color : T.border}`,
+                overflow: "hidden",
+                transition: "border-color 0.2s",
+              }}
+            >
               <button
-                className="w-full flex items-center justify-between px-5 py-4 text-left"
                 onClick={() => setOpen(open === i ? null : i)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "16px 20px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  gap: 16,
+                }}
               >
-                <span className="text-sm font-semibold text-gray-800 pr-4">{faq.q}</span>
-                <svg
-                  className="w-4 h-4 flex-shrink-0 transition-transform"
+                <span
                   style={{
-                    color: config.accent,
-                    transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
+                    fontFamily: "'Barlow', sans-serif",
+                    fontWeight: 600,
+                    fontSize: 15,
+                    color: T.text,
                   }}
-                  fill="none"
+                >
+                  {faq.q}
+                </span>
+                <svg
+                  width="16"
+                  height="16"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+                  fill="none"
+                  stroke={config.accent}
+                  strokeWidth="2.5"
+                  style={{
+                    flexShrink: 0,
+                    transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s",
+                  }}
                 >
                   <path d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               {open === i && (
-                <div className="px-5 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3">
-                  {faq.a}
+                <div
+                  style={{
+                    padding: "12px 20px 18px",
+                    borderTop: `1px solid ${T.borderL}`,
+                  }}
+                >
+                  <p
+                    style={{
+                      color: T.muted,
+                      fontSize: 14,
+                      lineHeight: 1.7,
+                      margin: 0,
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {faq.a}
+                  </p>
                 </div>
               )}
             </div>
@@ -395,69 +1963,296 @@ function FAQ({ config }) {
   );
 }
 
-// ─── CTA Banner ───────────────────────────────────────────────────────────────
+/* ─── CTA Banner ────────────────────────────────────────────────────────── */
 function CTABanner({ config, onRegister }) {
   return (
-    <section className="py-16 sm:py-20" style={{ background: config.color }}>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <span className="text-4xl">{config.icon}</span>
-        <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-4 mb-4">
-          Ready to get paid faster?
-        </h2>
-        <p className="text-white/50 mb-8 text-sm sm:text-base">
-          Join hundreds of {config.label.toLowerCase()} businesses already using SolidFlo.
-        </p>
-        <button
-          onClick={onRegister}
-          className="px-10 py-4 rounded-xl font-bold text-white text-base shadow-lg transition-transform hover:scale-105"
-          style={{ background: config.accent }}
+    <section
+      style={{
+        background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorDark || config.color} 100%)`,
+        padding: "80px 28px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          bottom: -80,
+          right: -80,
+          width: 420,
+          height: 420,
+          borderRadius: "50%",
+          background: config.accent,
+          opacity: 0.06,
+          filter: "blur(80px)",
+        }}
+      />
+      <div
+        style={{
+          maxWidth: 680,
+          margin: "0 auto",
+          textAlign: "center",
+          position: "relative",
+        }}
+      >
+        <div style={{ fontSize: 44, marginBottom: 14 }}>
+          {config.icon || "🍽️"}
+        </div>
+        <h2
+          style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: 900,
+            fontSize: "clamp(28px,4vw,50px)",
+            color: T.white,
+            margin: "0 0 14px",
+            letterSpacing: -0.4,
+          }}
         >
-          {config.cta}
-        </button>
+          Your restaurant, running smoother.
+        </h2>
+        <p
+          style={{
+            color: "rgba(255,255,255,0.45)",
+            fontSize: 15,
+            margin: "0 0 34px",
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          Join hundreds of South African{" "}
+          {(config.label || "restaurant").toLowerCase()} businesses that invoice
+          professionally and get paid faster with SolidFlo.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            onClick={onRegister}
+            style={{
+              background: config.accent,
+              border: "none",
+              borderRadius: 8,
+              padding: "14px 34px",
+              color: T.white,
+              fontSize: 15,
+              fontWeight: 800,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              cursor: "pointer",
+              letterSpacing: 0.3,
+              boxShadow: `0 6px 22px ${config.accent}60`,
+            }}
+          >
+            START FOR FREE
+          </button>
+          <button
+            onClick={() => scrollTo("pricing")}
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: 8,
+              padding: "14px 26px",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 14,
+              fontWeight: 600,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+            }}
+          >
+            See all plans →
+          </button>
+        </div>
+        <p
+          style={{
+            color: "rgba(255,255,255,0.2)",
+            fontSize: 11.5,
+            marginTop: 18,
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          No credit card required · Free plan forever · Cancel anytime
+        </p>
       </div>
     </section>
   );
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
+/* ─── Footer ────────────────────────────────────────────────────────────── */
 function Footer({ config, onLogin, onRegister }) {
-  return (
-    <footer className="border-t border-gray-100 py-10 bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{config.icon}</span>
-            <div>
-              <p className="font-bold text-gray-800 text-sm">SolidFlo {config.label}</p>
-              <p className="text-xs text-gray-400">Professional invoicing for SA businesses</p>
-            </div>
-          </div>
+  const cols = [
+    {
+      title: "Product",
+      links: [
+        "Features",
+        "Pricing",
+        "Table Billing",
+        "Catering Quotes",
+        "WhatsApp Invoicing",
+      ],
+    },
+    {
+      title: "Resources",
+      links: ["Help Centre", "Video Guides", "Blog", "API Docs", "Community"],
+    },
+    {
+      title: "Company",
+      links: [
+        "About SolidFlo",
+        "Contact Us",
+        "Privacy Policy",
+        "Terms of Service",
+        "Made in SA 🇿🇦",
+      ],
+    },
+  ];
 
-          <div className="flex items-center gap-6 text-xs text-gray-400">
-            <button onClick={() => scrollTo("features")} className="hover:text-gray-600 transition-colors">Features</button>
-            <button onClick={() => scrollTo("pricing")} className="hover:text-gray-600 transition-colors">Pricing</button>
-            <button onClick={() => scrollTo("faq")} className="hover:text-gray-600 transition-colors">FAQ</button>
-            <button onClick={onLogin} className="hover:text-gray-600 transition-colors">Sign In</button>
+  return (
+    <footer
+      style={{
+        background: "#0C1929",
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        padding: "52px 28px 28px",
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "2fr repeat(3, 1fr)",
+            gap: 40,
+            marginBottom: 44,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 14,
+              }}
+            >
+              <span style={{ fontSize: 22 }}>{config.icon || "🍽️"}</span>
+              <span
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 18,
+                  color: T.white,
+                }}
+              >
+                SolidFlo {config.label}
+              </span>
+            </div>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.3)",
+                fontSize: 13,
+                lineHeight: 1.7,
+                fontFamily: "'Barlow', sans-serif",
+                marginBottom: 18,
+                maxWidth: 220,
+              }}
+            >
+              Professional invoicing and billing software built for South
+              African restaurants and food businesses.
+            </p>
             <button
               onClick={onRegister}
-              className="px-3 py-1.5 rounded-lg text-white text-xs font-semibold"
-              style={{ background: config.accent }}
+              style={{
+                background: config.accent,
+                border: "none",
+                borderRadius: 6,
+                padding: "9px 18px",
+                color: T.white,
+                fontSize: 12.5,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
             >
-              Sign Up
+              Get started free
             </button>
           </div>
+          {cols.map((col, i) => (
+            <div key={i}>
+              <p
+                style={{
+                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.45)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  margin: "0 0 14px",
+                }}
+              >
+                {col.title}
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                {col.links.map((l) => (
+                  <a
+                    key={l}
+                    href="#"
+                    style={{
+                      color: "rgba(255,255,255,0.35)",
+                      fontSize: 13,
+                      fontFamily: "'Barlow', sans-serif",
+                      textDecoration: "none",
+                    }}
+                    onMouseEnter={(e) => (e.target.style.color = T.white)}
+                    onMouseLeave={(e) =>
+                      (e.target.style.color = "rgba(255,255,255,0.35)")
+                    }
+                  >
+                    {l}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-
-        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-300">
-          <p>© {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
-          <p>Made in South Africa 🇿🇦</p>
+        <div
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            paddingTop: 22,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
+          <p
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
+          >
+            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+          </p>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
+          >
+            Proudly South African 🇿🇦
+          </p>
         </div>
       </div>
     </footer>
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+/* ─── Main export ───────────────────────────────────────────────────────── */
 export default function SubdomainLandingPage() {
   const navigate = useNavigate();
   const { subdomain } = useSubdomain();
@@ -467,15 +2262,27 @@ export default function SubdomainLandingPage() {
   const goRegister = () => navigate("/register");
 
   return (
-    <div className="min-h-screen font-sans">
-      <Navbar config={config} onLogin={goLogin} onRegister={goRegister} />
-      <Hero config={config} onRegister={goRegister} />
-      <Features config={config} />
-      <Pricing config={config} onRegister={goRegister} />
-      <Testimonials config={config} />
-      <FAQ config={config} />
-      <CTABanner config={config} onRegister={goRegister} />
-      <Footer config={config} onLogin={goLogin} onRegister={goRegister} />
-    </div>
+    <>
+      <style>{fontStyle}</style>
+      <div
+        style={{
+          minHeight: "100vh",
+          fontFamily: "'Barlow', sans-serif",
+          background: T.bg,
+          color: T.text,
+        }}
+      >
+        <Navbar config={config} onLogin={goLogin} onRegister={goRegister} />
+        <Hero config={config} onRegister={goRegister} />
+        <HowItWorks config={config} />
+        <DashboardFeatures config={config} onRegister={goRegister} />
+        <Features config={config} />
+        <Pricing config={config} onRegister={goRegister} />
+        <Testimonials config={config} />
+        <FAQ config={config} />
+        <CTABanner config={config} onRegister={goRegister} />
+        <Footer config={config} onLogin={goLogin} onRegister={goRegister} />
+      </div>
+    </>
   );
 }

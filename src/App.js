@@ -51,7 +51,7 @@ import SolidPhotography from "./pages/photography/SubdomainLandingPage";
 import SolidPlumbing from "./pages/plumbing/SubdomainLandingPage";
 import SolidPoolService from "./pages/pool-services/SubdomainLandingPage";
 import SolidRealEstate from "./pages/realEstate/SubdomainLandingPage";
-import SolidRestaurants from "./pages/restaurants/SubdomainLandingPage";
+import SolidRestaurant from "./pages/restaurants/SubdomainLandingPage";
 import SolidRetail from "./pages/retail/SubdomainLandingPage";
 import SolidSecurity from "./pages/security/SubdomainLandingPage";
 import SolidSolar from "./pages/solar-installation/SubdomainLandingPage";
@@ -125,7 +125,6 @@ export const DASHBOARD_ID_TO_PATH = {
   security: "/security",
   electrical: "/electrical",
   restaurant: "/restaurant",
-  restaurants: "/restaurant",
   construction: "/construction",
   cleaning: "/cleaning",
   education: "/education",
@@ -638,7 +637,7 @@ const SUBDOMAIN_LANDING = {
   plumbing: SolidPlumbing,
   "pool-services": SolidPoolService,
   realestate: SolidRealEstate,
-  restaurants: SolidRestaurants,
+  restaurant: SolidRestaurant,
   retail: SolidRetail,
   security: SolidSecurity,
   "solar-installation": SolidSolar,

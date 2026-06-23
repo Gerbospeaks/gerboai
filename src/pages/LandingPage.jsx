@@ -1675,7 +1675,7 @@ const scrollTo = (id) => {
               >
                 Start Free <ArrowRight size={13} />
               </button>
-              <div id="google_translate_element"></div>
+             
             </div>
 
             <button

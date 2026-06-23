@@ -287,18 +287,6 @@ function Hero({ config, onRegister }) {
           pointerEvents: "none",
         }}
       />
-
-      {/* Grid lines */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `linear-gradient(${config.accent}0A 1px, transparent 1px), linear-gradient(90deg, ${config.accent}0A 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-          pointerEvents: "none",
-        }}
-      />
-
       <div
         style={{
           maxWidth: 1200,

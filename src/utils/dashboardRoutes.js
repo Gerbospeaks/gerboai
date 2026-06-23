@@ -20,7 +20,7 @@ export const dashboardRoutes = {
   plumbing:             "/plumbing",
   poolservice:          "/pool-services",
   realestate:           "/realestate",
-  restaurants:          "/restaurant",
+  restaurant:          "/restaurant",
   retail:               "/retail",
   security:             "/security",
   solar:                "/solar-installation",

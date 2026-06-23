@@ -13,7 +13,7 @@ import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import AIInvoiceWindow from '../AIInvoiceWindow';
+import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import logo from "../../assets/img/solidflo.png";
@@ -61,6 +61,8 @@ import {
   Save,
   Eye,
   ShoppingBag,
+  Mail,
+  Phone,
 } from "lucide-react";
 import {
   LineChart,
@@ -106,7 +108,7 @@ const RetailDashboard = () => {
   });
   const location = useLocation();
   const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [stampConfig, setStampConfig] = useState(null);
   useEffect(() => {
     if (location.state?.activeView) {
       setActiveView(location.state.activeView);
@@ -115,6 +117,19 @@ const [stampConfig, setStampConfig] = useState(null);
   // Orders state
   const [orders, setOrders] = useState([]);
   const [showOrdersModal, setShowOrdersModal] = useState(false);
+
+  // Customers state
+  const [customers, setCustomers] = useState([]);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [customerForm, setCustomerForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    company: "",
+    notes: "",
+  });
 
   // Store settings
   const [storeInfo, setStoreInfo] = useState({
@@ -218,6 +233,7 @@ const [stampConfig, setStampConfig] = useState(null);
     if (user?.uid) {
       loadProducts();
       loadOrders();
+      loadCustomers();
       loadStoreInfo();
       generateSalesData();
     }
@@ -283,6 +299,101 @@ const [stampConfig, setStampConfig] = useState(null);
       console.error("Error loading orders:", error);
     }
   };
+
+  // ---- Customers: Firestore CRUD (mirrors the products pattern above) ----
+  const loadCustomers = async () => {
+    if (!user?.uid) return;
+    try {
+      const q = query(
+        collection(db, "users", user.uid, "customers"),
+        orderBy("createdAt", "desc"),
+      );
+      const querySnapshot = await getDocs(q);
+      const customersData = [];
+
+      querySnapshot.forEach((doc) => {
+        customersData.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      setCustomers(customersData);
+    } catch (error) {
+      console.error("Error loading customers:", error);
+    }
+  };
+
+  const handleAddCustomer = () => {
+    setEditingCustomer(null);
+    setCustomerForm({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      company: "",
+      notes: "",
+    });
+    setShowCustomerModal(true);
+  };
+
+  const handleEditCustomer = (customer) => {
+    setEditingCustomer(customer);
+    setCustomerForm(customer);
+    setShowCustomerModal(true);
+  };
+
+  const handleSaveCustomer = async () => {
+    if (!user?.uid) return;
+
+    if (!customerForm.name || !customerForm.email) {
+      alert("Please enter customer name and email");
+      return;
+    }
+
+    try {
+      const customerData = {
+        ...customerForm,
+        updatedAt: serverTimestamp(),
+      };
+
+      if (editingCustomer) {
+        await updateDoc(
+          doc(db, "users", user.uid, "customers", editingCustomer.id),
+          customerData,
+        );
+        alert("Customer updated successfully!");
+      } else {
+        customerData.createdAt = serverTimestamp();
+        await addDoc(
+          collection(db, "users", user.uid, "customers"),
+          customerData,
+        );
+        alert("Customer added successfully!");
+      }
+
+      setShowCustomerModal(false);
+      loadCustomers();
+    } catch (error) {
+      console.error("Error saving customer:", error);
+      alert("Failed to save customer");
+    }
+  };
+
+  const handleDeleteCustomer = async (customerId) => {
+    if (!window.confirm("Are you sure you want to delete this customer?"))
+      return;
+
+    try {
+      await deleteDoc(doc(db, "users", user.uid, "customers", customerId));
+      alert("Customer deleted successfully!");
+      loadCustomers();
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+      alert("Failed to delete customer");
+    }
+  };
+  // ---- End customers CRUD ----
 
   const loadStoreInfo = async () => {
     if (!user?.uid) return;
@@ -671,6 +782,15 @@ const [stampConfig, setStampConfig] = useState(null);
                     Add Product
                   </button>
                 )}
+                {activeTab === "Customers" && (
+                  <button
+                    onClick={handleAddCustomer}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-gray-800 rounded-lg hover:bg-indigo-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Customer
+                  </button>
+                )}
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 px-4 py-2 bg-red-600 text-gray-800 rounded-lg hover:bg-red-700"
@@ -986,6 +1106,86 @@ const [stampConfig, setStampConfig] = useState(null);
                 </div>
               </div>
             )}
+
+            {/* Customers Tab */}
+            {activeTab === "Customers" && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">
+                  All Customers
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600">
+                          Name
+                        </th>
+                        <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600">
+                          Company
+                        </th>
+                        <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600">
+                          Email
+                        </th>
+                        <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600">
+                          Phone
+                        </th>
+                        <th className="text-left py-3 px-2 text-sm font-semibold text-gray-600">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customers.map((customer) => (
+                        <tr
+                          key={customer.id}
+                          className="border-b border-gray-100 hover:bg-gray-50"
+                        >
+                          <td className="py-3 px-2 text-sm font-medium text-gray-900">
+                            {customer.name}
+                          </td>
+                          <td className="py-3 px-2 text-sm text-gray-600">
+                            {customer.company || "N/A"}
+                          </td>
+                          <td className="py-3 px-2 text-sm text-gray-600">
+                            {customer.email}
+                          </td>
+                          <td className="py-3 px-2 text-sm text-gray-600">
+                            {customer.phone || "N/A"}
+                          </td>
+                          <td className="py-3 px-2">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEditCustomer(customer)}
+                                className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteCustomer(customer.id)
+                                }
+                                className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {customers.length === 0 && (
+                  <div className="text-center py-12 text-gray-500">
+                    <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                    <p>
+                      No customers yet. Click "Add Customer" to get started!
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1191,6 +1391,155 @@ const [stampConfig, setStampConfig] = useState(null);
                 >
                   <Save className="w-5 h-5" />
                   {editingProduct ? "Update Product" : "Add Product"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Modal */}
+      {showCustomerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                {editingCustomer ? "Edit Customer" : "Add New Customer"}
+              </h2>
+              <button
+                onClick={() => setShowCustomerModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="overflow-auto p-6">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Customer Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={customerForm.name}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          name: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border rounded-lg"
+                      placeholder="Full name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Company
+                    </label>
+                    <input
+                      type="text"
+                      value={customerForm.company}
+                      onChange={(e) =>
+                        setCustomerForm({
+                          ...customerForm,
+                          company: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border rounded-lg"
+                      placeholder="Company name (optional)"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Email *
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="email"
+                        value={customerForm.email}
+                        onChange={(e) =>
+                          setCustomerForm({
+                            ...customerForm,
+                            email: e.target.value,
+                          })
+                        }
+                        className="w-full pl-9 pr-4 py-2 border rounded-lg"
+                        placeholder="customer@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Phone
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={customerForm.phone}
+                        onChange={(e) =>
+                          setCustomerForm({
+                            ...customerForm,
+                            phone: e.target.value,
+                          })
+                        }
+                        className="w-full pl-9 pr-4 py-2 border rounded-lg"
+                        placeholder="123-456-7890"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    value={customerForm.address}
+                    onChange={(e) =>
+                      setCustomerForm({
+                        ...customerForm,
+                        address: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Street, city, postal code"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Notes
+                  </label>
+                  <textarea
+                    value={customerForm.notes}
+                    onChange={(e) =>
+                      setCustomerForm({
+                        ...customerForm,
+                        notes: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-lg"
+                    rows="3"
+                    placeholder="Any additional notes"
+                  />
+                </div>
+
+                <button
+                  onClick={handleSaveCustomer}
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-gray-800 py-3 rounded-lg hover:bg-indigo-700"
+                >
+                  <Save className="w-5 h-5" />
+                  {editingCustomer ? "Update Customer" : "Add Customer"}
                 </button>
               </div>
             </div>

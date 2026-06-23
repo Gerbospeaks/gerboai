@@ -85,7 +85,7 @@ export default function PaintingSidebar({
 
             {/* Logo */}
             <div className="relative group">
-              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
+              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
               <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
                 <img
                   src={logo}
