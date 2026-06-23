@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import logo from "../../assets/images/logo.png"
+import logo from "../../assets/images/logo.png";
 import {
   collection,
   query,
@@ -527,6 +526,7 @@ export default function SolidFloAgent({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${await user.getIdToken()}`,
             "X-SF-Industry": industry,
             "X-SF-UID": user?.uid || "",
           },
@@ -625,7 +625,9 @@ export default function SolidFloAgent({
         >
           {/* Header */}
           <div className={styles.header}>
-            <div className={styles.headerAvatar}><img src={logo} width={80} alt="" /> </div>
+            <div className={styles.headerAvatar}>
+              <img src={logo} width={80} alt="" />{" "}
+            </div>
             <div className={styles.headerText}>
               <p className={styles.headerTitle}>SolidFlo Assistant</p>
               <p className={styles.headerSub}>

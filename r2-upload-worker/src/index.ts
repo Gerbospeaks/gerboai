@@ -74,7 +74,7 @@ const worker = {
 		const corsHeaders = {
 			'Access-Control-Allow-Origin': '*',
 			'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-			'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-File-Name',
+			'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-File-Name, x-sf-industry, x-sf-uid',
 		};
 
 		if (request.method === 'OPTIONS') {

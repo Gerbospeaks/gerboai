@@ -190,7 +190,6 @@ function PublicOnlyRoute({ children }) {
   return children;
 }
 
-// ─── PWA prompt — only shown on protected (non-public) routes ────────────────
 function PWAGate() {
   const { loading } = useAuth();
   const { pathname } = useLocation();
