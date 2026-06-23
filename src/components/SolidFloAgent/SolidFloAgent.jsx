@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import logo from "../../assets/images/logo.png";
+import { getAuth } from "firebase/auth";
 import {
   collection,
   query,
@@ -494,10 +495,13 @@ export default function SolidFloAgent({
   // ── Send a message ─────────────────────────────────────────────────────────
   const sendMessage = useCallback(
     async (overrideText) => {
-      if (!user) {
-        console.error("[SolidFloAgent] No authenticated user");
-        return;
-      }
+     const auth = getAuth();
+const firebaseUser = auth.currentUser;
+if (!firebaseUser) {
+  console.error("[SolidFloAgent] No authenticated user");
+  return;
+}
+const idToken = await firebaseUser.getIdToken();
 
       const text = overrideText || input.trim();
       if (!text || loading) return;
