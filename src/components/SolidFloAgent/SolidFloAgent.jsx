@@ -304,7 +304,7 @@ export default function SolidFloAgent({
   industry = "general",
   position = "right",
 }) {
-  const { user } = useAuth();
+  const { user, authUser } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -495,15 +495,15 @@ export default function SolidFloAgent({
   // ── Send a message ─────────────────────────────────────────────────────────
   const sendMessage = useCallback(
     async (overrideText) => {
-     const auth = getAuth();
-const firebaseUser = auth.currentUser;
-if (!firebaseUser) {
-  console.error("[SolidFloAgent] No authenticated user");
-  return;
-}
-const idToken = await firebaseUser.getIdToken();
+    const text = overrideText || input.trim();
+    if (!text || loading) return;
+    if (!authUser) {
+      console.error("[SolidFloAgent] No authenticated user");
+      return;
+    }
+    if (!overrideText) setInput("");
 
-      const text = overrideText || input.trim();
+     
       if (!text || loading) return;
       if (!overrideText) setInput("");
 
@@ -531,6 +531,7 @@ const idToken = await firebaseUser.getIdToken();
       history.push({ role: "user", content: text });
 
       try {
+        const idToken = await authUser.getIdToken();
         const res = await fetch(WORKER_URL, {
           method: "POST",
           headers: {
@@ -589,7 +590,7 @@ const idToken = await firebaseUser.getIdToken();
         setTimeout(() => inputRef.current?.focus(), 50);
       }
     },
-    [input, loading, messages, context, industry, user],
+    [input, loading, messages, context, industry, user, authUser],
   );
 
   const handleKeyDown = (e) => {
