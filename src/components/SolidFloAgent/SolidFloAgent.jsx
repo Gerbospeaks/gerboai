@@ -1,20 +1,7 @@
-/**
- * SolidFloAgent.jsx
- *
- * Drop this into any SolidFlo dashboard. It floats as a button in the
- * bottom-right corner and opens a full chat panel.
- *
- * Usage:
- *   import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
- *   <SolidFloAgent industry="mechanics" />
- *
- * Props:
- *   industry  (string) — matches your DASHBOARD_ID_TO_PATH keys
- *   position  ("right"|"left") — defaults to "right"
- */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import logo from "../../assets/images/logo.png"
 import {
   collection,
   query,
@@ -638,7 +625,7 @@ export default function SolidFloAgent({
         >
           {/* Header */}
           <div className={styles.header}>
-            <div className={styles.headerAvatar}>SF</div>
+            <div className={styles.headerAvatar}><img src={logo} width={80} alt="" /> </div>
             <div className={styles.headerText}>
               <p className={styles.headerTitle}>SolidFlo Assistant</p>
               <p className={styles.headerSub}>
