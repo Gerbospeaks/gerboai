@@ -494,6 +494,11 @@ export default function SolidFloAgent({
   // ── Send a message ─────────────────────────────────────────────────────────
   const sendMessage = useCallback(
     async (overrideText) => {
+      if (!user) {
+        console.error("[SolidFloAgent] No authenticated user");
+        return;
+      }
+
       const text = overrideText || input.trim();
       if (!text || loading) return;
       if (!overrideText) setInput("");
