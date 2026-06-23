@@ -103,6 +103,9 @@ const worker = {
 		if (url.pathname === '/invoice-extract') {
       return handleInvoiceExtract(request, env, corsHeaders);
 }
+ if (url.pathname === '/ai-agent') {
+      return handleAIAgent(request, env, corsHeaders);
+    }
 if (url.pathname === '/save-gateway-credentials') {
       return handleSaveGatewayCredentials(request, env, corsHeaders);
     }
@@ -111,23 +114,7 @@ if (url.pathname === '/save-gateway-credentials') {
 	},
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// NEW: /generate-pdf
-// Body (JSON):
-//   uid         string   – Firebase user ID
-//   docType     string   – "invoice" | "quote" | "purchase_order" | "sick_note" | "jobcard" | "waybill"
-//   docNumber   string   – e.g. "202675001"
-//   data        object   – document payload (see templates below)
-//   metadata?   object   – extra fields saved to Firestore (clientName, amount, etc.)
-//
-// Flow:
-//   1. Verify Bearer token (same pattern as other handlers)
-//   2. Build HTML from template
-//   3. Render to PDF via Puppeteer
-//   4. Save PDF to DOCUMENTS_BUCKET under users/{uid}/{folder}/{prefix}-{docNumber}.pdf
-//   5. Write metadata + URL to Firestore under users/{uid}/{folder}/{docNumber}
-//   6. Return { downloadUrl, fileName }
-// ─────────────────────────────────────────────────────────────────────────────
+
 async function handleGeneratePdf(request: Request, env: Env, corsHeaders: Record<string, string>): Promise<Response> {
 	if (request.method !== 'POST') {
 		return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
@@ -316,6 +303,211 @@ Rules:
         });
     }
 }
+async function handleAIAgent(
+  request: Request,
+  env: Env,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+  }
+ 
+  try {
+    // ── Auth (same pattern as all your other handlers) ──────────────────────
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+    }
+    const idToken = authHeader.split('Bearer ')[1];
+    const payload = JSON.parse(atob(idToken.split('.')[1]));
+    const userId = payload.user_id;
+    if (!userId) {
+      return new Response('Invalid token', { status: 401, headers: corsHeaders });
+    }
+ 
+    // ── Parse body ──────────────────────────────────────────────────────────
+    interface AgentBody {
+      messages: { role: string; content: string }[];
+      industry: string;
+      context?: {
+        clients?: { name: string; email?: string; phone?: string }[];
+        materials?: { name: string; price: number; unit?: string }[];
+        recentInvoices?: { clientName: string; total: number; status: string; number?: string }[];
+      };
+    }
+ 
+    const { messages, industry, context = {} } = (await request.json()) as AgentBody;
+ 
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: 'messages array required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+ 
+    // ── Rate limit: 30 requests per user per minute (uses KV if available) ──
+    // Simple approach — you can add KV rate limiting later if needed.
+    // For now we cap at 20 history messages to control token usage.
+    const trimmedMessages = messages.slice(-20);
+ 
+    // ── Build system prompt with real user context ──────────────────────────
+    const systemPrompt = buildAgentSystemPrompt(industry, context);
+ 
+    // ── Call Anthropic API (reuses your existing ANTHROPIC_API_KEY secret) ──
+    // NOTE: Add ANTHROPIC_API_KEY to your Worker secrets in the CF dashboard:
+    //   wrangler secret put ANTHROPIC_API_KEY
+  const aiResponse = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...trimmedMessages,
+      ],
+      max_tokens: 1024,
+    });
+
+    const replyText = typeof aiResponse === 'string'
+      ? aiResponse
+      : (aiResponse as any).response ?? '';
+
+    return new Response(JSON.stringify({
+      content: [{ type: 'text', text: replyText }]
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+
+  } catch (err: any) {
+    console.error('ai-agent error:', err);
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
+  }
+}
+ 
+ 
+// ─────────────────────────────────────────────────────────────────────────────
+// STEP 3 — Add this helper function (paste right below handleAIAgent)
+// ─────────────────────────────────────────────────────────────────────────────
+ 
+function buildAgentSystemPrompt(
+  industry: string,
+  context: {
+    clients?: { name: string; email?: string; phone?: string }[];
+    materials?: { name: string; price: number; unit?: string }[];
+    recentInvoices?: { clientName: string; total: number; status: string; number?: string }[];
+  }
+): string {
+  const { clients = [], materials = [], recentInvoices = [] } = context;
+ 
+  // Format saved clients for the prompt
+  const clientList = clients.length
+    ? clients
+        .map((c) => `  - ${c.name}${c.email ? ' (' + c.email + ')' : ''}${c.phone ? ' | ' + c.phone : ''}`)
+        .join('\n')
+    : '  No clients saved yet.';
+ 
+  // Format materials / price list
+  const materialList = materials.length
+    ? materials
+        .map((m) => `  - ${m.name}: R${m.price} per ${m.unit ?? 'unit'}`)
+        .join('\n')
+    : '  No materials saved yet.';
+ 
+  // Format recent invoices
+  const invoiceList = recentInvoices.length
+    ? recentInvoices
+        .map((i) => `  - ${i.number ? 'INV-' + i.number + ' | ' : ''}${i.clientName} | R${i.total} | ${i.status}`)
+        .join('\n')
+    : '  No recent invoices.';
+ 
+  return `You are the SolidFlo AI assistant — embedded inside SolidFlo (solidflo.co.za), a South African multi-industry SaaS for small businesses.
+ 
+CURRENT USER:
+Industry: ${industry}
+Currency: South African Rand (R / ZAR)
+VAT Rate: 15%
+Today: ${new Date().toLocaleDateString('en-ZA')}
+ 
+SAVED CLIENTS:
+${clientList}
+ 
+MATERIALS / PRICE LIST:
+${materialList}
+ 
+RECENT INVOICES:
+${invoiceList}
+ 
+YOUR CAPABILITIES:
+1. Create invoices — gather client, line items, quantities, prices, VAT (15%), discount, due date
+2. Create quotes — same as invoices but type="quote"
+3. Save clients — name, email, phone, address, company
+4. Add materials/services to price list — name, unit, price
+5. Look up saved clients or materials from the lists above
+6. Check outstanding invoices
+7. Convert quotes to invoices
+8. General business advice for ${industry} businesses in South Africa
+ 
+RESPONSE RULES:
+- Be concise, friendly, practical. Under 100 words unless outputting a document.
+- Always use South African context (Rand, 15% VAT, SA addresses).
+- When creating an invoice/quote: gather ALL required info first. Ask ONE question at a time if info is missing.
+- Required fields: client name, at least one line item (description + qty + unit price), due date.
+- When you have all info, output the document using EXACTLY this format:
+ 
+[DOCUMENT type="invoice"]
+client: Client Name
+clientEmail: email@domain.com
+clientPhone: 082 000 0000
+date: ${new Date().toLocaleDateString('en-ZA')}
+dueDate: DD/MM/YYYY
+items:
+  - description: Labour | qty: 2 | unitPrice: 500 | total: 1000
+  - description: Materials | qty: 1 | unitPrice: 300 | total: 300
+subtotal: 1300
+vat: 195
+discount: 0
+total: 1495
+notes: Payment due within 30 days.
+[/DOCUMENT]
+ 
+[ACTIONS]
+Save & Send|primary
+Save as Draft|secondary
+Edit|secondary
+[/ACTIONS]
+ 
+- For saving a client:
+[CLIENT]
+name: Full Name
+email: email@domain.com
+phone: 082 000 0000
+address: 12 Street, City, Province, 0001
+company: Company Name
+[/CLIENT]
+ 
+[ACTIONS]
+Save Client|primary
+Cancel|secondary
+[/ACTIONS]
+ 
+- For adding a material/service:
+[MATERIAL]
+name: Item name
+price: 100
+unit: hour
+category: labour
+[/MATERIAL]
+ 
+[ACTIONS]
+Add to Price List|primary
+[/ACTIONS]
+ 
+- Use type="quote" for quotes, type="invoice" for invoices.
+- Only use client details from the SAVED CLIENTS list above, or details the user provides.
+- Never invent client info, prices, or document numbers.
+- Document numbers are assigned by the system — never include them in [DOCUMENT] blocks.`;
+}
+ 
 // ─────────────────────────────────────────────────────────────────────────────
 // Firestore: write document record under users/{uid}/{folder}/{docNumber}
 // ─────────────────────────────────────────────────────────────────────────────

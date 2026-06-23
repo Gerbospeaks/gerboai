@@ -13,6 +13,7 @@ import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import HomeView from "../HomeView";
+import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
@@ -1545,6 +1546,7 @@ const [stampConfig, setStampConfig] = useState(null);
           )}
         </div>
       </div>
+      <SolidFloAgent industry="landscaping" />
     </div>
   );
 };

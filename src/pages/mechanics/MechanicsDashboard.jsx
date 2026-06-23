@@ -54,6 +54,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { db } from "../../firebase";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HomeView from "../HomeView";
+import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import AppHeader from "../AppHeader";
 import StampSignatureModal from "../StampSignatureModal";
@@ -4064,6 +4065,7 @@ const MechanicsDashboard = () => {
           </div>
         </div>
       )}
+      <SolidFloAgent industry="mechanics" />
     </div>
   );
 };

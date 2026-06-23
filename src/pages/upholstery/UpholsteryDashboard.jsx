@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
+import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
 import StampSignatureModal from "../StampSignatureModal";
@@ -1916,6 +1917,7 @@ const [stampConfig, setStampConfig] = useState(null);
           )}
         </div>
       </div>
+       <SolidFloAgent industry="upholstery" />
     </div>
   );
 };

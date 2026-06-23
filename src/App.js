@@ -59,7 +59,7 @@ import SolidTowing from "./pages/towing/SubdomainLandingPage";
 import SolidWindowRepair from "./pages/window-repair/SubdomainLandingPage";
 import SubdomainAuthPage from "./pages/SubdomainAuthPage";
 import PublicMarketplace from "./pages/PublicMarketplace";
-// ── Industry dashboards ───────────────────────────────────────────────────────
+import SolidFloAgent from "./components/SolidFloAgent/SolidFloAgent";
 import MechanicsDashboard from "./pages/mechanics/MechanicsDashboard";
 import SecurityDashboard from "./pages/security/SecurityDashboard";
 import TechnologyDashboard from "./pages/technology/TechnologyDashboard";
@@ -242,8 +242,10 @@ function ProtectedDashboard() {
   return <MechanicsDashboard />;
 }
 function DashboardRoutes() {
+  const { userDashboard } = useAuth();
   return (
-    <Routes>
+   <>
+   <Routes>
       {/* 
         /dashboard is the entry point after login.
         DashboardRouter reads userDashboard from AuthContext
@@ -610,6 +612,8 @@ function DashboardRoutes() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    <SolidFloAgent industry={userDashboard || "general"} />
+</>
   );
 }
 

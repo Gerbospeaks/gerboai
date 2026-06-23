@@ -22,6 +22,7 @@ import LegalMultiStepForm from "./LegalMultiStepForm";
 import LegalSidebar from "./LegalSidebar";
 import { getFunctions } from "firebase/functions";
 import HomeView from "../HomeView";
+import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import {
   getFirestore,
   collection,
@@ -4232,6 +4233,7 @@ const [stampConfig, setStampConfig] = useState(null);
           )}
         </div>
       </div>
+      <SolidFloAgent industry="legal" />
     </div>
   );
 };
