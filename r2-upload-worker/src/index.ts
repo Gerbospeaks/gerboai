@@ -106,6 +106,9 @@ const worker = {
  if (url.pathname === '/ai-agent') {
       return handleAIAgent(request, env, corsHeaders);
     }
+    if (url.pathname === '/transcribe') {
+  return handleTranscribe(request, env, corsHeaders);
+}
 if (url.pathname === '/save-gateway-credentials') {
       return handleSaveGatewayCredentials(request, env, corsHeaders);
     }
@@ -383,7 +386,52 @@ async function handleAIAgent(
     });
   }
 }
- 
+ async function handleTranscribe(
+  request: Request,
+  env: Env,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405, headers: corsHeaders });
+  }
+
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+    }
+
+    const { audio, mimeType } = await request.json() as {
+      audio: string;       // base64-encoded audio
+      mimeType: string;    // e.g. "audio/webm" or "audio/mp4"
+    };
+
+    if (!audio) {
+      return Response.json({ error: 'Missing audio' }, { status: 400, headers: corsHeaders });
+    }
+
+    // Decode base64 back to bytes
+    const binaryStr = atob(audio);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+
+    // Run Whisper — returns { text: "..." }
+    const result = await env.AI.run('@cf/openai/whisper', {
+      audio: [...bytes],   // Whisper binding expects a plain number array
+    });
+
+    return Response.json(
+      { transcript: result.text ?? '' },
+      { headers: corsHeaders }
+    );
+
+  } catch (err: any) {
+    console.error('transcribe error:', err);
+    return Response.json({ error: err.message }, { status: 500, headers: corsHeaders });
+  }
+}
  
 // ─────────────────────────────────────────────────────────────────────────────
 // STEP 3 — Add this helper function (paste right below handleAIAgent)

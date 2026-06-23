@@ -9,12 +9,15 @@ import {
   limit,
   getDocs,
   addDoc,
+  setDoc,
   serverTimestamp,
   doc,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import styles from "./SolidFloAgent.module.css";
+
+
 
 const WORKER_URL = "https://r2-upload-worker.v8-auto.workers.dev/ai-agent";
 
@@ -28,6 +31,58 @@ const QUICK_ACTIONS = [
   },
   { label: "💰 Unpaid invoices", prompt: "Show me my unpaid invoices" },
 ];
+
+// ── Invoice number helpers ────────────────────────────────────────────────────
+
+/**
+ * Derives the numeric suffix from an invoice/quote number string.
+ * Supports formats like "INV-0042", "QUO-0042", "INV0042", plain "42", etc.
+ * Returns NaN when nothing numeric is found.
+ */
+function extractNumber(invoiceNumber) {
+  if (!invoiceNumber) return NaN;
+  const match = String(invoiceNumber).match(/(\d+)\s*$/);
+  return match ? parseInt(match[1], 10) : NaN;
+}
+
+/**
+ * Builds the next formatted invoice/quote number for a given user.
+ *
+ * Strategy:
+ *  1. Query the last 20 invoices ordered by createdAt desc (catches both
+ *     invoices and quotes in the same collection).
+ *  2. Parse each stored `invoiceNumber` field and find the highest numeric
+ *     suffix, regardless of prefix.
+ *  3. Increment by 1 and format as INV-XXXX / QUO-XXXX (zero-padded to 4).
+ *
+ * Falls back to INV-0001 / QUO-0001 when no prior documents exist.
+ */
+async function getNextInvoiceNumber(uid, type = "invoice") {
+  const prefix = type === "quote" ? "QUO" : "INV";
+
+  try {
+    const snap = await getDocs(
+      query(
+        collection(db, "users", uid, "invoices"),
+        orderBy("createdAt", "desc"),
+        limit(20),
+      ),
+    );
+
+    let highest = 0;
+    snap.docs.forEach((d) => {
+      const n = extractNumber(d.data().invoiceNumber);
+      if (!isNaN(n) && n > highest) highest = n;
+    });
+
+    const next = highest + 1;
+    return `${prefix}-${String(next).padStart(4, "0")}`;
+  } catch (err) {
+    console.error("[SolidFloAgent] getNextInvoiceNumber error:", err);
+    // Safe fallback — avoids blocking the save
+    return `${prefix}-0001`;
+  }
+}
 
 // ── Document parser ───────────────────────────────────────────────────────────
 function parseAgentResponse(text) {
@@ -309,6 +364,11 @@ export default function SolidFloAgent({
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recording, setRecording] = useState(false);
+const [transcribing, setTranscribing] = useState(false);
+const mediaRecorderRef = useRef(null);
+const chunksRef = useRef([]);
+const WORKER_TRANSCRIBE_URL = "https://r2-upload-worker.v8-auto.workers.dev/transcribe";
   const [context, setContext] = useState({
     clients: [],
     materials: [],
@@ -377,7 +437,92 @@ export default function SolidFloAgent({
       setContextLoaded(true);
     }
   }, [user]);
+const startRecording = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Prefer webm/opus (Chrome/Firefox), fall back to whatever the browser supports
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : 'audio/mp4';
 
+    const recorder = new MediaRecorder(stream, { mimeType });
+    chunksRef.current = [];
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunksRef.current.push(e.data);
+    };
+
+    recorder.onstop = async () => {
+      stream.getTracks().forEach((t) => t.stop());
+      const blob = new Blob(chunksRef.current, { type: mimeType });
+      await transcribeAudio(blob, mimeType);
+    };
+
+    mediaRecorderRef.current = recorder;
+    recorder.start();
+    setRecording(true);
+  } catch (err) {
+    console.error('Mic access denied:', err);
+  }
+};
+
+const stopRecording = () => {
+  mediaRecorderRef.current?.stop();
+  setRecording(false);
+};
+
+const toggleRecording = () => {
+  if (recording) stopRecording();
+  else startRecording();
+};
+
+// ── Transcribe and send ─────────────────────────────────────────────────────
+const transcribeAudio = async (blob, mimeType) => {
+  setTranscribing(true);
+  try {
+    // Convert blob → base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const idToken = await authUser.getIdToken();
+    const res = await fetch(WORKER_TRANSCRIBE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ audio: base64, mimeType }),
+    });
+
+    const { transcript, error } = await res.json();
+    if (error) throw new Error(error);
+
+    if (transcript?.trim()) {
+      // Option A: auto-send immediately
+      sendMessage(transcript.trim());
+
+      // Option B: fill the textarea so the user can review first (comment out A above)
+      // setInput(transcript.trim());
+      // inputRef.current?.focus();
+    }
+  } catch (err) {
+    console.error('Transcription failed:', err);
+  } finally {
+    setTranscribing(false);
+  }
+};
+
+// ── File upload handler (for pre-recorded voice notes) ──────────────────────
+const handleVoiceFileUpload = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  await transcribeAudio(file, file.type);
+  e.target.value = ''; // reset so the same file can be re-uploaded
+};
   // ── Welcome message ────────────────────────────────────────────────────────
   const sendWelcome = () => {
     setMessages([
@@ -411,7 +556,17 @@ export default function SolidFloAgent({
         ) {
           const parsed = parseKV(docSegment.raw);
           const isDraft = actionLabel === "Save as Draft";
-          const ref = await addDoc(collection(db, "users", uid, "invoices"), {
+
+          // ── Generate the next sequential invoice/quote number ──────────────
+          const invoiceNumber = await getNextInvoiceNumber(
+            uid,
+            docSegment.type,
+          );
+
+          // Use the invoice number as the Firestore document ID
+          const docRef = doc(db, "users", uid, "invoices", invoiceNumber);
+          await setDoc(docRef, {
+            invoiceNumber, // stored for future lookups
             type: docSegment.type,
             clientName: parsed.client || "",
             clientEmail: parsed.clientEmail || "",
@@ -428,7 +583,8 @@ export default function SolidFloAgent({
             industry,
             createdAt: serverTimestamp(),
           });
-          return `✅ ${docSegment.type === "invoice" ? "Invoice" : "Quote"} ${isDraft ? "saved as draft" : "saved and marked as sent"}! ID: ${ref.id.slice(0, 8).toUpperCase()}`;
+
+          return `✅ ${docSegment.type === "invoice" ? "Invoice" : "Quote"} **${invoiceNumber}** ${isDraft ? "saved as draft" : "saved and marked as sent"}!`;
         }
 
         if (clientSegment && actionLabel === "Save Client") {
@@ -495,15 +651,14 @@ export default function SolidFloAgent({
   // ── Send a message ─────────────────────────────────────────────────────────
   const sendMessage = useCallback(
     async (overrideText) => {
-    const text = overrideText || input.trim();
-    if (!text || loading) return;
-    if (!authUser) {
-      console.error("[SolidFloAgent] No authenticated user");
-      return;
-    }
-    if (!overrideText) setInput("");
+      const text = overrideText || input.trim();
+      if (!text || loading) return;
+      if (!authUser) {
+        console.error("[SolidFloAgent] No authenticated user");
+        return;
+      }
+      if (!overrideText) setInput("");
 
-     
       if (!text || loading) return;
       if (!overrideText) setInput("");
 
@@ -725,6 +880,47 @@ export default function SolidFloAgent({
               onKeyDown={handleKeyDown}
               disabled={loading}
             />
+            {/* Hidden file input for uploading voice notes */}
+<input
+  type="file"
+  accept="audio/*"
+  id="voice-upload"
+  style={{ display: 'none' }}
+  onChange={handleVoiceFileUpload}
+  disabled={loading || transcribing}
+/>
+
+{/* Mic / upload button */}
+<button
+  className={`${styles.micBtn} ${recording ? styles.micActive : ''}`}
+  onClick={transcribing ? undefined : toggleRecording}
+  onContextMenu={(e) => {
+    e.preventDefault();
+    document.getElementById('voice-upload').click();
+  }}
+  title={recording ? 'Tap to stop' : 'Tap to record · Right-click to upload file'}
+  disabled={loading || transcribing}
+  aria-label={recording ? 'Stop recording' : 'Start voice recording'}
+>
+  {transcribing ? (
+    // Spinner while Whisper processes
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.spin}>
+      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
+    </svg>
+  ) : recording ? (
+    // Stop icon
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="6" width="12" height="12" rx="2"/>
+    </svg>
+  ) : (
+    // Mic icon
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="9" y="2" width="6" height="12" rx="3"/>
+      <path d="M5 10a7 7 0 0 0 14 0M12 19v3M8 22h8" strokeLinecap="round"/>
+    </svg>
+  )}
+</button>
             <button
               className={styles.sendBtn}
               onClick={() => sendMessage()}
