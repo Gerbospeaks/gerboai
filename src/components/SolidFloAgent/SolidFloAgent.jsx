@@ -536,7 +536,7 @@ export default function SolidFloAgent({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${await user.getIdToken()}`,
+            Authorization: `Bearer ${idToken}`,
             "X-SF-Industry": industry,
             "X-SF-UID": user?.uid || "",
           },
