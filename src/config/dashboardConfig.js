@@ -211,7 +211,7 @@ export const dashboards = [
 
   },
   { 
-    id: 'appliance-repair',
+    id: 'appliancerepair',
     name: 'Appliance Repair', 
     path: '/appliancerepair',
     icon: '🔧', 
@@ -227,7 +227,7 @@ export const dashboards = [
     description: 'Pest control & prevention services'
   },
   { 
-    id: 'pool-services',
+    id: 'poolservices',
     name: 'Pool Services', 
     path: '/poolservices',
     icon: '🏊', 
@@ -235,7 +235,7 @@ export const dashboards = [
     description: 'Pool maintenance & repair services'
   },
   { 
-    id: 'solar-installation',
+    id: 'solarinstallation',
     name: 'Solar Installation', 
     path: '/solarinstallation',
     icon: '☀️', 
@@ -244,7 +244,7 @@ export const dashboards = [
 
   },
   { 
-    id: 'window-repair',
+    id: 'windowrepair',
     name: 'Window Repair', 
     path: '/windowrepair',
     icon: '🪟', 

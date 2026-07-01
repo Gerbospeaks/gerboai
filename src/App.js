@@ -150,7 +150,7 @@ export const DASHBOARD_ID_TO_PATH = {
   technology:"/technology",
   upholstery:"/upholstery",
   virtualservice:"/virtualservice",
-  appliancerepair:"/appliance-repair"
+  appliancerepair:"/appliancerepair"
 };
 
 // ─── Full-page spinner shown while Firebase resolves auth state ───────────────

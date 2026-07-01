@@ -313,8 +313,8 @@ export const INDUSTRY_SEO = {
       },
     ],
   },
-  "pest-control": {
-    slug: "pest-control",
+  "pestcontrol": {
+    slug: "pestcontrol",
     title: "Pest Control Services in Gauteng | Fumigation | SolidFlo Market",
     description:
       "Book registered pest control operators in Johannesburg. Cockroach, rodent and termite treatments. Same-day service from R550 flat rate.",
@@ -341,8 +341,8 @@ export const INDUSTRY_SEO = {
       },
     ],
   },
-  pool: {
-    slug: "pool",
+  poolservices: {
+    slug: "poolservices",
     title: "Pool Services in Gauteng | Cleaning & Maintenance | SolidFlo",
     description:
       "Find pool cleaning and maintenance companies in Pretoria and Johannesburg. Weekly service, chemical balancing and pump repairs. From R350/visit.",
@@ -370,8 +370,8 @@ export const INDUSTRY_SEO = {
       },
     ],
   },
-  restaurants: {
-    slug: "restaurants",
+  restaurant: {
+    slug: "restaurant",
     title: "Corporate Catering in Gauteng | Event Food Services | SolidFlo",
     description:
       "Book catering companies in Johannesburg. Corporate lunches, halaal-certified menus and set menus from R180/person.",
@@ -403,7 +403,7 @@ export const INDUSTRY_SEO = {
     ],
   },
   solar: {
-    slug: "solar",
+    slug: "solarinstallation",
     title: "Solar Installers in Gauteng | Off-Grid & Grid-Tied | SolidFlo",
     description:
       "Find NRS097-compliant solar companies in Pretoria and Johannesburg. Off-grid, grid-tied and hybrid systems for homes and businesses.",
@@ -464,7 +464,7 @@ export const INDUSTRY_SEO = {
     ],
   },
   windows: {
-    slug: "windows",
+    slug: "windowrepair",
     title: "Window Repair & Glazing in Gauteng | Aluminium Frames | SolidFlo",
     description:
       "Book window repair specialists in Johannesburg. Double glazing, aluminium frames, shopfront glazing and glass repairs. From R350/hr.",

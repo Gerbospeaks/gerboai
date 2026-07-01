@@ -25,7 +25,7 @@ export const SUBDOMAIN_ROUTES = {
   hotel:               '/hotel',
   painting:            '/painting',
   flooring:            '/flooring',
-  appliancerepair:  '/appliance-repair',
+  appliancerepair:  '/appliancerepair',
   pestcontrol:      '/pestcontrol',
   poolservices:     '/poolservices',
   solarinstallation:'/solarinstallation',

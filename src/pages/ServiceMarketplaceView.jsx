@@ -634,7 +634,7 @@ const PROVIDERS = [
   },
   {
     id: "p26",
-    industry: "solar-installation",
+    industry: "solarinstallation",
     name: "SunPower Solar Installs",
     location: "Pretoria, PTA",
     rate: "Custom quote",

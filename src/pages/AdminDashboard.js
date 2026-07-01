@@ -30,8 +30,8 @@ const ALL_INDUSTRIES = [
   "construction","cleaning","education","hotel","legal",
   "plumbing","retail","landscaping","logistics","photography",
   "realestate","flooring","hvac","accounting","painting",
-  "pest-control","pool-services","solar-installation","towing",
-  "welding","carpentry","window-repair",
+  "pestcontrol","poolservices","solarinstallation","towing",
+  "welding","carpentry","windowrepair",
 ];
 
 async function getIdToken() {

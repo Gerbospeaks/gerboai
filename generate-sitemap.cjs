@@ -14,9 +14,9 @@ const TODAY      = new Date().toISOString().split("T")[0];
 const INDUSTRY_SLUGS = [
   "mechanics", "electrical", "carpentry", "plumbing", "logistics",
   "construction", "accounting", "cleaning", "education", "health",
-  "hospitality", "hvac", "landscaping", "legal", "painting","technology","virtual-services",
-  "pest-control", "photography", "pool", "realestate", "restaurant","upholstery",
-  "retail", "security", "solar-installation", "towing", "welding", "flooring", "window-repair",
+  "hospitality", "hvac", "landscaping", "legal", "painting","technology","virtualservice",
+  "pestcontrol", "photography", "poolservices", "realestate", "restaurant","upholstery",
+  "retail", "security", "solarinstallation", "towing", "welding", "flooring", "windowrepair",
 ];
 
 const MAIN_PAGES = [

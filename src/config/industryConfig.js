@@ -4177,15 +4177,14 @@ virtualservice: {
 // ─── Aliases ──────────────────────────────────────────────────────────────────
 // Handle alternate subdomain keys that map to the same config
 
-INDUSTRY_CONFIG["solar"] = INDUSTRY_CONFIG["solar-installation"];
+INDUSTRY_CONFIG["solar"] = INDUSTRY_CONFIG["solarinstallation"];
 INDUSTRY_CONFIG["health"] = INDUSTRY_CONFIG["healthcare"];
 INDUSTRY_CONFIG["realEstate"] = INDUSTRY_CONFIG["realestate"];
-INDUSTRY_CONFIG["pestcontrol"] = INDUSTRY_CONFIG["pest-control"];
-INDUSTRY_CONFIG["poolservices"] = INDUSTRY_CONFIG["pool-services"];
-INDUSTRY_CONFIG["windowrepair"] = INDUSTRY_CONFIG["window-repair"];
+INDUSTRY_CONFIG["pestcontrol"] = INDUSTRY_CONFIG["pestcontrol"];
+INDUSTRY_CONFIG["poolservices"] = INDUSTRY_CONFIG["poolservices"];
+INDUSTRY_CONFIG["windowrepair"] = INDUSTRY_CONFIG["windowrepair"];
 INDUSTRY_CONFIG["tech"] = INDUSTRY_CONFIG["technology"];
-INDUSTRY_CONFIG["virtualservices"] = INDUSTRY_CONFIG["virtual-services"];
-INDUSTRY_CONFIG["virtual_services"] = INDUSTRY_CONFIG["virtual-services"];
+INDUSTRY_CONFIG["virtualservice"] = INDUSTRY_CONFIG["virtualservice"];
 export function getIndustryConfig(subdomain) {
   return INDUSTRY_CONFIG[subdomain] || INDUSTRY_CONFIG["default"];
 }

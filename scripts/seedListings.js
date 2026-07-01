@@ -246,7 +246,7 @@ const INDUSTRIES = [
     ],
   },
   {
-    id: "pest-control", color: "#fef2f2", textColor: "#7f1d1d",
+    id: "pestcontrol", color: "#fef2f2", textColor: "#7f1d1d",
     badges: ["Cockroach treatment", "Rodent control", "Termite treatment", "Bed bug treatment", "Fumigation"],
     names: ["PestAway", "BugBusters SA", "ClearNest Pest Control", "ShieldPest"],
     abouts: [
@@ -255,7 +255,7 @@ const INDUSTRIES = [
     ],
   },
   {
-    id: "pool-services", color: "#ecfeff", textColor: "#0e7490",
+    id: "poolservices", color: "#ecfeff", textColor: "#0e7490",
     badges: ["Pool cleaning", "Chemical balancing", "Pump & filter repairs", "Pool plastering", "New pool builds"],
     names: ["AquaClear Pools", "PoolPro SA", "BlueWave Pool Services", "SplashTech"],
     abouts: [
@@ -264,7 +264,7 @@ const INDUSTRIES = [
     ],
   },
   {
-    id: "solar-installation", color: "#fffbeb", textColor: "#78350f",
+    id: "solarinstallation", color: "#fffbeb", textColor: "#78350f",
     badges: ["Solar panels", "Inverters", "Battery backup", "Grid-tied systems", "Load shedding solutions"],
     names: ["SunPower Solar", "BrightSolar SA", "EcoEnergy Solutions", "SolarEdge Installers"],
     abouts: [
