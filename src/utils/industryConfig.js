@@ -151,7 +151,7 @@ export const INDUSTRY_CONFIG = {
     promptHint: "Extract item being upholstered, fabric type and metres required, foam/padding details and labour hours.",
     jsonExtra: `"job": {"itemDescription": null, "fabricType": null, "fabricMetres": null, "pickupDate": null},`,
   },
-  "virtual-services": {
+  "virtualservice": {
     extraFields: {
       service: { serviceType: "", hoursWorked: "", period: "" },
     },

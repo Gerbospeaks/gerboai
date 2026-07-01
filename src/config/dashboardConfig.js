@@ -57,7 +57,7 @@ export const dashboards = [
 
   },
   { 
-    id: 'virtual-services',
+    id: 'virtualservice',
     name: 'Virtual Services', 
     path: '/virtualservice',
     icon: '🌐', 

@@ -182,7 +182,7 @@ export const INDUSTRIES = [
     subdomain: "upholstery",
   },
   {
-    id: "virtual-services",
+    id: "virtualservice",
     label: "Virtual Services",
     icon: "🖥️",
     desc: "Remote support & online consultations",
