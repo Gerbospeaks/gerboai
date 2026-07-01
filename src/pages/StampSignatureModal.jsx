@@ -1,4 +1,10 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import {
   X,
   Stamp,
@@ -208,11 +214,73 @@ const COLOR_PRESETS = [
   { value: "#f57c00", label: "Orange", emoji: "🟠" },
 ];
 
+// ─── Page-window slicer ───────────────────────────────────────────────────────
+// Wraps `content` in a fixed A4-height viewport and shifts it up by
+// `index * pageHeight` so only that page's worth of content is visible.
+// This is what lets a single tall `previewContent` node get sliced into
+// several A4 "pages" the same way print pagination would, instead of being
+// clipped at the bottom by the outer overflow:hidden container.
+function PageWindow({
+  content,
+  index,
+  width,
+  height,
+  contentHeight,
+  marginTop,
+}) {
+  const sliceHeight = contentHeight ?? height;
+  const top = marginTop ?? 0;
+  return (
+    <div
+      style={{
+        width,
+        height,
+        overflow: "hidden",
+        position: "relative",
+        background: "white",
+      }}
+    >
+      {/* Content area is inset from both the top and bottom of the page
+          by the margin amount, and hard-clipped to exactly `sliceHeight`
+          tall. That guarantees a blank strip on both edges of every page —
+          nothing from the previous or next slice can ever bleed through,
+          so no line of text is ever cropped at a page boundary. */}
+      <div
+        style={{
+          position: "absolute",
+          top,
+          left: 0,
+          width,
+          height: sliceHeight,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: -index * sliceHeight,
+            left: 0,
+            width,
+          }}
+        >
+          {content}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /**
  * StampSignatureModal — multi-page, dual stamp style
  *
  * New props via stampSettings (from BusinessSettingsModal):
  *   stampSettings – { text, color, showDate, size, enabled, stampType: "circle"|"rect" }
+ *
+ * Pagination:
+ *   - If `pages` (array of already-split page nodes) is passed, it's used as-is.
+ *   - Otherwise, if `previewContent` is passed, its real rendered height is
+ *     measured and it is automatically sliced into as many A4-height pages
+ *     as needed — so long invoices/quotes no longer get trimmed to page 1.
  */
 export default function StampSignatureModal({
   isOpen,
@@ -226,12 +294,65 @@ export default function StampSignatureModal({
 }) {
   const FULL_W = 794;
   const FULL_H = 1123;
+  // Reserved blank space at the top and bottom of every page so a line of
+  // text never lands exactly on a slice boundary and gets visually cropped.
+  const PAGE_MARGIN_TOP = 20;
+  const PAGE_MARGIN_BOTTOM = 20;
+  const PAGE_CONTENT_H = FULL_H - PAGE_MARGIN_TOP - PAGE_MARGIN_BOTTOM;
+
+  // ── Measure previewContent so we know how many A4 pages it spans ──────
+  const measureRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState(FULL_H);
+
+  useLayoutEffect(() => {
+    if (!isOpen || pages?.length || !previewContent) return;
+
+    const measure = () => {
+      if (measureRef.current) {
+        setContentHeight(measureRef.current.scrollHeight || FULL_H);
+      }
+    };
+
+    measure();
+    // Re-measure shortly after mount/paint — logos, fonts, or async data
+    // (e.g. business info loading into the template) can change the height
+    // after the first paint.
+    const raf = requestAnimationFrame(measure);
+    const timer = setTimeout(measure, 300);
+
+    let ro;
+    if (typeof ResizeObserver !== "undefined" && measureRef.current) {
+      ro = new ResizeObserver(measure);
+      ro.observe(measureRef.current);
+    }
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+      if (ro) ro.disconnect();
+    };
+  }, [isOpen, previewContent, pages]);
+
+  const computedPageCount = previewContent
+    ? Math.max(1, Math.ceil(contentHeight / PAGE_CONTENT_H))
+    : 1;
 
   const pageList = pages?.length
     ? pages
     : previewContent
-      ? [previewContent]
+      ? Array.from({ length: computedPageCount }, (_, i) => (
+          <PageWindow
+            key={i}
+            content={previewContent}
+            index={i}
+            width={FULL_W}
+            height={FULL_H}
+            contentHeight={PAGE_CONTENT_H}
+            marginTop={PAGE_MARGIN_TOP}
+          />
+        ))
       : [];
+
   const totalPages = pageList.length || 1;
 
   // ── Default stamp customisation ───────────────────────────────────────
@@ -278,6 +399,25 @@ export default function StampSignatureModal({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, existingConfigs]);
+
+  // ── Grow pageConfigs when measurement reveals more pages ──────────────
+  // On first mount totalPages starts at 1 (before the measurer has run).
+  // Once the real height is known and totalPages increases, this fills in
+  // default configs for the newly-discovered pages instead of leaving them
+  // undefined.
+  useEffect(() => {
+    setPageConfigs((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (let i = 1; i <= totalPages; i++) {
+        if (!next[i]) {
+          next[i] = defaultPageCfg();
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [totalPages]);
 
   // ── Current page cfg helpers ──────────────────────────────────────────
   const cfg = pageConfigs[currentPage] ?? defaultPageCfg();
@@ -408,11 +548,13 @@ export default function StampSignatureModal({
   })();
 
   const companyName = businessInfo?.businessName ?? "MY COMPANY NAME";
- const companyAddress = [
-  businessInfo?.addressLine2,
-  businessInfo?.city,
-  businessInfo?.postalCode,
-].filter(Boolean).join(", ");
+  const companyAddress = [
+    businessInfo?.addressLine2,
+    businessInfo?.city,
+    businessInfo?.postalCode,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   if (!isOpen) return null;
 
@@ -453,6 +595,26 @@ export default function StampSignatureModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
+      {/* Hidden measurer — renders the full, un-sliced previewContent
+          off-screen so we can read its true height and know how many
+          A4 pages it needs. Only mounted when we're doing our own
+          auto-pagination (i.e. an explicit `pages` array wasn't supplied). */}
+      {!pages?.length && previewContent && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: -99999,
+            width: FULL_W,
+            visibility: "hidden",
+            pointerEvents: "none",
+          }}
+          aria-hidden="true"
+        >
+          <div ref={measureRef}>{previewContent}</div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[96vh] flex flex-col overflow-hidden">
         {/* ── Header ────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
@@ -859,15 +1021,19 @@ export default function StampSignatureModal({
                   overflow: "hidden",
                 }}
               >
-                {/* Scaled page content */}
+                {/* Scaled page content — pageList[currentPage - 1] is already
+                    a fixed FULL_W x FULL_H window (via PageWindow) when we're
+                    auto-paginating, so it fills this container correctly
+                    instead of being clipped mid-content. */}
                 <div
                   style={{
                     width: FULL_W,
-                    minHeight: FULL_H,
+                    height: FULL_H,
                     transformOrigin: "top left",
                     transform: `scale(${containerRef.current ? containerRef.current.clientWidth / FULL_W : 1})`,
                     pointerEvents: "none",
                     userSelect: "none",
+                    overflow: "hidden",
                   }}
                 >
                   {pageList[currentPage - 1] ?? null}
