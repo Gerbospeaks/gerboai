@@ -25,17 +25,17 @@ const INDUSTRY_TEMPLATE_MAP = {
   hvac:                 () => import('../pages/hvac/TemplateSelector'),
   accounting:           () => import('../pages/accounting/TemplateSelector'),
   painting:             () => import('../pages/painting/TemplateSelector'),
-  'pest-control':       () => import('../pages/pest-control/TemplateSelector'),
-  'pool-services':      () => import('../pages/pool-services/TemplateSelector'),
-  'solar-installation': () => import('../pages/solar-installation/TemplateSelector'),
+  pestcontrol:       () => import('../pages/pest-control/TemplateSelector'),
+  poolservices:      () => import('../pages/pool-services/TemplateSelector'),
+  solarinstallation: () => import('../pages/solar-installation/TemplateSelector'),
   towing:               () => import('../pages/towing/TemplateSelector'),
   welding:              () => import('../pages/welding/TemplateSelector'),
   carpentry:            () => import('../pages/carpentry/TemplateSelector'),
-  'window-repair':      () => import('../pages/window-repair/TemplateSelector'),
+  windowrepair:      () => import('../pages/window-repair/TemplateSelector'),
   technology:           () => import('../pages/technology/TemplateSelector'),
   upholstery:           () => import('../pages/upholstery/TemplateSelector'),
-  'virtual-services':   () => import('../pages/virtual-services/TemplateSelector'),
-  'appliance-repair':   () => import('../pages/appliance-repair/TemplateSelector'),
+  virtualservice:   () => import('../pages/virtual-services/TemplateSelector'),
+  appliancerepair:   () => import('../pages/appliance-repair/TemplateSelector'),
 };
 
 /**

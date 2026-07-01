@@ -691,8 +691,8 @@ export const INDUSTRY_CONFIG = {
   },
 
   // ─── SOLAR ───────────────────────────────────────────────────────────────────
-  "solar-installation": {
-    subdomain: "solar-installation",
+  "solarinstallation": {
+    subdomain: "solarinstallation",
     label: "Solar",
     headline: "Quotes & Invoices for Solar Installers",
     subheadline:
@@ -2168,8 +2168,8 @@ export const INDUSTRY_CONFIG = {
   },
 
   // ─── PEST CONTROL ─────────────────────────────────────────────────────────────
-  "pest-control": {
-    subdomain: "pest-control",
+  "pestcontrol": {
+    subdomain: "pestcontrol",
     label: "Pest Control",
     headline: "Professional Invoicing for Pest Control Businesses",
     subheadline:
@@ -2436,8 +2436,8 @@ export const INDUSTRY_CONFIG = {
   },
 
   // ─── POOL SERVICES ────────────────────────────────────────────────────────────
-  "pool-services": {
-    subdomain: "pool-services",
+  poolservices: {
+    subdomain: "poolservices",
     label: "Pool Services",
     headline: "Invoicing for Pool Cleaners & Service Technicians",
     subheadline:
@@ -3508,8 +3508,8 @@ export const INDUSTRY_CONFIG = {
   },
 
   // ─── WINDOW REPAIR ───────────────────────────────────────────────────────────
-  "window-repair": {
-    subdomain: "window-repair",
+  windowrepair: {
+    subdomain: "windowrepair",
     label: "Window Repair",
     headline: "Fast Invoicing for Glaziers & Window Repair Businesses",
     subheadline:
@@ -3908,8 +3908,8 @@ upholstery: {
 },
  
 // ─── VIRTUAL SERVICES ─────────────────────────────────────────────────────────
-"virtual-services": {
-  subdomain: "virtual-services",
+virtualservice: {
+  subdomain: "virtualservice",
   label: "Virtual Services",
   headline: "Professional Invoicing for Virtual Assistants & Remote Professionals",
   subheadline:

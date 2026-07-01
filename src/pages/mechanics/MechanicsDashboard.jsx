@@ -1,5 +1,8 @@
 import { getAuth, signOut } from "firebase/auth";
 import JobCardTemplate from "./JobCardTemplate";
+import LetterheadEditor from "../../components/LetterheadEditor";
+
+
 import {
   addDoc,
   collection,
@@ -2273,6 +2276,7 @@ const MechanicsDashboard = () => {
               <Templates user={user} />
             </div>
           )}
+          {activeView === "letterheads" && <LetterheadEditor user={user} />}
           {activeView === "marketplace" && (
             <div className="flex-1 overflow-y-auto p-6">
               <ServiceMarketplaceView user={user} businessInfo={businessInfo} />

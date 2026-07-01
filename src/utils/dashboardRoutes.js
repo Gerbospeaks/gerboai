@@ -27,7 +27,7 @@ export const dashboardRoutes = {
   technology:           "/technology",
   towing:               "/towing",
   upholstery:           "/upholstery",
-  "virtual-services":   "/virtual-services",
+  virtualservice:   "/virtual-services",
   virtualservices:      "/virtual-services",
   welding:              "/welding",
   windowrepair:         "/window-repair",

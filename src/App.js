@@ -140,17 +140,17 @@ export const DASHBOARD_ID_TO_PATH = {
   hvac: "/hvac",
   accounting: "/accounting",
   painting: "/painting",
-  "pest-control": "/pest-control",
-  "pool-services": "/pool-services",
-  "solar-installation": "/solar-installation",
+  pestcontrol: "/pestcontrol",
+  poolservices: "/poolservices",
+  solarinstallation: "/solarinstallation",
   towing: "/towing",
   welding: "/welding",
   carpentry: "/carpentry",
-  "window-repair": "/window-repair",
+  windowrepair: "/windowrepair",
   technology:"/technology",
   upholstery:"/upholstery",
-  "virtual-services":"/virtual-services",
-  "appliance-repair":"/appliance-repair"
+  virtualservice:"/virtualservice",
+  appliancerepair:"/appliance-repair"
 };
 
 // ─── Full-page spinner shown while Firebase resolves auth state ───────────────
@@ -421,7 +421,7 @@ function DashboardRoutes() {
         }
       />
       <Route
-        path="/virtual"
+        path="/virtualservice"
         element={
           <ProtectedRoute>
             <VirtualDashboard />
@@ -549,7 +549,7 @@ function DashboardRoutes() {
         }
       />
       <Route
-        path="/pest-control"
+        path="/pestcontrol"
         element={
           <ProtectedRoute>
             <PestcontrolDashboard />
@@ -557,7 +557,7 @@ function DashboardRoutes() {
         }
       />
       <Route
-        path="/pool-services"
+        path="/poolservices"
         element={
           <ProtectedRoute>
             <PoolservicesDashboard />
@@ -565,7 +565,7 @@ function DashboardRoutes() {
         }
       />
       <Route
-        path="/solar-installation"
+        path="/solarinstallation"
         element={
           <ProtectedRoute>
             <SolarDashboard />
@@ -597,7 +597,7 @@ function DashboardRoutes() {
         }
       />
       <Route
-        path="/window-repair"
+        path="/windowrepair"
         element={
           <ProtectedRoute>
             <WindowrepairDashboard />
@@ -635,21 +635,21 @@ const SUBDOMAIN_LANDING = {
   legal: SolidLegal,
   logistics: SolidLogistics,
   painting: SolidPainting,
-  "pest-control": SolidPestControl,
+  pestcontrol: SolidPestControl,
   photography: SolidPhotography,
   plumbing: SolidPlumbing,
-  "pool-services": SolidPoolService,
+  poolservices: SolidPoolService,
   realestate: SolidRealEstate,
   restaurant: SolidRestaurant,
   retail: SolidRetail,
   security: SolidSecurity,
-  "solar-installation": SolidSolar,
+  solarinstallation: SolidSolar,
   towing: SolidTowing,
   welding: SolidWelder,
   technology: SolidTechnology,
   upholstery: SolidUpholstery,
-  "virtual-services": SolidVirtual,
-  "window-repair": SolidWindowRepair,
+  virtualservice: SolidVirtual,
+  windowrepair: SolidWindowRepair,
 };
 
 // In App.jsx — replace your existing SubdomainRoot

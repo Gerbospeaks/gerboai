@@ -4,6 +4,7 @@ import {
   Settings,
   TrendingUp,
   Users,
+  Mail,
   ChevronRight,
   ChevronLeft,
   ChevronDown,
@@ -196,6 +197,7 @@ export default function MechanicsSidebar({
           onClick={() => goTo("templates")}
           active={activeView === "templates"}
         />
+         
         <NavItem
           icon={Car}
           label="Vehicles"
@@ -438,6 +440,12 @@ export default function MechanicsSidebar({
                   icon: Users,
                   title: "Customers",
                   action: () => setShowCustomersListModal(true),
+                },
+                  {
+      
+                  icon: Mail,
+                  title: "Letterheads",
+                  action: () => goTo("letterheads"),
                 },
                 {
                   icon: History,

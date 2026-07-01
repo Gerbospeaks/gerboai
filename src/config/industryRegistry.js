@@ -91,25 +91,25 @@ export const INDUSTRY_REGISTRY = {
     "../pages/cleaning/CleaningSubAccountDashboard"
   ),
 
-  pest_control: reg(
+  pestcontrol: reg(
     "Pest Control",
     "../pages/pest-control/PestcontrolDashboard",
     "../pages/pest-control/PestcontrolSubAccountDashboard"
   ),
 
-  pool_services: reg(
+  poolservices: reg(
     "Pool Services",
     "../pages/pool-services/PoolservicesDashboard",
     "../pages/pool-services/PoolservicesSubAccountDashboard"
   ),
 
-  solar: reg(
+  solarinstallation: reg(
     "Solar Installation",
     "../pages/solar-installation/SolarDashboard",
     "../pages/solar-installation/SolarSubAccountDashboard"
   ),
 
-  window_repair: reg(
+  windowrepair: reg(
     "Window Repair",
     "../pages/window-repair/WindowrepairDashboard",
     "../pages/window-repair/WindowrepairSubAccountDashboard"
@@ -163,7 +163,7 @@ export const INDUSTRY_REGISTRY = {
     "../pages/photography/PhotographySubAccountDashboard"
   ),
 
-  real_estate: reg(
+  realestate: reg(
     "Real Estate",
     "../pages/realEstate/RealEstateDashboard",
     "../pages/realEstate/RealEstateSubAccountDashboard"
@@ -199,7 +199,7 @@ export const INDUSTRY_REGISTRY = {
     "../pages/technology/TechnologySubAccountDashboard"
   ),
 
-  virtual_services: reg(
+  virtualservice: reg(
     "Virtual Services",
     "../pages/virtual-services/VirtualDashboard",
     "../pages/virtual-services/VirtualSubAccountDashboard"

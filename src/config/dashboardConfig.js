@@ -59,7 +59,7 @@ export const dashboards = [
   { 
     id: 'virtual-services',
     name: 'Virtual Services', 
-    path: '/virtual-services',
+    path: '/virtualservice',
     icon: '🌐', 
     color: 'bg-indigo-500',
     description: 'Remote support & online consultations'
@@ -213,7 +213,7 @@ export const dashboards = [
   { 
     id: 'appliance-repair',
     name: 'Appliance Repair', 
-    path: '/appliance-repair',
+    path: '/appliancerepair',
     icon: '🔧', 
     color: 'bg-blue-500',
     description: 'Appliance repair & maintenance services'
@@ -221,7 +221,7 @@ export const dashboards = [
   { 
     id: 'pest-control',
     name: 'Pest Control', 
-    path: '/pest-control',
+    path: '/pestcontrol',
     icon: '🐜', 
     color: 'bg-green-500',
     description: 'Pest control & prevention services'
@@ -229,15 +229,15 @@ export const dashboards = [
   { 
     id: 'pool-services',
     name: 'Pool Services', 
-    path: '/pool-services',
-    icon: '�', 
+    path: '/poolservices',
+    icon: '🏊', 
     color: 'bg-blue-400',
     description: 'Pool maintenance & repair services'
   },
   { 
     id: 'solar-installation',
     name: 'Solar Installation', 
-    path: '/solar-installation',
+    path: '/solarinstallation',
     icon: '☀️', 
     color: 'bg-yellow-500',
     description: 'Solar panel installation & maintenance'
@@ -246,7 +246,7 @@ export const dashboards = [
   { 
     id: 'window-repair',
     name: 'Window Repair', 
-    path: '/window-repair',
+    path: '/windowrepair',
     icon: '🪟', 
     color: 'bg-blue-500',
     description: 'Window repair & installation services'

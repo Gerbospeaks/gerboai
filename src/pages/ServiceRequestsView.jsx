@@ -17,18 +17,18 @@ const INDUSTRY_LABELS = {
   landscaping: "Landscaping",
   legal: "Legal",
   painting: "Painting",
-  "pest-control": "Pest Control",
+  pestcontrol: "Pest Control",
   photography: "Photography",
-  "pool-services": "Pool Services",
+  poolservices: "Pool Services",
   realestate: "Real Estate",
   restaurants: "Restaurants",
   retail: "Retail",
   security: "Security",
-  "solar-installation": "Solar",
+  solarinstallation: "Solar",
   towing: "Towing",
   welding: "Welding",
   flooring: "Flooring",
-  "window-repair": "Window Repair",
+  windowrepair: "Window Repair",
 };
 
 const URGENCY_STYLES = {
