@@ -8,6 +8,8 @@ import {
   TrendingUp,
   Shield,
   Zap,
+  Lock,
+  Code,
   Globe,
   Menu,
   X,
@@ -120,92 +122,92 @@ const AboutPage = () => {
     {
       name: "Gabriel Moyo",
       role: "CEO & Founder",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gabriel",
+      
       bio: "Former fintech executive with 15+ years building payment solutions.",
     },
     {
       name: "Thomas Dube",
       role: "CTO",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Thomas",
+      
       bio: "Tech visionary who scaled systems serving millions of users.",
     },
     {
       name: "Gracious Ncube",
       role: "Head of Product",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gracious",
+      
       bio: "Product designer passionate about creating intuitive user experiences.",
     },
     {
       name: "Sarah Johnson",
       role: "VP of Engineering",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+      
       bio: "Infrastructure expert building secure, scalable platforms.",
     },
     {
       name: "Michael Chen",
       role: "Head of Customer Success",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael",
+      
       bio: "Customer advocate ensuring every user achieves their goals.",
     },
     {
       name: "Emily Rodriguez",
       role: "Head of Marketing",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily",
+      
       bio: "Growth strategist helping businesses discover SolidFlo.",
     },
   ];
 
   const milestones = [
-    {
-      year: "2020",
-      title: "The Beginning",
-      description:
-        "Founded with a mission to simplify invoicing for small businesses",
-      icon: <Rocket className="w-6 h-6" />,
-    },
-    {
-      year: "2021",
-      title: "First 1,000 Users",
-      description:
-        "Reached our first thousand happy customers across 15 countries",
-      icon: <Users className="w-6 h-6" />,
-    },
-    {
-      year: "2022",
-      title: "Series A Funding",
-      description:
-        "Raised $10M to accelerate product development and global expansion",
-      icon: <TrendingUp className="w-6 h-6" />,
-    },
-    {
-      year: "2023",
-      title: "10K+ Businesses",
-      description:
-        "Surpassed 10,000 active businesses processing millions in invoices",
-      icon: <Award className="w-6 h-6" />,
-    },
-    {
-      year: "2024",
-      title: "Global Recognition",
-      description:
-        "Named 'Best Invoicing Software' by leading industry publications",
-      icon: <Sparkles className="w-6 h-6" />,
-    },
-    {
-      year: "2025",
-      title: "The Future",
-      description:
-        "Expanding AI capabilities and launching new features to serve you better",
-      icon: <Target className="w-6 h-6" />,
-    },
-  ];
+  {
+    year: "2020",
+    title: "The Beginning",
+    description:
+      "Founded with a mission to simplify invoicing for small businesses",
+    icon: <Rocket className="w-6 h-6" />,
+  },
+  {
+    year: "2021",
+    title: "First 100 Users",
+    description:
+      "Reached our first hundred happy customers across 2 countries",
+    icon: <Users className="w-6 h-6" />,
+  },
+  {
+    year: "2022",
+    title: "Profitable & Bootstrapped",
+    description:
+      "Reached profitability without external funding, staying lean and founder-led",
+    icon: <TrendingUp className="w-6 h-6" />,
+  },
+  {
+    year: "2023",
+    title: "200+ Businesses",
+    description:
+      "Grew to over 200 active businesses processing thousands of invoices monthly",
+    icon: <Award className="w-6 h-6" />,
+  },
+  {
+    year: "2024",
+    title: "Product Milestone",
+    description:
+      "Shipped major platform improvements based on two years of customer feedback",
+    icon: <Sparkles className="w-6 h-6" />,
+  },
+  {
+    year: "2025",
+    title: "The Future",
+    description:
+      "Expanding AI capabilities and launching new features to serve you better",
+    icon: <Target className="w-6 h-6" />,
+  },
+];
 
   const stats = [
-    { value: "10,000+", label: "Happy Customers" },
-    { value: "50+", label: "Countries Served" },
-    { value: "$5M+", label: "Processed Monthly" },
-    { value: "99.9%", label: "Uptime" },
-  ];
+  { value: "Real-time", label: "Sync", icon: <Zap size={18} /> },
+  { value: "256-bit", label: "Encryption", icon: <Lock size={18} /> },
+  { value: "99.9%", label: "Uptime SLA", icon: <Shield size={18} /> },
+  { value: "API", label: "First", icon: <Code size={18} /> },
+];
 
   return (
     <>
@@ -580,8 +582,8 @@ const AboutPage = () => {
                     email, yet powerful enough to scale with your business.
                   </p>
                   <p>
-                    Today, we're proud to serve over 10,000 businesses in 50+
-                    countries, processing millions of dollars in invoices every
+                    Today, we're proud to serve over 200 businesses in 4+
+                    countries, processing thousands of dollars in invoices every
                     month. But we're just getting started.
                   </p>
                   <p className="font-semibold text-gray-900">
@@ -732,11 +734,7 @@ const AboutPage = () => {
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="relative inline-block mb-6">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-32 h-32 rounded-full mx-auto border-4 border-orange-100 group-hover:border-orange-500 transition-colors"
-                    />
+                    
                     <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <h3 className="text-xl font-bold mb-1 text-gray-900">

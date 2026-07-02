@@ -9,11 +9,14 @@ import { Helmet } from "react-helmet";
 import InstallButton from "../components/InstallButton";
 import CookieConsent from "../components/CookieConsent";
 import heroBg from "../assets/videos/world.mp4";
+import google from "../assets/google-play.png"
 import {
   Zap,
   Shield,
   TrendingUp,
   Clock,
+  Code,
+  Lock,
   Users,
   CheckCircle,
   ArrowRight,
@@ -301,7 +304,16 @@ const css = `
 .lp-services-btn-ghost:hover {
   background: rgba(255,255,255,.13); color: #fff;
 }
-
+.kraal-section {
+  display:grid;
+  padding: 72px 0;
+  background: transparent;
+}
+  .kraal-section .section-eyebrow {
+  text-align: center;
+  display: block;
+  margin-bottom: 10px;
+}
 @media (max-width: 1024px) {
   .lp-services-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -629,6 +641,9 @@ const css = `
     min-height: auto;
     background: linear-gradient(160deg, #f8fafc 0%, #eef2ff 100%) !important;
   }
+     .kraal-section {
+    padding: 52px 0;
+  }
   .lp-hero h1 { font-size: 2.2rem; text-align: center; }
   .lp-hero-sub { text-align: center; font-size: 0.95rem; margin: 0 auto 28px; }
   .lp-hero-badge { font-size: 10px; }
@@ -731,7 +746,7 @@ const css = `
      STATS STRIP  — creamy dark
   ════════════════════════════════════════════════ */
   .lp-stats {
-   background: #0f172a;
+   background: #C1B2FF;
     padding: 56px 24px;
     position: relative;
   }
@@ -826,7 +841,27 @@ const css = `
   .lp-globe h2 { color: #000000; font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; }
   .lp-globe p  { color: rgba(0,0,0,.55); font-size: 16px; max-width: 480px; margin: 0 auto 48px; line-height: 1.65; }
   .lp-globe img { max-width: 760px; width: 100%; }
-
+.section-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 36px;
+}
+  .hero-app {
+  margin-top: 0; 
+  flex: 1 1 320px; 
+}
+   .hero-app {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0);
+  border: 0px solid rgba(0, 0, 0, 0.07);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  max-width: 480px;
+}
   /* ════════════════════════════════════════════════
      PRICING  — deeper cream
   ════════════════════════════════════════════════ */
@@ -1020,18 +1055,18 @@ const css = `
   /* ════════════════════════════════════════════════
      FOOTER  — keeps navy
   ════════════════════════════════════════════════ */
-  .lp-footer { background: #0f172a; padding: 72px 24px 32px; }
+  .lp-footer { background: transparent; padding: 72px 24px 32px; }
   .lp-footer-grid {
     max-width: 1100px; margin: 0 auto;
     display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
     margin-bottom: 56px;
   }
   .lp-footer-logo { height: 38px; margin-bottom: 16px; }
-  .lp-footer-tagline { font-size: 13px; color: rgba(255,255,255,.45); line-height: 1.7; margin-bottom: 20px; max-width: 280px; }
+  .lp-footer-tagline { font-size: 13px; color: rgb(0, 19, 71); line-height: 1.7; margin-bottom: 20px; max-width: 280px; }
   .lp-footer-socials { display: flex; gap: 8px; }
   .lp-footer-social {
     width: 34px; height: 34px; border-radius: 3px;
-    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+    background: #6366f1; border: 1px solid rgba(255,255,255,.1);
     display: flex; align-items: center; justify-content: center;
     transition: background .15s, border-color .15s; cursor: pointer;
   }
@@ -1040,16 +1075,16 @@ const css = `
   .lp-footer-col-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--red); margin-bottom: 16px; }
   .lp-footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
   .lp-footer-links a, .lp-footer-links span {
-    font-size: 13px; color: rgba(255,255,255,.5);
+    font-size: 13px; color: rgba(0, 0, 0);
     text-decoration: none; cursor: pointer;
     transition: color .15s;
   }
-  .lp-footer-links a:hover, .lp-footer-links span:hover { color: #fff; }
+  .lp-footer-links a:hover, .lp-footer-links span:hover { color: #000000; }
   .lp-footer-bottom {
     max-width: 1100px; margin: 0 auto;
     padding-top: 24px; border-top: 1px solid rgba(255,255,255,.07);
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 12px; color: rgba(255,255,255,.3);
+    font-size: 12px; color: #000000;
   }
 /* Hide Vapi widget button text, keep icon only */
 vapi-widget::part(button-text),
@@ -1519,16 +1554,12 @@ const scrollTo = (id) => {
     },
   ];
 
-  const stats = [
-    { value: "10K+", label: "Active Users", icon: <Users size={18} /> },
-    {
-      value: "$500k+",
-      label: "Processed Monthly",
-      icon: <TrendingUp size={18} />,
-    },
-    { value: "99.9%", label: "Uptime", icon: <Shield size={18} /> },
-    { value: "24/7", label: "Support", icon: <Clock size={18} /> },
-  ];
+const stats = [
+  { value: "Real-time", label: "Sync", icon: <Zap size={18} /> },
+  { value: "256-bit", label: "Encryption", icon: <Lock size={18} /> },
+  { value: "99.9%", label: "Uptime SLA", icon: <Shield size={18} /> },
+  { value: "API", label: "First", icon: <Code size={18} /> },
+];
 
   const testimonials = [
     
@@ -2338,30 +2369,62 @@ const scrollTo = (id) => {
             </button>
           </div>
           <p className="lp-cta-footnote">
-            ✓ No credit card required &nbsp;✓ 14-day free trial &nbsp;✓ Cancel
+             No credit card required &nbsp; 14-day free trial &nbsp; Cancel
             anytime
           </p>
         </section>
+        <section className="kraal-section">
+  <div className="section-inner">
+   
+     
 
+      <div className="hero-app">
+        <h1 className="section-eyebrow light">
+        Download the Solidflo app
+      </h1>
+        <img src={google} alt="" />
+      </div>
+       
+   
+  </div>
+</section>
         {/* ── Footer ── */}
         <footer className="lp-footer">
           <div className="lp-footer-grid">
             <div>
-              <img src={logo1} alt="SolidFlo" className="lp-footer-logo" />
+              <img src={logo} alt="SolidFlo" className="lp-footer-logo" />
               <p className="lp-footer-tagline">
                 Free online invoicing for small businesses. Create and send
                 invoices, track time and expenses, and accept online payments.
               </p>
               <div className="lp-footer-socials">
                 {[
-                  { icon: facebook, alt: "Facebook" },
-                  { icon: twitter, alt: "Twitter" },
-                  { icon: linkedin, alt: "LinkedIn" },
-                  { icon: instagram, alt: "Instagram" },
+                  {
+                    icon: facebook,
+                    alt: "Facebook",
+                    href: "https://web.facebook.com/solidflo.saas",
+                  },
+                  {
+                    icon: twitter,
+                    alt: "Twitter",
+                    href: "https://x.com/solidflo_saas",
+                  },
+                  {
+                    icon: instagram,
+                    alt: "Instagram",
+                    href: "https://www.instagram.com/solidflo_saas?igsh=MTdwcHlxc2gyemFzdw==",
+                  },
                 ].map((s) => (
-                  <div key={s.alt} className="lp-footer-social">
+                  <a
+                    key={s.alt}
+                    href={s.href}
+                    className="lp-footer-social"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.alt}
+                  >
                     <img src={s.icon} alt={s.alt} />
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>

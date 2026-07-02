@@ -389,14 +389,16 @@ export default function StampSignatureModal({
   const [currentPage, setCurrentPage] = useState(1);
   const sigFileRef = useRef(null);
   const containerRef = useRef(null);
-
+useEffect(() => {
+  setCurrentPage((p) => Math.min(Math.max(p, totalPages), totalPages));
+}, [totalPages]);
   useEffect(() => {
     if (isOpen) {
-      setPageConfigs(initConfigs());
-      setSignatureDataUrl(existingConfigs?.signatureDataUrl ?? null);
-      setCurrentPage(1);
-      setStampStyle(defaultStampStyle());
-    }
+    setPageConfigs(initConfigs());
+    setSignatureDataUrl(existingConfigs?.signatureDataUrl ?? null);
+    setCurrentPage(totalPages); 
+    setStampStyle(defaultStampStyle());
+  }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, existingConfigs]);
 
@@ -1123,8 +1125,8 @@ export default function StampSignatureModal({
           </div>
           <button
             onClick={() =>
-              onConfirm({ pageConfigs, signatureDataUrl, stampStyle })
-            }
+  onConfirm({ pageConfigs, signatureDataUrl, stampStyle, lastPage: totalPages })
+}
             className="flex items-center gap-2 px-5 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-semibold rounded-lg transition-colors"
           >
             <Check className="w-4 h-4" />
