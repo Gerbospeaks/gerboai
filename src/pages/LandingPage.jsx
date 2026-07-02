@@ -1604,7 +1604,7 @@ const stats = [
     },
     {
       name: "Professional",
-      usdPrice: 7,
+      usdPrice: 5,
       period: "per month",
       desc: "Ideal for growing businesses",
       popular: true,
@@ -1622,7 +1622,7 @@ const stats = [
     },
     {
       name: "Enterprise",
-      usdPrice: 13.5,
+      usdPrice: 10,
       period: "per month",
       desc: "For large teams and businesses",
       popular: false,
