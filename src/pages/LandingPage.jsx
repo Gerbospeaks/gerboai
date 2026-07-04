@@ -201,7 +201,7 @@ const css = `
    SERVICES / MARKETPLACE SECTION
 ════════════════════════════════════════════════ */
 .lp-services {
-  background: var(--cream-mid);
+  background: transparent;
   padding: 96px 24px;
 }
 .lp-services-inner {
@@ -355,7 +355,7 @@ const css = `
    ANALYTICS / CHARTS SECTION
 ════════════════════════════════════════════════ */
 .lp-analytics {
-  background: var(--cream);
+  background: transparent;
   padding: 96px 24px;
 }
 .lp-analytics-inner {
@@ -369,8 +369,8 @@ const css = `
   margin-bottom: 32px;
 }
 .lp-analytics-metric {
-  background: var(--cream-mid);
-  border: 1px solid var(--cream-dark);
+  background: transparent;
+  border: 1px solid #C1B2FF;
   border-radius: 10px;
   padding: 18px 20px;
 }
@@ -776,8 +776,9 @@ const css = `
      FEATURES  — creamy background
   ════════════════════════════════════════════════ */
   .lp-features {
-    background: var(--cream);
+    background: #C1B2FF;
     padding: 96px 24px;
+    margin-left: 100px; margin-right: 100px;
   }
   .lp-section-head { text-align: center; margin-bottom: 56px; }
   .lp-section-eyebrow {
@@ -866,7 +867,7 @@ const css = `
      PRICING  — deeper cream
   ════════════════════════════════════════════════ */
   .lp-pricing {
-    background: var(--cream-mid);
+    background: transparent;
     padding: 96px 24px;
     position: relative; overflow: hidden;
   }
@@ -990,7 +991,7 @@ const css = `
      FAQ  — lightest cream
   ════════════════════════════════════════════════ */
   .lp-faq {
-    background: var(--cream); padding: 96px 24px;
+    background: transparent; padding: 96px 24px;
   }
   .lp-faq-list {
     max-width: 760px; margin: 0 auto;
@@ -1055,7 +1056,7 @@ const css = `
   /* ════════════════════════════════════════════════
      FOOTER  — keeps navy
   ════════════════════════════════════════════════ */
-  .lp-footer { background: transparent; padding: 72px 24px 32px; }
+  .lp-footer { background: #C1B2FF; padding: 72px 24px 32px; }
   .lp-footer-grid {
     max-width: 1100px; margin: 0 auto;
     display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;

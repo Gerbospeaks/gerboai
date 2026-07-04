@@ -6,7 +6,7 @@ import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
 import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
-import SubUserManagement from "../SubUserManagement"; // ✅ ADDED
+import SubUserManagement from "../SubUserManagement"; 
 import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
@@ -23,8 +23,8 @@ import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import jsPDF from "jspdf"; // ✅ ADDED
-import html2canvas from "html2canvas"; // ✅ ADDED
+import jsPDF from "jspdf"; 
+import html2canvas from "html2canvas"; 
 
 import {
   getFirestore,
