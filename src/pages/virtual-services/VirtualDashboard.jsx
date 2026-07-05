@@ -8,8 +8,10 @@ import StampPaywallModal from "../StampPaywallModal";
 import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
+import FinancialOverview from "../FinancialOverview";
+import ReportsView from "../mechanics/ReportsView";
+import HistoryView from "../mechanics/HistoryView";
 import { serverTimestamp } from "firebase/firestore";
-import logo from "../../assets/img/solidflo-logo.png";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
@@ -21,6 +23,7 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
 import VirtualMultiStepForm from "./VirtualMultiStepForm";
+import VirtualSidebar from "./VirtualSidebar";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -43,49 +46,22 @@ import CustomerModal from "../CustomerModal";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import CustomersListModal from "../CustomersListModal";
 import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Settings,
   Sparkles,
   Users,
   Save,
-  Calendar,
   FileText,
-  Camera,
   X,
-  FileBarChart,
-  BarChart3,
   Stamp,
-  Menu,
   Plus,
   Send,
-  Edit,
   LogOut,
-  CheckSquare,
-  TrendingUp,
-  CreditCard,
-  Receipt,
-  Wallet,
-  PieChart,
-  Image,
-  ClipboardList,
-  Package,
-  Upload,
-  Film,
   Eye,
   Lock,
 } from "lucide-react";
 
 // ── Plan gating – import from the separate planGating.js file ────────────────
-import {
-  PlanProvider,
-  usePlan,
-  UpgradeModal,
-  PLANS,
-  PLAN_ORDER,
-} from "./planGating";
+import { PlanProvider, usePlan } from "./planGating";
+import { UpgradeModal } from "./planGating";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -108,93 +84,9 @@ const generateInvoiceNumber = async (userId) => {
 const functions = getFunctions();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Small plan badge shown in sidebar/header
-// ─────────────────────────────────────────────────────────────────────────────
-const PlanBadge = () => {
-  const { currentPlan } = usePlan();
-  const colours = {
-    starter: {
-      bg: "rgba(100,116,139,0.25)",
-      text: "#94a3b8",
-      border: "rgba(100,116,139,0.3)",
-    },
-    growth: {
-      bg: "rgba(201,168,76,0.18)",
-      text: "#C9A84C",
-      border: "rgba(201,168,76,0.4)",
-    },
-    elite: {
-      bg: "rgba(139,92,246,0.18)",
-      text: "#a78bfa",
-      border: "rgba(139,92,246,0.4)",
-    },
-  };
-  const c = colours[currentPlan] ?? colours.starter;
-  return (
-    <span
-      style={{
-        fontSize: 10,
-        fontWeight: 700,
-        letterSpacing: "0.1em",
-        textTransform: "uppercase",
-        padding: "2px 8px",
-        borderRadius: 99,
-        border: `1px solid ${c.border}`,
-        background: c.bg,
-        color: c.text,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {PLANS[currentPlan]?.label ?? currentPlan}
-    </span>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Gated sidebar item – shows a lock icon if the user lacks access
-// ─────────────────────────────────────────────────────────────────────────────
-const SidebarItem = ({
-  icon: Icon,
-  label,
-  featureKey,
-  featureLabel,
-  onClick,
-  children,
-  className = "",
-}) => {
-  const { canAccess, requirePlan } = usePlan();
-  const locked = !canAccess(featureKey);
-
-  const handleClick = () => {
-    requirePlan(featureKey, onClick, featureLabel ?? label);
-  };
-
-  return (
-    <div
-      onClick={handleClick}
-      className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 ${
-        locked
-          ? "text-slate-500 hover:bg-slate-700/30"
-          : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-      } ${className}`}
-    >
-      <div className="flex items-center space-x-3">
-        <Icon className="w-5 h-5" />
-        <span className="text-sm font-medium">{label}</span>
-      </div>
-      {locked ? (
-        <Lock className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
-      ) : (
-        children
-      )}
-    </div>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Inner dashboard – consumes the plan context
 // ─────────────────────────────────────────────────────────────────────────────
-const PhotographyDashboardInner = () => {
+const VirtualDashboardInner = () => {
   const { requirePlan, canAccess, currentPlan } = usePlan();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -234,7 +126,7 @@ const PhotographyDashboardInner = () => {
     enabled: false,
   });
   const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [stampConfig, setStampConfig] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
     balanceDue: 0,
@@ -251,13 +143,11 @@ const [stampConfig, setStampConfig] = useState(null);
     "456 Oak Avenue, Johannesburg, 2000",
   );
   const [eventDate, setEventDate] = useState("2026-06-15");
-  const [eventType, setEventType] = useState("Wedding");
-  const [eventLocation, setEventLocation] = useState(
-    "Silverstar Casino, Krugersdorp",
-  );
+  const [eventType, setEventType] = useState("Consultation");
+  const [eventLocation, setEventLocation] = useState("Online / Remote");
 
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "PERFECT MOMENTS PHOTOGRAPHY",
+    businessName: "YOUR ONLINE BUSINESS",
     addressLine1: "123 Studio Street",
     addressLine2: "Rosebank",
     city: "Johannesburg",
@@ -273,7 +163,7 @@ const [stampConfig, setStampConfig] = useState(null);
     description: "",
     rate: "",
     qty: "",
-    type: "Photography",
+    type: "Service",
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
@@ -298,8 +188,8 @@ const [stampConfig, setStampConfig] = useState(null);
     subtotal,
     vat,
     total,
-    documentType: "photography",
-    serviceType: "PHOTOGRAPHY",
+    documentType: "virtual",
+    serviceType: "VIRTUAL SERVICE",
     showStamp: stampSettings?.enabled || false,
     stampText: stampSettings?.text || "APPROVED",
     stampColor: stampSettings?.color || "#d32f2f",
@@ -590,8 +480,8 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerPhone("082 456 7890");
     setCustomerAddress("456 Oak Avenue, Johannesburg, 2000");
     setEventDate("2026-06-15");
-    setEventType("Wedding");
-    setEventLocation("Silverstar Casino, Krugersdorp");
+    setEventType("Consultation");
+    setEventLocation("Online / Remote");
     setItems([]);
     if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
   };
@@ -604,13 +494,13 @@ const [stampConfig, setStampConfig] = useState(null);
       ...prev,
       {
         description: newItem.description,
-        type: newItem.type || "Photography",
+        type: newItem.type || "Service",
         rate,
         qty,
         amount: rate * qty,
       },
     ]);
-    setNewItem({ description: "", rate: "", qty: "", type: "Photography" });
+    setNewItem({ description: "", rate: "", qty: "", type: "Service" });
   };
 
   const handleLogoUpload = async (e) => {
@@ -753,27 +643,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
     },
-    {
-      label: "Send",
-      icon: Send,
-      onClick: () =>
-        requirePlan(
-          "sendInvoice",
-          () => {
-            /* send logic */
-          },
-          "Send Invoice",
-        ),
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg hover:from-blue-700 transition-colors shadow-sm whitespace-nowrap",
-    },
-    {
-      label: "Save PDF",
-      icon: Download,
-      onClick: () => requirePlan("savePDF", handleSavePDF, "Save PDF"),
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white text-sm font-semibold rounded-lg hover:from-orange-700 transition-colors shadow-sm whitespace-nowrap",
-    },
+   
     {
       label: "Save",
       icon: Save,
@@ -781,13 +651,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-violet-600 to-violet-700 text-white text-sm font-semibold rounded-lg hover:from-violet-700 transition-colors shadow-sm whitespace-nowrap",
     },
-    {
-      label: "Logout",
-      icon: LogOut,
-      onClick: handleLogout,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-semibold rounded-lg hover:from-red-700 transition-colors shadow-sm whitespace-nowrap",
-    },
+   
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -839,434 +703,24 @@ const [stampConfig, setStampConfig] = useState(null);
       {/* ── Upgrade modal (renders on top of everything) ─────────────────── */}
       <UpgradeModal />
 
-      {/* ── Mobile Sidebar Backdrop ──────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* ── Collapsed Sidebar ────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "hidden" : "hidden md:block"} fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
-      >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-violet-600 hover:to-violet-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-violet-500/50 hover:scale-110"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-          </button>
-          <div className="w-10 h-10 mb-2">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-full h-full object-contain rounded-lg"
-            />
-          </div>
-          <div className="w-10 border-t border-slate-600"></div>
-          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button
-              onClick={() => setActiveView("home")}
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() =>
-                requirePlan("businessOverview", () => {}, "Business Overview")
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Business Overview"
-            >
-              <TrendingUp className="w-5 h-5" />
-              {!canAccess("businessOverview") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => {
-                handleNewInvoice();
-                setActiveView("invoice");
-              }}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Invoices"
-            >
-              <ClipboardList className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() =>
-                requirePlan(
-                  "allClients",
-                  () => setShowCustomersListModal(true),
-                  "All Clients",
-                )
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Clients"
-            >
-              <Users className="w-5 h-5" />
-              {!canAccess("allClients") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() =>
-                requirePlan(
-                  "templates",
-                  () => setActiveView("templates"),
-                  "Invoice Templates",
-                )
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Templates"
-            >
-              <FileText className="w-5 h-5" />
-              {!canAccess("templates") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("bookings", () => {}, "Bookings")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Bookings"
-            >
-              <Calendar className="w-5 h-5" />
-              {!canAccess("bookings") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("portfolio", () => {}, "Portfolio")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Portfolio"
-            >
-              <Image className="w-5 h-5" />
-              {!canAccess("portfolio") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("packages", () => {}, "Packages")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Packages"
-            >
-              <Package className="w-5 h-5" />
-              {!canAccess("packages") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-          </div>
-        </div>
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-          <div className="relative group">
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-violet-700 shadow-lg group-hover:ring-4 group-hover:ring-violet-500/50 transition-all duration-300">
-              <img src={businessInfo.logoUrl} alt="" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Expanded Sidebar ─────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 md:w-72 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
-      >
-        <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* ── Plan badge in sidebar ──────────────────────────────────── */}
-          <div className="flex items-center justify-between mb-4 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
-            <span className="text-xs text-slate-400">Your plan</span>
-            <div className="flex items-center gap-2">
-              <PlanBadge />
-              {currentPlan !== "elite" && (
-                <button
-                  onClick={() => requirePlan("elite", () => {}, "Elite plan")}
-                  className="text-xs text-violet-400 hover:text-violet-300 font-semibold transition-colors"
-                >
-                  Upgrade ↑
-                </button>
-              )}
-            </div>
-          </div>
-
-          <nav className="space-y-1.5 md:space-y-2">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-slate-600/20 hover:to-slate-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
-            >
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">Settings</span>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-slate-700/50">
-              {/* Business Overview */}
-              <SidebarItem
-                icon={TrendingUp}
-                label="Business Overview"
-                featureKey="businessOverview"
-                featureLabel="Business Overview"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Invoices */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <ClipboardList className="w-5 h-5" />
-                    <span className="text-sm font-medium">Invoices</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={() => {
-                      handleNewInvoice();
-                      setSidebarOpen(false);
-                      setActiveView("invoice");
-                    }}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    Create Invoice
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "allInvoices",
-                        () => {
-                          setShowInvoicesList(!showInvoicesList);
-                          setSidebarOpen(false);
-                        },
-                        "All Invoices",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        All Invoices
-                        {!canAccess("allInvoices") && (
-                          <Lock className="w-3 h-3 text-slate-600" />
-                        )}
-                      </span>
-                      <span className="text-violet-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedInvoices.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan("payments", () => {}, "Pending Payment")
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5"
-                  >
-                    Pending Payment
-                    {!canAccess("payments") && (
-                      <Lock className="w-3 h-3 text-slate-600" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Clients */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-5 h-5" />
-                    <span className="text-sm font-medium">Clients</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "addClient",
-                        () => {
-                          handleAddNewCustomer();
-                          setSidebarOpen(false);
-                        },
-                        "Add Client",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5"
-                  >
-                    Add Client
-                    {!canAccess("addClient") && (
-                      <Lock className="w-3 h-3 text-slate-600" />
-                    )}
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "allClients",
-                        () => {
-                          setShowCustomersListModal(true);
-                          setSidebarOpen(false);
-                        },
-                        "All Clients",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        All Clients
-                        {!canAccess("allClients") && (
-                          <Lock className="w-3 h-3 text-slate-600" />
-                        )}
-                      </span>
-                      <span className="text-violet-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedCustomers.length}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Templates */}
-              <SidebarItem
-                icon={FileText}
-                label="Invoice Templates"
-                featureKey="templates"
-                featureLabel="Invoice Templates"
-                onClick={() => {
-                  setActiveView("templates");
-                  setSidebarOpen(false);
-                }}
-                className="mt-2"
-              />
-
-              {/* Bookings */}
-              <SidebarItem
-                icon={Calendar}
-                label="Bookings"
-                featureKey="bookings"
-                featureLabel="Bookings"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Portfolio */}
-              <SidebarItem
-                icon={Image}
-                label="Portfolio"
-                featureKey="portfolio"
-                featureLabel="Portfolio"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Packages */}
-              <SidebarItem
-                icon={Package}
-                label="Packages"
-                featureKey="packages"
-                featureLabel="Packages"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Payments */}
-              <SidebarItem
-                icon={CreditCard}
-                label="Payments"
-                featureKey="payments"
-                featureLabel="Payments"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-
-              {/* Reports */}
-              <SidebarItem
-                icon={FileBarChart}
-                label="Reports"
-                featureKey="reports"
-                featureLabel="Reports"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-
-              {/* Analytics */}
-              <SidebarItem
-                icon={BarChart3}
-                label="Analytics"
-                featureKey="analytics"
-                featureLabel="Analytics"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-            </div>
-          </nav>
-        </div>
-
-        {/* Sidebar footer */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-violet-500/50 transition-all duration-300">
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Business Logo"
-                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* ── Sidebar (extracted into its own component) ───────────────────── */}
+      <VirtualSidebar
+        user={user}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        setShowSettings={setShowSettings}
+        handleNewInvoice={handleNewInvoice}
+        handleLogout={handleLogout}
+        businessInfo={businessInfo}
+        savedInvoices={savedInvoices}
+        savedCustomers={savedCustomers}
+        showInvoicesList={showInvoicesList}
+        setShowInvoicesList={setShowInvoicesList}
+        setShowCustomersListModal={setShowCustomersListModal}
+        handleAddNewCustomer={handleAddNewCustomer}
+      />
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
       <div
@@ -1299,22 +753,24 @@ const [stampConfig, setStampConfig] = useState(null);
               onCustomerSaved={handleCustomerSaved}
             />
             {showStampModal && (
-  <StampSignatureModal
-    isOpen={showStampModal}
-    onClose={() => setShowStampModal(false)}
-    onConfirm={(cfg) => {
-      setStampConfig(cfg);
-      setShowStampModal(false);
-    }}
-    previewContent={
-      activeView === "purchase-orders"
-        ? <POTemplateRenderer  />
-        : <TemplateRenderer {...templateProps} />
-    }
-    businessInfo={businessInfo}
-    existingConfig={stampConfig}
-  />
-)}
+              <StampSignatureModal
+                isOpen={showStampModal}
+                onClose={() => setShowStampModal(false)}
+                onConfirm={(cfg) => {
+                  setStampConfig(cfg);
+                  setShowStampModal(false);
+                }}
+                previewContent={
+                  activeView === "purchase-orders" ? (
+                    <POTemplateRenderer />
+                  ) : (
+                    <TemplateRenderer {...templateProps} />
+                  )
+                }
+                businessInfo={businessInfo}
+                existingConfig={stampConfig}
+              />
+            )}
             {showInvoicesList && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
@@ -1427,13 +883,17 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                     <div
                       className="mx-auto bg-white shadow-xl"
-                      style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
+                      style={{
+                        position: "relative",
+                        width: "210mm",
+                        minHeight: "297mm",
+                      }}
                     >
                       <TemplateRenderer {...templateProps} />
                       <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
+                        stampConfig={stampConfig}
+                        businessInfo={businessInfo}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1446,7 +906,7 @@ const [stampConfig, setStampConfig] = useState(null);
                 businessInfo={businessInfo}
                 documentType={documentType}
                 onExit={() => setShowAIWindow(false)}
-                industry="photography"
+                industry="virtual"
                 TemplateRenderer={TemplateRenderer}
               />
             )}
@@ -1466,18 +926,21 @@ const [stampConfig, setStampConfig] = useState(null);
                 />
               </div>
             )}
-            {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
-
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
-
+            {activeView === "financial-overview" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <FinancialOverview user={user} />
+            </div>
+          )}
+          {activeView === "history-view" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <HistoryView user={user} />
+            </div>
+          )}
+{activeView === "reports" && (
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <ReportsView user={user} />
+                      </div>
+                    )}
             {activeView === "invoice" && (
               <div
                 className="flex flex-1 overflow-hidden min-h-0"
@@ -1579,6 +1042,12 @@ const [stampConfig, setStampConfig] = useState(null);
                           newItem={newItem}
                           setNewItem={setNewItem}
                           handleAddItem={handleAddItem}
+                          subtotal={subtotal}
+                          vat={vat}
+                          total={total}
+                          documentType={documentType}
+                          setDocumentType={setDocumentType}
+                          onSave={handleSaveInvoice}
                         />
 
                         <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -1592,7 +1061,9 @@ const [stampConfig, setStampConfig] = useState(null);
                               <span className="text-gray-600">
                                 Payment Method:
                               </span>
-                              <span className="font-medium">EFT/Card/Cash</span>
+                              <span className="font-medium">
+                                EFT/Card/Online
+                              </span>
                             </div>
                             <div className="flex justify-between py-2 border-b">
                               <span className="text-gray-600">
@@ -1604,7 +1075,7 @@ const [stampConfig, setStampConfig] = useState(null);
                               <span className="text-gray-600">
                                 Balance Due:
                               </span>
-                              <span className="font-medium">Day of Event</span>
+                              <span className="font-medium">On Delivery</span>
                             </div>
                           </div>
                         </div>
@@ -1659,22 +1130,21 @@ const [stampConfig, setStampConfig] = useState(null);
                     >
                       <TemplateRenderer {...templateProps} />
                       <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
-
+                        stampConfig={stampConfig}
+                        businessInfo={businessInfo}
+                      />
                     </div>
                   </div>
                   {/* ── Stamp button footer ── */}
-<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-  <button
-    onClick={() => setShowStampModal(true)}
-    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <Stamp className="w-4 h-4" />
-    Stamp &amp; Signature
-  </button>
-</div>
+                  <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                    <button
+                      onClick={() => setShowStampModal(true)}
+                      className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      <Stamp className="w-4 h-4" />
+                      Stamp &amp; Signature
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1696,11 +1166,11 @@ const [stampConfig, setStampConfig] = useState(null);
       >
         <TemplateRenderer {...templateProps} />
         <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
+          stampConfig={stampConfig}
+          businessInfo={businessInfo}
+        />
       </div>
-     <SolidFloAgent industry="virtual" />
+      <SolidFloAgent industry="virtual" />
     </div>
   );
 };
@@ -1708,12 +1178,10 @@ const [stampConfig, setStampConfig] = useState(null);
 // ─────────────────────────────────────────────────────────────────────────────
 // Exported component – wraps the dashboard in the plan provider
 // ─────────────────────────────────────────────────────────────────────────────
-const PhotographyDashboard = () => (
-  // Replace initialPlan with the value fetched from your auth/firestore
-  // e.g. initialPlan={user?.plan ?? "starter"}
+const VirtualDashboard = () => (
   <PlanProvider initialPlan="starter">
-    <PhotographyDashboardInner />
+    <VirtualDashboardInner />
   </PlanProvider>
 );
 
-export default PhotographyDashboard;
+export default VirtualDashboard;

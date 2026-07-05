@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import VapiAssistant from "./VapiAssistant";
+import HeroInvoiceOverlay from "./HeroInvoiceOverlay";
 import ChatAssistant from "../components/ChatAssistant";
 import IndustryPickerModal from "../components/IndustryPickerModal";
 import { useIndustryPicker } from "../hooks/useIndustryPicker";
@@ -153,12 +154,16 @@ const css = `
     height: 64px;
     display: flex; align-items: center;
     padding: 0 40px;
-    transition: background .25s, box-shadow .25s;
+    transition: background .25s, box-shadow .25s,
+              left .35s ease, right .35s ease, border-radius .35s ease;
   }
   .lp-nav.scrolled {
-    background: rgba(254,252,248,.97);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 2px 20px rgba(26,18,8,.08);
+    left: 400px;
+  right: 400px;
+  border-radius: 499px;          
+  background: rgba(254,252,248,.97);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 20px rgba(26,18,8,.08);
   }
   .lp-nav-inner {
     max-width: 1200px; width: 100%; margin: 0 auto;
@@ -465,11 +470,30 @@ const css = `
   width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
   gap: 60px;
 }
-
+@media (max-width: 1100px) {
+  .lp-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .lp-hero-left {
+    padding-top: 60px;
+    text-align: center;
+  }
+  .lp-hero-left h1,
+  .lp-hero-sub {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .lp-hero-ctas,
+  .lp-hero-trust {
+    justify-content: center;
+  }
+}
 .lp-hero-left {
   text-align: left;
   padding-top: 100px;
@@ -483,6 +507,8 @@ const css = `
   align-items: center;
   justify-content: center;
   position: relative;
+  min-width: 0;   
+  width: 100%;
 }
     .lp-hero-video {
   position: absolute;
@@ -1159,9 +1185,12 @@ vapi-widget::part(button) {
     backdrop-filter: blur(12px);
     border-bottom: 0.5px solid #e2e8f0;
   }
-  /* Always show on mobile regardless of scroll */
+
   .lp-nav.scrolled,
   .lp-nav:not(.scrolled) {
+   left: 0;
+    right: 0;
+    border-radius: 0;
     background: rgba(255,255,255,.97) !important;
     box-shadow: none;
   }
@@ -1805,26 +1834,7 @@ const stats = [
             </div>
 
             {/* RIGHT — orb visual */}
-            <div className="lp-hero-right">
-              <div className="lp-hero-screen">
-                <div className="lp-hero-screen-frame">
-                  <img
-                    key={currentSlide}
-                    src={slides[currentSlide].src}
-                    alt={slides[currentSlide].alt}
-                  />
-                </div>
-                <div className="lp-slide-dots">
-                  {slides.map((_, i) => (
-                    <button
-                      key={i}
-                      className={`lp-slide-dot${i === currentSlide ? " active" : ""}`}
-                      onClick={() => setCurrentSlide(i)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+           <div className="lp-hero-right"><HeroInvoiceOverlay /></div>
           </div>
         </section>
 

@@ -1225,19 +1225,7 @@ const AppHeader = ({
                       {getUserDisplayName()}
                     </div>
                     <div className="zah-user-card-email">{user?.email}</div>
-                    <div className="zah-user-badges">
-                      <span className="zah-user-badge-industry">
-                        {dashConfig.label}
-                      </span>
-                      {plan && (
-                        <span
-                          className={(planMeta[plan] ?? planMeta.pro).cls}
-                          style={{ border: "1px solid rgba(255,255,255,.15)" }}
-                        >
-                          {(planMeta[plan] ?? planMeta.pro).label}
-                        </span>
-                      )}
-                    </div>
+                    
                   </div>
                 </div>
 

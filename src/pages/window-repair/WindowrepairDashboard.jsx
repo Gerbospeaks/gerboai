@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import ReportsView from "../mechanics/ReportsView";
+import HistoryView from "../mechanics/HistoryView";
 import StampPaywallModal from "../StampPaywallModal";
 import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
@@ -13,12 +16,12 @@ import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { usePermissions } from "../../hooks/usePermissions";
+import WindowRepairSidebar from "./WindowrepairSidebar";
 import Templates from "./Templates";
 import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
-import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -48,7 +51,6 @@ import {
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
-import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
@@ -99,6 +101,7 @@ const generateQuoteNumber = async (userId, documentType) => {
 const functions = getFunctions();
 
 const WindowrepairDashboard = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -171,7 +174,10 @@ const [stampConfig, setStampConfig] = useState(null);
     taxRate: "15",
     urgency: "Standard",
   });
-
+const handleAddNewCustomer = () => {
+  setSelectedCustomer(null);
+  setShowCustomerModal(true);
+};
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "CLEARVIEW WINDOW REPAIR",
     addressLine1: "456 Commercial Plaza",
@@ -734,19 +740,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    {
-      label: "Save PDF",
-      icon: Download,
-      onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
+   
     {
       label: "Save",
       icon: Save,
@@ -1058,246 +1052,28 @@ const [stampConfig, setStampConfig] = useState(null);
   />
 )}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <div
-          className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 md:w-72 bg-[#0f172a] border-r border-[#1e293b] transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto lg:relative lg:translate-x-0 lg:flex-shrink-0`}
-        >
-          <div className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-[#1e3a5f] rounded-lg flex items-center justify-center">
-                  <Grid3x3 className="w-5 h-5 text-[#60a5fa]" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white leading-tight">
-                    ClearView
-                  </p>
-                  <p className="text-xs text-[#64748b]">Window Repair</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all lg:hidden"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-            </div>
-
-            <nav className="space-y-1">
-              {[
-                {
-                  label: "Home",
-                  icon: Home,
-                  view: "home",
-                  color: "text-[#94a3b8]",
-                  hoverBg: "hover:bg-[#1e293b]",
-                },
-                {
-                  label: "Settings",
-                  icon: Settings,
-                  onClick: () => setShowSettings(true),
-                  color: "text-[#94a3b8]",
-                  hoverBg: "hover:bg-[#1e293b]",
-                },
-              ].map(({ label, icon: Icon, view, onClick, color, hoverBg }) => (
-                <div
-                  key={label}
-                  onClick={
-                    onClick ||
-                    (() => {
-                      setActiveView(view);
-                      if (isMobile) setSidebarOpen(false);
-                    })
-                  }
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${hoverBg} ${activeView === view ? "bg-[#1e293b] text-white" : `${color} hover:text-white`}`}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">{label}</span>
-                </div>
-              ))}
-
-              <div className="pt-3 mt-3 border-t border-[#1e293b]">
-                <div
-                  onClick={() => {
-                    setActiveView("financial-overview");
-                    if (isMobile) setSidebarOpen(false);
-                  }}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all hover:bg-[#1e293b] ${activeView === "financial-overview" ? "bg-[#1e293b] text-white" : "text-[#94a3b8] hover:text-white"}`}
-                >
-                  <TrendingUp className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium">
-                    Financial Dashboard
-                  </span>
-                </div>
-
-                {/* Quotes & Invoices accordion */}
-                <div className="mt-1">
-                  <div
-                    onClick={() =>
-                      setIsQuotesInvoicesOpen(!isQuotesInvoicesOpen)
-                    }
-                    className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Receipt className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-sm font-medium">
-                        Quotes & Invoices
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${isQuotesInvoicesOpen ? "rotate-180" : ""}`}
-                    />
-                  </div>
-                  <div
-                    className={`ml-6 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-300 ${isQuotesInvoicesOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
-                    {[
-                      {
-                        label: "Create Quote",
-                        onClick: () => {
-                          handleNewQuote();
-                          setActiveView("quote");
-                          if (isMobile) setSidebarOpen(false);
-                        },
-                      },
-                      {
-                        label: "Create Invoice",
-                        onClick: () => {
-                          handleNewInvoice();
-                          setActiveView("quote");
-                          if (isMobile) setSidebarOpen(false);
-                        },
-                      },
-                      {
-                        label: `All ${documentType === "quote" ? "Quotes" : "Invoices"} (${savedQuotes.length})`,
-                        onClick: () => {
-                          setShowQuotesList(true);
-                          if (isMobile) setSidebarOpen(false);
-                        },
-                      },
-                    ].map(({ label, onClick }) => (
-                      <div
-                        key={label}
-                        onClick={onClick}
-                        className="px-2 py-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded cursor-pointer transition-all"
-                      >
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Clients accordion */}
-                <div className="mt-1">
-                  <div
-                    onClick={() => setIsClientsOpen(!isClientsOpen)}
-                    className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Users className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-sm font-medium">Clients</span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${isClientsOpen ? "rotate-180" : ""}`}
-                    />
-                  </div>
-                  <div
-                    className={`ml-6 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-300 ${isClientsOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
-                    {[
-                      {
-                        label: "Add Client",
-                        onClick: () => {
-                          setSelectedCustomer(null);
-                          setShowCustomerModal(true);
-                          if (isMobile) setSidebarOpen(false);
-                        },
-                      },
-                      {
-                        label: `All Clients (${savedCustomers.length})`,
-                        onClick: () => {
-                          setShowCustomersListModal(true);
-                          if (isMobile) setSidebarOpen(false);
-                        },
-                      },
-                    ].map(({ label, onClick }) => (
-                      <div
-                        key={label}
-                        onClick={onClick}
-                        className="px-2 py-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded cursor-pointer transition-all"
-                      >
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {!isMobile && (
-                  <>
-                    <div
-                      onClick={() => {
-                        setActiveView("schedule");
-                        setSidebarOpen(false);
-                      }}
-                      className="flex items-center gap-3 px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all mt-1"
-                    >
-                      <Calendar className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-sm font-medium">Schedule</span>
-                    </div>
-                    <div
-                      onClick={() => {
-                        setActiveView("reports");
-                        setSidebarOpen(false);
-                      }}
-                      className="flex items-center gap-3 px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all"
-                    >
-                      <BarChart3 className="w-4 h-4 flex-shrink-0" />
-                      <span className="text-sm font-medium">Reports</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </nav>
-          </div>
-
-          {/* Sidebar footer */}
-          <div className="absolute bottom-0 left-0 right-0 border-t border-[#1e293b] p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0 ring-1 ring-[#1e293b]">
-                {businessInfo.logoUrl ? (
-                  <img
-                    src={businessInfo.logoUrl}
-                    alt=""
-                    className="w-full h-full rounded-full object-contain"
-                  />
-                ) : (
-                  <Grid3x3 className="w-4 h-4 text-[#64748b]" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-white truncate">
-                  {user?.email || "user@example.com"}
-                </p>
-                <p className="text-xs text-[#64748b] truncate">
-                  {businessInfo.businessName}
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
+<WindowRepairSidebar
+  navigate={navigate}
+  user={user}
+  activeView={activeView}
+  setActiveView={setActiveView}
+  sidebarOpen={sidebarOpen}
+  setSidebarOpen={setSidebarOpen}
+  setShowSettings={setShowSettings}
+  handleNewQuote={handleNewQuote}
+  handleNewInvoice={handleNewInvoice}
+  handleAddNewCustomer={handleAddNewCustomer}
+  businessInfo={businessInfo}
+  savedQuotes={savedQuotes}
+  savedCustomers={savedCustomers}
+  showQuotesList={showQuotesList}
+  setShowQuotesList={setShowQuotesList}
+  setShowCustomersListModal={setShowCustomersListModal}
+  documentType={documentType}
+  handleLogout={handleLogout}
+/>
+       
 
         {/* ── Main content ─────────────────────────────────────────────────── */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
@@ -1523,6 +1299,11 @@ const [stampConfig, setStampConfig] = useState(null);
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "reports" && (
+                                <div className="flex-1 overflow-y-auto p-4">
+                                  <ReportsView user={user} />
+                                </div>
+                              )}
           {activeView === "history-view" && (
             <div className="flex-1 overflow-y-auto p-4">
               <HistoryView user={user} />
@@ -2437,7 +2218,11 @@ const [stampConfig, setStampConfig] = useState(null);
               {/* RIGHT: Live preview panel */}
               <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                  <TemplateSelector />
+                  <TemplateSelector
+                    user={user}
+                    selectedTemplate={selectedTemplate}
+                    onTemplateChange={setSelectedTemplate}
+                  />
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={handlePrint}

@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import { Users, Calendar, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Users,
+  Calendar,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  FileCheck,
+  Loader2,
+} from "lucide-react";
 
-const PhotographyMultiStepForm = ({
+const VirtualMultiStepForm = ({
   // Client Info Props
   customerName,
   setCustomerName,
@@ -13,7 +21,7 @@ const PhotographyMultiStepForm = ({
   setCustomerPhone,
   customerAddress,
   setCustomerAddress,
-  // Event Info Props
+  // Service/Session Info Props
   eventDate,
   setEventDate,
   eventType,
@@ -25,9 +33,18 @@ const PhotographyMultiStepForm = ({
   newItem,
   setNewItem,
   handleAddItem,
+  // Totals (for the review step)
+  subtotal = 0,
+  vat = 0,
+  total = 0,
+  // Save step props
+  documentType = "invoice",
+  setDocumentType,
+  onSave,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
+  const [isSaving, setIsSaving] = useState(false);
+  const totalSteps = 4;
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -41,10 +58,20 @@ const PhotographyMultiStepForm = ({
     }
   };
 
+  const handleSaveClick = async () => {
+    if (!onSave) return;
+    try {
+      setIsSaving(true);
+      await onSave();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const renderStepIndicator = () => (
     <div className="mb-6">
       <div className="flex items-center justify-between">
-        {[1, 2, 3].map((step) => (
+        {[1, 2, 3, 4].map((step) => (
           <React.Fragment key={step}>
             <div className="flex flex-col items-center">
               <div
@@ -58,11 +85,12 @@ const PhotographyMultiStepForm = ({
               </div>
               <div className="text-xs mt-2 text-gray-600 font-medium">
                 {step === 1 && "Client"}
-                {step === 2 && "Event"}
-                {step === 3 && "Services"}
+                {step === 2 && "Service"}
+                {step === 3 && "Items"}
+                {step === 4 && "Review"}
               </div>
             </div>
-            {step < 3 && (
+            {step < 4 && (
               <div
                 className={`flex-1 h-1 mx-2 ${
                   currentStep > step ? "bg-purple-600" : "bg-gray-200"
@@ -120,7 +148,7 @@ const PhotographyMultiStepForm = ({
               />
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Phone *</div>
+              <div className="text-sm text-gray-500 mb-1">Phone</div>
               <input
                 type="tel"
                 value={customerPhone}
@@ -130,31 +158,31 @@ const PhotographyMultiStepForm = ({
               />
             </div>
             <div className="col-span-1 sm:col-span-2">
-              <div className="text-sm text-gray-500 mb-1">Address</div>
+              <div className="text-sm text-gray-500 mb-1">Billing Address</div>
               <input
                 type="text"
                 value={customerAddress}
                 onChange={(e) => setCustomerAddress(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                placeholder="Street address, City, Postal Code"
+                placeholder="Street address, City, Postal Code (optional for fully digital clients)"
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* Step 2: Event Information */}
+      {/* Step 2: Service Information */}
       {currentStep === 2 && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold flex items-center space-x-2">
               <Calendar className="w-5 h-5" />
-              <span>Event Information</span>
+              <span>Service Information</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-gray-500 mb-1">Event Date *</div>
+              <div className="text-sm text-gray-500 mb-1">Delivery / Session Date *</div>
               <input
                 type="date"
                 value={eventDate}
@@ -163,38 +191,41 @@ const PhotographyMultiStepForm = ({
               />
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Event Type *</div>
+              <div className="text-sm text-gray-500 mb-1">Service Type *</div>
               <select
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               >
-                <option value="Wedding">Wedding</option>
-                <option value="Portrait">Portrait Session</option>
-                <option value="Corporate">Corporate Event</option>
-                <option value="Birthday">Birthday Party</option>
+                <option value="Consultation">Consultation</option>
+                <option value="Coaching Session">Coaching Session</option>
+                <option value="Web Design">Web Design</option>
+                <option value="Software Development">Software Development</option>
+                <option value="Digital Marketing">Digital Marketing</option>
+                <option value="Online Course">Online Course</option>
+                <option value="Subscription">Subscription</option>
                 <option value="Other">Other</option>
               </select>
             </div>
             <div className="col-span-1 sm:col-span-2">
-              <div className="text-sm text-gray-500 mb-1">Event Location *</div>
+              <div className="text-sm text-gray-500 mb-1">Meeting Link / Platform *</div>
               <input
                 type="text"
                 value={eventLocation}
                 onChange={(e) => setEventLocation(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                placeholder="Venue name and address"
+                placeholder="e.g. Zoom, Google Meet, Online / Remote"
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* Step 3: Add Service/Package */}
+      {/* Step 3: Add Service/Line Item */}
       {currentStep === 3 && (
         <div className="space-y-4">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">Add Service/Package</h2>
+            <h2 className="text-lg font-semibold mb-4">Add Service / Item</h2>
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
               <select
                 value={newItem.type}
@@ -203,10 +234,13 @@ const PhotographyMultiStepForm = ({
                 }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="Photography">Photography</option>
-                <option value="Videography">Videography</option>
-                <option value="Editing">Editing</option>
-                <option value="Prints">Prints</option>
+                <option value="Service">Service</option>
+                <option value="Consulting">Consulting</option>
+                <option value="Design">Design</option>
+                <option value="Development">Development</option>
+                <option value="Digital Product">Digital Product</option>
+                <option value="Subscription">Subscription</option>
+                <option value="Support">Support</option>
               </select>
               <input
                 type="text"
@@ -248,7 +282,7 @@ const PhotographyMultiStepForm = ({
           {/* Display Added Items */}
           {items && items.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Added Services</h3>
+              <h3 className="text-lg font-semibold mb-4">Added Items</h3>
               <div className="space-y-2">
                 {items.map((item, index) => (
                   <div
@@ -269,6 +303,136 @@ const PhotographyMultiStepForm = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Step 4: Review & Save */}
+      {currentStep === 4 && (
+        <div className="space-y-4">
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileCheck className="w-5 h-5" />
+              <span>Review &amp; Save</span>
+            </h2>
+
+            {/* Client & service summary */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div className="p-3 bg-gray-50 rounded border border-gray-200">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Client
+                </div>
+                <div className="font-medium">{customerName || "—"}</div>
+                <div className="text-sm text-gray-500">{customerEmail || "—"}</div>
+                <div className="text-sm text-gray-500">{customerPhone || "—"}</div>
+              </div>
+              <div className="p-3 bg-gray-50 rounded border border-gray-200">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Service
+                </div>
+                <div className="font-medium">{eventType || "—"}</div>
+                <div className="text-sm text-gray-500">{eventDate || "—"}</div>
+                <div className="text-sm text-gray-500">{eventLocation || "—"}</div>
+              </div>
+            </div>
+
+            {/* Items summary */}
+            <div className="mb-6">
+              <div className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+                Items ({items?.length || 0})
+              </div>
+              {items && items.length > 0 ? (
+                <div className="space-y-2">
+                  {items.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200"
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium">{item.description}</div>
+                        <div className="text-sm text-gray-500">
+                          {item.type} - Qty: {item.qty} × R{item.rate}
+                        </div>
+                      </div>
+                      <div className="font-semibold text-purple-600">
+                        R{item.amount.toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 italic">
+                  No items added yet — go back to Step 3 to add one.
+                </div>
+              )}
+            </div>
+
+            {/* Totals */}
+            <div className="border-t pt-4 space-y-1 text-sm mb-6">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium">R{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">VAT (15%)</span>
+                <span className="font-medium">R{vat.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-base pt-1 border-t">
+                <span className="font-semibold">Total</span>
+                <span className="font-bold text-purple-600">
+                  R{total.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Quote vs Invoice toggle */}
+            {setDocumentType && (
+              <div className="mb-6">
+                <div className="text-sm text-gray-500 mb-2">Save as</div>
+                <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setDocumentType("quote")}
+                    className={`px-4 py-2 text-sm font-medium transition-colors ${
+                      documentType === "quote"
+                        ? "bg-purple-600 text-white"
+                        : "bg-white text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    Quote
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDocumentType("invoice")}
+                    className={`px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
+                      documentType === "invoice"
+                        ? "bg-purple-600 text-white"
+                        : "bg-white text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    Invoice
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleSaveClick}
+              disabled={isSaving || !onSave}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <FileCheck className="w-4 h-4" />
+                  Save {documentType === "quote" ? "Quote" : "Invoice"}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
@@ -308,4 +472,4 @@ const PhotographyMultiStepForm = ({
   );
 };
 
-export default PhotographyMultiStepForm;
+export default VirtualMultiStepForm;

@@ -21,12 +21,12 @@ export const TemplateSelector = ({
 
   const templateNames = {
     default: "Default (Original)",
-    classic: "Classic Workshop",
+    classic: "Classic Consultant",
     modern: "Modern Minimalist",
     elegant: "Elegant Business",
-    premium: "Premium Auto Service",
-    speed: "Speed Shop Pro",
-    diagnostic: "Diagnostic Specialist",
+    premium: "Premium Agency",
+    speed: "Rapid Freelancer",
+    diagnostic: "Strategy Specialist",
   };
 
   useEffect(() => {
@@ -182,7 +182,7 @@ export const DefaultTemplate = ({
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
+          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
@@ -219,17 +219,17 @@ export const DefaultTemplate = ({
       </div>
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          EVENT DETAILS
+          SERVICE DETAILS
         </div>
         <div className="text-xs space-y-1">
           <div>
-            <span className="font-semibold">Type:</span> {eventType}
+            <span className="font-semibold">Service:</span> {eventType}
           </div>
           <div>
             <span className="font-semibold">Date:</span> {eventDate}
           </div>
           <div>
-            <span className="font-semibold">Location:</span> {eventLocation}
+            <span className="font-semibold">Platform:</span> {eventLocation}
           </div>
         </div>
       </div>
@@ -317,7 +317,7 @@ export const DefaultTemplate = ({
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for choosing us for your special moments!
+      Thank you for choosing us for your business!
     </div>
   </div>
 );
@@ -347,7 +347,7 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
+          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
@@ -385,17 +385,17 @@ export const ClassicTemplate = (props) => (
       </div>
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          EVENT DETAILS
+          SERVICE DETAILS
         </div>
         <div className="text-xs space-y-1">
           <div>
-            <span className="font-semibold">Type:</span> {props.eventType}
+            <span className="font-semibold">Service:</span> {props.eventType}
           </div>
           <div>
             <span className="font-semibold">Date:</span> {props.eventDate}
           </div>
           <div>
-            <span className="font-semibold">Location:</span>{" "}
+            <span className="font-semibold">Platform:</span>{" "}
             {props.eventLocation}
           </div>
         </div>
@@ -484,7 +484,7 @@ export const ClassicTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for choosing us for your special moments!
+      Thank you for choosing us for your business!
     </div>
   </div>
 );
@@ -514,7 +514,7 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
+          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
@@ -552,17 +552,17 @@ export const ModernTemplate = (props) => (
       </div>
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          EVENT DETAILS
+          SERVICE DETAILS
         </div>
         <div className="text-xs space-y-1">
           <div>
-            <span className="font-semibold">Type:</span> {props.eventType}
+            <span className="font-semibold">Service:</span> {props.eventType}
           </div>
           <div>
             <span className="font-semibold">Date:</span> {props.eventDate}
           </div>
           <div>
-            <span className="font-semibold">Location:</span>{" "}
+            <span className="font-semibold">Platform:</span>{" "}
             {props.eventLocation}
           </div>
         </div>
@@ -651,7 +651,7 @@ export const ModernTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for choosing us for your special moments!
+      Thank you for choosing us for your business!
     </div>
   </div>
 );
@@ -681,7 +681,7 @@ export const ElegantTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
+          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
@@ -719,17 +719,17 @@ export const ElegantTemplate = (props) => (
       </div>
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          EVENT DETAILS
+          SERVICE DETAILS
         </div>
         <div className="text-xs space-y-1">
           <div>
-            <span className="font-semibold">Type:</span> {props.eventType}
+            <span className="font-semibold">Service:</span> {props.eventType}
           </div>
           <div>
             <span className="font-semibold">Date:</span> {props.eventDate}
           </div>
           <div>
-            <span className="font-semibold">Location:</span>{" "}
+            <span className="font-semibold">Platform:</span>{" "}
             {props.eventLocation}
           </div>
         </div>
@@ -818,12 +818,12 @@ export const ElegantTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for choosing us for your special moments!
+      Thank you for choosing us for your business!
     </div>
   </div>
 );
 
-// Speed Shop Template
+// Rapid Freelancer Template
 export const SpeedTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
@@ -848,7 +848,7 @@ export const SpeedTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
+          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
@@ -886,17 +886,17 @@ export const SpeedTemplate = (props) => (
       </div>
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          EVENT DETAILS
+          SERVICE DETAILS
         </div>
         <div className="text-xs space-y-1">
           <div>
-            <span className="font-semibold">Type:</span> {props.eventType}
+            <span className="font-semibold">Service:</span> {props.eventType}
           </div>
           <div>
             <span className="font-semibold">Date:</span> {props.eventDate}
           </div>
           <div>
-            <span className="font-semibold">Location:</span>{" "}
+            <span className="font-semibold">Platform:</span>{" "}
             {props.eventLocation}
           </div>
         </div>
@@ -985,11 +985,11 @@ export const SpeedTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for choosing us for your special moments!
+      Thank you for choosing us for your business!
     </div>
   </div>
 );
-// Diagnostic Template
+// Strategy Specialist Template
 export const DiagnosticTemplate = (props) => (
   <div className="bg-white" style={{ padding: "15mm 20mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
@@ -1014,7 +1014,7 @@ export const DiagnosticTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
+          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
@@ -1052,17 +1052,17 @@ export const DiagnosticTemplate = (props) => (
       </div>
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
-          EVENT DETAILS
+          SERVICE DETAILS
         </div>
         <div className="text-xs space-y-1">
           <div>
-            <span className="font-semibold">Type:</span> {props.eventType}
+            <span className="font-semibold">Service:</span> {props.eventType}
           </div>
           <div>
             <span className="font-semibold">Date:</span> {props.eventDate}
           </div>
           <div>
-            <span className="font-semibold">Location:</span>{" "}
+            <span className="font-semibold">Platform:</span>{" "}
             {props.eventLocation}
           </div>
         </div>
@@ -1151,7 +1151,7 @@ export const DiagnosticTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Thank you for choosing us for your special moments!
+      Thank you for choosing us for your business!
     </div>
   </div>
 );
