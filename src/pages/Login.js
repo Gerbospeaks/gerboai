@@ -7,7 +7,6 @@ import slide2 from "../assets/img/slide2.avif";
 import slide3 from "../assets/img/slide3.jpg";
 import { getDashboardRoute } from "../utils/dashboardRoutes";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
-import "tailwindcss";
 const slides = [
   {
     image: slide1,
@@ -85,7 +84,7 @@ export default function Login() {
 
           {/* Heading */}
           <h1 className="text-[28px] font-bold text-[#111827] mb-1">
-            Welcome back
+            Welcome
           </h1>
           <p className="text-[14px] text-[#6b7280] mb-8">
             Sign in to your account to continue

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { dashboards } from "../config/dashboardConfig";
 import { X, Search, ArrowRight, Check, ChevronDown } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 const BASE_DOMAIN = "solidflo.co.za";
 
 export const INDUSTRIES = [
@@ -257,6 +257,7 @@ const btnBase = {
 };
 
 export default function IndustryPickerModal({ onClose, intent = "register" }) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("");
   const [query, setQuery] = useState("");
@@ -342,19 +343,14 @@ export default function IndustryPickerModal({ onClose, intent = "register" }) {
     if (!selected) return;
     const industry = dashboards.find((d) => d.id === selected);
     if (!industry) return;
+
+    localStorage.setItem("pendingDashboardId", industry.id); // safe now — same origin
     onClose();
-    const isDev =
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1";
-    if (isDev) {
-      window.location.href = `http://localhost:${window.location.port}?industry=${industry.id}&mode=${intent}`;
+
+    if (intent === "login") {
+      navigate(`/login?industry=${industry.id}`);
     } else {
-      const protocol = window.location.protocol;
-      if (intent === "login") {
-        window.location.href = `${protocol}//${industry.id}.solidflo.co.za/login`;
-      } else {
-        window.location.href = `${protocol}//${industry.id}.solidflo.co.za/register?industry=${industry.id}`;
-      }
+      navigate(`/register?industry=${industry.id}`);
     }
   };
 

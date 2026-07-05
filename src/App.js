@@ -14,6 +14,8 @@ import { getSubdomainFromHost } from "./utils/subdomain";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PWAInstallPrompt from "./components/Pwainstallprompt";
 import LandingPage from "./pages/LandingPage";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
 import { PlanProvider } from "./pages/technology/planGating";
 import AboutPage from "./pages/AboutPage";
 import { useIsStandalone } from "./hooks/useIsStandalone";
@@ -227,17 +229,17 @@ function useSecurityLock() {
 }
 
 function ProtectedDashboard() {
-  const { authUser } = useAuth();              // grab authUser from your existing AuthContext
+  const { authUser } = useAuth();              
   const { parentUid, loading } = useSubAccount(authUser);
 
-  if (loading) return <AppLoader />;           // reuse your existing spinner
+  if (loading) return <AppLoader />;           
 
   if (parentUid) {
-    // Sub-user → stripped-down restricted dashboard
+   
     return <SubAccountDashboard parentUid={parentUid} subUser={authUser} />;
   }
 
-  // Main account owner → full dashboard
+ 
   return <MechanicsDashboard />;
 }
 function DashboardRoutes() {
@@ -652,14 +654,11 @@ const SUBDOMAIN_LANDING = {
   windowrepair: SolidWindowRepair,
 };
 
-// In App.jsx — replace your existing SubdomainRoot
 function SubdomainRoot() {
   const subdomain = getSubdomainFromHost();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const isStandalone = useIsStandalone();
-
-  useEffect(() => {
+   useEffect(() => {
     if (loading) return;
 
     if (user && user.emailVerified) {
@@ -667,17 +666,29 @@ function SubdomainRoot() {
       return;
     }
 
-    // Launched from home screen / desktop shortcut and not logged in
-    if (isStandalone) {
+  
       navigate("/login", { replace: true });
-    }
-  }, [loading, user, navigate, isStandalone]);
+    
+  }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
 
-  // Browser visit (not standalone) → show landing page as normal
-  const Landing = SUBDOMAIN_LANDING[subdomain];
-  return Landing ? <Landing /> : <LandingPage />;
+
+   return <AppLoader />;
+}
+function RedirectToSubdomainAuth({ mode }) {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const industry =
+      params.get("industry") ||
+      localStorage.getItem("pendingDashboardId") ||
+      "mechanics"; // sensible default
+
+    const sub = DASHBOARD_ID_TO_PATH[industry] ? industry : "mechanics";
+    window.location.href = `https://${sub}.solidflo.co.za/${mode}?industry=${industry}`;
+  }, [mode]);
+
+  return <AppLoader />;
 }
 function MainDomainRoot() {
   const { user, loading } = useAuth();
@@ -769,8 +780,22 @@ useEffect(() => {
               <Route path="/auth-action" element={<AuthAction />} />
 
               {/* Auth is subdomain-only — block direct access on main domain */}
-              <Route path="/login" element={<Navigate to="/" replace />} />
-              <Route path="/register" element={<Navigate to="/" replace />} />
+   <Route
+  path="/login"
+  element={
+    <PublicOnlyRoute>
+      <Login />
+    </PublicOnlyRoute>
+  }
+/>
+<Route
+  path="/register"
+  element={
+    <PublicOnlyRoute>
+      <Register />
+    </PublicOnlyRoute>
+  }
+/>
 
               <Route
                 path="/*"

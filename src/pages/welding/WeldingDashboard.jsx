@@ -18,6 +18,7 @@ import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
+import ScheduleView from "./ScheduleView";
 import { useNavigate, useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
@@ -1789,6 +1790,11 @@ const [stampConfig, setStampConfig] = useState(null);
     <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
   </div>
 )}
+{activeView === "schedule" && (
+  <div className="flex-1 overflow-y-auto p-4">
+    <ScheduleView user={user} />
+  </div>
+)}
 
 {activeView === "incoming-requests" && (
   <div className="flex-1 overflow-y-auto p-6">
@@ -2753,7 +2759,11 @@ const [stampConfig, setStampConfig] = useState(null);
               {/* RIGHT: Live preview panel */}
               <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                  <TemplateSelector />
+                 <TemplateSelector
+  user={user}
+  selectedTemplate={selectedTemplate}
+  onTemplateChange={setSelectedTemplate}
+/>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={handlePrint}

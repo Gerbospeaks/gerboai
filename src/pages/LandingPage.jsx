@@ -778,7 +778,6 @@ const css = `
   .lp-features {
     background: #C1B2FF;
     padding: 96px 24px;
-    margin-left: 100px; margin-right: 100px;
   }
   .lp-section-head { text-align: center; margin-bottom: 56px; }
   .lp-section-eyebrow {
@@ -1780,7 +1779,7 @@ const stats = [
               <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
 
               <div className="lp-hero-ctas">
-                <button className="lp-hero-primary" onClick={open}>
+                <button className="lp-btn-primary" onClick={() => open("register")}>
                   Start Free Trial <ArrowRight size={15} />
                 </button>
                 <button className="lp-hero-secondary" onClick={openCalendly}>

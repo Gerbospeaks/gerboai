@@ -84,12 +84,16 @@ export default function Register() {
   // ── Read the industry the user picked on the landing page ──────────────────
   const [dashboardId, setDashboardId] = useState("");
 
-  useEffect(() => {
-    const pending = localStorage.getItem("pendingDashboardId");
-    if (pending) {
-      setDashboardId(pending);
-    }
-  }, []);
+ useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get("industry");
+  const pending = fromQuery || localStorage.getItem("pendingDashboardId");
+
+  if (pending) {
+    setDashboardId(pending);
+    localStorage.setItem("pendingDashboardId", pending); 
+  }
+}, []);
 
   const industryInfo = dashboards.find((d) => d.id === dashboardId);
 

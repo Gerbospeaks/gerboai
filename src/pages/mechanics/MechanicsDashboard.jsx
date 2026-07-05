@@ -15,6 +15,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  increment,
 } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 import {
@@ -113,10 +114,12 @@ const MechanicsDashboard = () => {
     if (action === "newCustomer") handleAddNewCustomer();
     if (view) setActiveView(view);
   };
+  const FREE_STAMP_LIMIT = 5;
   const [showStampModal, setShowStampModal] = useState(false);
   const [stampConfig, setStampConfig] = useState(null);
   const [stampUnlocked, setStampUnlocked] = useState(false);
-const [showStampPaywall, setShowStampPaywall] = useState(false);
+  const [stampUsageCount, setStampUsageCount] = useState(0);
+  const [showStampPaywall, setShowStampPaywall] = useState(false);
 
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("JobCard");
@@ -402,7 +405,11 @@ useEffect(() => {
     try {
       const db = getFirestore();
       const snap = await getDoc(doc(db, "users", user.uid, "settings", "features"));
-      setStampUnlocked(snap.exists() && snap.data().stampSignatureUnlocked === true);
+      if (snap.exists()) {
+        const data = snap.data();
+        setStampUnlocked(data.stampSignatureUnlocked === true);
+        setStampUsageCount(data.stampUsageCount || 0);
+      }
     } catch (err) {
       console.error("Error checking stamp access:", err);
     }
@@ -437,7 +444,13 @@ useEffect(() => {
       console.error("Error loading customers:", error);
     }
   };
-
+const handleStampButtonClick = () => {
+  if (stampUnlocked || stampUsageCount < FREE_STAMP_LIMIT) {
+    setShowStampModal(true);
+  } else {
+    setShowStampPaywall(true);
+  }
+};
   const handleProcessPayment = async () => {
     if (!jobCardId || !user?.uid) {
       alert("Please save the invoice before processing payment");
@@ -1054,7 +1067,25 @@ const handleUnlockStamp = async () => {
     qty: "",
     type: "Labor",
   });
+const handleStampConfirm = async (cfg) => {
+  setStampConfig(cfg);
+  setShowStampModal(false);
 
+  if (stampUnlocked || !user?.uid) return; // unlimited once unlocked, nothing to count
+
+  setStampUsageCount((prev) => prev + 1); // optimistic UI update
+
+  try {
+    const db = getFirestore();
+    await setDoc(
+      doc(db, "users", user.uid, "settings", "features"),
+      { stampUsageCount: increment(1) }, // atomic server-side increment
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to record stamp usage:", err);
+  }
+};
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const vat = subtotal * (vatRate / 100);
   const total = subtotal + vat;
@@ -2002,10 +2033,7 @@ const handleUnlockStamp = async () => {
             <StampSignatureModal
               isOpen={showStampModal}
               onClose={() => setShowStampModal(false)}
-              onConfirm={(cfg) => {
-                setStampConfig(cfg);
-                setShowStampModal(false);
-              }}
+              onConfirm={handleStampConfirm}
               previewContent={
                 activeView === "purchase-orders" ? (
                   <POTemplateRenderer {...poTemplateProps} />
@@ -2256,12 +2284,14 @@ const handleUnlockStamp = async () => {
               </div>
             </div>
           )}
-           {showStampPaywall && (
+          {showStampPaywall && (
   <StampPaywallModal
     isOpen={showStampPaywall}
     onClose={() => setShowStampPaywall(false)}
     onUnlock={handleUnlockStamp}
     price="R99"
+    title="You've used all 5 free stamps"
+    subtitle="Unlock unlimited stamping to keep going."
   />
 )}
           {/* ── Views ──────────────────────────────────────────────────────── */}
@@ -3959,13 +3989,17 @@ const handleUnlockStamp = async () => {
                 {/* ── Stamp button footer ── */}
                 <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
                   <button
-  onClick={() => (stampUnlocked ? setShowStampModal(true) : setShowStampPaywall(true))}
+  onClick={handleStampButtonClick}
   className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
 >
   <Stamp className="w-4 h-4" />
   Stamp &amp; Signature
   {!stampUnlocked && (
-    <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-semibold">PRO</span>
+    <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-semibold">
+      {stampUsageCount < FREE_STAMP_LIMIT
+        ? `${FREE_STAMP_LIMIT - stampUsageCount} free left`
+        : "PRO"}
+    </span>
   )}
 </button>
                 </div>

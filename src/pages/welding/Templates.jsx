@@ -33,8 +33,6 @@ const TEMPLATES = {
     category: "free",
     icon: Zap,
     color: "gray",
-    image:
-      "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=500&fit=crop",
     features: [
       "Professional 3-column layout",
       "Circuit details section",
@@ -54,8 +52,6 @@ const TEMPLATES = {
     category: "premium",
     icon: Shield,
     color: "purple",
-    image:
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop",
     features: [
       "Luxury design aesthetic",
       "Large branding area",
@@ -74,8 +70,6 @@ const TEMPLATES = {
     category: "industrial",
     icon: Activity,
     color: "red",
-    image:
-      "https://images.unsplash.com/photo-1581092918484-8313e1f7e8c8?w=400&h=500&fit=crop",
     features: [
       "High-energy red design",
       "Industrial-focused layout",
@@ -94,8 +88,6 @@ const TEMPLATES = {
     category: "modern",
     icon: Cpu,
     color: "blue",
-    image:
-      "https://images.unsplash.com/photo-1509475826633-fed577a2c71b?w=400&h=500&fit=crop",
     features: [
       "Minimalist blue design",
       "Spacious layout",
@@ -114,8 +106,6 @@ const TEMPLATES = {
     category: "residential",
     icon: Lightbulb,
     color: "green",
-    image:
-      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=500&fit=crop",
     features: [
       "Approachable green theme",
       "Detailed service breakdown",
@@ -125,6 +115,157 @@ const TEMPLATES = {
     preview:
       "Friendly design with green accents. Optimized for residential electricians and home service providers.",
   },
+};
+
+// Color palette used to theme each SVG mockup to match its template card
+const TEMPLATE_COLOR_HEX = {
+  gray: { primary: "#374151", light: "#f3f4f6", accent: "#6b7280", soft: "#e5e7eb" },
+  purple: { primary: "#7c3aed", light: "#f5f3ff", accent: "#a78bfa", soft: "#ddd6fe" },
+  red: { primary: "#b91c1c", light: "#fef2f2", accent: "#ef4444", soft: "#fecaca" },
+  blue: { primary: "#2563eb", light: "#eff6ff", accent: "#60a5fa", soft: "#bfdbfe" },
+  green: { primary: "#059669", light: "#ecfdf5", accent: "#34d399", soft: "#a7f3d0" },
+};
+
+// Miniature SVG mockup of the real invoice layout (header, client/project
+// info cards, line-item table, totals box) — used instead of stock photos
+// so each marketplace card actually shows the template's structure.
+const TemplatePreviewSVG = ({ template, className = "" }) => {
+  const c = TEMPLATE_COLOR_HEX[template.color] || TEMPLATE_COLOR_HEX.gray;
+  const gradId = `tpl-grad-${template.id}`;
+
+  const InfoCard = ({ x, w }) => (
+    <g>
+      <rect x={x} y="130" width={w} height="70" rx="4" fill={c.light} stroke={c.soft} />
+      <rect x={x + 8} y="140" width={w - 16} height="10" rx="2" fill={c.primary} />
+      <rect x={x + 8} y="158" width={w - 24} height="6" rx="1.5" fill={c.accent} opacity="0.6" />
+      <rect x={x + 8} y="170" width={w - 32} height="6" rx="1.5" fill={c.accent} opacity="0.5" />
+      <rect x={x + 8} y="182" width={w - 40} height="6" rx="1.5" fill={c.accent} opacity="0.4" />
+    </g>
+  );
+
+  const TableMock = () => (
+    <g>
+      <rect x="16" y="215" width="268" height="18" fill={c.primary} />
+      {[0, 1, 2].map((row) => (
+        <g key={row}>
+          <rect
+            x="16"
+            y={233 + row * 20}
+            width="268"
+            height="20"
+            fill={row % 2 ? c.light : "#ffffff"}
+            stroke="#f1f5f9"
+          />
+          <rect x="24" y={239 + row * 20} width="90" height="6" rx="1.5" fill="#94a3b8" />
+          <rect x="150" y={239 + row * 20} width="30" height="6" rx="1.5" fill="#94a3b8" />
+          <rect x="200" y={239 + row * 20} width="40" height="6" rx="1.5" fill="#94a3b8" />
+          <rect x="250" y={239 + row * 20} width="34" height="6" rx="1.5" fill={c.primary} opacity="0.7" />
+        </g>
+      ))}
+    </g>
+  );
+
+  const TotalsMock = () => (
+    <g>
+      <rect x="180" y="300" width="104" height="12" rx="2" fill={c.soft} opacity="0.6" />
+      <rect x="180" y="316" width="104" height="12" rx="2" fill={c.soft} opacity="0.6" />
+      <rect x="180" y="332" width="104" height="20" rx="3" fill={c.primary} />
+      <rect x="188" y="339" width="40" height="7" rx="1.5" fill="#ffffff" opacity="0.9" />
+      <rect x="252" y="339" width="24" height="7" rx="1.5" fill="#ffffff" opacity="0.9" />
+    </g>
+  );
+
+  const Footer = () => (
+    <rect x="70" y="368" width="160" height="5" rx="2.5" fill={c.accent} opacity="0.5" />
+  );
+
+  return (
+    <svg
+      viewBox="0 0 300 380"
+      className={`w-full h-full ${className}`}
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={c.primary} />
+          <stop offset="100%" stopColor={c.accent} />
+        </linearGradient>
+      </defs>
+      <rect width="300" height="380" fill="#ffffff" />
+
+      {template.id === "classic" && (
+        <>
+          <rect x="0" y="0" width="300" height="4" fill={c.primary} />
+          <rect x="16" y="18" width="26" height="26" rx="3" fill={c.light} stroke={c.primary} />
+          <rect x="50" y="22" width="90" height="9" rx="2" fill={c.primary} />
+          <rect x="50" y="36" width="70" height="6" rx="1.5" fill="#94a3b8" />
+          <rect x="188" y="18" width="96" height="34" rx="2" fill={c.light} stroke={c.soft} />
+          <rect x="196" y="26" width="60" height="8" rx="2" fill={c.primary} />
+          <rect x="196" y="40" width="80" height="6" rx="1.5" fill="#94a3b8" />
+          <rect x="0" y="62" width="300" height="2" fill={c.primary} />
+        </>
+      )}
+
+      {template.id === "premium" && (
+        <>
+          <rect x="0" y="0" width="300" height="76" fill={`url(#${gradId})`} />
+          <circle cx="34" cy="34" r="16" fill="#ffffff" opacity="0.25" />
+          <rect x="58" y="22" width="100" height="10" rx="2" fill="#ffffff" />
+          <rect x="58" y="38" width="76" height="6" rx="1.5" fill="#ffffff" opacity="0.75" />
+          <rect x="196" y="20" width="88" height="16" rx="2" fill="#ffffff" opacity="0.9" />
+          <rect x="196" y="42" width="88" height="18" rx="9" fill="#ffffff" />
+        </>
+      )}
+
+      {template.id === "industrial" && (
+        <>
+          <rect x="4" y="4" width="292" height="372" fill="none" stroke={c.primary} strokeWidth="4" />
+          <rect x="12" y="12" width="276" height="60" fill={c.primary} />
+          <rect x="22" y="24" width="110" height="10" rx="1" fill="#ffffff" />
+          <rect x="22" y="40" width="90" height="6" rx="1" fill="#ffffff" opacity="0.75" />
+          <rect x="220" y="20" width="56" height="16" rx="1" fill="#ffffff" />
+          <rect x="220" y="42" width="56" height="12" rx="1" fill="#ffffff" opacity="0.85" />
+        </>
+      )}
+
+      {template.id === "modern" && (
+        <>
+          <rect x="16" y="20" width="34" height="34" rx="8" fill={c.light} />
+          <rect x="16" y="20" width="34" height="34" rx="8" fill="none" stroke={c.primary} strokeWidth="2" />
+          <rect x="60" y="26" width="110" height="10" rx="3" fill={c.primary} />
+          <rect x="60" y="42" width="80" height="6" rx="3" fill="#94a3b8" />
+          <rect x="196" y="16" width="88" height="20" rx="3" fill={c.primary} opacity="0.9" />
+          <rect x="196" y="42" width="88" height="26" rx="8" fill={c.light} />
+          <rect x="0" y="80" width="300" height="4" fill={c.primary} />
+        </>
+      )}
+
+      {template.id === "residential" && (
+        <>
+          <rect x="0" y="0" width="300" height="80" fill={c.light} />
+          <circle cx="150" cy="30" r="18" fill="#ffffff" stroke={c.primary} strokeWidth="2" />
+          <path
+            d="M143 30 l5 5 l10 -12"
+            stroke={c.primary}
+            strokeWidth="2.5"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <rect x="90" y="54" width="120" height="8" rx="4" fill={c.primary} opacity="0.85" />
+          <rect x="110" y="66" width="80" height="5" rx="2.5" fill="#94a3b8" />
+        </>
+      )}
+
+      <InfoCard x={16} w={84} />
+      <InfoCard x={108} w={84} />
+      <InfoCard x={200} w={84} />
+
+      <TableMock />
+      <TotalsMock />
+      <Footer />
+    </svg>
+  );
 };
 
 // Templates Component
@@ -356,33 +497,7 @@ const Templates = ({ user }) => {
 
   return (
     <div className="space-y-6 bg-gray-300 p-4 md:p-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg p-8 text-gray-800">
-        <div className="flex items-center gap-3 mb-3">
-          <Zap className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Invoice Templates</h1>
-        </div>
-        <p className="text-blue-50 text-lg">
-          Professional invoice designs crafted specifically for electrical
-          engineers and contractors
-        </p>
-        <div className="mt-4 flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>One-time purchase</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>Lifetime access</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span>Print ready</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
+     {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="text-2xl font-bold text-blue-600">
@@ -435,20 +550,10 @@ const Templates = ({ user }) => {
               key={template.id}
               className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1"
             >
-              {/* Template Preview Image with Gradient Overlay */}
-              <div className="relative h-64 bg-gray-900 overflow-hidden group">
-                <img
-                  src={template.image}
-                  alt={template.name}
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-                />
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${getColorClasses(template.color)} opacity-40`}
-                ></div>
-
-                {/* Icon Overlay */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <Icon className="w-24 h-24 text-gray-800 opacity-20" />
+              {/* Template Preview SVG Mockup */}
+              <div className="relative h-64 bg-gray-100 overflow-hidden group flex items-center justify-center p-3">
+                <div className="w-full h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transform group-hover:scale-[1.02] transition-transform duration-300">
+                  <TemplatePreviewSVG template={template} />
                 </div>
 
                 {/* Badges */}
@@ -568,58 +673,7 @@ const Templates = ({ user }) => {
         })}
       </div>
 
-      {/* Help Section */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          How to use your templates
-        </h3>
-        <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-          <li>
-            Purchase a template that matches your electrical business style
-          </li>
-          <li>Go to "Create Job Card" from the sidebar menu</li>
-          <li>
-            Look for the template selector dropdown at the top of the page
-          </li>
-          <li>Select your purchased template from the dropdown</li>
-          <li>Your invoice will automatically use the selected design</li>
-        </ol>
-      </div>
-
-      {/* Benefits Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-          <Zap className="w-5 h-5" />
-          Perfect for Electrical Professionals
-        </h3>
-        <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-800">
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Licensed electricians</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Industrial electrical contractors</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Residential electricians</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Commercial electrical services</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Smart home automation specialists</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Maintenance and repair services</span>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Preview Modal */}
       {showPreview && (
@@ -653,11 +707,9 @@ const Templates = ({ user }) => {
                   <p className="text-gray-600 mb-4">
                     {TEMPLATES[showPreview].description}
                   </p>
-                  <img
-                    src={TEMPLATES[showPreview].image}
-                    alt={TEMPLATES[showPreview].name}
-                    className="w-full rounded-lg shadow-md"
-                  />
+                  <div className="w-full aspect-[3/4] max-w-sm mx-auto bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <TemplatePreviewSVG template={TEMPLATES[showPreview]} />
+                  </div>
                 </div>
                 <div className="border-t pt-6">
                   <h4 className="font-semibold mb-3">Template Features:</h4>

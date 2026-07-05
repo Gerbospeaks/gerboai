@@ -6,6 +6,8 @@ export default function StampPaywallModal({
   onClose,
   onUnlock,
   price = "R99",
+  title = "Unlock this feature",
+  subtitle = "Add a custom stamp and signature to your invoices and quotes.",
   features = [
     "Custom circular & shape stamps",
     "Upload and place your signature",
@@ -70,11 +72,11 @@ export default function StampPaywallModal({
           </div>
 
           <h3 className="text-base font-semibold text-[#1e293b] mb-1.5">
-            Unlock this feature
-          </h3>
-          <p className="text-sm text-[#64748b] mb-5">
-            Add a custom stamp and signature to your invoices and quotes.
-          </p>
+  {title}
+</h3>
+<p className="text-sm text-[#64748b] mb-5">
+  {subtitle}
+</p>
 
           {/* Feature list */}
           <div className="text-left bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-4 mb-5 space-y-2.5">
