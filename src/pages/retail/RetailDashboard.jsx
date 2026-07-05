@@ -4,6 +4,7 @@ import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampPaywallModal from "../StampPaywallModal";
 import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";

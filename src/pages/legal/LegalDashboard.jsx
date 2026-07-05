@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampPaywallModal from "../StampPaywallModal";
 import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";

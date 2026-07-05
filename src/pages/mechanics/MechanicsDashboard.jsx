@@ -58,6 +58,7 @@ import HomeView from "../HomeView";
 import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import AppHeader from "../AppHeader";
+import StampPaywallModal from "../StampPaywallModal";
 import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
@@ -114,6 +115,9 @@ const MechanicsDashboard = () => {
   };
   const [showStampModal, setShowStampModal] = useState(false);
   const [stampConfig, setStampConfig] = useState(null);
+  const [stampUnlocked, setStampUnlocked] = useState(false);
+const [showStampPaywall, setShowStampPaywall] = useState(false);
+
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("JobCard");
   const [showJobCard, setShowJobCard] = useState(false);
@@ -392,7 +396,19 @@ const MechanicsDashboard = () => {
       setStats((p) => ({ ...p, loading: false }));
     }
   };
-
+useEffect(() => {
+  if (!user?.uid) return;
+  const checkStampAccess = async () => {
+    try {
+      const db = getFirestore();
+      const snap = await getDoc(doc(db, "users", user.uid, "settings", "features"));
+      setStampUnlocked(snap.exists() && snap.data().stampSignatureUnlocked === true);
+    } catch (err) {
+      console.error("Error checking stamp access:", err);
+    }
+  };
+  checkStampAccess();
+}, [user]);
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -443,7 +459,20 @@ const MechanicsDashboard = () => {
       alert("Failed to load invoice for payment");
     }
   };
+const handleUnlockStamp = async () => {
+  const auth = getAuth();
+  const token = await auth.currentUser.getIdToken();
+  const res = await fetch(`${WORKER_URL}/purchase-feature`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ feature: "stamp_signature" }),
+  });
+  if (!res.ok) throw new Error(await res.text());
 
+  setStampUnlocked(true);
+  setShowStampPaywall(false);
+  setShowStampModal(true);
+};
   const loadPaymentStatus = async () => {
     if (!user?.uid || !jobCardId) {
       setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
@@ -2227,7 +2256,14 @@ const MechanicsDashboard = () => {
               </div>
             </div>
           )}
-
+           {showStampPaywall && (
+  <StampPaywallModal
+    isOpen={showStampPaywall}
+    onClose={() => setShowStampPaywall(false)}
+    onUnlock={handleUnlockStamp}
+    price="R99"
+  />
+)}
           {/* ── Views ──────────────────────────────────────────────────────── */}
           {activeView === "home" && (
             <div className="flex-1 overflow-y-auto p-4">
@@ -3923,12 +3959,15 @@ const MechanicsDashboard = () => {
                 {/* ── Stamp button footer ── */}
                 <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
                   <button
-                    onClick={() => setShowStampModal(true)}
-                    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-                  >
-                    <Stamp className="w-4 h-4" />
-                    Stamp &amp; Signature
-                  </button>
+  onClick={() => (stampUnlocked ? setShowStampModal(true) : setShowStampPaywall(true))}
+  className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+>
+  <Stamp className="w-4 h-4" />
+  Stamp &amp; Signature
+  {!stampUnlocked && (
+    <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-semibold">PRO</span>
+  )}
+</button>
                 </div>
               </div>
             </div>

@@ -22,26 +22,28 @@ import {
   arrayUnion,
   serverTimestamp,
 } from "firebase/firestore";
+import { TEMPLATE_THUMBNAILS } from "./TemplateThumbnails";
 
 // ─── Template definitions ────────────────────────────────────────────────────
 const TEMPLATES = {
   classic: {
     id: "classic",
     name: "Classic Workshop",
-    description: "Traditional auto repair invoice with professional 3-column layout",
+    description:
+      "Traditional auto repair invoice with professional 3-column layout",
     price: 0,
     isPremium: false,
     category: "free",
     icon: Wrench,
     color: "gray",
-    image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=500&fit=crop",
     features: [
       "Professional 3-column layout",
       "Vehicle details section",
       "Parts and labor breakdown",
       "Print optimized for A4",
     ],
-    preview: "Three neat columns showing customer info, billing details, and vehicle information with a clean items table.",
+    preview:
+      "Three neat columns showing customer info, billing details, and vehicle information with a clean items table.",
   },
   premium: {
     id: "premium",
@@ -52,14 +54,14 @@ const TEMPLATES = {
     category: "premium",
     icon: Crown,
     color: "purple",
-    image: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=500&fit=crop",
     features: [
       "Luxury design aesthetic",
       "Large branding area",
       "Enhanced color scheme",
       "Premium paper compatible",
     ],
-    preview: "Elegant bordered design with serif fonts and premium purple accents. Perfect for luxury vehicle specialists.",
+    preview:
+      "Elegant bordered design with serif fonts and premium purple accents. Perfect for luxury vehicle specialists.",
   },
   speed: {
     id: "speed",
@@ -70,14 +72,14 @@ const TEMPLATES = {
     category: "performance",
     icon: Zap,
     color: "red",
-    image: "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&h=500&fit=crop",
     features: [
       "High-energy red design",
       "Performance-focused layout",
       "Bold typography",
       "Racing-inspired styling",
     ],
-    preview: "Dynamic red and black design with aggressive styling. Ideal for performance tuning and racing shops.",
+    preview:
+      "Dynamic red and black design with aggressive styling. Ideal for performance tuning and racing shops.",
   },
   modern: {
     id: "modern",
@@ -88,14 +90,14 @@ const TEMPLATES = {
     category: "modern",
     icon: Car,
     color: "blue",
-    image: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&h=500&fit=crop",
     features: [
       "Minimalist blue design",
       "Spacious layout",
       "Modern typography",
       "Clean and professional",
     ],
-    preview: "Contemporary design with blue accents and generous white space. Perfect for modern auto service centers.",
+    preview:
+      "Contemporary design with blue accents and generous white space. Perfect for modern auto service centers.",
   },
   diagnostic: {
     id: "diagnostic",
@@ -106,24 +108,20 @@ const TEMPLATES = {
     category: "technical",
     icon: Gauge,
     color: "green",
-    image: "https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=400&h=500&fit=crop",
     features: [
       "Technical green theme",
       "Detailed service breakdown",
       "Diagnostic codes section",
       "Inspection checklist ready",
     ],
-    preview: "Technical design with green accents. Optimized for diagnostic centers and detailed inspection reports.",
+    preview:
+      "Technical design with green accents. Optimized for diagnostic centers and detailed inspection reports.",
   },
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const TEMPLATE_DOC_PATH = (uid) => ["users", uid, "settings", "templates"];
 
-/**
- * Read the user's purchased templates from Firestore.
- * Returns an array of template IDs, always including "classic".
- */
 const fetchPurchased = async (uid) => {
   try {
     const db = getFirestore();
@@ -132,11 +130,14 @@ const fetchPurchased = async (uid) => {
       const data = snap.data();
       return Array.from(new Set(["classic", ...(data.purchased ?? [])]));
     }
-    // Doc doesn't exist yet — seed it with the free template
     await setDoc(
       doc(db, ...TEMPLATE_DOC_PATH(uid)),
-      { purchased: ["classic"], active: "classic", createdAt: serverTimestamp() },
-      { merge: true }
+      {
+        purchased: ["classic"],
+        active: "classic",
+        createdAt: serverTimestamp(),
+      },
+      { merge: true },
     );
     return ["classic"];
   } catch (err) {
@@ -145,10 +146,6 @@ const fetchPurchased = async (uid) => {
   }
 };
 
-/**
- * Persist a newly purchased template to Firestore using arrayUnion
- * so concurrent purchases don't overwrite each other.
- */
 const persistPurchase = async (uid, templateId) => {
   const db = getFirestore();
   await setDoc(
@@ -157,42 +154,26 @@ const persistPurchase = async (uid, templateId) => {
       purchased: arrayUnion(templateId),
       updatedAt: serverTimestamp(),
     },
-    { merge: true }
+    { merge: true },
   );
 };
 
-// ─── Color map ────────────────────────────────────────────────────────────────
-const gradientMap = {
-  gray:   "from-gray-500 to-gray-600",
-  purple: "from-purple-500 to-purple-600",
-  red:    "from-red-500 to-red-600",
-  blue:   "from-blue-500 to-blue-600",
-  green:  "from-green-500 to-green-600",
-};
-
 // ─── Component ────────────────────────────────────────────────────────────────
-/**
- * Templates
- *
- * Props:
- *   user  — the authenticated Firebase user object (needs user.uid)
- */
 const Templates = ({ user }) => {
   const [purchasedTemplates, setPurchasedTemplates] = useState(["classic"]);
-  const [loadingOwned, setLoadingOwned]             = useState(true);
-  const [selectedCategory, setSelectedCategory]     = useState("all");
-  const [showPreview, setShowPreview]               = useState(null);
-  const [showPayment, setShowPayment]               = useState(null);
-  const [paymentLoading, setPaymentLoading]         = useState(false);
-  const [successTemplateId, setSuccessTemplateId]   = useState(null);
-  const [paymentForm, setPaymentForm]               = useState({
+  const [loadingOwned, setLoadingOwned] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showPreview, setShowPreview] = useState(null);
+  const [showPayment, setShowPayment] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [successTemplateId, setSuccessTemplateId] = useState(null);
+  const [paymentForm, setPaymentForm] = useState({
     cardNumber: "",
     cardName: "",
     expiryDate: "",
     cvv: "",
   });
 
-  // ── Load owned templates on mount / user change ──────────────────────────
   useEffect(() => {
     if (!user?.uid) return;
     setLoadingOwned(true);
@@ -202,11 +183,9 @@ const Templates = ({ user }) => {
     });
   }, [user?.uid]);
 
-  // ── Purchase handlers ─────────────────────────────────────────────────────
   const handlePurchase = (templateId) => {
     const template = TEMPLATES[templateId];
     if (!template.isPremium) {
-      // Free template — add immediately
       handleFreePurchase(templateId);
       return;
     }
@@ -217,7 +196,7 @@ const Templates = ({ user }) => {
     try {
       if (user?.uid) await persistPurchase(user.uid, templateId);
       setPurchasedTemplates((prev) =>
-        Array.from(new Set([...prev, templateId]))
+        Array.from(new Set([...prev, templateId])),
       );
       setSuccessTemplateId(templateId);
       setTimeout(() => setSuccessTemplateId(null), 3000);
@@ -229,9 +208,8 @@ const Templates = ({ user }) => {
 
   const handlePaymentSubmit = async () => {
     const templateId = showPayment;
-    const template   = TEMPLATES[templateId];
+    const template = TEMPLATES[templateId];
 
-    // Validation
     if (paymentForm.cardNumber.replace(/\s/g, "").length !== 16) {
       alert("❌ Please enter a valid 16-digit card number");
       return;
@@ -251,19 +229,11 @@ const Templates = ({ user }) => {
 
     try {
       setPaymentLoading(true);
-
-      // Simulate payment gateway (replace with real Stripe/Yoco/etc.)
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // ✅ Persist to Firebase
       if (user?.uid) await persistPurchase(user.uid, templateId);
-
-      // Update local state
       setPurchasedTemplates((prev) =>
-        Array.from(new Set([...prev, templateId]))
+        Array.from(new Set([...prev, templateId])),
       );
-
-      // Reset & close
       setPaymentForm({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" });
       setShowPayment(null);
       setSuccessTemplateId(templateId);
@@ -276,7 +246,6 @@ const Templates = ({ user }) => {
     }
   };
 
-  // ── Input formatters ──────────────────────────────────────────────────────
   const handleCardNumberChange = (e) => {
     const cleaned = e.target.value.replace(/\D/g, "").slice(0, 16);
     const formatted = cleaned.match(/.{1,4}/g)?.join(" ") ?? cleaned;
@@ -294,34 +263,32 @@ const Templates = ({ user }) => {
     setPaymentForm((p) => ({ ...p, cvv: v }));
   };
 
-  // ── Data ──────────────────────────────────────────────────────────────────
   const categories = [
-    { id: "all",         name: "All Templates" },
-    { id: "free",        name: "Free" },
-    { id: "premium",     name: "Premium" },
+    { id: "all", name: "All Templates" },
+    { id: "free", name: "Free" },
+    { id: "premium", name: "Premium" },
     { id: "performance", name: "Performance" },
-    { id: "modern",      name: "Modern" },
-    { id: "technical",   name: "Technical" },
+    { id: "modern", name: "Modern" },
+    { id: "technical", name: "Technical" },
   ];
 
   const filteredTemplates = Object.values(TEMPLATES).filter((t) =>
-    selectedCategory === "all" ? true : t.category === selectedCategory
+    selectedCategory === "all" ? true : t.category === selectedCategory,
   );
 
   const totalValue = Object.values(TEMPLATES)
     .filter((t) => purchasedTemplates.includes(t.id))
     .reduce((sum, t) => sum + t.price, 0);
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-
-        {/* ── Header ── */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-1">
             <FileText className="w-6 h-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">Invoice Templates</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Invoice Templates
+            </h1>
           </div>
           <p className="text-sm text-gray-500">
             Professional invoice designs for auto repair shops and mechanics.
@@ -329,7 +296,6 @@ const Templates = ({ user }) => {
           </p>
         </div>
 
-        {/* ── Success toast ── */}
         {successTemplateId && (
           <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-green-600 text-white px-5 py-3 rounded-xl shadow-xl animate-bounce">
             <Check className="w-5 h-5 flex-shrink-0" />
@@ -339,27 +305,33 @@ const Templates = ({ user }) => {
           </div>
         )}
 
-        {/* ── Stats ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             {loadingOwned ? (
               <Loader2 className="w-6 h-6 text-gray-300 animate-spin" />
             ) : (
-              <div className="text-3xl font-bold text-blue-600">{purchasedTemplates.length}</div>
+              <div className="text-3xl font-bold text-blue-600">
+                {purchasedTemplates.length}
+              </div>
             )}
             <div className="text-sm text-gray-500 mt-1">Templates Owned</div>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <div className="text-3xl font-bold text-gray-700">{Object.keys(TEMPLATES).length}</div>
+            <div className="text-3xl font-bold text-gray-700">
+              {Object.keys(TEMPLATES).length}
+            </div>
             <div className="text-sm text-gray-500 mt-1">Total Available</div>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <div className="text-3xl font-bold text-green-600">R{totalValue}</div>
-            <div className="text-sm text-gray-500 mt-1">Total Value Unlocked</div>
+            <div className="text-3xl font-bold text-green-600">
+              R{totalValue}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              Total Value Unlocked
+            </div>
           </div>
         </div>
 
-        {/* ── Category filter ── */}
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
@@ -376,30 +348,21 @@ const Templates = ({ user }) => {
           ))}
         </div>
 
-        {/* ── Template grid ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTemplates.map((template) => {
             const isPurchased = purchasedTemplates.includes(template.id);
-            const Icon        = template.icon;
+            const Icon = template.icon;
+            const Thumb = TEMPLATE_THUMBNAILS[template.id];
 
             return (
               <div
                 key={template.id}
                 className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl hover:border-blue-300 transition-all duration-300 hover:-translate-y-1"
               >
-                {/* Image */}
-                <div className="relative h-56 bg-gray-900 overflow-hidden group">
-                  <img
-                    src={template.image}
-                    alt={template.name}
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradientMap[template.color]} opacity-40`} />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <Icon className="w-20 h-20 text-white opacity-10" />
-                  </div>
+                {/* Live design preview (mirrors the real invoice template) */}
+                <div className="relative h-56 overflow-hidden group border-b border-gray-100">
+                  {Thumb && <Thumb />}
 
-                  {/* Badges */}
                   {template.isPremium && !isPurchased && (
                     <div className="absolute top-3 right-3 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow">
                       <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -413,40 +376,47 @@ const Templates = ({ user }) => {
                     </div>
                   )}
 
-                  {/* Name overlay */}
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                     <div className="flex items-center gap-2 text-white">
                       <Icon className="w-5 h-5" />
-                      <h3 className="font-bold text-lg leading-tight">{template.name}</h3>
+                      <h3 className="font-bold text-lg leading-tight">
+                        {template.name}
+                      </h3>
                     </div>
                   </div>
                 </div>
 
-                {/* Info */}
                 <div className="p-5">
-                  <p className="text-sm text-gray-500 mb-4 min-h-[36px]">{template.description}</p>
+                  <p className="text-sm text-gray-500 mb-4 min-h-[36px]">
+                    {template.description}
+                  </p>
 
-                  {/* Features */}
                   <ul className="space-y-1.5 mb-4">
                     {template.features.map((f, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                      <li
+                        key={i}
+                        className="flex items-start gap-2 text-sm text-gray-700"
+                      >
                         <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         {f}
                       </li>
                     ))}
                   </ul>
 
-                  {/* Price + actions */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div>
                       {template.isPremium ? (
                         <>
-                          <div className="text-2xl font-bold text-gray-900">R{template.price}</div>
+                          <div className="text-2xl font-bold text-gray-900">
+                            R{template.price}
+                          </div>
                           <div className="text-xs text-gray-400">one-time</div>
                         </>
                       ) : (
                         <>
-                          <div className="text-2xl font-bold text-green-600">Free</div>
+                          <div className="text-2xl font-bold text-green-600">
+                            Free
+                          </div>
                           <div className="text-xs text-gray-400">included</div>
                         </>
                       )}
@@ -472,9 +442,13 @@ const Templates = ({ user }) => {
                           className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1.5 text-sm transition-colors shadow-sm"
                         >
                           {template.isPremium ? (
-                            <><ShoppingCart className="w-4 h-4" /> Buy Now</>
+                            <>
+                              <ShoppingCart className="w-4 h-4" /> Buy Now
+                            </>
                           ) : (
-                            <><Check className="w-4 h-4" /> Get Free</>
+                            <>
+                              <Check className="w-4 h-4" /> Get Free
+                            </>
                           )}
                         </button>
                       )}
@@ -486,32 +460,43 @@ const Templates = ({ user }) => {
           })}
         </div>
 
-        {/* ── Help section ── */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
           <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
             <FileText className="w-5 h-5" />
             How to use your templates
           </h3>
           <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-            <li>Purchase a template below — it is saved to your account instantly.</li>
-            <li>Go to <strong>Create Job Card</strong> from the sidebar.</li>
-            <li>Click the <strong>Template</strong> dropdown at the top of the page.</li>
+            <li>
+              Purchase a template below — it is saved to your account instantly.
+            </li>
+            <li>
+              Go to <strong>Create Job Card</strong> from the sidebar.
+            </li>
+            <li>
+              Click the <strong>Template</strong> dropdown at the top of the
+              page.
+            </li>
             <li>Select any template you own — your invoice updates live.</li>
           </ol>
         </div>
       </div>
 
-      {/* ── Preview modal ── */}
       {showPreview && (
         <div
           className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowPreview(null); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowPreview(null);
+          }}
         >
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-5 border-b flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {React.createElement(TEMPLATES[showPreview].icon, { className: "w-5 h-5 text-blue-600" })}
-                <h2 className="text-lg font-bold text-gray-900">{TEMPLATES[showPreview].name}</h2>
+                {React.createElement(TEMPLATES[showPreview].icon, {
+                  className: "w-5 h-5 text-blue-600",
+                })}
+                <h2 className="text-lg font-bold text-gray-900">
+                  {TEMPLATES[showPreview].name}
+                </h2>
               </div>
               <button
                 onClick={() => setShowPreview(null)}
@@ -521,14 +506,21 @@ const Templates = ({ user }) => {
               </button>
             </div>
             <div className="overflow-auto p-6 bg-gray-50">
-              <img
-                src={TEMPLATES[showPreview].image}
-                alt={TEMPLATES[showPreview].name}
-                className="w-full rounded-xl shadow-md"
-              />
+              <div
+                className="w-full rounded-xl shadow-md overflow-hidden"
+                style={{ aspectRatio: "4 / 5" }}
+              >
+                {(() => {
+                  const PreviewThumb = TEMPLATE_THUMBNAILS[showPreview];
+                  return PreviewThumb ? <PreviewThumb /> : null;
+                })()}
+              </div>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 {TEMPLATES[showPreview].features.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 text-sm text-gray-700"
+                  >
                     <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
                     {f}
                   </div>
@@ -542,21 +534,39 @@ const Templates = ({ user }) => {
         </div>
       )}
 
-      {/* ── Payment modal ── */}
       {showPayment && (
         <div
           className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) { setShowPayment(null); setPaymentForm({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" }); } }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPayment(null);
+              setPaymentForm({
+                cardNumber: "",
+                cardName: "",
+                expiryDate: "",
+                cvv: "",
+              });
+            }
+          }}
         >
           <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
-            {/* Header */}
             <div className="p-5 border-b flex items-center justify-between bg-gray-50">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg font-bold text-gray-900">Complete Purchase</h2>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Complete Purchase
+                </h2>
               </div>
               <button
-                onClick={() => { setShowPayment(null); setPaymentForm({ cardNumber: "", cardName: "", expiryDate: "", cvv: "" }); }}
+                onClick={() => {
+                  setShowPayment(null);
+                  setPaymentForm({
+                    cardNumber: "",
+                    cardName: "",
+                    expiryDate: "",
+                    cvv: "",
+                  });
+                }}
                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 text-gray-500 transition-colors text-xl"
               >
                 ✕
@@ -564,20 +574,26 @@ const Templates = ({ user }) => {
             </div>
 
             <div className="p-6 space-y-5">
-              {/* Template summary */}
               <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                {React.createElement(TEMPLATES[showPayment].icon, { className: "w-8 h-8 text-blue-600 flex-shrink-0" })}
+                {React.createElement(TEMPLATES[showPayment].icon, {
+                  className: "w-8 h-8 text-blue-600 flex-shrink-0",
+                })}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900">{TEMPLATES[showPayment].name}</p>
-                  <p className="text-xs text-gray-500 truncate">{TEMPLATES[showPayment].description}</p>
+                  <p className="font-semibold text-gray-900">
+                    {TEMPLATES[showPayment].name}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {TEMPLATES[showPayment].description}
+                  </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-xl font-bold text-blue-600">R{TEMPLATES[showPayment].price}</p>
+                  <p className="text-xl font-bold text-blue-600">
+                    R{TEMPLATES[showPayment].price}
+                  </p>
                   <p className="text-xs text-gray-400">once-off</p>
                 </div>
               </div>
 
-              {/* Card number */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
                   <CreditCard className="w-4 h-4" /> Card Number
@@ -591,22 +607,29 @@ const Templates = ({ user }) => {
                 />
               </div>
 
-              {/* Cardholder */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Cardholder Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Cardholder Name
+                </label>
                 <input
                   type="text"
                   value={paymentForm.cardName}
-                  onChange={(e) => setPaymentForm((p) => ({ ...p, cardName: e.target.value.toUpperCase() }))}
+                  onChange={(e) =>
+                    setPaymentForm((p) => ({
+                      ...p,
+                      cardName: e.target.value.toUpperCase(),
+                    }))
+                  }
                   placeholder="JOHN DOE"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none uppercase transition-all"
                 />
               </div>
 
-              {/* Expiry + CVV */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Expiry</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Expiry
+                  </label>
                   <input
                     type="text"
                     value={paymentForm.expiryDate}
@@ -616,7 +639,9 @@ const Templates = ({ user }) => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">CVV</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    CVV
+                  </label>
                   <input
                     type="password"
                     value={paymentForm.cvv}
@@ -627,22 +652,26 @@ const Templates = ({ user }) => {
                 </div>
               </div>
 
-              {/* Security note */}
               <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-800">
                 <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                Encrypted & secure. One-time payment — lifetime access to this template.
+                Encrypted & secure. One-time payment — lifetime access to this
+                template.
               </div>
 
-              {/* Submit */}
               <button
                 onClick={handlePaymentSubmit}
                 disabled={paymentLoading}
                 className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm text-base"
               >
                 {paymentLoading ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Processing…</>
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" /> Processing…
+                  </>
                 ) : (
-                  <><Lock className="w-5 h-5" /> Pay R{TEMPLATES[showPayment].price}</>
+                  <>
+                    <Lock className="w-5 h-5" /> Pay R
+                    {TEMPLATES[showPayment].price}
+                  </>
                 )}
               </button>
 

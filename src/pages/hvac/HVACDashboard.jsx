@@ -4,6 +4,7 @@ import HomeView from "../HomeView";
 import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
+import StampPaywallModal from "../StampPaywallModal";
 import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import HVACSidebar from "./HVACSidebar";
