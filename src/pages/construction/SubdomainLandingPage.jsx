@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/construction-logo.png";
+import logotop from "../../assets/img/construction-logo-top.png";
+import { HC, heroFontStyle } from "../../styles/landingTokens";
+import google from "../../assets/google-play.png";
+import Helmet from "react-helmet";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -296,6 +300,7 @@ function MockQuote() {
   );
 }
 
+/* ─── Navbar (restyled to match light hero) ──────────────────────────────── */
 function Navbar({ onLogin, onRegister }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -306,7 +311,6 @@ function Navbar({ onLogin, onRegister }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // Close menu on resize to desktop
   useEffect(() => {
     const fn = () => { if (window.innerWidth > 768) setOpen(false); };
     window.addEventListener("resize", fn);
@@ -321,6 +325,8 @@ function Navbar({ onLogin, onRegister }) {
   }, []);
 
   const links = ["features", "pricing", "testimonials", "faq"];
+  const AMBER = "#C67C3A";
+  const AMBER_HOVER = "#A9652C";
 
   const handleNavLink = (id) => {
     scrollTo(id);
@@ -333,10 +339,10 @@ function Navbar({ onLogin, onRegister }) {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        background: C.ink,
-        borderBottom: `1px solid rgba(255,255,255,0.06)`,
+        background: HC.cream,
+        borderBottom: `1px solid ${HC.creamDark}`,
         transition: "box-shadow .2s",
-        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
+        boxShadow: scrolled ? "0 4px 20px rgba(15,23,42,0.08)" : "none",
       }}
     >
       <div
@@ -362,7 +368,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -377,15 +383,15 @@ function Navbar({ onLogin, onRegister }) {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "rgba(255,255,255,0.55)",
+                  color: HC.textMid,
                   fontSize: 14,
-                  fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 500,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
                   textTransform: "capitalize",
                   transition: "color .2s",
                 }}
-                onMouseEnter={(e) => (e.target.style.color = C.white)}
-                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.55)")}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
               >
                 {s}
               </button>
@@ -400,13 +406,23 @@ function Navbar({ onLogin, onRegister }) {
               onClick={onLogin}
               style={{
                 background: "none",
-                border: "1px solid rgba(255,255,255,0.2)",
+                border: `1px solid ${HC.creamDark}`,
                 borderRadius: 8,
                 padding: "7px 18px",
-                color: "rgba(255,255,255,0.75)",
+                color: HC.textMid,
                 fontSize: 13,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
+                fontWeight: 600,
                 cursor: "pointer",
+                transition: "border-color .15s, color .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.color = HC.navy;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.color = HC.textMid;
               }}
             >
               Sign In
@@ -414,17 +430,20 @@ function Navbar({ onLogin, onRegister }) {
             <button
               onClick={onRegister}
               style={{
-                background: C.orange,
+                background: AMBER,
                 border: "none",
                 borderRadius: 8,
                 padding: "8px 20px",
-                color: C.white,
+                color: HC.white,
                 fontSize: 13,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                transition: "background .15s",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = AMBER_HOVER)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = AMBER)}
             >
               Start Free →
             </button>
@@ -437,7 +456,7 @@ function Navbar({ onLogin, onRegister }) {
             onClick={() => setOpen(!open)}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.15)",
+              border: `1px solid ${HC.creamDark}`,
               borderRadius: 8,
               padding: "8px 10px",
               cursor: "pointer",
@@ -449,7 +468,6 @@ function Navbar({ onLogin, onRegister }) {
             }}
             aria-label="Toggle menu"
           >
-            {/* Animated hamburger lines */}
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
@@ -457,7 +475,7 @@ function Navbar({ onLogin, onRegister }) {
                   display: "block",
                   width: 22,
                   height: 2,
-                  background: C.white,
+                  background: HC.navy,
                   borderRadius: 2,
                   transition: "transform .2s, opacity .2s",
                   transformOrigin: "center",
@@ -481,8 +499,8 @@ function Navbar({ onLogin, onRegister }) {
             maxHeight: open ? 400 : 0,
             overflow: "hidden",
             transition: "max-height .3s ease",
-            background: C.ink2,
-            borderTop: open ? `1px solid rgba(255,255,255,0.07)` : "none",
+            background: HC.creamMid,
+            borderTop: open ? `1px solid ${HC.creamDark}` : "none",
           }}
         >
           <div style={{ padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
@@ -494,35 +512,35 @@ function Navbar({ onLogin, onRegister }) {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "rgba(255,255,255,0.65)",
+                  color: HC.textMid,
                   fontSize: 16,
-                  fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 500,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
                   textTransform: "capitalize",
                   padding: "12px 0",
                   textAlign: "left",
-                  borderBottom: `1px solid rgba(255,255,255,0.06)`,
+                  borderBottom: `1px solid ${HC.creamDark}`,
                   transition: "color .2s",
                 }}
-                onMouseEnter={(e) => (e.target.style.color = C.white)}
-                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.65)")}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
               >
                 {s}
               </button>
             ))}
 
-            {/* Mobile CTAs */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
               <button
                 onClick={() => { onLogin(); setOpen(false); }}
                 style={{
                   background: "none",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  border: `1px solid ${HC.creamDark}`,
                   borderRadius: 8,
                   padding: "11px",
-                  color: "rgba(255,255,255,0.75)",
+                  color: HC.textMid,
                   fontSize: 14,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
                   cursor: "pointer",
                 }}
               >
@@ -531,16 +549,16 @@ function Navbar({ onLogin, onRegister }) {
               <button
                 onClick={() => { onRegister(); setOpen(false); }}
                 style={{
-                  background: C.orange,
+                  background: AMBER,
                   border: "none",
                   borderRadius: 8,
                   padding: "12px",
-                  color: C.white,
+                  color: HC.white,
                   fontSize: 14,
                   fontWeight: 700,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontFamily: "'Lato', sans-serif",
                   cursor: "pointer",
-                  boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                  boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
                 }}
               >
                 Start Free →
@@ -553,13 +571,13 @@ function Navbar({ onLogin, onRegister }) {
   );
 }
 
-/* ─── Hero ──────────────────────────────────────────────────────────────── */
+/* ─── Hero (restyled to match main LandingPage) ──────────────────────────── */
 function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 60%, #0D1F08 100%)`,
-        padding: "72px 24px 80px",
+        background: HC.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -568,46 +586,52 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-  
-      {/* Glow */}
+      <style>{heroFontStyle}</style>
+
+      {/* Ambient glow, tinted with construction orange */}
       <div
         style={{
           position: "absolute",
-          top: -60,
-          right: -80,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: C.orange,
-          opacity: 0.07,
-          filter: "blur(80px)",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(249,115,22,.08) 0%, transparent 55%)",
+          pointerEvents: "none",
         }}
       />
 
+      {/* Framed "device" container, matching lp-hero-inner */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: `1px solid rgba(15,23,42,0.08)`,
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(249,115,22,0.12)",
-              border: "1px solid rgba(249,115,22,0.3)",
+              background: "rgba(249,115,22,0.1)",
+              border: "1px solid rgba(249,115,22,0.28)",
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span
@@ -615,16 +639,16 @@ function Hero({ onRegister }) {
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: C.orange,
+                background: "#F97316",
                 display: "inline-block",
               }}
             />
             <span
               style={{
-                color: C.orange,
+                color: "#F97316",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
               Built for Contractors &amp; Construction Companies
@@ -633,30 +657,29 @@ function Hero({ onRegister }) {
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1.05,
-              color: C.white,
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: HC.navy,
+              margin: "0 0 24px",
             }}
           >
             Quote your clients.
             <br />
-            <span style={{ color: C.orange }}>Invoice on site.</span>
+            <em style={{ fontStyle: "italic", color: "#F97316" }}>Invoice on site.</em>
             <br />
             Build your business.
           </h1>
 
           <p
             style={{
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 17,
+              color: HC.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
             SolidFlo is purpose-built for SA contractors. Create professional
@@ -664,58 +687,64 @@ function Hero({ onRegister }) {
             under 60 seconds — from the site or the office.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: C.orange,
+                height: 52,
+                padding: "0 32px",
+                background: "#F97316",
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
-                color: C.white,
-                fontSize: 15,
+                borderRadius: 4,
+                color: HC.white,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(249,115,22,0.4)",
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(255,255,255,0.75)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${HC.creamDark}`,
+                borderRadius: 4,
+                color: HC.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.background = HC.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
           {/* Trust row */}
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "Free plan forever",
               "VAT-compliant invoices",
@@ -728,12 +757,14 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.35)",
+                  color: HC.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.orange}>
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="#F97316">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -747,15 +778,8 @@ function Hero({ onRegister }) {
         </div>
 
         {/* Right: Quote preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ position: "relative" }}>
-            {/* Badge floating */}
             <div
               style={{
                 position: "absolute",
@@ -763,13 +787,13 @@ function Hero({ onRegister }) {
                 right: -18,
                 zIndex: 2,
                 background: "#16A34A",
-                color: C.white,
+                color: HC.white,
                 borderRadius: 10,
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -778,7 +802,6 @@ function Hero({ onRegister }) {
               <span>💰</span> Quote approved!
             </div>
             <MockQuote />
-            {/* Stats row */}
             <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
               {[
                 ["R 218 000", "This Month"],
@@ -789,8 +812,8 @@ function Hero({ onRegister }) {
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: HC.white,
+                    border: `1px solid ${HC.creamDark}`,
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -798,10 +821,10 @@ function Hero({ onRegister }) {
                 >
                   <div
                     style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
+                      fontFamily: "'Playfair Display', serif",
+                      fontWeight: 700,
                       fontSize: 18,
-                      color: C.white,
+                      color: HC.navy,
                     }}
                   >
                     {v}
@@ -809,8 +832,8 @@ function Hero({ onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
+                      color: HC.textMuted,
+                      fontFamily: "'Lato', sans-serif",
                     }}
                   >
                     {l}
@@ -822,27 +845,30 @@ function Hero({ onRegister }) {
         </div>
       </div>
 
-      {/* Trusted bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.3)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: HC.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA CONTRACTORS
+          Trusted by SA contractors
         </span>
         {[
           "Cape Build & Civil",
@@ -853,11 +879,10 @@ function Hero({ onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(255,255,255,0.25)",
-              letterSpacing: 0.5,
+              color: HC.textMuted,
             }}
           >
             {b}
@@ -867,7 +892,6 @@ function Hero({ onRegister }) {
     </section>
   );
 }
-
 /* ─── How It Works ─────────────────────────────────────────────────────── */
 function HowItWorks() {
   const steps = [

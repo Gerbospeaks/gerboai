@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
 import logo from "../../assets/img/hvac-logo.png";
+import { HC, heroFontStyle } from "../../styles/landingTokens";
+import google from "../../assets/google-play.png";
+import Helmet from "react-helmet";
 /* ─── Font ──────────────────────────────────────────────────────────────── */
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
@@ -79,13 +82,10 @@ function Eyebrow({ accent, children }) {
   );
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   NAVBAR
-════════════════════════════════════════════════════════════════════════════ */
-function Navbar({ config, onLogin, onRegister }) {
+/* ─── Navbar (restyled to match light hero) ──────────────────────────────── */
+function Navbar({ onLogin, onRegister }) {
+  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const C = T(config);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -93,7 +93,27 @@ function Navbar({ config, onLogin, onRegister }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  useEffect(() => {
+    const fn = () => { if (window.innerWidth > 768) setOpen(false); };
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
   const links = ["features", "pricing", "testimonials", "faq"];
+  const AMBER = "#C67C3A";
+  const AMBER_HOVER = "#A9652C";
+
+  const handleNavLink = (id) => {
+    scrollTo(id);
+    setOpen(false);
+  };
 
   return (
     <nav
@@ -101,11 +121,10 @@ function Navbar({ config, onLogin, onRegister }) {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        background: C.ink,
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.4)" : "none",
+        background: HC.cream,
+        borderBottom: `1px solid ${HC.creamDark}`,
         transition: "box-shadow .2s",
-        fontFamily: "'Barlow', sans-serif",
+        boxShadow: scrolled ? "0 4px 20px rgba(15,23,42,0.08)" : "none",
       }}
     >
       <div
@@ -119,180 +138,73 @@ function Navbar({ config, onLogin, onRegister }) {
           height: 60,
         }}
       >
-         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
               background: "transparent",
               width: 160,
-             
               borderRadius: 8,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 17,
             }}
           >
-            <img src={logo} alt="SolidFlo" />
+            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
-         
         </div>
+
         {/* Desktop links */}
-        <div
-          className="nav-links-desktop"
-          style={{ gap: 28, alignItems: "center" }}
-        >
-          {links.map((s) => (
-            <button
-              key={s}
-              onClick={() => scrollTo(s)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "rgba(255,255,255,0.45)",
-                fontSize: 14,
-                fontFamily: "'Barlow', sans-serif",
-                fontWeight: 500,
-                textTransform: "capitalize",
-                transition: "color .2s",
-                padding: 0,
-              }}
-              onMouseEnter={(e) => (e.target.style.color = "#fff")}
-              onMouseLeave={(e) =>
-                (e.target.style.color = "rgba(255,255,255,0.45)")
-              }
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => scrollTo(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: HC.textMid,
+                  fontSize: 14,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  textTransform: "capitalize",
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* Desktop CTAs */}
-        <div
-          className="nav-ctas-desktop"
-          style={{ gap: 10, alignItems: "center" }}
-        >
-          <button
-            onClick={onLogin}
-            style={{
-              background: "none",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 8,
-              padding: "7px 18px",
-              color: "rgba(255,255,255,0.7)",
-              fontSize: 13,
-              fontFamily: "'Barlow', sans-serif",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.5)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-              e.currentTarget.style.color = "rgba(255,255,255,0.7)";
-            }}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={onRegister}
-            style={{
-              background: C.accent,
-              border: "none",
-              borderRadius: 8,
-              padding: "8px 20px",
-              color: "#fff",
-              fontSize: 13,
-              fontWeight: 700,
-              fontFamily: "'Barlow', sans-serif",
-              cursor: "pointer",
-              boxShadow: `0 4px 12px ${C.accent}55`,
-              transition: "opacity .15s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            {config.cta} →
-          </button>
-        </div>
-
-        {/* Hamburger */}
-        <button
-          className="nav-hamburger"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "rgba(255,255,255,0.6)",
-            padding: 4,
-          }}
-        >
-          <svg
-            width="22"
-            height="22"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            {mobileOpen ? (
-              <path d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div
-          style={{
-            background: C.ink,
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-            padding: "12px 24px 20px",
-          }}
-        >
-          {links.map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                scrollTo(s);
-                setMobileOpen(false);
-              }}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "rgba(255,255,255,0.6)",
-                fontSize: 15,
-                fontFamily: "'Barlow', sans-serif",
-                padding: "10px 0",
-                textTransform: "capitalize",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
-              }}
-            >
-              {s}
-            </button>
-          ))}
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+        {/* Desktop CTA */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <button
               onClick={onLogin}
               style={{
-                flex: 1,
-                padding: 10,
-                border: "1px solid rgba(255,255,255,0.2)",
-                borderRadius: 8,
                 background: "none",
-                color: "rgba(255,255,255,0.7)",
-                fontFamily: "'Barlow', sans-serif",
-                cursor: "pointer",
+                border: `1px solid ${HC.creamDark}`,
+                borderRadius: 8,
+                padding: "7px 18px",
+                color: HC.textMid,
                 fontSize: 13,
+                fontFamily: "'Lato', sans-serif",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "border-color .15s, color .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.color = HC.navy;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.color = HC.textMid;
               }}
             >
               Sign In
@@ -300,20 +212,140 @@ function Navbar({ config, onLogin, onRegister }) {
             <button
               onClick={onRegister}
               style={{
-                flex: 1,
-                padding: 10,
+                background: AMBER,
                 border: "none",
                 borderRadius: 8,
-                background: C.accent,
-                color: "#fff",
-                fontFamily: "'Barlow', sans-serif",
-                fontWeight: 700,
-                cursor: "pointer",
+                padding: "8px 20px",
+                color: HC.white,
                 fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                transition: "background .15s",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = AMBER_HOVER)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = AMBER)}
             >
-              Sign Up Free
+              Start Free →
             </button>
+          </div>
+        )}
+
+        {/* Hamburger button (mobile only) */}
+        {isMobile && (
+          <button
+            onClick={() => setOpen(!open)}
+            style={{
+              background: "none",
+              border: `1px solid ${HC.creamDark}`,
+              borderRadius: 8,
+              padding: "8px 10px",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              gap: 5,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-label="Toggle menu"
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  width: 22,
+                  height: 2,
+                  background: HC.navy,
+                  borderRadius: 2,
+                  transition: "transform .2s, opacity .2s",
+                  transformOrigin: "center",
+                  transform:
+                    open && i === 0 ? "translateY(7px) rotate(45deg)"
+                    : open && i === 1 ? "scaleX(0)"
+                    : open && i === 2 ? "translateY(-7px) rotate(-45deg)"
+                    : "none",
+                  opacity: open && i === 1 ? 0 : 1,
+                }}
+              />
+            ))}
+          </button>
+        )}
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {isMobile && (
+        <div
+          style={{
+            maxHeight: open ? 400 : 0,
+            overflow: "hidden",
+            transition: "max-height .3s ease",
+            background: HC.creamMid,
+            borderTop: open ? `1px solid ${HC.creamDark}` : "none",
+          }}
+        >
+          <div style={{ padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleNavLink(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: HC.textMid,
+                  fontSize: 16,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  textTransform: "capitalize",
+                  padding: "12px 0",
+                  textAlign: "left",
+                  borderBottom: `1px solid ${HC.creamDark}`,
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
+              >
+                {s}
+              </button>
+            ))}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+              <button
+                onClick={() => { onLogin(); setOpen(false); }}
+                style={{
+                  background: "none",
+                  border: `1px solid ${HC.creamDark}`,
+                  borderRadius: 8,
+                  padding: "11px",
+                  color: HC.textMid,
+                  fontSize: 14,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { onRegister(); setOpen(false); }}
+                style={{
+                  background: AMBER,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "12px",
+                  color: HC.white,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: "'Lato', sans-serif",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                }}
+              >
+                Start Free →
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
 import logo from "../../assets/img/landscaping-logo.png";
+import { HC, heroFontStyle } from "../../styles/landingTokens";
+import google from "../../assets/google-play.png";
+import Helmet from "react-helmet";
 // ─── Google Fonts ─────────────────────────────────────────────────────────────
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
@@ -79,10 +82,10 @@ function NoiseTile({ opacity = 0.04 }) {
   );
 }
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
-function Navbar({ config, C, onLogin, onRegister }) {
-  const [scrolled, setScrolled] = useState(false);
+/* ─── Navbar (restyled to match light hero) ──────────────────────────────── */
+function Navbar({ onLogin, onRegister }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -90,7 +93,27 @@ function Navbar({ config, C, onLogin, onRegister }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  useEffect(() => {
+    const fn = () => { if (window.innerWidth > 768) setOpen(false); };
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
   const links = ["features", "pricing", "testimonials", "faq"];
+  const AMBER = "#C67C3A";
+  const AMBER_HOVER = "#A9652C";
+
+  const handleNavLink = (id) => {
+    scrollTo(id);
+    setOpen(false);
+  };
 
   return (
     <nav
@@ -98,11 +121,10 @@ function Navbar({ config, C, onLogin, onRegister }) {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        background: base.ink,
-        borderBottom: `1px solid ${hexAlpha(C.accent, 0.15)}`,
+        background: HC.cream,
+        borderBottom: `1px solid ${HC.creamDark}`,
         transition: "box-shadow .2s",
-        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.4)" : "none",
-        fontFamily: "'Barlow', sans-serif",
+        boxShadow: scrolled ? "0 4px 20px rgba(15,23,42,0.08)" : "none",
       }}
     >
       <div
@@ -118,138 +140,71 @@ function Navbar({ config, C, onLogin, onRegister }) {
       >
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          
-          <div>
-           <img src={logo} width={160} alt="" />
+          <div
+            style={{
+              background: "transparent",
+              width: 160,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
         {/* Desktop links */}
-        <div
-          style={{
-            display: "flex",
-            gap: 28,
-            alignItems: "center",
-          }}
-        >
-          {links.map((s) => (
-            <button
-              key={s}
-              onClick={() => scrollTo(s)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "rgba(246,238,228,0.45)",
-                fontSize: 14,
-                fontFamily: "'Barlow', sans-serif",
-                fontWeight: 500,
-                textTransform: "capitalize",
-                transition: "color .2s",
-              }}
-              onMouseEnter={(e) => (e.target.style.color = "#F6EEE4")}
-              onMouseLeave={(e) =>
-                (e.target.style.color = "rgba(246,238,228,0.45)")
-              }
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => scrollTo(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: HC.textMid,
+                  fontSize: 14,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  textTransform: "capitalize",
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* CTA */}
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <button
-            onClick={onLogin}
-            style={{
-              background: "none",
-              border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
-              borderRadius: 8,
-              padding: "7px 18px",
-              color: "rgba(246,238,228,0.7)",
-              fontSize: 13,
-              fontFamily: "'Barlow', sans-serif",
-              cursor: "pointer",
-              transition: "border-color .2s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.borderColor = hexAlpha(C.accent, 0.6))
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.borderColor = hexAlpha(C.accent, 0.3))
-            }
-          >
-            Sign In
-          </button>
-          <button
-            onClick={onRegister}
-            style={{
-              background: C.accent,
-              border: "none",
-              borderRadius: 8,
-              padding: "8px 20px",
-              color: base.white,
-              fontSize: 13,
-              fontWeight: 700,
-              fontFamily: "'Barlow', sans-serif",
-              cursor: "pointer",
-              boxShadow: `0 4px 12px ${hexAlpha(C.accent, 0.4)}`,
-              transition: "opacity .2s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            {config.cta} →
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {open && (
-        <div
-          style={{
-            background: base.ink2,
-            borderTop: `1px solid ${hexAlpha(C.accent, 0.1)}`,
-            padding: "12px 24px 20px",
-          }}
-        >
-          {links.map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                scrollTo(s);
-                setOpen(false);
-              }}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-                background: "none",
-                border: "none",
-                color: "rgba(246,238,228,0.5)",
-                fontSize: 14,
-                fontFamily: "'Barlow', sans-serif",
-                padding: "10px 0",
-                cursor: "pointer",
-                textTransform: "capitalize",
-              }}
-            >
-              {s}
-            </button>
-          ))}
-          <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+        {/* Desktop CTA */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <button
               onClick={onLogin}
               style={{
-                flex: 1,
-                padding: "10px",
-                borderRadius: 8,
-                border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
                 background: "none",
-                color: "rgba(246,238,228,0.7)",
+                border: `1px solid ${HC.creamDark}`,
+                borderRadius: 8,
+                padding: "7px 18px",
+                color: HC.textMid,
                 fontSize: 13,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
+                fontWeight: 600,
                 cursor: "pointer",
+                transition: "border-color .15s, color .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.color = HC.navy;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.color = HC.textMid;
               }}
             >
               Sign In
@@ -257,20 +212,140 @@ function Navbar({ config, C, onLogin, onRegister }) {
             <button
               onClick={onRegister}
               style={{
-                flex: 1,
-                padding: "10px",
-                borderRadius: 8,
-                background: C.accent,
+                background: AMBER,
                 border: "none",
-                color: base.white,
+                borderRadius: 8,
+                padding: "8px 20px",
+                color: HC.white,
                 fontSize: 13,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                transition: "background .15s",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = AMBER_HOVER)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = AMBER)}
             >
-              Sign Up Free
+              Start Free →
             </button>
+          </div>
+        )}
+
+        {/* Hamburger button (mobile only) */}
+        {isMobile && (
+          <button
+            onClick={() => setOpen(!open)}
+            style={{
+              background: "none",
+              border: `1px solid ${HC.creamDark}`,
+              borderRadius: 8,
+              padding: "8px 10px",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              gap: 5,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-label="Toggle menu"
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  width: 22,
+                  height: 2,
+                  background: HC.navy,
+                  borderRadius: 2,
+                  transition: "transform .2s, opacity .2s",
+                  transformOrigin: "center",
+                  transform:
+                    open && i === 0 ? "translateY(7px) rotate(45deg)"
+                    : open && i === 1 ? "scaleX(0)"
+                    : open && i === 2 ? "translateY(-7px) rotate(-45deg)"
+                    : "none",
+                  opacity: open && i === 1 ? 0 : 1,
+                }}
+              />
+            ))}
+          </button>
+        )}
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {isMobile && (
+        <div
+          style={{
+            maxHeight: open ? 400 : 0,
+            overflow: "hidden",
+            transition: "max-height .3s ease",
+            background: HC.creamMid,
+            borderTop: open ? `1px solid ${HC.creamDark}` : "none",
+          }}
+        >
+          <div style={{ padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleNavLink(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: HC.textMid,
+                  fontSize: 16,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  textTransform: "capitalize",
+                  padding: "12px 0",
+                  textAlign: "left",
+                  borderBottom: `1px solid ${HC.creamDark}`,
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
+              >
+                {s}
+              </button>
+            ))}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+              <button
+                onClick={() => { onLogin(); setOpen(false); }}
+                style={{
+                  background: "none",
+                  border: `1px solid ${HC.creamDark}`,
+                  borderRadius: 8,
+                  padding: "11px",
+                  color: HC.textMid,
+                  fontSize: 14,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { onRegister(); setOpen(false); }}
+                style={{
+                  background: AMBER,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "12px",
+                  color: HC.white,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: "'Lato', sans-serif",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                }}
+              >
+                Start Free →
+              </button>
+            </div>
           </div>
         </div>
       )}

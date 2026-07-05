@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/photography-logo.png";
+import { HC, heroFontStyle } from "../../styles/landingTokens";
+import google from "../../assets/google-play.png";
+import Helmet from "react-helmet";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -324,7 +327,7 @@ function MockInvoice() {
     </div>
   );
 }
-
+/* ─── Navbar (restyled to match light hero) ──────────────────────────────── */
 function Navbar({ onLogin, onRegister }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -335,7 +338,6 @@ function Navbar({ onLogin, onRegister }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  // Close menu on resize to desktop
   useEffect(() => {
     const fn = () => { if (window.innerWidth > 768) setOpen(false); };
     window.addEventListener("resize", fn);
@@ -350,6 +352,8 @@ function Navbar({ onLogin, onRegister }) {
   }, []);
 
   const links = ["features", "pricing", "testimonials", "faq"];
+  const AMBER = "#C67C3A";
+  const AMBER_HOVER = "#A9652C";
 
   const handleNavLink = (id) => {
     scrollTo(id);
@@ -362,10 +366,10 @@ function Navbar({ onLogin, onRegister }) {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        background: C.ink,
-        borderBottom: `1px solid rgba(255,255,255,0.06)`,
+        background: HC.cream,
+        borderBottom: `1px solid ${HC.creamDark}`,
         transition: "box-shadow .2s",
-        boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
+        boxShadow: scrolled ? "0 4px 20px rgba(15,23,42,0.08)" : "none",
       }}
     >
       <div
@@ -406,15 +410,15 @@ function Navbar({ onLogin, onRegister }) {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "rgba(255,255,255,0.55)",
+                  color: HC.textMid,
                   fontSize: 14,
-                  fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 500,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
                   textTransform: "capitalize",
                   transition: "color .2s",
                 }}
-                onMouseEnter={(e) => (e.target.style.color = C.white)}
-                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.55)")}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
               >
                 {s}
               </button>
@@ -429,13 +433,23 @@ function Navbar({ onLogin, onRegister }) {
               onClick={onLogin}
               style={{
                 background: "none",
-                border: "1px solid rgba(255,255,255,0.2)",
+                border: `1px solid ${HC.creamDark}`,
                 borderRadius: 8,
                 padding: "7px 18px",
-                color: "rgba(255,255,255,0.75)",
+                color: HC.textMid,
                 fontSize: 13,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
+                fontWeight: 600,
                 cursor: "pointer",
+                transition: "border-color .15s, color .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.color = HC.navy;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.color = HC.textMid;
               }}
             >
               Sign In
@@ -443,17 +457,20 @@ function Navbar({ onLogin, onRegister }) {
             <button
               onClick={onRegister}
               style={{
-                background: C.orange,
+                background: AMBER,
                 border: "none",
                 borderRadius: 8,
                 padding: "8px 20px",
-                color: C.white,
+                color: HC.white,
                 fontSize: 13,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                transition: "background .15s",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = AMBER_HOVER)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = AMBER)}
             >
               Start Free →
             </button>
@@ -466,7 +483,7 @@ function Navbar({ onLogin, onRegister }) {
             onClick={() => setOpen(!open)}
             style={{
               background: "none",
-              border: "1px solid rgba(255,255,255,0.15)",
+              border: `1px solid ${HC.creamDark}`,
               borderRadius: 8,
               padding: "8px 10px",
               cursor: "pointer",
@@ -478,7 +495,6 @@ function Navbar({ onLogin, onRegister }) {
             }}
             aria-label="Toggle menu"
           >
-            {/* Animated hamburger lines */}
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
@@ -486,7 +502,7 @@ function Navbar({ onLogin, onRegister }) {
                   display: "block",
                   width: 22,
                   height: 2,
-                  background: C.white,
+                  background: HC.navy,
                   borderRadius: 2,
                   transition: "transform .2s, opacity .2s",
                   transformOrigin: "center",
@@ -510,8 +526,8 @@ function Navbar({ onLogin, onRegister }) {
             maxHeight: open ? 400 : 0,
             overflow: "hidden",
             transition: "max-height .3s ease",
-            background: C.ink2,
-            borderTop: open ? `1px solid rgba(255,255,255,0.07)` : "none",
+            background: HC.creamMid,
+            borderTop: open ? `1px solid ${HC.creamDark}` : "none",
           }}
         >
           <div style={{ padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
@@ -523,35 +539,35 @@ function Navbar({ onLogin, onRegister }) {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "rgba(255,255,255,0.65)",
+                  color: HC.textMid,
                   fontSize: 16,
-                  fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 500,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
                   textTransform: "capitalize",
                   padding: "12px 0",
                   textAlign: "left",
-                  borderBottom: `1px solid rgba(255,255,255,0.06)`,
+                  borderBottom: `1px solid ${HC.creamDark}`,
                   transition: "color .2s",
                 }}
-                onMouseEnter={(e) => (e.target.style.color = C.white)}
-                onMouseLeave={(e) => (e.target.style.color = "rgba(255,255,255,0.65)")}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
               >
                 {s}
               </button>
             ))}
 
-            {/* Mobile CTAs */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
               <button
                 onClick={() => { onLogin(); setOpen(false); }}
                 style={{
                   background: "none",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  border: `1px solid ${HC.creamDark}`,
                   borderRadius: 8,
                   padding: "11px",
-                  color: "rgba(255,255,255,0.75)",
+                  color: HC.textMid,
                   fontSize: 14,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
                   cursor: "pointer",
                 }}
               >
@@ -560,16 +576,16 @@ function Navbar({ onLogin, onRegister }) {
               <button
                 onClick={() => { onRegister(); setOpen(false); }}
                 style={{
-                  background: C.orange,
+                  background: AMBER,
                   border: "none",
                   borderRadius: 8,
                   padding: "12px",
-                  color: C.white,
+                  color: HC.white,
                   fontSize: 14,
                   fontWeight: 700,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontFamily: "'Lato', sans-serif",
                   cursor: "pointer",
-                  boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                  boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
                 }}
               >
                 Start Free →
