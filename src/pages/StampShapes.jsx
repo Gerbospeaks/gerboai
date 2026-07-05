@@ -1,103 +1,176 @@
 import React from "react";
 
-// clip-path outlines for non-rectangular / non-circular shapes.
-// Add new shapes here — that's the only step needed to support a new outline.
-const SHAPE_CLIP_PATHS = {
-  hexagon: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-  triangle: "polygon(50% 0%, 0% 100%, 100% 100%)",
-  diamond: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-  pentagon: "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
-  badge: "polygon(50% 0%, 93% 25%, 93% 70%, 50% 100%, 7% 70%, 7% 25%)", // shield/badge look
-};
-
-// Shapes whose text sits fine straight-on (no clip-path needed — handled
-// with border-radius instead, which renders more cleanly than clip-path).
-const RADIUS_SHAPES = {
-  rect: "8px",
-  oval: "50%",
-  "rounded-square": "16%",
+// Each polygon shape: outline points (300x300 viewBox) + optional straight
+// top/bottom edge paths that text can run along, with their known pixel
+// width so we can force-fit text to that exact width via textLength.
+const SHAPES = {
+  hexagon: {
+    points: "82.5,15 217.5,15 285,150 217.5,285 82.5,285 15,150",
+    topPath: "M 82.5,34 L 217.5,34",   topWidth: 125,
+    bottomPath: "M 82.5,266 L 217.5,266", bottomWidth: 125,
+  },
+  pentagon: {
+    points: "150,15 288,110 235,285 65,285 12,110",
+    topPath: "M 78,98 L 222,98",   topWidth: 134,
+    bottomPath: "M 68,266 L 232,266", bottomWidth: 154,
+  },
+  badge: {
+    points: "150,15 275,72 275,195 150,285 25,195 25,72",
+    topPath: "M 65,58 L 235,58",   topWidth: 160,
+    bottomPath: "M 58,232 L 242,232", bottomWidth: 174,
+  },
+  diamond: {
+    points: "150,15 285,150 150,285 15,150",
+    // no usable flat edge — centered text only
+  },
+  triangle: {
+    points: "150,25 275,275 25,275",
+    // no usable flat top edge — centered text only
+  },
 };
 
 export const STAMP_SHAPES = [
-  { value: "circle", label: "Round" },       // handled separately (CircleStamp)
+  { value: "circle", label: "Round" },
   { value: "rect", label: "Rectangle" },
   { value: "oval", label: "Oval" },
-  { value: "hexagon", label: "Hexagon" },
-  { value: "diamond", label: "Diamond" },
-  { value: "pentagon", label: "Pentagon" },
-  { value: "badge", label: "Badge" },
-  { value: "triangle", label: "Triangle" },
+ 
 ];
+
+const BOX_SHAPES = { rect: "8px", oval: "50%" };
 
 export default function ShapeStamp({
   shape = "rect",
-  text = "APPROVED",
+  text = "",
   color = "#d32f2f",
   showDate = true,
   rotation = -5,
   size = "medium",
+  companyName = "",
+  companyAddress = "",
+  dateStr = "",
 }) {
-  const today = new Date().toLocaleDateString("en-ZA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+    const uid = React.useId().replace(/:/g, "");
+  const boxSizes = { small: 150, medium: 190, large: 230 };
+  const svgSizes = { small: 130, medium: 170, large: 210 };
 
-  const sizes = {
-    small: { w: 140, h: 90, fontSize: "12px", dateSize: "9px", border: "2px", padding: "10px" },
-    medium: { w: 190, h: 120, fontSize: "16px", dateSize: "11px", border: "3px", padding: "14px" },
-    large: { w: 240, h: 150, fontSize: "20px", dateSize: "13px", border: "4px", padding: "18px" },
-  };
-  const s = sizes[size] || sizes.medium;
-  const clipPath = SHAPE_CLIP_PATHS[shape];
-  const borderRadius = RADIUS_SHAPES[shape] ?? (clipPath ? "0" : "8px");
+  // ── Rectangle / oval — roomy flexbox layout, plenty of space, no clipping ──
+  if (BOX_SHAPES[shape]) {
+    const w = boxSizes[size] || boxSizes.medium;
+    return (
+      <div
+        style={{
+          width: w,
+          minHeight: w * 0.62,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: `3px solid ${color}`,
+          borderRadius: BOX_SHAPES[shape],
+          transform: `rotate(${rotation}deg)`,
+          background: "transparent",
+          fontFamily: "Courier New, monospace",
+          userSelect: "none",
+          pointerEvents: "none",
+          boxSizing: "border-box",
+          padding: "10px",
+        }}
+      >
+        <div style={{ textAlign: "center", width: "100%" }}>
+          {companyName && (
+            <div style={{ fontWeight: "bold", fontSize: 11, color, textTransform: "uppercase", letterSpacing: "1px" }}>
+              {companyName}
+            </div>
+          )}
+          <div style={{ fontWeight: "bold", fontSize: 17, color, textTransform: "uppercase", letterSpacing: "1.5px", margin: "3px 0" }}>
+            {text}
+          </div>
+          {companyAddress && <div style={{ fontSize: 8, color }}>{companyAddress}</div>}
+          {showDate && <div style={{ fontSize: 9, color, marginTop: 3 }}>{dateStr}</div>}
+        </div>
+      </div>
+    );
+  }
 
-  // Shapes with sharp points (triangle, diamond) need their text pulled
-  // toward the visual center of mass rather than the true geometric center,
-  // otherwise the label crowds an edge or point.
-  const contentOffset =
-    shape === "triangle" ? { paddingTop: "38%" } :
-    shape === "diamond" ? { padding: `${s.h * 0.3}px ${s.w * 0.22}px` } :
-    {};
+  // ── Polygon shapes — SVG, text auto-fit via textLength so it can never overflow ──
+  const def = SHAPES[shape] || SHAPES.hexagon;
+  const px = svgSizes[size] || svgSizes.medium;
+  
+  const hasTop = def.topPath && companyName;
+  const hasBottom = def.bottomPath && companyAddress;
 
   return (
-    <div
-      style={{
-        width: s.w,
-        height: s.h,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        border: `${s.border} solid ${color}`,
-        borderRadius,
-        clipPath,
-        transform: `rotate(${rotation}deg)`,
-        background: `${color}14`,
-        fontFamily: "Courier New, monospace",
-        userSelect: "none",
-        pointerEvents: "none",
-        boxSizing: "border-box",
-      }}
+    <svg
+      viewBox="0 0 300 300"
+      width={px}
+      height={px}
+      style={{ transform: `rotate(${rotation}deg)`, display: "block" }}
     >
-      <div style={{ textAlign: "center", padding: s.padding, ...contentOffset }}>
-        <div
-          style={{
-            fontWeight: "bold",
-            fontSize: s.fontSize,
-            color,
-            textTransform: "uppercase",
-            letterSpacing: "1.5px",
-            lineHeight: 1.15,
-          }}
+      <polygon points={def.points} fill="transparent" stroke={color} strokeWidth="4" opacity=".9" />
+
+      {hasTop && (
+        <>
+          <path id={`top-${uid}`} d={def.topPath} fill="none" />
+          <text fill={color} fontSize="14" fontWeight="bold" fontFamily="Courier New, monospace">
+            <textPath
+              href={`#top-${uid}`}
+              startOffset="50%"
+              textAnchor="middle"
+              textLength={def.topWidth}
+              lengthAdjust="spacingAndGlyphs"
+            >
+              {companyName.toUpperCase()}
+            </textPath>
+          </text>
+        </>
+      )}
+
+      {hasBottom && (
+        <>
+          <path id={`bot-${uid}`} d={def.bottomPath} fill="none" />
+          <text fill={color} fontSize="10" fontWeight="bold" fontFamily="Courier New, monospace">
+            <textPath
+              href={`#bot-${uid}`}
+              startOffset="50%"
+              textAnchor="middle"
+              textLength={def.bottomWidth}
+              lengthAdjust="spacingAndGlyphs"
+            >
+              {companyAddress}
+            </textPath>
+          </text>
+        </>
+      )}
+
+      {/* Center text — always auto-fits to 150px width regardless of shape */}
+      <text
+        x="150"
+        y={hasTop || hasBottom ? "158" : "160"}
+        fill={color}
+        fontSize="20"
+        fontWeight="bold"
+        fontFamily="Courier New, monospace"
+        letterSpacing="1"
+        textAnchor="middle"
+        textLength="150"
+        lengthAdjust="spacingAndGlyphs"
+      >
+        {text}
+      </text>
+
+      {showDate && !hasBottom && (
+        <text
+          x="150"
+          y="185"
+          fill={color}
+          fontSize="11"
+          textAnchor="middle"
+          fontFamily="Courier New, monospace"
+          textLength="80"
+          lengthAdjust="spacingAndGlyphs"
         >
-          {text}
-        </div>
-        {showDate && (
-          <div style={{ fontSize: s.dateSize, color, marginTop: "4px" }}>
-            {today}
-          </div>
-        )}
-      </div>
-    </div>
+          {dateStr}
+        </text>
+      )}
+    </svg>
   );
 }

@@ -1,19 +1,5 @@
-/**
- * StampOverlay.jsx
- *
- * Drop this onto any document wrapper (position: relative).
- * It reads stampConfig (from StampSignatureModal's onConfirm) and renders
- * the stamp and/or signature at the saved coordinates for the given page.
- *
- * Props:
- *   stampConfig   – { pageConfigs, signatureDataUrl, stampStyle }
- *   pageNumber    – which page to render overlays for (default 1)
- *   containerW    – actual rendered width  of the document (px). Default 794 (full size)
- *   containerH    – actual rendered height of the document (px). Default 1123
- */
-
 import React from "react";
-
+import ShapeStamp from "./StampShapes";
 const FULL_W = 794;
 const FULL_H = 1123;
 
@@ -244,7 +230,13 @@ export default function StampOverlay({
     "DEC",
   ];
   const dateStr = `${String(now.getDate()).padStart(2, "0")} ${mo[now.getMonth()]} ${now.getFullYear()}`;
-
+const formatStampDate = (isoDate) => {
+  if (!isoDate) return "";
+  const d = new Date(isoDate + "T00:00:00");
+  if (isNaN(d)) return isoDate;
+  const mo = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  return `${String(d.getDate()).padStart(2, "0")} ${mo[d.getMonth()]} ${d.getFullYear()}`;
+};
   const companyName = businessInfo?.businessName ?? "MY COMPANY";
  const companyAddress = [
   businessInfo?.addressLine2,
@@ -265,21 +257,25 @@ export default function StampOverlay({
             zIndex: 20,
           }}
         >
-          {stampStyle?.stampType === "rect" ? (
-            <RectStamp
-              text={stampStyle.text}
-              color={stampStyle.color}
-              showDate={stampStyle.showDate}
-              rotation={stampStyle.rotation}
-              size={stampStyle.size}
-            />
-          ) : (
-            <CircleStamp
+          {stampStyle?.stampType === "circle" ? (
+           <CircleStamp
               size={pageCfg.stamp.size * scaleX}
               companyName={companyName}
               companyAddress={companyAddress}
               dateStr={dateStr}
             />
+          ) : (
+            <ShapeStamp
+    shape={stampStyle?.stampType}
+    text={formatStampDate(stampStyle.text)}
+    color={stampStyle?.color}
+    showDate={stampStyle?.showDate}
+    rotation={stampStyle?.rotation}
+    size={stampStyle?.size}
+    companyName={companyName}       
+    companyAddress={companyAddress} 
+    dateStr={dateStr}  
+  />
           )}
         </div>
       )}

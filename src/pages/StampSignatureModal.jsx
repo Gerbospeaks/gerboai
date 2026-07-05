@@ -17,7 +17,7 @@ import {
   Circle,
   Square,
 } from "lucide-react";
-import ShapeStamp, { STAMP_SHAPES } from "./StampShapes"
+import ShapeStamp, { STAMP_SHAPES } from "./StampShapes";
 
 // ─── Circular stamp (original) ───────────────────────────────────────────────
 function CircleStamp({
@@ -275,15 +275,14 @@ export default function StampSignatureModal({
 
   const totalPages = pageList.length || 1;
 
-  // ── Default stamp customisation ───────────────────────────────────────
   const defaultStampStyle = () => ({
-    stampType: externalStampSettings?.stampType ?? "circle", // "circle" | "rect"
-    text: externalStampSettings?.text ?? "APPROVED",
-    color: externalStampSettings?.color ?? "#d32f2f",
-    showDate: externalStampSettings?.showDate ?? true,
-    size: externalStampSettings?.size ?? "medium",
-    rotation: externalStampSettings?.rotation ?? -5,
-  });
+  stampType: externalStampSettings?.stampType ?? "circle",
+  text: externalStampSettings?.text ?? new Date().toISOString().slice(0, 10), // ← was "APPROVED"
+  color: externalStampSettings?.color ?? "#d32f2f",
+  showDate: externalStampSettings?.showDate ?? true,
+  size: externalStampSettings?.size ?? "medium",
+  rotation: externalStampSettings?.rotation ?? -5,
+});
 
   const [stampStyle, setStampStyle] = useState(defaultStampStyle);
 
@@ -309,16 +308,16 @@ export default function StampSignatureModal({
   const [currentPage, setCurrentPage] = useState(1);
   const sigFileRef = useRef(null);
   const containerRef = useRef(null);
-useEffect(() => {
-  setCurrentPage((p) => Math.min(Math.max(p, totalPages), totalPages));
-}, [totalPages]);
+  useEffect(() => {
+    setCurrentPage((p) => Math.min(Math.max(p, totalPages), totalPages));
+  }, [totalPages]);
   useEffect(() => {
     if (isOpen) {
-    setPageConfigs(initConfigs());
-    setSignatureDataUrl(existingConfigs?.signatureDataUrl ?? null);
-    setCurrentPage(totalPages); 
-    setStampStyle(defaultStampStyle());
-  }
+      setPageConfigs(initConfigs());
+      setSignatureDataUrl(existingConfigs?.signatureDataUrl ?? null);
+      setCurrentPage(totalPages);
+      setStampStyle(defaultStampStyle());
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, existingConfigs]);
 
@@ -468,7 +467,13 @@ useEffect(() => {
     ];
     return `${String(now.getDate()).padStart(2, "0")} ${mo[now.getMonth()]} ${now.getFullYear()}`;
   })();
-
+const formatStampDate = (isoDate) => {
+  if (!isoDate) return "";
+  const d = new Date(isoDate + "T00:00:00");
+  if (isNaN(d)) return isoDate;
+  const mo = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  return `${String(d.getDate()).padStart(2, "0")} ${mo[d.getMonth()]} ${d.getFullYear()}`;
+};
   const companyName = businessInfo?.businessName ?? "MY COMPANY NAME";
   const companyAddress = [
     businessInfo?.addressLine2,
@@ -480,28 +485,31 @@ useEffect(() => {
 
   if (!isOpen) return null;
 
-const StampOverlay = () => {
-  if (stampStyle.stampType === "circle") {
+  const StampOverlay = () => {
+    if (stampStyle.stampType === "circle") {
+      return (
+        <CircleStamp
+          size={toPreviewX(cfg.stamp.size)}
+          companyName={companyName}
+          companyAddress={companyAddress}
+          dateStr={dateStr}
+        />
+      );
+    }
     return (
-      <CircleStamp
-        size={toPreviewX(cfg.stamp.size)}
+      <ShapeStamp
+        shape={stampStyle.stampType}
+        text={formatStampDate(stampStyle.text)}
+        color={stampStyle.color}
+        showDate={stampStyle.showDate}
+        rotation={stampStyle.rotation}
+        size={stampStyle.size}
         companyName={companyName}
         companyAddress={companyAddress}
         dateStr={dateStr}
       />
     );
-  }
-  return (
-    <ShapeStamp
-      shape={stampStyle.stampType}
-      text={stampStyle.text}
-      color={stampStyle.color}
-      showDate={stampStyle.showDate}
-      rotation={stampStyle.rotation}
-      size={stampStyle.size}
-    />
-  );
-};
+  };
 
   // ── Sidebar section header ────────────────────────────────────────────
   const SectionLabel = ({ children }) => (
@@ -609,31 +617,19 @@ const StampOverlay = () => {
               </label>
 
               {/* ── Stamp type switcher ─────────────────────────── */}
-              <div className="flex gap-1.5 mb-3">
-                {[
-                  {
-                    value: "circle",
-                    icon: <Circle className="w-3.5 h-3.5" />,
-                    label: "Round",
-                  },
-                  {
-                    value: "rect",
-                    icon: <Square className="w-3.5 h-3.5" />,
-                    label: "Rectangle",
-                  },
-                ].map((opt) => (
+              <div className="grid grid-cols-3 gap-1.5 mb-3">
+                {STAMP_SHAPES.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() =>
                       setStampStyle((s) => ({ ...s, stampType: opt.value }))
                     }
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                    className={`py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                       stampStyle.stampType === opt.value
                         ? "bg-[#ce1414] text-white border-[#ce1414]"
                         : "bg-white text-[#374151] border-[#e2e8f0] hover:bg-[#f1f5f9]"
                     }`}
                   >
-                    {opt.icon}
                     {opt.label}
                   </button>
                 ))}
@@ -667,25 +663,20 @@ const StampOverlay = () => {
               )}
 
               {/* ── Rect-only: customisation controls ────────────── */}
-              {stampStyle.stampType === "rect" && (
+              {stampStyle.stampType !== "circle" && (
                 <div className="space-y-3 mt-1">
                   {/* Stamp text */}
                   <div>
                     <label className="text-xs text-[#64748b] block mb-1">
-                      Stamp text
+                      Stamp date
                     </label>
                     <input
-                      type="text"
+                      type="date"
                       value={stampStyle.text}
-                      maxLength={15}
                       onChange={(e) =>
-                        setStampStyle((s) => ({
-                          ...s,
-                          text: e.target.value.toUpperCase(),
-                        }))
+                        setStampStyle((s) => ({ ...s, text: e.target.value }))
                       }
-                      className="w-full px-2.5 py-1.5 text-xs font-bold uppercase border border-[#e2e8f0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ce1414] bg-white"
-                      placeholder="APPROVED"
+                      className="w-full px-2.5 py-1.5 text-xs font-bold border border-[#e2e8f0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ce1414] bg-white"
                     />
                     <span className="text-[10px] text-[#94a3b8]">
                       Max 15 characters
@@ -1045,8 +1036,13 @@ const StampOverlay = () => {
           </div>
           <button
             onClick={() =>
-  onConfirm({ pageConfigs, signatureDataUrl, stampStyle, lastPage: totalPages })
-}
+              onConfirm({
+                pageConfigs,
+                signatureDataUrl,
+                stampStyle,
+                lastPage: totalPages,
+              })
+            }
             className="flex items-center gap-2 px-5 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-semibold rounded-lg transition-colors"
           >
             <Check className="w-4 h-4" />
