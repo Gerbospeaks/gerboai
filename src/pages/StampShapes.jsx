@@ -47,7 +47,6 @@ export default function ShapeStamp({
   size = "medium",
   companyName = "",
   companyAddress = "",
-  dateStr = "",
 }) {
     const uid = React.useId().replace(/:/g, "");
   const boxSizes = { small: 150, medium: 190, large: 230 };
@@ -85,7 +84,7 @@ export default function ShapeStamp({
             {text}
           </div>
           {companyAddress && <div style={{ fontSize: 8, color }}>{companyAddress}</div>}
-          {showDate && <div style={{ fontSize: 9, color, marginTop: 3 }}>{dateStr}</div>}
+          {showDate && <div style={{ fontSize: 9, color, marginTop: 3 }}></div>}
         </div>
       </div>
     );
@@ -168,7 +167,7 @@ export default function ShapeStamp({
           textLength="80"
           lengthAdjust="spacingAndGlyphs"
         >
-          {dateStr}
+         
         </text>
       )}
     </svg>
