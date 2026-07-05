@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import logo from "../../assets/img/accounting-logo.png";
-import logotop from "../../assets/img/accounting-logo-top.png";
+import logotop from "../../assets/img/accounting-top-logo.png";
 import google from "../../assets/google-play.png";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
