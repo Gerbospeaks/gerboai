@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/carpentry-logo.png";
+import logotop from "../../assets/img/carpentry-logo-top.png";
 import { Helmet } from "react-helmet";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
@@ -146,7 +147,7 @@ function MockInvoice() {
               }}
             >
               <span style={{ fontSize: 20 }}>
-                <img src={logo} alt="" width={80} />
+                <img src={logotop} alt="" width={80} />
               </span>
               
             </div>
@@ -765,33 +766,6 @@ function Hero({ onRegister }) {
               See How It Works
             </button>
           </div>
-
-          {/* Trust row */}
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            {[
-              "Free plan forever",
-              "VAT-compliant quotes",
-              "Mobile-friendly",
-              "SA-built & hosted",
-            ].map((t) => (
-              <span
-                key={t}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  color: HC.textMuted,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  letterSpacing: "0.03em",
-                  fontFamily: "'Lato', sans-serif",
-                }}
-              >
-                <span style={{ color: "#C67C3A", fontSize: 10 }}>✦</span>
-                {t}
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* Right: Invoice preview */}
@@ -819,45 +793,7 @@ function Hero({ onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice />
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {[
-                ["R 56 200", "This Month"],
-                ["12", "Active Jobs"],
-                ["4.9★", "Client Rating"],
-              ].map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: HC.white,
-                    border: `1px solid ${HC.creamDark}`,
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontWeight: 700,
-                      fontSize: 18,
-                      color: HC.navy,
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: HC.textMuted,
-                      fontFamily: "'Lato', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+           
           </div>
         </div>
       </div>

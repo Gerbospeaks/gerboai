@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
 import logo from "../../assets/img/cleaning-logo.png";
-
+import { HC, heroFontStyle } from "../../styles/landingTokens";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -225,13 +225,13 @@ function Navbar({ config, onLogin, onRegister }) {
   );
 }
 
-/* ─── Hero ───────────────────────────────────────────────────────────────── */
+/* ─── Hero (restyled to match main LandingPage) ──────────────────────────── */
 function Hero({ config, onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorMid || config.color} 60%, ${config.colorDark || config.color} 100%)`,
-        padding: "72px 24px 80px",
+        background: HC.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -240,32 +240,36 @@ function Hero({ config, onRegister }) {
         justifyContent: "center",
       }}
     >
-     
-      {/* Glow blob */}
+      <style>{heroFontStyle}</style>
+
+      {/* Ambient glow, tinted with this industry's accent */}
       <div
         style={{
           position: "absolute",
-          top: -60,
-          right: -80,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: config.accent,
-          opacity: 0.1,
-          filter: "blur(80px)",
+          inset: 0,
+          background: `radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, ${config.accent}14 0%, transparent 55%)`,
+          pointerEvents: "none",
         }}
       />
 
+      {/* Framed "device" container, matching lp-hero-inner */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: `1px solid rgba(15,23,42,0.08)`,
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
@@ -276,11 +280,11 @@ function Hero({ config, onRegister }) {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: `${config.accent}1e`,
-              border: `1px solid ${config.accent}4d`,
+              background: `${config.accent}1a`,
+              border: `1px solid ${config.accent}40`,
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span
@@ -297,7 +301,7 @@ function Hero({ config, onRegister }) {
                 color: config.accent,
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
               {config.icon} Built for {config.label} Businesses
@@ -306,13 +310,12 @@ function Hero({ config, onRegister }) {
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1.05,
-              color: "#fff",
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: HC.navy,
+              margin: "0 0 24px",
             }}
           >
             {config.headline}
@@ -320,69 +323,75 @@ function Hero({ config, onRegister }) {
 
           <p
             style={{
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 17,
+              color: HC.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
             {config.subheadline}
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
+                height: 52,
+                padding: "0 32px",
                 background: config.accent,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
+                borderRadius: 4,
                 color: "#fff",
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 8px 24px ${config.accent}66`,
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               {config.cta}
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(255,255,255,0.75)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${HC.creamDark}`,
+                borderRadius: 4,
+                color: HC.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.background = HC.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
           {/* Trust badges */}
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "No credit card required",
               "Free plan available",
@@ -395,17 +404,14 @@ function Hero({ config, onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.35)",
+                  color: HC.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 20 20"
-                  fill={config.accent}
-                >
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={config.accent}>
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -419,13 +425,7 @@ function Hero({ config, onRegister }) {
         </div>
 
         {/* Right: Dashboard card visual */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ width: "100%", maxWidth: 420 }}>
             {/* Floating badge */}
             <div
@@ -439,8 +439,8 @@ function Hero({ config, onRegister }) {
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 marginBottom: 16,
               }}
             >
@@ -450,18 +450,18 @@ function Hero({ config, onRegister }) {
             {/* Mock dashboard */}
             <div
               style={{
-                background: "#fff",
+                background: HC.white,
                 borderRadius: 16,
-                boxShadow: `0 32px 80px ${config.color}38`,
+                boxShadow: "0 32px 80px rgba(15,23,42,0.14)",
                 overflow: "hidden",
-                border: "1px solid #E2E8F0",
-                fontFamily: "'Barlow', sans-serif",
+                border: `1px solid ${HC.creamDark}`,
+                fontFamily: "'Lato', sans-serif",
               }}
             >
               {/* Chrome bar */}
               <div
                 style={{
-                  background: "#F1F5F9",
+                  background: HC.creamMid,
                   padding: "10px 16px",
                   display: "flex",
                   alignItems: "center",
@@ -483,7 +483,7 @@ function Hero({ config, onRegister }) {
                 <div
                   style={{
                     flex: 1,
-                    background: "#fff",
+                    background: HC.white,
                     borderRadius: 6,
                     height: 22,
                     margin: "0 12px",
@@ -492,7 +492,7 @@ function Hero({ config, onRegister }) {
                     paddingLeft: 10,
                   }}
                 >
-                  <span style={{ fontSize: 11, color: "#64748B" }}>
+                  <span style={{ fontSize: 11, color: HC.textMuted }}>
                     solidflo.co.za/{config.slug || "cleaning"}/invoices
                   </span>
                 </div>
@@ -511,16 +511,16 @@ function Hero({ config, onRegister }) {
                 <div>
                   <p
                     style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 900,
+                      fontFamily: "'Playfair Display', serif",
+                      fontWeight: 700,
                       fontSize: 18,
-                      color: config.color,
+                      color: HC.navy,
                       margin: 0,
                     }}
                   >
                     {config.heroBusinessName || "CleanPro Services"}
                   </p>
-                  <p style={{ fontSize: 12, color: "#64748B", margin: 0 }}>
+                  <p style={{ fontSize: 12, color: HC.textMuted, margin: 0 }}>
                     Cape Town, South Africa
                   </p>
                 </div>
@@ -540,21 +540,15 @@ function Hero({ config, onRegister }) {
 
               {/* Recent jobs table */}
               <div style={{ padding: "0 24px" }}>
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: 12,
-                  }}
-                >
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                   <thead>
-                    <tr style={{ borderBottom: "1px solid #E2E8F0" }}>
+                    <tr style={{ borderBottom: `1px solid ${HC.creamDark}` }}>
                       {["Client", "Service", "Date", "Amount"].map((h) => (
                         <th
                           key={h}
                           style={{
                             padding: "10px 0 8px",
-                            color: "#64748B",
+                            color: HC.textMuted,
                             fontWeight: 600,
                             textAlign: h === "Client" ? "left" : "right",
                             fontSize: 11,
@@ -567,51 +561,17 @@ function Hero({ config, onRegister }) {
                   </thead>
                   <tbody>
                     {[
-                      {
-                        client: "Patel Home",
-                        service: "Deep Clean",
-                        date: "Apr 5",
-                        amount: "R850",
-                      },
-                      {
-                        client: "Botha Office",
-                        service: "Weekly",
-                        date: "Apr 4",
-                        amount: "R1 200",
-                      },
-                      {
-                        client: "Nkosi Villa",
-                        service: "Post-Move",
-                        date: "Apr 3",
-                        amount: "R1 500",
-                      },
-                      {
-                        client: "Smith House",
-                        service: "Monthly",
-                        date: "Apr 2",
-                        amount: "R650",
-                      },
+                      { client: "Patel Home", service: "Deep Clean", date: "Apr 5", amount: "R850" },
+                      { client: "Botha Office", service: "Weekly", date: "Apr 4", amount: "R1 200" },
+                      { client: "Nkosi Villa", service: "Post-Move", date: "Apr 3", amount: "R1 500" },
+                      { client: "Smith House", service: "Monthly", date: "Apr 2", amount: "R650" },
                     ].map((r, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #E2E8F0" }}>
-                        <td style={{ padding: "9px 0", color: "#1E293B" }}>
-                          {r.client}
-                        </td>
-                        <td
-                          style={{
-                            padding: "9px 0",
-                            textAlign: "right",
-                            color: "#64748B",
-                          }}
-                        >
+                      <tr key={i} style={{ borderBottom: `1px solid ${HC.creamDark}` }}>
+                        <td style={{ padding: "9px 0", color: HC.text }}>{r.client}</td>
+                        <td style={{ padding: "9px 0", textAlign: "right", color: HC.textMuted }}>
                           {r.service}
                         </td>
-                        <td
-                          style={{
-                            padding: "9px 0",
-                            textAlign: "right",
-                            color: "#64748B",
-                          }}
-                        >
+                        <td style={{ padding: "9px 0", textAlign: "right", color: HC.textMuted }}>
                           {r.date}
                         </td>
                         <td
@@ -631,29 +591,17 @@ function Hero({ config, onRegister }) {
               </div>
 
               {/* Total */}
-              <div
-                style={{
-                  padding: "12px 24px 20px",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
+              <div style={{ padding: "12px 24px 20px", display: "flex", justifyContent: "flex-end" }}>
                 <div
                   style={{
                     display: "flex",
                     gap: 32,
-                    background: config.color,
+                    background: HC.navy,
                     borderRadius: 8,
                     padding: "6px 14px",
                   }}
                 >
-                  <span
-                    style={{
-                      color: "rgba(255,255,255,0.7)",
-                      fontSize: 13,
-                      fontWeight: 600,
-                    }}
-                  >
+                  <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600 }}>
                     This Week
                   </span>
                   <span
@@ -682,8 +630,8 @@ function Hero({ config, onRegister }) {
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: HC.white,
+                    border: `1px solid ${HC.creamDark}`,
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -691,10 +639,10 @@ function Hero({ config, onRegister }) {
                 >
                   <div
                     style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
+                      fontFamily: "'Playfair Display', serif",
+                      fontWeight: 700,
                       fontSize: 18,
-                      color: "#fff",
+                      color: HC.navy,
                     }}
                   >
                     {v}
@@ -702,8 +650,8 @@ function Hero({ config, onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
+                      color: HC.textMuted,
+                      fontFamily: "'Lato', sans-serif",
                     }}
                   >
                     {l}
@@ -715,27 +663,30 @@ function Hero({ config, onRegister }) {
         </div>
       </div>
 
-      {/* Trusted by bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.3)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: HC.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA {config.label.toUpperCase()} BUSINESSES
+          Trusted by SA {config.label.toLowerCase()} businesses
         </span>
         {[
           "CleanPro Services",
@@ -746,11 +697,10 @@ function Hero({ config, onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(255,255,255,0.25)",
-              letterSpacing: 0.5,
+              color: HC.textMuted,
             }}
           >
             {b}
