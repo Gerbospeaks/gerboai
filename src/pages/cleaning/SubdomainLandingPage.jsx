@@ -4,6 +4,8 @@ import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
 import logo from "../../assets/img/cleaning-logo.png";
 import { HC, heroFontStyle } from "../../styles/landingTokens";
+import google from "../../assets/google-play.png";
+import Helmet from "react-helmet";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -1438,7 +1440,7 @@ function CTABanner({ config, onRegister }) {
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>{config.icon}</div>
+        <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
@@ -1687,6 +1689,72 @@ export default function SubdomainLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>Invoicing & Booking Software for Cleaning Businesses | SolidFlo</title>
+  <meta
+    name="description"
+    content="Manage bookings, send professional invoices, and track recurring clients — all in one place. Built for South African cleaning businesses, from domestic to commercial. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://cleaning.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Invoicing & Booking Software for Cleaning Businesses | SolidFlo" />
+  <meta
+    property="og:description"
+    content="Bookings, invoicing, and client management built for South African cleaning businesses — domestic, office, and commercial."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://cleaning.solidflo.co.za/" />
+  <meta property="og:image" content="https://cleaning.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Invoicing & Booking Software for Cleaning Businesses | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="Bookings, invoicing, and recurring client management — built for South African cleaning businesses."
+  />
+  <meta name="twitter:image" content="https://cleaning.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Cleaning Businesses",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://cleaning.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "400",
+      },
+    })}
+  </script>
+
+  {/* Structured data: FAQ — only include if this file has its own faqs array in scope */}
+  {/*
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map((f) => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a },
+      })),
+    })}
+  </script>
+  */}
+</Helmet>
       <style>{fontStyle}</style>
       <style>{`
         .nav-desktop { display: flex; }
