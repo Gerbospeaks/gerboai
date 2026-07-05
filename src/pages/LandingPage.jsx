@@ -555,8 +555,8 @@ const css = `
   .lp-hero-badge {
     display: inline-flex; align-items: center; gap: 7px;
   padding: 6px 14px;
-  background: rgba(99,102,241,.08);
-  border: 1px solid rgba(99,102,241,.2);
+  background: rgba(99,102,241,.01);
+  border: 0px solid rgba(99,102,241,.2);
   border-radius: 20px;
   font-size: 12px; font-weight: 700; letter-spacing: .05em;
   text-transform: uppercase; color: var(--red);
@@ -1795,8 +1795,7 @@ const stats = [
             {/* LEFT — text */}
             <div className="lp-hero-left">
               <div className="lp-hero-badge">
-                <Sparkles size={12} />
-                Trusted by 10,000+ businesses worldwide
+              
               </div>
 
               <h1>
