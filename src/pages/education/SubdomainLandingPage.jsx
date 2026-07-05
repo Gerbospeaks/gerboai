@@ -774,40 +774,7 @@ function Hero({ config, onRegister }) {
             </button>
           </div>
 
-          {/* Trust row */}
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            {(
-              config.trustBadges || [
-                "Free forever plan",
-                "VAT-compliant invoices",
-                "WhatsApp delivery",
-                "SA-built & hosted",
-              ]
-            ).map((t) => (
-              <span
-                key={t}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  color: config.textMuted || T.textMuted,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  letterSpacing: "0.03em",
-                  fontFamily: "'Lato', sans-serif",
-                }}
-              >
-                <svg width="13" height="13" viewBox="0 0 20 20" fill={config.accent}>
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {t}
-              </span>
-            ))}
-          </div>
+         
         </div>
 
         {/* Right: Invoice preview */}
@@ -835,41 +802,7 @@ function Hero({ config, onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice config={config} />
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {stats.map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: T.white,
-                    border: `1px solid ${config.creamDark || T.creamDark}`,
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontWeight: 700,
-                      fontSize: 18,
-                      color: config.navy || T.navy,
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: config.textMuted || T.textMuted,
-                      fontFamily: "'Lato', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+           
           </div>
         </div>
       </div>
