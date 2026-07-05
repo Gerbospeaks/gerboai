@@ -1285,7 +1285,7 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visible, setVisible] = useState({});
   const [cardsSwapped, setCardsSwapped] = useState(false);
-  const words = ["Smarter", "Faster", "Simpler", "Powerful", "Professional"];
+  const words = ["Smarter", "Faster", "Simpler", "Powerful", "Proper"];
   const slides = [
     {
       id: 1,
@@ -1317,7 +1317,7 @@ const LandingPage = () => {
       sub: "Manage clients, track payments, generate documents and run your business from one place.",
     },
     {
-      word: "Professional",
+      word: "Proper",
       sub: "Beautiful templates for every industry — billing, healthcare, education, construction and more.",
     },
   ];
