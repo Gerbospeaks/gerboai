@@ -573,15 +573,52 @@ const css = `
     pointer-events: none;
   }
   .lp-hero-badge {
-    display: inline-flex; align-items: center; gap: 7px;
-  padding: 6px 14px;
-  background: rgba(99,102,241,.01);
-  border: 0px solid rgba(99,102,241,.2);
-  border-radius: 20px;
-  font-size: 12px; font-weight: 700; letter-spacing: .05em;
-  text-transform: uppercase; color: var(--red);
+   display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  background: #fff;
+  border: 1px solid var(--cream-dark);
+  border-radius: 30px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
   margin-bottom: 28px;
   }
+  .lp-hero-badge-avatars {
+  display: flex;
+  align-items: center;
+}
+
+.lp-hero-badge-avatars img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  object-fit: cover;
+  margin-left: -8px;
+}
+
+.lp-hero-badge-avatars img:first-child {
+  margin-left: 0;
+}
+
+.lp-hero-badge-count {
+  background: var(--navy);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.lp-hero-badge-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-mid);
+  text-transform: none; /* override the uppercase from the old badge rule */
+  letter-spacing: normal;
+}
   .lp-hero h1 {
    font-size: clamp(2.8rem, 5vw, 4.5rem);
   line-height: 1.08;
@@ -1814,9 +1851,15 @@ const stats = [
           <div className="lp-hero-inner">
             {/* LEFT — text */}
             <div className="lp-hero-left">
-              <div className="lp-hero-badge">
-              
-              </div>
+             <div className="lp-hero-badge">
+  <div className="lp-hero-badge-avatars">
+    <img src="https://i.pravatar.cc/60?img=1" alt="" />
+    <img src="https://i.pravatar.cc/60?img=2" alt="" />
+    <img src="https://i.pravatar.cc/60?img=3" alt="" />
+  </div>
+  <span className="lp-hero-badge-count">Plus 10k</span>
+  <span className="lp-hero-badge-text">26 industries</span>
+</div>
 
               <h1>
                 Business Management
