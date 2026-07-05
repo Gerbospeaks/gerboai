@@ -216,6 +216,7 @@ export default function StampOverlay({
   containerW = FULL_W,
   containerH = FULL_H,
   businessInfo,
+  yOffset = 0,
 }) {
   if (!stampConfig) return null;
 
@@ -259,7 +260,7 @@ export default function StampOverlay({
           style={{
             position: "absolute",
             left: pageCfg.stamp.x * scaleX,
-            top: pageCfg.stamp.y * scaleY,
+           top: (pageCfg.stamp.y + yOffset) * scaleY,
             pointerEvents: "none",
             zIndex: 20,
           }}
@@ -289,7 +290,7 @@ export default function StampOverlay({
           style={{
             position: "absolute",
             left: pageCfg.sig.x * scaleX,
-            top: pageCfg.sig.y * scaleY,
+            top: (pageCfg.sig.y + yOffset) * scaleY,
             pointerEvents: "none",
             zIndex: 20,
           }}
@@ -315,3 +316,38 @@ export default function StampOverlay({
     </>
   );
 }
+export function AllPagesStampOverlay({
+  stampConfig,
+  businessInfo,
+  containerW = FULL_W,
+  containerH = FULL_H,
+}) {
+  if (!stampConfig?.pageConfigs) return null;
+
+  const pageNumbers = Object.keys(stampConfig.pageConfigs)
+    .map(Number)
+    .filter((n) => {
+      const c = stampConfig.pageConfigs[n];
+      return c && (c.stampEnabled || c.sigEnabled);
+    })
+    .sort((a, b) => a - b);
+
+  return (
+    <>
+      {pageNumbers.map((pn) => (
+        <StampOverlay
+          key={pn}
+          stampConfig={stampConfig}
+          pageNumber={pn}
+          businessInfo={businessInfo}
+          containerW={containerW}
+          containerH={containerH}
+          yOffset={(pn - 1) * PAGE_CONTENT_H - PAGE_MARGIN_TOP}
+        />
+      ))}
+    </>
+  );
+}
+export const PAGE_MARGIN_TOP = 20;
+export const PAGE_MARGIN_BOTTOM = 20;
+export const PAGE_CONTENT_H = FULL_H - PAGE_MARGIN_TOP - PAGE_MARGIN_BOTTOM;

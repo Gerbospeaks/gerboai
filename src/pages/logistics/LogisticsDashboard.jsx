@@ -12,7 +12,7 @@ import logo from "../../assets/img/solidflo-logo.png";
 import FinancialOverview from "../FinancialOverview";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import LogisticsSidebar from "./LogisticsSidebar";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
@@ -1102,7 +1102,10 @@ const [stampConfig, setStampConfig] = useState(null);
     <div id="print-area" className="hidden print:block bg-white"
       style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
       <TemplateRenderer {...templateProps} />
-      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+      <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
     </div>
 
@@ -1368,7 +1371,10 @@ const [stampConfig, setStampConfig] = useState(null);
                       style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                     </div>
                   </div>
                 </div>
@@ -1655,7 +1661,10 @@ const [stampConfig, setStampConfig] = useState(null);
                       }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
                     </div>
                   </div>

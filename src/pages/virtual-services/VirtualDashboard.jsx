@@ -36,7 +36,7 @@ import {
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Printer, Download } from "lucide-react";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
@@ -1429,7 +1429,10 @@ const [stampConfig, setStampConfig] = useState(null);
                       style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                     </div>
                   </div>
                 </div>
@@ -1654,7 +1657,10 @@ const [stampConfig, setStampConfig] = useState(null);
                       }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
                     </div>
                   </div>
@@ -1688,7 +1694,10 @@ const [stampConfig, setStampConfig] = useState(null);
         }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
      <SolidFloAgent industry="virtual" />
     </div>

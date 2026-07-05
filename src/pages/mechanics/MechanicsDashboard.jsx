@@ -1,8 +1,6 @@
 import { getAuth, signOut } from "firebase/auth";
 import JobCardTemplate from "./JobCardTemplate";
 import LetterheadEditor from "../../components/LetterheadEditor";
-
-
 import {
   addDoc,
   collection,
@@ -79,7 +77,7 @@ import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
 const WORKER_URL = process.env.REACT_APP_API_URL;
@@ -1817,11 +1815,10 @@ const MechanicsDashboard = () => {
         ) : (
           <div id="invoice-printable" style={{ position: "relative" }}>
             <TemplateRenderer {...templateProps} />
-            <StampOverlay
-              stampConfig={stampConfig}
-              pageNumber={1}
-              businessInfo={businessInfo}
-            />
+           <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
           </div>
         )}
         {documentType === "jobcard" && (
@@ -2221,11 +2218,10 @@ const MechanicsDashboard = () => {
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay
-                      stampConfig={stampConfig}
-                      pageNumber={1}
-                      businessInfo={businessInfo}
-                    />
+                   <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -3917,11 +3913,10 @@ const MechanicsDashboard = () => {
                     ) : (
                       <TemplateRenderer {...templateProps} />
                     )}
-                    <StampOverlay
-                      stampConfig={stampConfig}
-                      pageNumber={1}
-                      businessInfo={businessInfo}
-                    />
+                   <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
 

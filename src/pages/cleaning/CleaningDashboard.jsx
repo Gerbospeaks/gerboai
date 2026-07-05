@@ -15,7 +15,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import CleaningSidebar from "./CleaningSidebar";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
@@ -765,7 +765,10 @@ const bottomNavItems = [
         style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
       {showAIWindow && (
   <AIInvoiceWindow
@@ -999,7 +1002,10 @@ const bottomNavItems = [
                     style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -1809,7 +1815,10 @@ const bottomNavItems = [
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

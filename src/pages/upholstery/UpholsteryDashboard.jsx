@@ -38,7 +38,7 @@ import {
 import { Printer, Download, Sparkles, Trash2, Hammer } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
@@ -732,7 +732,10 @@ const [stampConfig, setStampConfig] = useState(null);
         style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
       {showAIWindow && (
         <AIInvoiceWindow
@@ -957,7 +960,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -1899,7 +1905,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

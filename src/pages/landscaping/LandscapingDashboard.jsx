@@ -26,7 +26,7 @@ import AppointmentsView from "./AppointmentsView";
 import CrewEquipmentView from "./CrewEquipmentView";
 import PlantLibraryView from "./PlantLibraryView";
 import IrrigationView from "./IrrigationView";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import { getFunctions } from "firebase/functions";
 import {
   getFirestore,
@@ -961,7 +961,10 @@ const [stampConfig, setStampConfig] = useState(null);
         style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
       </div>
 
@@ -1182,7 +1185,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -1527,7 +1533,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
                   </div>
                 </div>

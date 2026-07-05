@@ -16,7 +16,7 @@ import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceWindow from "../AIInvoiceWindow";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import LegalMultiStepForm from "./LegalMultiStepForm";
 import LegalSidebar from "./LegalSidebar";

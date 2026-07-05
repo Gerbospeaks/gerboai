@@ -450,12 +450,12 @@ const loadBusinessInfo = async () => {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4">
       <div className="bg-white w-full h-full sm:rounded-xl sm:max-w-5xl sm:h-[90vh] shadow-xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 bg-gray-900 border-b border-gray-200 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
               <Settings className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-base font-bold text-gray-800">
+            <h2 className="text-base font-bold text-white">
               Business Settings
             </h2>
           </div>

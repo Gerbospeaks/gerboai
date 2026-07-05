@@ -17,7 +17,7 @@ import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -679,7 +679,10 @@ const bottomNavItems = [
         style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
      {showAIWindow && (
   <AIInvoiceWindow
@@ -896,7 +899,10 @@ const bottomNavItems = [
                     style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -1703,7 +1709,10 @@ const bottomNavItems = [
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
                   </div>
                 </div>

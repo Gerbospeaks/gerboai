@@ -15,7 +15,7 @@ import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
@@ -1427,7 +1427,10 @@ const [stampConfig, setStampConfig] = useState(null);
                       style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                     </div>
                   </div>
                   {/* ── Stamp button footer ── */}
@@ -1662,7 +1665,10 @@ const [stampConfig, setStampConfig] = useState(null);
                       }}
                     >
                       <TemplateRenderer {...templateProps} />
-                      <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                      <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
                     </div>
                   </div>
@@ -1686,7 +1692,10 @@ const [stampConfig, setStampConfig] = useState(null);
         }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
      <SolidFloAgent industry="photography" /></div>
   );

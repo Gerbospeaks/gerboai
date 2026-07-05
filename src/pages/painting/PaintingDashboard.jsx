@@ -45,7 +45,7 @@ import {
   HardHat,
 } from "lucide-react";
 import { db } from "../../firebase";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import HistoryView from "./HistoryView";

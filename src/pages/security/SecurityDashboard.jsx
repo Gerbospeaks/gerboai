@@ -18,7 +18,7 @@ import { useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getAuth, signOut } from "firebase/auth";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import {
   getFirestore,
@@ -861,7 +861,10 @@ const [stampConfig, setStampConfig] = useState(null);
         style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
       {showAIWindow && (
         <AIInvoiceWindow
@@ -1450,7 +1453,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -1637,7 +1643,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

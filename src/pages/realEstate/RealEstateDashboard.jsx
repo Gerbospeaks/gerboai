@@ -41,7 +41,7 @@ import {
 } from "firebase/firestore";
 import { Printer, Download, Sparkles } from "lucide-react";
 import { db } from "../../firebase";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import CustomerModal from "../CustomerModal";
 import RealEstateMultiStepForm from "./RealEstateMultiStepForm";
 import CustomersListModal from "../CustomersListModal";
@@ -706,7 +706,10 @@ const [stampConfig, setStampConfig] = useState(null);
       {/* Print area */}
       <div id="print-area" className="hidden print:block bg-white" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
         {showAIWindow && (
                 <AIInvoiceWindow
@@ -836,7 +839,10 @@ const [stampConfig, setStampConfig] = useState(null);
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div className="mx-auto bg-white shadow-xl" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -974,7 +980,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     style={{ position: "relative", width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}

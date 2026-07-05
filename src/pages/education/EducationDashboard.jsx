@@ -14,7 +14,7 @@ import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";

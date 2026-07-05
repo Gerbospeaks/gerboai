@@ -17,87 +17,7 @@ import {
   Circle,
   Square,
 } from "lucide-react";
-
-// ─── Rectangular stamp (customisable) ────────────────────────────────────────
-function RectStamp({
-  text = "APPROVED",
-  color = "#d32f2f",
-  showDate = true,
-  rotation = -5,
-  size = "medium",
-}) {
-  const today = new Date().toLocaleDateString("en-ZA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-  const sizes = {
-    small: {
-      padding: "8px 16px",
-      fontSize: "14px",
-      dateSize: "10px",
-      border: "2px",
-    },
-    medium: {
-      padding: "12px 22px",
-      fontSize: "18px",
-      dateSize: "11px",
-      border: "3px",
-    },
-    large: {
-      padding: "18px 28px",
-      fontSize: "22px",
-      dateSize: "13px",
-      border: "4px",
-    },
-  };
-  const s = sizes[size] || sizes.medium;
-
-  return (
-    <div
-      style={{
-        display: "inline-block",
-        padding: s.padding,
-        border: `${s.border} solid ${color}`,
-        borderRadius: "8px",
-        transform: `rotate(${rotation}deg)`,
-        background: `${color}14`,
-        fontFamily: "Courier New, monospace",
-        userSelect: "none",
-        pointerEvents: "none",
-      }}
-    >
-      <div
-        style={{
-          fontWeight: "bold",
-          outline: `0px solid ${color}`,
-          outlineOffset: "2px",
-          fontSize: s.fontSize,
-          color,
-          textTransform: "uppercase",
-          letterSpacing: "2px",
-          textAlign: "center",
-          padding: "2px 4px",
-        }}
-      >
-        {text}
-      </div>
-      {showDate && (
-        <div
-          style={{
-            fontSize: s.dateSize,
-            color,
-            textAlign: "center",
-            marginTop: "5px",
-          }}
-        >
-          {today}
-        </div>
-      )}
-    </div>
-  );
-}
+import ShapeStamp, { STAMP_SHAPES } from "./StampShapes"
 
 // ─── Circular stamp (original) ───────────────────────────────────────────────
 function CircleStamp({
@@ -560,19 +480,8 @@ useEffect(() => {
 
   if (!isOpen) return null;
 
-  // ── Stamp renderer (preview inside document) ──────────────────────────
-  const StampOverlay = () => {
-    if (stampStyle.stampType === "rect") {
-      return (
-        <RectStamp
-          text={stampStyle.text}
-          color={stampStyle.color}
-          showDate={stampStyle.showDate}
-          rotation={stampStyle.rotation}
-          size={stampStyle.size}
-        />
-      );
-    }
+const StampOverlay = () => {
+  if (stampStyle.stampType === "circle") {
     return (
       <CircleStamp
         size={toPreviewX(cfg.stamp.size)}
@@ -581,7 +490,18 @@ useEffect(() => {
         dateStr={dateStr}
       />
     );
-  };
+  }
+  return (
+    <ShapeStamp
+      shape={stampStyle.stampType}
+      text={stampStyle.text}
+      color={stampStyle.color}
+      showDate={stampStyle.showDate}
+      rotation={stampStyle.rotation}
+      size={stampStyle.size}
+    />
+  );
+};
 
   // ── Sidebar section header ────────────────────────────────────────────
   const SectionLabel = ({ children }) => (
@@ -619,13 +539,13 @@ useEffect(() => {
 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[96vh] flex flex-col overflow-hidden">
         {/* ── Header ────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-gray-900 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-[#ce1414] rounded-lg flex items-center justify-center">
+            <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
               <Stamp className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-[#1e293b]">
+              <h2 className="text-sm font-semibold text-white">
                 Stamp &amp; Signature
               </h2>
               <p className="text-xs text-[#64748b]">

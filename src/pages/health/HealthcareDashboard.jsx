@@ -22,7 +22,7 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getFunctions } from "firebase/functions";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import AIInvoiceWindow from "../AIInvoiceWindow";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import {
   getFirestore,
   collection,

@@ -23,7 +23,7 @@ import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HVACMultiStepForm from "./HVACMultiStepForm";
 import AIInvoiceWindow from "../AIInvoiceWindow";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -1163,7 +1163,10 @@ const [stampConfig, setStampConfig] = useState(null);
         style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
       </div>
       {showAIWindow && (
         <AIInvoiceWindow
@@ -1403,7 +1406,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -1672,7 +1678,10 @@ const [stampConfig, setStampConfig] = useState(null);
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
                   </div>
                 </div>

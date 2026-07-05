@@ -31,7 +31,7 @@ import { db } from "../../firebase";
 import GuestModal from "./GuestModal";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";

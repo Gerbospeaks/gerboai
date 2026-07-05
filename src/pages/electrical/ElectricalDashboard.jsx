@@ -43,7 +43,7 @@ import HistoryView from "./HistoryView";
 import NotesView from "./NotesView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
 import ElectricalScheduleView from "./ElectricalScheduleView";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import ElectricalReportsView  from "./ElectricalReportsView";
 import {
   ChevronLeft,
@@ -704,7 +704,10 @@ const handleAddNewCustomer = () => {
         style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
       >
         <TemplateRenderer {...templateProps} />
-        <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+        <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
       </div>
       {showAIWindow && (
@@ -897,7 +900,10 @@ const handleAddNewCustomer = () => {
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div className="mx-auto bg-white shadow-xl" style={{ position: "relative", width: "210mm", minHeight: "297mm" }}>
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
                   </div>
                 </div>
               </div>
@@ -1648,7 +1654,10 @@ const handleAddNewCustomer = () => {
                     }}
                   >
                     <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={businessInfo} />
+                    <AllPagesStampOverlay
+  stampConfig={stampConfig}
+  businessInfo={businessInfo}
+/>
 
                   </div>
                 </div>

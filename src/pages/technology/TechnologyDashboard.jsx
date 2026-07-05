@@ -19,7 +19,7 @@ import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
-import StampOverlay from "../StampOverlay";
+import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TechnologyMultiStepForm from "./TechnologyMultiStepForm";
 import TechnologySidebar from "./TechnologySidebar";
 import { getFunctions, httpsCallable } from "firebase/functions";
