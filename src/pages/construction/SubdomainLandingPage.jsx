@@ -1820,7 +1820,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🏗️</div>
+       <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
