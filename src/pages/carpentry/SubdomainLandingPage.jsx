@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/carpentry-logo.png";
+import { Helmet } from "react-helmet";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -18,7 +19,22 @@ const C = {
   text: "#2D1F0E",
   muted: "#8C7B6B",
 };
-
+const HC = {
+  navy: "#0f172a",
+  indigo: "#6366f1",
+  indigoHover: "#4f46e5",
+  indigoLight: "#eef2ff",
+  cream: "#f8fafc",
+  creamMid: "#f1f5f9",
+  creamDark: "#e2e8f0",
+  text: "#0f172a",
+  textMid: "#475569",
+  textMuted: "#94a3b8",
+  white: "#ffffff",
+};
+const heroFontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;600;700;900&display=swap');
+`;
 /* ─── Scroll helper ─────────────────────────────────────────────────────── */
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -347,6 +363,7 @@ function Navbar({ onLogin, onRegister }) {
     scrollTo(id);
     setOpen(false);
   };
+/* ─── Hero-only design tokens (matches main LandingPage) ─────────────────── */
 
   return (
     <nav
@@ -574,13 +591,13 @@ function Navbar({ onLogin, onRegister }) {
   );
 }
 
-/* ─── Hero ──────────────────────────────────────────────────────────────── */
+/* ─── Hero (restyled to match main LandingPage) ──────────────────────────── */
 function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: C.ink,
-        padding: "72px 24px 80px",
+        background: HC.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -589,81 +606,61 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-      <WoodGrain opacity={0.045} />
+      <style>{heroFontStyle}</style>
 
-      {/* Warm glow */}
+      {/* Ambient glow, same language as main hero */}
       <div
         style={{
           position: "absolute",
-          bottom: -80,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 700,
-          height: 300,
-          borderRadius: "50%",
-          background: C.amber,
-          opacity: 0.12,
-          filter: "blur(80px)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Decorative chisel lines */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: 64,
-          height: "100%",
-          borderLeft: `1px solid rgba(198,124,58,0.06)`,
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 32,
-          width: 1,
-          height: "100%",
-          background: "rgba(198,124,58,0.04)",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(198,124,58,.06) 0%, transparent 55%)",
           pointerEvents: "none",
         }}
       />
 
+      {/* Framed "device" container, matching lp-hero-inner */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: `1px solid rgba(15,23,42,0.08)`,
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(198,124,58,0.12)",
-              border: "1px solid rgba(198,124,58,0.3)",
+              background: "rgba(198,124,58,0.1)",
+              border: "1px solid rgba(198,124,58,0.25)",
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span style={{ fontSize: 14 }}>🪚</span>
             <span
               style={{
-                color: C.amber,
+                color: "#C67C3A",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
                 letterSpacing: "0.05em",
               }}
             >
@@ -673,88 +670,93 @@ function Hero({ onRegister }) {
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 62px)",
-              lineHeight: 1.05,
-              color: "#F5E6D3",
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: HC.navy,
+              margin: "0 0 24px",
             }}
           >
-            Invoicing Built for
+            Invoicing built for
             <br />
-            <span style={{ color: C.amber }}>the Workshop,</span>
+            <em style={{ fontStyle: "italic", color: "#C67C3A" }}>the workshop,</em>
             <br />
-            Not the Boardroom.
+            not the boardroom.
           </h1>
 
           <p
             style={{
-              color: "rgba(245,230,211,0.5)",
-              fontSize: 17,
+              color: HC.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
             Send professional quotes, track materials, and get paid on time —
             purpose-built for South African carpenters and joinery businesses.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: C.amber,
+                height: 52,
+                padding: "0 32px",
+                background: "#C67C3A",
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
-                color: C.white,
-                fontSize: 15,
+                borderRadius: 4,
+                color: HC.white,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(198,124,58,0.4)",
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(198,124,58,0.08)",
-                border: "1px solid rgba(198,124,58,0.3)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(245,230,211,0.7)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${HC.creamDark}`,
+                borderRadius: 4,
+                color: HC.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.background = HC.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
           {/* Trust row */}
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "Free plan forever",
               "VAT-compliant quotes",
@@ -767,12 +769,14 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(245,230,211,0.3)",
+                  color: HC.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <span style={{ color: C.amber, fontSize: 10 }}>✦</span>
+                <span style={{ color: "#C67C3A", fontSize: 10 }}>✦</span>
                 {t}
               </span>
             ))}
@@ -780,15 +784,8 @@ function Hero({ onRegister }) {
         </div>
 
         {/* Right: Invoice preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ position: "relative" }}>
-            {/* Badge floating */}
             <div
               style={{
                 position: "absolute",
@@ -796,13 +793,13 @@ function Hero({ onRegister }) {
                 right: -18,
                 zIndex: 2,
                 background: "#16A34A",
-                color: C.white,
+                color: HC.white,
                 borderRadius: 10,
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -811,7 +808,6 @@ function Hero({ onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice />
-            {/* Stats row */}
             <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
               {[
                 ["R 56 200", "This Month"],
@@ -822,8 +818,8 @@ function Hero({ onRegister }) {
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(198,124,58,0.08)",
-                    border: "1px solid rgba(198,124,58,0.2)",
+                    background: HC.white,
+                    border: `1px solid ${HC.creamDark}`,
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -831,10 +827,10 @@ function Hero({ onRegister }) {
                 >
                   <div
                     style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
+                      fontFamily: "'Playfair Display', serif",
+                      fontWeight: 700,
                       fontSize: 18,
-                      color: "#F5E6D3",
+                      color: HC.navy,
                     }}
                   >
                     {v}
@@ -842,8 +838,8 @@ function Hero({ onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(245,230,211,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
+                      color: HC.textMuted,
+                      fontFamily: "'Lato', sans-serif",
                     }}
                   >
                     {l}
@@ -855,27 +851,30 @@ function Hero({ onRegister }) {
         </div>
       </div>
 
-      {/* Trusted by bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(198,124,58,0.1)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(245,230,211,0.25)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: HC.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA CARPENTERS
+          Trusted by SA carpenters
         </span>
         {[
           "Van der Merwe Custom Furniture",
@@ -886,11 +885,10 @@ function Hero({ onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(245,230,211,0.2)",
-              letterSpacing: 0.5,
+              color: HC.textMuted,
             }}
           >
             {b}
@@ -900,7 +898,6 @@ function Hero({ onRegister }) {
     </section>
   );
 }
-
 /* ─── Craft Divider ─────────────────────────────────────────────────────── */
 function CraftDivider() {
   return (
@@ -2163,6 +2160,72 @@ export default function SubdomainLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>Invoicing Software for Carpenters & Joiners | SolidFlo</title>
+  <meta
+    name="description"
+    content="Send professional quotes, track materials, and get paid on time. VAT-compliant invoicing built for South African carpenters and joinery businesses. Free plan available — no credit card required."
+  />
+  <link rel="canonical" href="https://carpentry.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Invoicing Software for Carpenters & Joiners | SolidFlo" />
+  <meta
+    property="og:description"
+    content="Quotes, materials tracking, and VAT-compliant invoicing — purpose-built for South African carpenters and joinery businesses."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://carpentry.solidflo.co.za/" />
+  <meta property="og:image" content="https://carpentry.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Invoicing Software for Carpenters & Joiners | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="Quotes, materials tracking, and VAT-compliant invoicing — built for the workshop, not the boardroom."
+  />
+  <meta name="twitter:image" content="https://carpentry.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Carpenters",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://carpentry.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "500",
+      },
+    })}
+  </script>
+
+  {/* Structured data: FAQ — only include if this file has its own faqs array in scope */}
+  {/*
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map((f) => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a },
+      })),
+    })}
+  </script>
+  */}
+</Helmet>
       <style>{fontStyle}</style>
       <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
         <Navbar onLogin={goLogin} onRegister={goRegister} />
