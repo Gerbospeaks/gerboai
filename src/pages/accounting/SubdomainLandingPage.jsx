@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import logo from "../../assets/img/accounting-logo.png";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
@@ -2134,6 +2135,39 @@ export default function SubdomainLandingPage() {
 
   return (
     <>
+      <Helmet>
+        <title>Accounting Software for SA Practices | SolidFlo</title>
+        <meta
+          name="description"
+          content="SARS-compliant invoicing, automated payment reminders, and cash flow dashboards built for South African accounting firms. Free plan available — start in 60 seconds."
+        />
+        <link rel="canonical" href="https://accounting.solidflo.co.za/" />
+
+        <meta property="og:title" content="Accounting Software for SA Practices | SolidFlo" />
+        <meta property="og:description" content="SARS-compliant invoicing and payment automation built for South African accounting firms." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://accounting.solidflo.co.za/" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Accounting Software for SA Practices | SolidFlo" />
+        <meta name="twitter:description" content="SARS-compliant invoicing and payment automation built for South African accounting firms." />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "SolidFlo for Accounting Practices",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "ZAR" },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "ratingCount": "800",
+            },
+          })}
+        </script>
+      </Helmet>
       <style>{fontStyle}</style>
       <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
         <Navbar onLogin={goLogin} onRegister={goRegister} />

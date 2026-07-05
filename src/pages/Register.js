@@ -7,7 +7,7 @@ import slide1 from "../assets/img/slide1.avif";
 import slide2 from "../assets/img/slide2.avif";
 import slide3 from "../assets/img/slide3.jpg";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
-
+import { getSubdomainFromHost } from "../utils/subdomain";
 /* ─── Slide data ─────────────────────────────────────────────────────────── */
 const slides = [
   {
@@ -94,7 +94,18 @@ export default function Register() {
     localStorage.setItem("pendingDashboardId", pending); 
   }
 }, []);
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get("industry");
+  const fromSubdomain = getSubdomainFromHost(); // e.g. "accounting" on accounting.solidflo.co.za
+  const pending =
+    fromQuery || fromSubdomain || localStorage.getItem("pendingDashboardId");
 
+  if (pending) {
+    setDashboardId(pending);
+    localStorage.setItem("pendingDashboardId", pending);
+  }
+}, []);
   const industryInfo = dashboards.find((d) => d.id === dashboardId);
 
   const { register } = useAuth();
