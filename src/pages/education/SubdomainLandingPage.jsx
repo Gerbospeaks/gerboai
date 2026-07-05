@@ -4,6 +4,7 @@ import heroVideo from "../../assets/videos/education.mp4";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
 import logo from "../../assets/img/educare-logo.png";
+import logotop from "../../assets/img/educare-logo-top.png";
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -174,7 +175,7 @@ function MockInvoice({ config }) {
           }}
         >
           <div>
-            <img src={logo} width={72} alt="" style={{ marginBottom: 5 }} />
+            <img src={logotop} width={72} alt="" style={{ marginBottom: 5 }} />
             <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>{bizName}</p>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -1998,7 +1999,7 @@ function CTABanner({ config, onRegister }) {
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 44, marginBottom: 14 }}>{config.icon}</div>
+       <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
