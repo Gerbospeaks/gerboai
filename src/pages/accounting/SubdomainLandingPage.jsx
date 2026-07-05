@@ -4,7 +4,25 @@ import logo from "../../assets/img/accounting-logo.png";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
+const HC = {
+  navy: "#0f172a",
+  indigo: "#6366f1",
+  indigoHover: "#4f46e5",
+  indigoLight: "#eef2ff",
+  cream: "#f8fafc",
+  creamMid: "#f1f5f9",
+  creamDark: "#e2e8f0",
+  text: "#0f172a",
+  textMid: "#475569",
+  textMuted: "#94a3b8",
+  white: "#ffffff",
+};
 
+/* Add these two families alongside your existing Barlow import.
+   Put this <style> once near the top of the component (or merge into fontStyle). */
+const heroFontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;600;700;900&display=swap');
+`;
 /* ─── Design Tokens ────────────────────────────────────────────────────── */
 const C = {
   ink: "#085041", // deep teal (was deep navy)
@@ -29,12 +47,12 @@ function MockInvoice() {
   return (
     <div
       style={{
-        background: C.white,
+        background: HC.white,
         borderRadius: 16,
-        boxShadow: "0 32px 80px rgba(8,80,65,0.22)",
+        boxShadow: "0 32px 80px rgba(15,23,42,0.14)",
         overflow: "hidden",
-        fontFamily: "'Barlow', sans-serif",
-        border: `1px solid ${C.border}`,
+        fontFamily: "'Lato', sans-serif",
+        border: `1px solid ${HC.creamDark}`,
         maxWidth: 520,
         width: "100%",
       }}
@@ -42,7 +60,7 @@ function MockInvoice() {
       {/* Chrome bar */}
       <div
         style={{
-          background: "#F1F5F9",
+          background: HC.creamMid,
           padding: "10px 16px",
           display: "flex",
           alignItems: "center",
@@ -64,7 +82,7 @@ function MockInvoice() {
         <div
           style={{
             flex: 1,
-            background: C.white,
+            background: HC.white,
             borderRadius: 6,
             height: 22,
             margin: "0 12px",
@@ -73,7 +91,7 @@ function MockInvoice() {
             paddingLeft: 10,
           }}
         >
-          <span style={{ fontSize: 11, color: C.muted }}>
+          <span style={{ fontSize: 11, color: HC.textMuted }}>
             solidflo.co.za/accounting/INV-2024
           </span>
         </div>
@@ -83,7 +101,7 @@ function MockInvoice() {
       <div
         style={{
           padding: "20px 24px 16px",
-          borderBottom: `2px solid ${C.green}`,
+          borderBottom: `2px solid ${HC.indigo}`,
         }}
       >
         <div
@@ -105,19 +123,19 @@ function MockInvoice() {
               <span style={{ fontSize: 20 }}>🧾</span>
               <span
                 style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 900,
+                  fontFamily: "'Playfair Display', serif",
+                  fontWeight: 700,
                   fontSize: 18,
-                  color: C.ink,
+                  color: HC.navy,
                 }}
               >
                 SolidFlo
               </span>
             </div>
-            <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+            <p style={{ fontSize: 12, color: HC.textMuted, margin: 0 }}>
               Mokoena Accounting Inc.
             </p>
-            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+            <p style={{ fontSize: 11, color: HC.textMuted, margin: 0 }}>
               Johannesburg, South Africa
             </p>
           </div>
@@ -137,16 +155,16 @@ function MockInvoice() {
             </div>
             <p
               style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 800,
+                fontFamily: "'Playfair Display', serif",
+                fontWeight: 700,
                 fontSize: 20,
-                color: C.ink,
+                color: HC.navy,
                 margin: 0,
               }}
             >
               INV-0087
             </p>
-            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+            <p style={{ fontSize: 11, color: HC.textMuted, margin: 0 }}>
               Issued 28 Mar 2025
             </p>
           </div>
@@ -159,13 +177,13 @@ function MockInvoice() {
           style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
         >
           <thead>
-            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+            <tr style={{ borderBottom: `1px solid ${HC.creamDark}` }}>
               {["Description", "Qty", "Unit Price", "Total"].map((h) => (
                 <th
                   key={h}
                   style={{
                     padding: "10px 0 8px",
-                    color: C.muted,
+                    color: HC.textMuted,
                     fontWeight: 600,
                     textAlign: h === "Description" ? "left" : "right",
                     fontSize: 11,
@@ -203,13 +221,13 @@ function MockInvoice() {
                 total: "R1 500.00",
               },
             ].map((r, i) => (
-              <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
-                <td style={{ padding: "9px 0", color: C.text }}>{r.desc}</td>
+              <tr key={i} style={{ borderBottom: `1px solid ${HC.creamDark}` }}>
+                <td style={{ padding: "9px 0", color: HC.text }}>{r.desc}</td>
                 <td
                   style={{
                     padding: "9px 0",
                     textAlign: "right",
-                    color: C.muted,
+                    color: HC.textMuted,
                   }}
                 >
                   {r.qty}
@@ -218,7 +236,7 @@ function MockInvoice() {
                   style={{
                     padding: "9px 0",
                     textAlign: "right",
-                    color: C.muted,
+                    color: HC.textMuted,
                   }}
                 >
                   {r.unit}
@@ -228,7 +246,7 @@ function MockInvoice() {
                     padding: "9px 0",
                     textAlign: "right",
                     fontWeight: 600,
-                    color: C.ink,
+                    color: HC.navy,
                   }}
                 >
                   {r.total}
@@ -254,8 +272,8 @@ function MockInvoice() {
           ["VAT (15%)", "R1 462.50"],
         ].map(([l, v]) => (
           <div key={l} style={{ display: "flex", gap: 32, fontSize: 12 }}>
-            <span style={{ color: C.muted }}>{l}</span>
-            <span style={{ color: C.text, minWidth: 80, textAlign: "right" }}>
+            <span style={{ color: HC.textMuted }}>{l}</span>
+            <span style={{ color: HC.text, minWidth: 80, textAlign: "right" }}>
               {v}
             </span>
           </div>
@@ -264,7 +282,7 @@ function MockInvoice() {
           style={{
             display: "flex",
             gap: 32,
-            background: C.ink,
+            background: HC.navy,
             borderRadius: 8,
             padding: "6px 14px",
             marginTop: 6,
@@ -281,7 +299,7 @@ function MockInvoice() {
           </span>
           <span
             style={{
-              color: C.white,
+              color: HC.white,
               fontWeight: 800,
               fontSize: 15,
               minWidth: 80,
@@ -554,13 +572,12 @@ function Navbar({ onLogin, onRegister }) {
   );
 }
 
-/* ─── Hero ──────────────────────────────────────────────────────────────── */
 function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 60%, #0a5d49 100%)`,
-        padding: "72px 24px 80px",
+        background: HC.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -569,95 +586,123 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-     
-      {/* Glow */}
+      <style>{heroFontStyle}</style>
+
+      {/* Ambient glow, same language as main hero */}
       <div
         style={{
           position: "absolute",
-          top: -60,
-          right: -80,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: C.green,
-          opacity: 0.1,
-          filter: "blur(80px)",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(99,102,241,.06) 0%, transparent 55%)",
+          pointerEvents: "none",
         }}
       />
 
+      {/* Framed "device" container, matching lp-hero-inner */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: `1px solid rgba(15,23,42,0.08)`,
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge: avatars + pill + text, matches main hero badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              background: "rgba(29,158,117,0.12)",
-              border: "1px solid rgba(29,158,117,0.3)",
-              borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              gap: 10,
+              padding: "6px 14px 6px 6px",
+              background: HC.white,
+              border: `1px solid ${HC.creamDark}`,
+              borderRadius: 30,
+              boxShadow: "0 4px 14px rgba(15,23,42,0.06)",
+              marginBottom: 28,
+              fontFamily: "'Lato', sans-serif",
             }}
           >
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {[1, 2, 3].map((n, i) => (
+                <img
+                  key={n}
+                  src={`https://i.pravatar.cc/60?img=${n}`}
+                  alt=""
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: "50%",
+                    border: "2px solid #fff",
+                    objectFit: "cover",
+                    marginLeft: i === 0 ? 0 : -8,
+                  }}
+                />
+              ))}
+            </div>
             <span
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: C.green,
-                display: "inline-block",
-              }}
-            />
-            <span
-              style={{
-                color: C.green,
-                fontSize: 12,
+                background: HC.navy,
+                color: HC.white,
+                fontSize: 11,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.02em",
+                padding: "4px 10px",
+                borderRadius: 20,
+                whiteSpace: "nowrap",
               }}
             >
-              Built for SA Accounting Firms &amp; Practitioners
+              800+ firms
+            </span>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: HC.textMid,
+              }}
+            >
+              Built for SA accountants
             </span>
           </div>
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1.05,
-              color: C.white,
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: HC.navy,
+              margin: "0 0 24px",
             }}
           >
             Invoice smarter.
             <br />
-            <span style={{ color: C.green }}>Get paid faster.</span>
+            Get paid <em style={{ fontStyle: "italic", color: HC.indigo }}>faster.</em>
             <br />
             Run your practice.
           </h1>
 
           <p
             style={{
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 17,
+              color: HC.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
             SolidFlo is purpose-built for SA accounting practices. Create
@@ -665,58 +710,70 @@ function Hero({ onRegister }) {
             real-time cash flow insights — in under 60 seconds.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: C.green,
+                height: 52,
+                padding: "0 32px",
+                background: HC.indigo,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
-                color: C.white,
-                fontSize: 15,
+                borderRadius: 4,
+                color: HC.white,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(29,158,117,0.4)",
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "background .15s, transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = HC.indigoHover;
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = HC.indigo;
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
             >
-              Start Free Trial — No Card Needed
+              Start Free Trial →
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(255,255,255,0.75)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${HC.creamDark}`,
+                borderRadius: 4,
+                color: HC.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.background = HC.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
           {/* Trust row */}
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "Free plan forever",
               "SARS-compliant invoices",
@@ -729,12 +786,14 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.35)",
+                  color: HC.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.green}>
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="#4ade80">
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -748,15 +807,8 @@ function Hero({ onRegister }) {
         </div>
 
         {/* Right: Invoice preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ position: "relative" }}>
-            {/* Badge floating */}
             <div
               style={{
                 position: "absolute",
@@ -764,13 +816,13 @@ function Hero({ onRegister }) {
                 right: -18,
                 zIndex: 2,
                 background: "#16A34A",
-                color: C.white,
+                color: HC.white,
                 borderRadius: 10,
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -779,7 +831,6 @@ function Hero({ onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice />
-            {/* Stats row */}
             <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
               {[
                 ["R 128 400", "This Month"],
@@ -790,8 +841,8 @@ function Hero({ onRegister }) {
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: HC.white,
+                    border: `1px solid ${HC.creamDark}`,
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -799,10 +850,10 @@ function Hero({ onRegister }) {
                 >
                   <div
                     style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
+                      fontFamily: "'Playfair Display', serif",
+                      fontWeight: 700,
                       fontSize: 18,
-                      color: C.white,
+                      color: HC.navy,
                     }}
                   >
                     {v}
@@ -810,8 +861,8 @@ function Hero({ onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
+                      color: HC.textMuted,
+                      fontFamily: "'Lato', sans-serif",
                     }}
                   >
                     {l}
@@ -823,27 +874,30 @@ function Hero({ onRegister }) {
         </div>
       </div>
 
-      {/* Trusted by bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.3)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: HC.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA ACCOUNTING FIRMS
+          Trusted by SA accounting firms
         </span>
         {[
           "Mokoena & Associates",
@@ -854,11 +908,10 @@ function Hero({ onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(255,255,255,0.25)",
-              letterSpacing: 0.5,
+              color: HC.textMuted,
             }}
           >
             {b}
