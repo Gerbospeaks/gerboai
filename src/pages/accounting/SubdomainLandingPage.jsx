@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import logo from "../../assets/img/accounting-logo.png";
+import logotop from "../../assets/img/accounting-logo-top.png";
+import google from "../../assets/google-play.png";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
@@ -381,7 +383,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -1847,7 +1849,7 @@ function CTABanner({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 100%)`,
+        background: C.ink,
         padding: "80px 24px",
         position: "relative",
         overflow: "hidden",
@@ -1874,7 +1876,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🧾</div>
+        <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",

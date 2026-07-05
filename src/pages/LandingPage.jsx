@@ -1756,9 +1756,70 @@ const stats = [
   return (
     <>
       {isOpen && <IndustryPickerModal onClose={close} intent={intent} />}
-      <Helmet>
-        <title>SolidFlo — Invoicing Made Smarter</title>
-      </Helmet>
+     <Helmet>
+  <title>SolidFlo — Business Management Software for 26 Industries</title>
+  <meta
+    name="description"
+    content="SolidFlo is business management software built for every trade — invoicing, quotes, scheduling and client management for mechanics, electricians, construction, healthcare, education and more. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="SolidFlo — Business Management Software for 26 Industries" />
+  <meta
+    property="og:description"
+    content="Invoicing, quotes, scheduling and client management — one platform built for every trade. Start free, no credit card required."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://solidflo.co.za/" />
+  <meta property="og:image" content="https://solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SolidFlo — Business Management Software for 26 Industries" />
+  <meta
+    name="twitter:description"
+    content="Invoicing, quotes, scheduling and client management — one platform built for every trade."
+  />
+  <meta name="twitter:image" content="https://solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: organization + software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "10000",
+      },
+    })}
+  </script>
+
+  {/* Structured data: FAQ (matches your on-page FAQ section) */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map((f) => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a },
+      })),
+    })}
+  </script>
+</Helmet>
       <div className="lp">
         <style>{css}</style>
 
