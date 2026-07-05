@@ -161,7 +161,7 @@ const css = `
     left: 400px;
   right: 400px;
   border-radius: 499px;          
-  background: rgba(254,252,248,.97);
+  background: rgba(254,252,248,.37);
   backdrop-filter: blur(12px);
   box-shadow: 0 2px 20px rgba(26,18,8,.08);
   }
@@ -466,18 +466,38 @@ const css = `
   overflow: hidden;
 }
   .lp-hero-inner {
-  max-width: 1200px;
+   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
   gap: 60px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 32px;
+  padding: 48px 56px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,   /* top highlight, like a bezel */
+    0 24px 60px rgba(15, 23, 42, 0.10),
+    0 4px 16px rgba(15, 23, 42, 0.06);
+  position: relative;
+}
+  .lp-hero-inner::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 26px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  pointer-events: none;
 }
 @media (max-width: 1100px) {
   .lp-hero-inner {
-    grid-template-columns: 1fr;
+   grid-template-columns: 1fr;
     gap: 40px;
+    padding: 32px 24px;
+    border-radius: 24px;
   }
   .lp-hero-left {
     padding-top: 60px;
