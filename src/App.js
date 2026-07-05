@@ -658,23 +658,23 @@ function SubdomainRoot() {
   const subdomain = getSubdomainFromHost();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-   useEffect(() => {
-    if (loading) return;
 
+  useEffect(() => {
+    if (loading) return;
     if (user && user.emailVerified) {
       navigate("/dashboard", { replace: true });
-      return;
     }
-
-  
-      navigate("/login", { replace: true });
-    
+   
   }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
+  if (user && user.emailVerified) return <AppLoader />; 
 
+  const LandingComponent = SUBDOMAIN_LANDING[subdomain];
+  if (LandingComponent) return <LandingComponent />;
 
-   return <AppLoader />;
+  
+  return <Navigate to="/login" replace />;
 }
 function RedirectToSubdomainAuth({ mode }) {
   useEffect(() => {
