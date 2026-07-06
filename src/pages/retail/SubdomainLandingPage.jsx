@@ -22,7 +22,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "../../firebase";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import logo from "../../assets/img/solidflo.png";
-import logotop from "../../assets/img/solidflo-retail-top.png";
+import logotop from "../../assets/img/retail-logo-top.png";
 import {
   LayoutDashboard,
   FileText,
