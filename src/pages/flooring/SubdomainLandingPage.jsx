@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/flooring-logo.png"
+import logotop from "../../assets/img/flooring-logo-top.png"
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -133,7 +134,7 @@ function MockInvoice() {
               }}
             >
               <span style={{ fontSize: 22 }}>
-                <img src={logo} alt="Flooring Logo" style={{ width: "100px", height: "auto" }} />
+                <img src={logotop} alt="Flooring Logo" style={{ width: "100px", height: "auto" }} />
               </span>
              
             </div>
@@ -387,7 +388,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="Flooring Logo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -617,17 +618,7 @@ function Hero({ onRegister }) {
         }}
       />
 
-      {/* Tile grid lines — decorative, kept as a subtle nod to flooring */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage:
-            "linear-gradient(rgba(196,122,69,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(196,122,69,0.05) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-          pointerEvents: "none",
-        }}
-      />
+     
 
       {/* Framed "device" container */}
       <div
@@ -1892,19 +1883,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-        <p
-          style={{
-            color: C.clay,
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            fontFamily: "'Barlow', sans-serif",
-            marginBottom: 16,
-          }}
-        >
-          Get started today
-        </p>
+       <img src={google} alt="google play"/>
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",

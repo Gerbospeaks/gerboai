@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/healthcare-logo.png"
+import logotop from "../../assets/img/healthcare-logo-top.png"
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -133,7 +134,7 @@ function MockInvoice() {
               }}
             >
               <span style={{ fontSize: 22 }}>
-                <img src={logo} width={140} alt="SolidFlo" />
+                <img src={logotop} width={140} alt="SolidFlo" />
               </span>
               
             </div>
@@ -386,7 +387,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -588,13 +589,13 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-/* ─── Hero ──────────────────────────────────────────────────────────────── */
+/* ─── Hero (healthcare, restyled to match construction-style framed hero) ── */
 function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: C.ink,
-        padding: "72px 24px 80px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -603,84 +604,64 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-      <MedTexture opacity={0.04} />
+      <style>{heroFontStyle}</style>
 
-      {/* Teal glow */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: -80,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 700,
-          height: 300,
-          borderRadius: "50%",
-          background: C.teal,
-          opacity: 0.1,
-          filter: "blur(80px)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Subtle hex grid */}
+      {/* Ambient glow, tinted with teal */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: `radial-gradient(circle, rgba(27,168,176,0.06) 1px, transparent 1px)`,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(27,168,176,.12) 0%, transparent 55%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Subtle hex/dot grid — kept as a light callback to the original texture */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "radial-gradient(circle, rgba(27,168,176,0.08) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
           pointerEvents: "none",
         }}
       />
 
-      {/* Right accent line */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 64,
-          width: 1,
-          height: "100%",
-          background: "rgba(27,168,176,0.06)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 32,
-          width: 1,
-          height: "100%",
-          background: "rgba(27,168,176,0.04)",
-          pointerEvents: "none",
-        }}
-      />
-
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(27,168,176,0.12)",
-              border: "1px solid rgba(27,168,176,0.3)",
+              background: "rgba(27,168,176,0.1)",
+              border: "1px solid rgba(27,168,176,0.28)",
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span style={{ fontSize: 14 }}>🏥</span>
@@ -689,8 +670,7 @@ function Hero({ onRegister }) {
                 color: C.teal,
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                letterSpacing: "0.05em",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
               Purpose-Built for South African Healthcare Practices
@@ -699,88 +679,94 @@ function Hero({ onRegister }) {
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 62px)",
-              lineHeight: 1.05,
-              color: "#EEF6F8",
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
             }}
           >
             Billing Built for
             <br />
-            <span style={{ color: C.teal }}>the Consulting Room,</span>
+            <em style={{ fontStyle: "italic", color: C.teal }}>the Consulting Room,</em>
             <br />
             Not the Back Office.
           </h1>
 
           <p
             style={{
-              color: "rgba(200,234,240,0.5)",
-              fontSize: 17,
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
-            Send professional invoices, manage medical aid claims, and get paid
-            on time — purpose-built for South African GPs, specialists, and
-            allied health practitioners.
+            Send professional invoices, manage medical aid claims, and get
+            paid on time — purpose-built for South African GPs, specialists,
+            and allied health practitioners.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
+                height: 52,
+                padding: "0 32px",
                 background: C.teal,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
+                borderRadius: 4,
                 color: C.white,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(27,168,176,0.4)",
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(27,168,176,0.08)",
-                border: "1px solid rgba(27,168,176,0.3)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(200,234,240,0.7)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "Free plan forever",
               "HPCSA-compliant",
@@ -793,9 +779,11 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(200,234,240,0.3)",
+                  color: C.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
                 <span style={{ color: C.teal, fontSize: 10 }}>✦</span>
@@ -806,13 +794,7 @@ function Hero({ onRegister }) {
         </div>
 
         {/* Right: Invoice preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ position: "relative" }}>
             <div
               style={{
@@ -826,8 +808,8 @@ function Hero({ onRegister }) {
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -846,8 +828,8 @@ function Hero({ onRegister }) {
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(27,168,176,0.08)",
-                    border: "1px solid rgba(27,168,176,0.2)",
+                    background: C.white,
+                    border: `1px solid ${C.creamDark}`,
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -855,10 +837,10 @@ function Hero({ onRegister }) {
                 >
                   <div
                     style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
+                      fontFamily: "'Playfair Display', serif",
+                      fontWeight: 700,
                       fontSize: 18,
-                      color: "#EEF6F8",
+                      color: C.navy,
                     }}
                   >
                     {v}
@@ -866,8 +848,8 @@ function Hero({ onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(200,234,240,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
+                      color: C.textMuted,
+                      fontFamily: "'Lato', sans-serif",
                     }}
                   >
                     {l}
@@ -879,27 +861,30 @@ function Hero({ onRegister }) {
         </div>
       </div>
 
-      {/* Trusted-by bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(27,168,176,0.1)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(200,234,240,0.25)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA HEALTHCARE PRACTITIONERS
+          Trusted by SA healthcare practitioners
         </span>
         {[
           "Dr. Naidoo Family Practice",
@@ -910,11 +895,10 @@ function Hero({ onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(200,234,240,0.2)",
-              letterSpacing: 0.5,
+              color: C.textMuted,
             }}
           >
             {b}
@@ -924,7 +908,6 @@ function Hero({ onRegister }) {
     </section>
   );
 }
-
 /* ─── Pulse Divider ─────────────────────────────────────────────────────── */
 function PulseDivider() {
   return (
@@ -1906,19 +1889,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-        <p
-          style={{
-            color: C.teal,
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            fontFamily: "'Barlow', sans-serif",
-            marginBottom: 16,
-          }}
-        >
-          Get started today
-        </p>
+       <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",

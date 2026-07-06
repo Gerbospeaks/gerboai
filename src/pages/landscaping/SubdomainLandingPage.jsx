@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
 import logo from "../../assets/img/landscaping-logo.png";
+import logotop from "../../assets/img/landscaping-logo-top.png";
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -150,7 +151,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -353,12 +354,12 @@ function Navbar({ onLogin, onRegister }) {
   );
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+// ─── Hero (restyled to match construction-style framed hero) ─────────────────
 function Hero({ config, C, onRegister }) {
   return (
     <section
       style={{
-        background: base.ink,
+        background: base.cream,
         padding: "80px 24px 96px",
         position: "relative",
         overflow: "hidden",
@@ -366,46 +367,36 @@ function Hero({ config, C, onRegister }) {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        fontFamily: "'Barlow', sans-serif",
+        fontFamily: "'Lato', sans-serif",
       }}
     >
-      <NoiseTile opacity={0.045} />
+      <style>{heroFontStyle}</style>
 
-      {/* Warm glow */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: -80,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 700,
-          height: 300,
-          borderRadius: "50%",
-          background: C.accent,
-          opacity: 0.09,
-          filter: "blur(80px)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Grid lines */}
+      {/* Ambient glow, tinted with accent */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: `linear-gradient(${hexAlpha(C.accent, 0.04)} 1px, transparent 1px), linear-gradient(90deg, ${hexAlpha(C.accent, 0.04)} 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
+          background: `radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, ${hexAlpha(C.accent, 0.14)} 0%, transparent 55%)`,
           pointerEvents: "none",
         }}
       />
 
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 860,
           margin: "0 auto",
           position: "relative",
-          textAlign: "center",
           width: "100%",
+          textAlign: "center",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "60px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Badge */}
@@ -414,8 +405,8 @@ function Hero({ config, C, onRegister }) {
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            background: hexAlpha(C.accent, 0.12),
-            border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
+            background: hexAlpha(C.accent, 0.1),
+            border: `1px solid ${hexAlpha(C.accent, 0.28)}`,
             borderRadius: 99,
             padding: "5px 16px",
             marginBottom: 24,
@@ -428,6 +419,7 @@ function Hero({ config, C, onRegister }) {
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.06em",
+              fontFamily: "'Lato', sans-serif",
             }}
           >
             Built for {config.label} Businesses
@@ -436,13 +428,12 @@ function Hero({ config, C, onRegister }) {
 
         <h1
           style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 900,
-            fontSize: "clamp(42px, 6vw, 72px)",
-            lineHeight: 1.04,
-            color: "#F6EEE4",
+            fontFamily: "'Playfair Display', serif",
+            fontWeight: 700,
+            fontSize: "clamp(2.4rem, 6vw, 4rem)",
+            lineHeight: 1.1,
+            color: base.navy,
             margin: "0 0 22px",
-            letterSpacing: "-0.5px",
           }}
         >
           {config.headline}
@@ -450,11 +441,12 @@ function Hero({ config, C, onRegister }) {
 
         <p
           style={{
-            color: "rgba(246,238,228,0.5)",
+            color: base.textMid,
             fontSize: 18,
             lineHeight: 1.7,
             margin: "0 auto 40px",
             maxWidth: 560,
+            fontFamily: "'Lato', sans-serif",
           }}
         >
           {config.subheadline}
@@ -463,7 +455,7 @@ function Hero({ config, C, onRegister }) {
         <div
           style={{
             display: "flex",
-            gap: 14,
+            gap: 12,
             justifyContent: "center",
             flexWrap: "wrap",
           }}
@@ -471,40 +463,55 @@ function Hero({ config, C, onRegister }) {
           <button
             onClick={onRegister}
             style={{
+              height: 52,
+              padding: "0 32px",
               background: C.accent,
               border: "none",
-              borderRadius: 10,
-              padding: "15px 32px",
+              borderRadius: 4,
               color: base.white,
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: 700,
-              fontFamily: "'Barlow', sans-serif",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              fontFamily: "'Lato', sans-serif",
               cursor: "pointer",
-              boxShadow: `0 8px 24px ${hexAlpha(C.accent, 0.4)}`,
-              transition: "transform .15s",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              transition: "transform .15s, box-shadow .15s",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "scale(1.03)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
           >
             {config.cta}
           </button>
           <button
             onClick={() => scrollTo("features")}
             style={{
-              background: hexAlpha(C.accent, 0.08),
-              border: `1px solid ${hexAlpha(C.accent, 0.3)}`,
-              borderRadius: 10,
-              padding: "15px 28px",
-              color: "rgba(246,238,228,0.7)",
-              fontSize: 15,
-              fontWeight: 600,
-              fontFamily: "'Barlow', sans-serif",
+              height: 52,
+              padding: "0 28px",
+              background: "transparent",
+              border: `1.5px solid ${base.creamDark}`,
+              borderRadius: 4,
+              color: base.navy,
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              fontFamily: "'Lato', sans-serif",
               cursor: "pointer",
+              transition: "border-color .15s, background .15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = base.navy;
+              e.currentTarget.style.background = base.creamMid;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = base.creamDark;
+              e.currentTarget.style.background = "transparent";
             }}
           >
-            See how it works →
+            See How It Works
           </button>
         </div>
 
@@ -513,8 +520,8 @@ function Hero({ config, C, onRegister }) {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 28,
-            marginTop: 36,
+            gap: 24,
+            marginTop: 32,
             justifyContent: "center",
           }}
         >
@@ -530,8 +537,11 @@ function Hero({ config, C, onRegister }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                color: "rgba(246,238,228,0.28)",
+                color: base.textMuted,
                 fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: "0.03em",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
               <span style={{ color: C.accent, fontSize: 10 }}>✦</span>
@@ -543,7 +553,6 @@ function Hero({ config, C, onRegister }) {
     </section>
   );
 }
-
 // ─── Layer Divider ────────────────────────────────────────────────────────────
 function LayDivider({ C }) {
   return (
@@ -1211,19 +1220,7 @@ function CTABanner({ config, C, onRegister }) {
           position: "relative",
         }}
       >
-        <p
-          style={{
-            color: C.accent,
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            fontFamily: "'Barlow', sans-serif",
-            marginBottom: 16,
-          }}
-        >
-          Get started today
-        </p>
+       <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
@@ -1356,7 +1353,7 @@ function Footer({ config, C, onLogin, onRegister }) {
                 marginBottom: 16,
               }}
             >
-              <img src={logo} width={160} alt="" />
+              <img src={logotop} width={160} alt="" />
             </div>
             <p
               style={{
