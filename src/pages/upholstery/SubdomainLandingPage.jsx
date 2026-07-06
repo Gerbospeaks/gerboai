@@ -1852,19 +1852,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-        <p
-          style={{
-            color: C.plum,
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            fontFamily: "'Barlow', sans-serif",
-            marginBottom: 16,
-          }}
-        >
-          Get started today
-        </p>
+      <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",

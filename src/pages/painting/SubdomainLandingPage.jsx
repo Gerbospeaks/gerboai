@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
 import logo from "../../assets/img/painting-logo.png";
+import logotop from "../../assets/img/painting-logo-top.png";
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -413,7 +414,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -1574,19 +1575,7 @@ function CTABanner({ config, onRegister }) {
           position: "relative",
         }}
       >
-        <p
-          style={{
-            color: config.accent,
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            fontFamily: "'Barlow', sans-serif",
-            marginBottom: 16,
-          }}
-        >
-          Get started today
-        </p>
+       <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
