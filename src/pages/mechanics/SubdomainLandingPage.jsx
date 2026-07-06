@@ -367,7 +367,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
