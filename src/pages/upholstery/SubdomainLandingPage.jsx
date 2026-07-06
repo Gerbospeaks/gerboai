@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/upholstery-logo.png";
+import logotop from "../../assets/img/upholstery-logo-top.png";
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -134,7 +135,7 @@ function MockInvoice() {
               }}
             >
               <span style={{ fontSize: 20 }}>
-                <img src={logo} alt="" width={80} />
+                <img src={logotop} alt="" width={80} />
               </span>
             </div>
             <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
@@ -386,7 +387,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
