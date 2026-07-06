@@ -23,6 +23,19 @@ const T = {
   muted: "#718096",
   shadow: "rgba(27,42,61,0.07)",
 };
+const C = {
+  ink: "#0D1B2A", // deep navy
+  ink2: "#1B2E42", // mid navy
+  surface: "#F4F7FA", // cool light bg
+  white: "#FFFFFF",
+  orange: "#F97316", // primary accent
+  orangeD: "#C2580F",
+  orangeL: "#FFF0E5",
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
 
 // ─── Smooth scroll helper ─────────────────────────────────────────────────────
 function scrollTo(id) {
@@ -399,27 +412,12 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-
-// ─── Hero ─────────────────────────────────────────────────────────────────────
-function Hero({ config, onRegister }) {
-  const stats = config.heroStats || [
-    ["2 400+", "Tows completed"],
-    ["24/7", "Always on call"],
-    ["< 60s", "Invoice time"],
-  ];
-
-  const trustedBy = config.trustedBy || [
-    "JHB Recovery Co.",
-    "Cape Town Towing",
-    "Durban Road Assist",
-    "PE Breakdown Squad",
-  ];
-
+function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(150deg, ${config.color} 0%, ${config.colorMid || config.color} 55%, ${config.colorDark || config.color} 100%)`,
-        padding: "80px 28px 90px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -428,72 +426,190 @@ function Hero({ config, onRegister }) {
         justifyContent: "center",
       }}
     >
-      {/* Optional video background — swap src for a plumbing clip */}
-       <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                poster={config.heroPoster}
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  zIndex: 0,
-                }}
-              >
-                <source src={heroVideo} type="video/mp4" />
-              </video>
-      {/* Gradient overlay */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 1, background: `linear-gradient(150deg, ${config.color}D9 0%, ${config.colorDark || config.color}F0 100%)` }} />
+      <style>{heroFontStyle}</style>
 
-      {/* Content */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", position: "relative", zIndex: 3, width: "100%", display: "flex", alignItems: "center", gap: 64, flexWrap: "wrap" }}>
+      {/* Ambient glow, tinted with crimson */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(220,38,38,.10) 0%, transparent 55%)",
+          pointerEvents: "none",
+        }}
+      />
 
-        {/* LEFT */}
+      {/* Framed "device" container */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          position: "relative",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 60,
+          flexWrap: "wrap",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
+        }}
+      >
+        {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
           {/* Badge */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 4, padding: "5px 14px", marginBottom: 24 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: config.accent, display: "inline-block" }} />
-            <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 12, fontWeight: 600, fontFamily: "'Barlow', sans-serif", letterSpacing: "0.05em" }}>
-              Built for {config.label} Businesses
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "rgba(220,38,38,0.1)",
+              border: "1px solid rgba(220,38,38,0.28)",
+              borderRadius: 99,
+              padding: "6px 14px",
+              marginBottom: 28,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: C.crimson,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: C.crimson,
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
+              }}
+            >
+              Built for Towing &amp; Roadside Recovery Operators
             </span>
           </div>
 
-          <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: "clamp(38px,5vw,66px)", lineHeight: 1.02, color: T.white, margin: "0 0 18px", letterSpacing: "-0.5px" }}>
-            {config.headline}
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
+            }}
+          >
+            Invoice every tow.
+            <br />
+            <em style={{ fontStyle: "italic", color: C.crimson }}>Get paid faster.</em>
+            <br />
+            Run your fleet.
           </h1>
 
-          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 16, lineHeight: 1.75, margin: "0 0 36px", fontFamily: "'Barlow', sans-serif", maxWidth: 460 }}>
-            {config.subheadline}
+          <p
+            style={{
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
+              lineHeight: 1.7,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
+            }}
+          >
+            SolidFlo is purpose-built for SA towing and roadside recovery
+            operators. Create on-the-spot invoices, track call-outs and fleet
+            jobs, and get paid in under 60 seconds.
           </p>
 
-          {/* CTA row */}
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 36 }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
-              style={{ background: config.accent, border: "none", borderRadius: 7, padding: "13px 28px", color: T.white, fontSize: 14, fontWeight: 700, fontFamily: "'Barlow', sans-serif", cursor: "pointer", boxShadow: `0 6px 20px ${config.accent}55`, transition: "transform 0.15s" }}
+              style={{
+                height: 52,
+                padding: "0 32px",
+                background: C.crimson,
+                border: "none",
+                borderRadius: 4,
+                color: C.white,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
+              }}
               onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
               onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              {config.cta || "Start for Free"} →
+              Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
-              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 7, padding: "13px 22px", color: "rgba(255,255,255,0.8)", fontSize: 14, fontWeight: 500, fontFamily: "'Barlow', sans-serif", cursor: "pointer" }}
+              style={{
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
+                cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
+              }}
             >
-              Explore Features
+              See How It Works
             </button>
           </div>
 
-          {/* Trust badges */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
-            {(config.trustBadges || ["Free forever plan", "VAT-compliant invoices", "WhatsApp delivery", "SA-built & hosted"]).map((t) => (
-              <span key={t} style={{ display: "flex", alignItems: "center", gap: 6, color: "rgba(255,255,255,0.4)", fontSize: 12, fontFamily: "'Barlow', sans-serif" }}>
-                <svg width="12" height="12" viewBox="0 0 20 20" fill={config.accent}>
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            {[
+              "Free plan forever",
+              "24/7 job logging",
+              "WhatsApp invoicing",
+              "SA-built & hosted",
+            ].map((t) => (
+              <span
+                key={t}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: C.textMuted,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.crimson}>
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 {t}
               </span>
@@ -501,40 +617,82 @@ function Hero({ config, onRegister }) {
           </div>
         </div>
 
-        {/* RIGHT — Invoice card */}
+        {/* Right: Invoice preview */}
         <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
-          <div style={{ position: "relative", width: "100%", maxWidth: 480 }}>
-            {/* Floating payment badge */}
-            <div style={{ position: "absolute", top: -16, right: -10, zIndex: 2, background: "#16A34A", color: T.white, borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 700, fontFamily: "'Barlow', sans-serif", boxShadow: "0 6px 18px rgba(22,163,74,0.35)", display: "flex", alignItems: "center", gap: 6 }}>
-              💰 Payment received!
+          <div style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                top: -18,
+                right: -18,
+                zIndex: 2,
+                background: "#16A34A",
+                color: C.white,
+                borderRadius: 10,
+                padding: "8px 14px",
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span>💰</span> Payment received!
             </div>
-            <MockInvoice config={config} />
-            {/* Mini stats */}
-            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-              {stats.map(([v, l]) => (
-                <div key={l} style={{ flex: 1, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "10px", textAlign: "center" }}>
-                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800, fontSize: 17, color: T.white }}>{v}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontFamily: "'Barlow', sans-serif" }}>{l}</div>
-                </div>
-              ))}
-            </div>
+            <MockInvoice />
           </div>
         </div>
       </div>
 
-      {/* Trusted bar */}
-      <div style={{ maxWidth: 1200, margin: "56px auto 0", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 26, display: "flex", gap: 36, flexWrap: "wrap", alignItems: "center", position: "relative", zIndex: 3 }}>
-        <span style={{ color: "rgba(255,255,255,0.28)", fontSize: 11, fontFamily: "'Barlow', sans-serif", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+      {/* Trusted-by strip below the frame */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "40px auto 0",
+          display: "flex",
+          gap: 40,
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+        }}
+      >
+        <span
+          style={{
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
+          }}
+        >
           Trusted by SA towing operators
         </span>
-        {trustedBy.map((b) => (
-          <span key={b} style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 14, color: "rgba(255,255,255,0.2)", letterSpacing: 0.4 }}>{b}</span>
+        {[
+          "JHB Recovery Co.",
+          "Cape Town Towing",
+          "Durban Road Assist",
+          "PE Breakdown Squad",
+        ].map((b) => (
+          <span
+            key={b}
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
+              fontSize: 15,
+              color: C.textMuted,
+            }}
+          >
+            {b}
+          </span>
         ))}
       </div>
     </section>
   );
 }
-
 // ─── Features ─────────────────────────────────────────────────────────────────
 function Features({ config }) {
   return (

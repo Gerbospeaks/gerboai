@@ -566,55 +566,66 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-// ─── Hero ─────────────────────────────────────────────────────────────────────
-function Hero({ config, onRegister }) {
+function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 60%, #162033 100%)`,
-        padding: "72px 24px 80px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
       }}
     >
+      <style>{heroFontStyle}</style>
+
+      {/* Ambient glow, tinted with glacier blue */}
       <div
         style={{
           position: "absolute",
-          top: -60,
-          right: -80,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: config.accent,
-          opacity: 0.07,
-          filter: "blur(80px)",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(14,165,233,.12) 0%, transparent 55%)",
+          pointerEvents: "none",
         }}
       />
 
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
-        {/* Left copy */}
+        {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: `${config.accent}1F`,
-              border: `1px solid ${config.accent}4D`,
+              background: "rgba(14,165,233,0.1)",
+              border: "1px solid rgba(14,165,233,0.28)",
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span
@@ -622,115 +633,112 @@ function Hero({ config, onRegister }) {
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: config.accent,
+                background: C.glacier,
                 display: "inline-block",
               }}
             />
             <span
               style={{
-                color: config.accent,
+                color: C.glacier,
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
-              Built for {config.label} Businesses
+              Built for Window &amp; Windscreen Repair Businesses
             </span>
           </div>
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1.05,
-              color: C.white,
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
             }}
           >
-            {config.headline
-              .split(".")
-              .filter(Boolean)
-              .map((line, i, arr) => (
-                <span key={i}>
-                  {line.trim()}.
-                  {i === arr.length - 2 ? (
-                    <>
-                      <br />
-                      <span style={{ color: config.accent }}></span>
-                    </>
-                  ) : i < arr.length - 1 ? (
-                    <br />
-                  ) : null}
-                </span>
-              ))}
+            Quote the repair.
+            <br />
+            <em style={{ fontStyle: "italic", color: C.glacier }}>Get paid faster.</em>
+            <br />
+            Run your business.
           </h1>
 
           <p
             style={{
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 17,
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
-            {config.subheadline}
+            SolidFlo is purpose-built for SA window and windscreen repair
+            businesses. Create professional job quotes, track parts &amp;
+            labour, and send VAT invoices in under 60 seconds.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: config.accent,
+                height: 52,
+                padding: "0 32px",
+                background: C.glacier,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
+                borderRadius: 4,
                 color: C.white,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 8px 24px ${config.accent}66`,
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              {config.cta}
+              Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(255,255,255,0.75)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "No credit card required",
               "Free plan available",
@@ -743,17 +751,14 @@ function Hero({ config, onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.35)",
+                  color: C.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 20 20"
-                  fill={config.accent}
-                >
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.glacier}>
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -767,13 +772,7 @@ function Hero({ config, onRegister }) {
         </div>
 
         {/* Right: Invoice preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ position: "relative" }}>
             <div
               style={{
@@ -787,8 +786,8 @@ function Hero({ config, onRegister }) {
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -796,71 +795,35 @@ function Hero({ config, onRegister }) {
             >
               <span>💰</span> Payment received!
             </div>
-            <MockInvoice config={config} />
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {[
-                ["R 28 500", "This Month"],
-                ["12", "Open Jobs"],
-                ["4.8★", "Customer Rating"],
-              ].map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
-                      fontSize: 18,
-                      color: C.white,
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MockInvoice />
           </div>
         </div>
       </div>
 
-      {/* Trusted bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.3)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA {config.label.toUpperCase()} BUSINESSES
+          Trusted by SA window &amp; glass repair businesses
         </span>
         {[
           "Cape Clear Glass",
@@ -871,11 +834,10 @@ function Hero({ config, onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(255,255,255,0.25)",
-              letterSpacing: 0.5,
+              color: C.textMuted,
             }}
           >
             {b}
@@ -885,7 +847,6 @@ function Hero({ config, onRegister }) {
     </section>
   );
 }
-
 // ─── Features ─────────────────────────────────────────────────────────────────
 function Features({ config }) {
   return (

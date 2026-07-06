@@ -14,6 +14,19 @@ const fontStyle = `
 function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
+const C = {
+  ink: "#0D1B2A", // deep navy
+  ink2: "#1B2E42", // mid navy
+  surface: "#F4F7FA", // cool light bg
+  white: "#FFFFFF",
+  orange: "#F97316", // primary accent
+  orangeD: "#C2580F",
+  orangeL: "#FFF0E5",
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
 
 // ─── Subtle texture overlay ───────────────────────────────────────────────────
 function NoiseTexture({ opacity = 0.04 }) {
@@ -42,7 +55,265 @@ function NoiseTexture({ opacity = 0.04 }) {
     </svg>
   );
 }
+function MockInvoice() {
+  const lineItems = [
+    {
+      desc: "Exterior Wall Painting – 3 Coats",
+      qty: 1,
+      unit: "R6 200.00",
+      total: "R6 200.00",
+    },
+    {
+      desc: "Interior Ceiling Painting",
+      qty: 1,
+      unit: "R2 850.00",
+      total: "R2 850.00",
+    },
+    { desc: "Primer & Surface Prep", qty: 1, unit: "R980.00", total: "R980.00" },
+    {
+      desc: "Paint & Materials",
+      qty: 1,
+      unit: "R1 340.00",
+      total: "R1 340.00",
+    },
+  ];
+  const subtotal = "R11 370.00";
+  const vat = "R1 705.50";
+  const total = "R13 075.50";
+  const refNo = "INV-0072";
+  const bizName = "Painting Co.";
 
+  return (
+    <div
+      style={{
+        background: C.white,
+        borderRadius: 12,
+        border: `1px solid ${C.creamDark}`,
+        overflow: "hidden",
+        fontFamily: "'Lato', sans-serif",
+        width: "100%",
+        maxWidth: 480,
+        boxShadow: "0 20px 60px rgba(15,23,42,0.16)",
+      }}
+    >
+      {/* Chrome bar */}
+      <div
+        style={{
+          background: "#F1F5F9",
+          padding: "9px 14px",
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+        }}
+      >
+        {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
+          <span
+            key={c}
+            style={{
+              width: 11,
+              height: 11,
+              borderRadius: "50%",
+              background: c,
+              display: "inline-block",
+            }}
+          />
+        ))}
+        <div
+          style={{
+            flex: 1,
+            background: C.white,
+            borderRadius: 4,
+            height: 20,
+            margin: "0 10px",
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: 9,
+          }}
+        >
+          <span style={{ fontSize: 10, color: C.textMuted }}>
+            solidflo.co.za/invoice/{refNo}
+          </span>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div
+        style={{
+          padding: "18px 22px 14px",
+          borderBottom: `2px solid ${C.orange}`,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontWeight: 700,
+                fontSize: 20,
+                color: C.navy,
+                marginBottom: 4,
+              }}
+            >
+              SolidFlo
+            </div>
+            <p style={{ fontSize: 11, color: C.textMuted, margin: 0 }}>
+              {bizName}
+            </p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <span
+              style={{
+                background: "#DCFCE7",
+                color: "#16A34A",
+                fontSize: 10,
+                fontWeight: 700,
+                padding: "2px 9px",
+                borderRadius: 3,
+              }}
+            >
+              PAID
+            </span>
+            <p
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontWeight: 700,
+                fontSize: 18,
+                color: C.navy,
+                margin: "5px 0 0",
+              }}
+            >
+              {refNo}
+            </p>
+            <p style={{ fontSize: 10, color: C.textMuted, margin: 0 }}>
+              Issued 2 Jun 2025
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Line items */}
+      <div style={{ padding: "0 22px" }}>
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}
+        >
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${C.creamDark}` }}>
+              {["Description", "Qty", "Unit", "Total"].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: "9px 0 7px",
+                    color: C.textMuted,
+                    fontWeight: 600,
+                    textAlign: h === "Description" ? "left" : "right",
+                    fontSize: 10,
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {lineItems.map((r, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${C.creamDark}` }}>
+                <td style={{ padding: "8px 0", color: C.navy }}>{r.desc}</td>
+                <td
+                  style={{
+                    padding: "8px 0",
+                    textAlign: "right",
+                    color: C.textMuted,
+                  }}
+                >
+                  {r.qty}
+                </td>
+                <td
+                  style={{
+                    padding: "8px 0",
+                    textAlign: "right",
+                    color: C.textMuted,
+                  }}
+                >
+                  {r.unit}
+                </td>
+                <td
+                  style={{
+                    padding: "8px 0",
+                    textAlign: "right",
+                    fontWeight: 600,
+                    color: C.navy,
+                  }}
+                >
+                  {r.total}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Totals */}
+      <div
+        style={{
+          padding: "10px 22px 18px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 4,
+        }}
+      >
+        {[
+          ["Subtotal", subtotal],
+          ["VAT (15%)", vat],
+        ].map(([l, v]) => (
+          <div key={l} style={{ display: "flex", gap: 28, fontSize: 11 }}>
+            <span style={{ color: C.textMuted }}>{l}</span>
+            <span style={{ color: C.navy, minWidth: 72, textAlign: "right" }}>
+              {v}
+            </span>
+          </div>
+        ))}
+        <div
+          style={{
+            display: "flex",
+            gap: 28,
+            background: C.orange,
+            borderRadius: 6,
+            padding: "5px 12px",
+            marginTop: 5,
+          }}
+        >
+          <span
+            style={{
+              color: "rgba(255,255,255,0.8)",
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            Total Due
+          </span>
+          <span
+            style={{
+              color: C.white,
+              fontWeight: 800,
+              fontSize: 14,
+              minWidth: 72,
+              textAlign: "right",
+            }}
+          >
+            {total}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 // ─── Section divider ──────────────────────────────────────────────────────────
 function LayDivider({ accent }) {
   return (
@@ -345,13 +616,12 @@ function Navbar({ onLogin, onRegister }) {
   );
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
-function Hero({ config, onRegister }) {
+function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: "#111318",
-        padding: "72px 24px 80px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -360,34 +630,37 @@ function Hero({ config, onRegister }) {
         justifyContent: "center",
       }}
     >
-      <NoiseTexture opacity={0.045} />
+      <style>{heroFontStyle}</style>
 
-      {/* Warm glow */}
+      {/* Ambient glow, tinted with orange */}
       <div
         style={{
           position: "absolute",
-          bottom: -80,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 700,
-          height: 300,
-          borderRadius: "50%",
-          background: config.accent,
-          opacity: 0.1,
-          filter: "blur(80px)",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(249,115,22,.10) 0%, transparent 55%)",
           pointerEvents: "none",
         }}
       />
+
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
@@ -398,111 +671,129 @@ function Hero({ config, onRegister }) {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: `${config.accent}1F`,
-              border: `1px solid ${config.accent}4D`,
+              background: "rgba(249,115,22,0.1)",
+              border: "1px solid rgba(249,115,22,0.28)",
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
-            <span style={{ fontSize: 14 }}>{config.icon}</span>
             <span
               style={{
-                color: config.accent,
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: C.orange,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: C.orange,
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                letterSpacing: "0.05em",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
-              Built for {config.label} Businesses
+              Built for Painters &amp; Decorating Contractors
             </span>
           </div>
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 62px)",
-              lineHeight: 1.05,
-              color: "#F6EEE4",
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
             }}
           >
-            {config.headline}
+            Quote your clients.
+            <br />
+            <em style={{ fontStyle: "italic", color: C.orange }}>Get paid faster.</em>
+            <br />
+            Run your painting business.
           </h1>
 
           <p
             style={{
-              color: "rgba(246,238,228,0.5)",
-              fontSize: 17,
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
-            {config.subheadline}
+            SolidFlo is purpose-built for SA painting &amp; decorating
+            contractors. Create professional quotes, track materials &amp;
+            labour, and send VAT invoices in under 60 seconds.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: config.accent,
+                height: 52,
+                padding: "0 32px",
+                background: C.orange,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
-                color: "#fff",
-                fontSize: 15,
+                borderRadius: 4,
+                color: C.white,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 8px 24px ${config.accent}66`,
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              {config.cta}
+              Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: `${config.accent}14`,
-                border: `1px solid ${config.accent}4D`,
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(246,238,228,0.7)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
           {/* Trust row */}
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
-              "No credit card required",
-              "Free plan available",
-              "Cancel anytime",
-              "South African business",
+              "Free plan forever",
+              "VAT-compliant invoices",
+              "WhatsApp invoicing",
+              "SA-built & hosted",
             ].map((t) => (
               <span
                 key={t}
@@ -510,42 +801,43 @@ function Hero({ config, onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(246,238,228,0.3)",
+                  color: C.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <span style={{ color: config.accent, fontSize: 10 }}>✦</span>
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.orange}>
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
                 {t}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Right: Feature card preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ position: "relative", width: "100%", maxWidth: 420 }}>
-            {/* Floating badge */}
+        {/* Right: Invoice preview */}
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
+          <div style={{ position: "relative" }}>
             <div
               style={{
                 position: "absolute",
                 top: -18,
-                right: -10,
+                right: -18,
                 zIndex: 2,
                 background: "#16A34A",
-                color: "#fff",
+                color: C.white,
                 borderRadius: 10,
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -553,348 +845,49 @@ function Hero({ config, onRegister }) {
             >
               <span>💰</span> Payment received!
             </div>
-
-            {/* Card */}
-            <div
-              style={{
-                background: "#fff",
-                borderRadius: 16,
-                boxShadow: "0 32px 80px rgba(17,19,24,0.32)",
-                overflow: "hidden",
-                border: "1px solid #E4D8CC",
-              }}
-            >
-              {/* Chrome bar */}
-              <div
-                style={{
-                  background: "#F0EBE4",
-                  padding: "10px 16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
-                  <span
-                    key={c}
-                    style={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: "50%",
-                      background: c,
-                      display: "inline-block",
-                    }}
-                  />
-                ))}
-                <div
-                  style={{
-                    flex: 1,
-                    background: "#fff",
-                    borderRadius: 6,
-                    height: 22,
-                    margin: "0 12px",
-                    display: "flex",
-                    alignItems: "center",
-                    paddingLeft: 10,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: "#8A7B6E",
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    solidflo.co.za/
-                    {config.label.toLowerCase().replace(/\s+/g, "-")}/INV-0042
-                  </span>
-                </div>
-              </div>
-
-              {/* Invoice body */}
-              <div
-                style={{
-                  padding: "20px 24px",
-                  borderBottom: `2px solid ${config.accent}`,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <div>
-                   <img src={logo}  width={120} alt="" />
-                    <p
-                      style={{
-                        fontSize: 11,
-                        color: "#8A7B6E",
-                        fontFamily: "'Barlow', sans-serif",
-                        margin: 0,
-                      }}
-                    >
-                      Johannesburg, South Africa
-                    </p>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div
-                      style={{
-                        background: "#DCFCE7",
-                        color: "#16A34A",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        fontFamily: "'Barlow', sans-serif",
-                        padding: "3px 10px",
-                        borderRadius: 99,
-                        marginBottom: 6,
-                      }}
-                    >
-                      PAID
-                    </div>
-                    <p
-                      style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 800,
-                        fontSize: 20,
-                        color: "#111318",
-                        margin: 0,
-                      }}
-                    >
-                      INV-0042
-                    </p>
-                    <p
-                      style={{
-                        fontSize: 11,
-                        color: "#8A7B6E",
-                        fontFamily: "'Barlow', sans-serif",
-                        margin: 0,
-                      }}
-                    >
-                      Issued{" "}
-                      {new Date().toLocaleDateString("en-ZA", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Line items */}
-              <div style={{ padding: "0 24px" }}>
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: 12,
-                    fontFamily: "'Barlow', sans-serif",
-                  }}
-                >
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid #E4D8CC" }}>
-                      {["Description", "Qty", "Total"].map((h) => (
-                        <th
-                          key={h}
-                          style={{
-                            padding: "10px 0 8px",
-                            color: "#8A7B6E",
-                            fontWeight: 600,
-                            textAlign: h === "Description" ? "left" : "right",
-                            fontSize: 11,
-                          }}
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(config.features || []).slice(0, 3).map((f, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid #E4D8CC" }}>
-                        <td style={{ padding: "9px 0", color: "#1E2027" }}>
-                          {f.title}
-                        </td>
-                        <td
-                          style={{
-                            padding: "9px 0",
-                            textAlign: "right",
-                            color: "#8A7B6E",
-                          }}
-                        >
-                          1
-                        </td>
-                        <td
-                          style={{
-                            padding: "9px 0",
-                            textAlign: "right",
-                            fontWeight: 600,
-                            color: "#111318",
-                          }}
-                        >
-                          R{(Math.random() * 3000 + 500).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Total */}
-              <div
-                style={{
-                  padding: "12px 24px 20px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  gap: 4,
-                }}
-              >
-                {[
-                  ["Subtotal", "R8 250.00"],
-                  ["VAT (15%)", "R1 237.50"],
-                ].map(([l, v]) => (
-                  <div
-                    key={l}
-                    style={{
-                      display: "flex",
-                      gap: 32,
-                      fontSize: 12,
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    <span style={{ color: "#8A7B6E" }}>{l}</span>
-                    <span
-                      style={{
-                        color: "#1E2027",
-                        minWidth: 80,
-                        textAlign: "right",
-                      }}
-                    >
-                      {v}
-                    </span>
-                  </div>
-                ))}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 32,
-                    background: "#111318",
-                    borderRadius: 8,
-                    padding: "6px 14px",
-                    marginTop: 6,
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "rgba(246,242,238,0.7)",
-                      fontSize: 13,
-                      fontWeight: 600,
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    Total Due
-                  </span>
-                  <span
-                    style={{
-                      color: "#F6EEE4",
-                      fontWeight: 800,
-                      fontSize: 15,
-                      minWidth: 80,
-                      textAlign: "right",
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                    }}
-                  >
-                    R9 487.50
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats strip */}
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {[
-                ["R 94 500", "This Month"],
-                ["18", "Active Jobs"],
-                ["4.9★", "Client Rating"],
-              ].map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: `${config.accent}14`,
-                    border: `1px solid ${config.accent}33`,
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
-                      fontSize: 18,
-                      color: "#F6EEE4",
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "rgba(246,238,228,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MockInvoice />
           </div>
         </div>
       </div>
 
-      {/* Trusted-by bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: `1px solid ${config.accent}1A`,
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
-          width: "100%",
+          justifyContent: "center",
           position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(246,238,228,0.25)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA {config.label.toUpperCase()} BUSINESSES
+          Trusted by SA painting contractors
         </span>
         {[
-          "Mokoena & Associates",
-          "Van der Berg Group",
-          "Sithole Services",
-          "Cape Town Pros",
+          "Cape Town Painters",
+          "Joburg Wall & Trim",
+          "Pretoria Paint Pros",
+          "Durban Decor Co",
         ].map((b) => (
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(246,238,228,0.2)",
-              letterSpacing: 0.5,
+              color: C.textMuted,
             }}
           >
             {b}

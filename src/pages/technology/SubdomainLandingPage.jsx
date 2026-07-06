@@ -600,14 +600,12 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-
-/* ─── Hero ──────────────────────────────────────────────────────────────── */
 function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: C.ink,
-        padding: "72px 24px 80px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -616,161 +614,165 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-      <GrainTexture opacity={0.05} />
+      <style>{heroFontStyle}</style>
 
-      {/* Blue glow */}
+      {/* Ambient glow, tinted with indigo */}
       <div
         style={{
           position: "absolute",
-          bottom: -60,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 800,
-          height: 320,
-          borderRadius: "50%",
-          background: C.accent,
-          opacity: 0.09,
-          filter: "blur(90px)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: -100,
-          right: -100,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: C.accent,
-          opacity: 0.05,
-          filter: "blur(80px)",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(59,111,232,.12) 0%, transparent 55%)",
           pointerEvents: "none",
         }}
       />
 
-    
-
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(59,111,232,0.12)",
-              border: "1px solid rgba(59,111,232,0.3)",
+              background: "rgba(59,111,232,0.1)",
+              border: "1px solid rgba(59,111,232,0.28)",
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
-            <span style={{ fontSize: 14 }}>💻</span>
             <span
               style={{
-                color: C.accentL,
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: C.indigo,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: C.indigo,
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                letterSpacing: "0.05em",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
-              Purpose-Built for South African Tech Businesses
+              Built for Tech Businesses &amp; Consultants
             </span>
           </div>
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 62px)",
-              lineHeight: 1.05,
-              color: "#EEF2F9",
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
             }}
           >
-            Spend More Time
+            Quote your projects.
             <br />
-            <span style={{ color: C.accent }}>Building Great Tech.</span>
+            <em style={{ fontStyle: "italic", color: C.indigo }}>Get paid faster.</em>
             <br />
-            Less Chasing Invoices.
+            Build great tech.
           </h1>
 
           <p
             style={{
-              color: "rgba(238,242,249,0.5)",
-              fontSize: 17,
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
-            Send professional quotes, collect deposits, deliver projects, and get
-            fully paid — purpose-built for South African software developers,
-            IT consultants, and tech agencies.
+            SolidFlo is purpose-built for SA software developers, IT
+            consultants, and tech agencies. Send professional quotes, collect
+            deposits, and get fully paid in under 60 seconds.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: C.accent,
+                height: 52,
+                padding: "0 32px",
+                background: C.indigo,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
+                borderRadius: 4,
                 color: C.white,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 8px 24px rgba(59,111,232,0.4)`,
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(59,111,232,0.1)",
-                border: "1px solid rgba(59,111,232,0.3)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(238,242,249,0.7)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "Free plan forever",
               "Deposit protection",
@@ -783,12 +785,20 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(238,242,249,0.3)",
+                  color: C.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <span style={{ color: C.accent, fontSize: 10 }}>✦</span>
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.indigo}>
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
                 {t}
               </span>
             ))}
@@ -796,13 +806,7 @@ function Hero({ onRegister }) {
         </div>
 
         {/* Right: Invoice preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ position: "relative" }}>
             <div
               style={{
@@ -816,8 +820,8 @@ function Hero({ onRegister }) {
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -826,72 +830,34 @@ function Hero({ onRegister }) {
               <span>💰</span> Deposit received!
             </div>
             <MockInvoice />
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {[
-                ["R215 000", "This Month"],
-                ["18", "Active Projects"],
-                ["4.9★", "Client Rating"],
-              ].map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: "rgba(59,111,232,0.1)",
-                    border: "1px solid rgba(59,111,232,0.22)",
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
-                      fontSize: 18,
-                      color: "#EEF2F9",
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "rgba(238,242,249,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Trusted-by bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(59,111,232,0.12)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
-          width: "100%",
+          justifyContent: "center",
           position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(238,242,249,0.25)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA TECH BUSINESSES & CONSULTANTS
+          Trusted by SA tech businesses &amp; consultants
         </span>
         {[
           "Nexus Tech Solutions",
@@ -902,11 +868,10 @@ function Hero({ onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(238,242,249,0.2)",
-              letterSpacing: 0.5,
+              color: C.textMuted,
             }}
           >
             {b}
@@ -916,7 +881,6 @@ function Hero({ onRegister }) {
     </section>
   );
 }
-
 /* ─── Divider ───────────────────────────────────────────────────────────── */
 function LayDivider() {
   return (

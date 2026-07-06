@@ -23,6 +23,19 @@ const T = {
   muted: "#718096",
   shadow: "rgba(27,42,61,0.07)",
 };
+const C = {
+  ink: "#0D1B2A", // deep navy
+  ink2: "#1B2E42", // mid navy
+  surface: "#F4F7FA", // cool light bg
+  white: "#FFFFFF",
+  orange: "#F97316", // primary accent
+  orangeD: "#C2580F",
+  orangeL: "#FFF0E5",
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
 
 // ─── Smooth scroll helper ─────────────────────────────────────────────────────
 function scrollTo(id) {
@@ -563,26 +576,12 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-// ─── Hero ─────────────────────────────────────────────────────────────────────
-function Hero({ config, onRegister }) {
-  const stats = config.heroStats || [
-    ["1 400+", "Pool pros onboarded"],
-    ["96%", "Paid on time"],
-    ["< 60s", "Invoice time"],
-  ];
-
-  const trustedBy = config.trustedBy || [
-    "Blue Wave Pools JHB",
-    "Cape Aqua Services",
-    "Durban Pool Care",
-    "PE Crystal Clear Pools",
-  ];
-
+function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(150deg, ${config.color} 0%, ${config.colorMid || config.color} 55%, ${config.colorDark || config.color} 100%)`,
-        padding: "80px 28px 90px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -591,66 +590,52 @@ function Hero({ config, onRegister }) {
         justifyContent: "center",
       }}
     >
-      {/* Optional video background — swap src for a plumbing clip */}
-      {config.heroVideo && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          poster={config.heroPoster}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            zIndex: 0,
-          }}
-        >
-          <source src={config.heroVideo} type="video/mp4" />
-        </video>
-      )}
+      <style>{heroFontStyle}</style>
 
-      {/* Gradient overlay */}
+      {/* Ambient glow, tinted with aqua */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          zIndex: 1,
-          background: `linear-gradient(150deg, ${config.color}D9 0%, ${config.colorDark || config.color}F0 100%)`,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(6,182,212,.12) 0%, transparent 55%)",
+          pointerEvents: "none",
         }}
       />
 
-      
-
-      {/* Content */}
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
-          zIndex: 3,
           width: "100%",
           display: "flex",
           alignItems: "center",
-          gap: 64,
+          gap: 60,
           flexWrap: "wrap",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
-        {/* LEFT */}
+        {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
           {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 7,
-              background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 4,
-              padding: "5px 14px",
-              marginBottom: 24,
+              gap: 8,
+              background: "rgba(6,182,212,0.1)",
+              border: "1px solid rgba(6,182,212,0.28)",
+              borderRadius: 99,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span
@@ -658,128 +643,132 @@ function Hero({ config, onRegister }) {
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: config.accent,
+                background: C.aqua,
                 display: "inline-block",
               }}
             />
             <span
               style={{
-                color: "rgba(255,255,255,0.9)",
+                color: C.aqua,
                 fontSize: 12,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
-                letterSpacing: "0.05em",
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
               }}
             >
-              Built for {config.label} Businesses
+              Built for Pool Service &amp; Maintenance Pros
             </span>
           </div>
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(38px,5vw,66px)",
-              lineHeight: 1.02,
-              color: T.white,
-              margin: "0 0 18px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
             }}
           >
-            {config.headline}
+            Quote your rounds.
+            <br />
+            <em style={{ fontStyle: "italic", color: C.aqua }}>Get paid faster.</em>
+            <br />
+            Run your pool business.
           </h1>
 
           <p
             style={{
-              color: "rgba(255,255,255,0.6)",
-              fontSize: 16,
-              lineHeight: 1.75,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
+              lineHeight: 1.7,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
-            {config.subheadline}
+            SolidFlo is purpose-built for SA pool service and maintenance
+            professionals. Create recurring service invoices, track chemicals
+            &amp; call-outs, and get paid in under 60 seconds.
           </p>
 
-          {/* CTA row */}
-          <div
-            style={{
-              display: "flex",
-              gap: 12,
-              flexWrap: "wrap",
-              marginBottom: 36,
-            }}
-          >
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: config.accent,
+                height: 52,
+                padding: "0 32px",
+                background: C.aqua,
                 border: "none",
-                borderRadius: 7,
-                padding: "13px 28px",
-                color: T.white,
+                borderRadius: 4,
+                color: C.white,
                 fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 6px 20px ${config.accent}55`,
-                transition: "transform 0.15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "translateY(-2px)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "translateY(0)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              {config.cta || "Start for Free"} →
+              Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                borderRadius: 7,
-                padding: "13px 22px",
-                color: "rgba(255,255,255,0.8)",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
                 fontSize: 14,
-                fontWeight: 500,
-                fontFamily: "'Barlow', sans-serif",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              Explore Features
+              See How It Works
             </button>
           </div>
 
-          {/* Trust badges */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
-            {(
-              config.trustBadges || [
-                "Free forever plan",
-                "VAT-compliant invoices",
-                "WhatsApp delivery",
-                "SA-built & hosted",
-              ]
-            ).map((t) => (
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            {[
+              "Free plan forever",
+              "VAT-compliant invoices",
+              "WhatsApp invoicing",
+              "SA-built & hosted",
+            ].map((t) => (
               <span
                 key={t}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.4)",
+                  color: C.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 20 20"
-                  fill={config.accent}
-                >
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.aqua}>
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -792,114 +781,73 @@ function Hero({ config, onRegister }) {
           </div>
         </div>
 
-        {/* RIGHT — Invoice card */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ position: "relative", width: "100%", maxWidth: 480 }}>
-            {/* Floating payment badge */}
+        {/* Right: Invoice preview */}
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
+          <div style={{ position: "relative" }}>
             <div
               style={{
                 position: "absolute",
-                top: -16,
-                right: -10,
+                top: -18,
+                right: -18,
                 zIndex: 2,
                 background: "#16A34A",
-                color: T.white,
-                borderRadius: 8,
-                padding: "7px 14px",
+                color: C.white,
+                borderRadius: 10,
+                padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 6px 18px rgba(22,163,74,0.35)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
               }}
             >
-              💰 Payment received!
+              <span>💰</span> Payment received!
             </div>
-            <MockInvoice config={config} />
-            {/* Mini stats */}
-            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-              {stats.map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: "rgba(255,255,255,0.07)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 8,
-                    padding: "10px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
-                      fontSize: 17,
-                      color: T.white,
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MockInvoice />
           </div>
         </div>
       </div>
 
-      {/* Trusted bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "56px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          paddingTop: 26,
+          margin: "40px auto 0",
           display: "flex",
-          gap: 36,
+          gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
           position: "relative",
-          zIndex: 3,
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.28)",
-            fontSize: 11,
-            fontFamily: "'Barlow', sans-serif",
-            fontWeight: 600,
-            letterSpacing: "0.1em",
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA pool service professionals
+          Trusted by SA pool service pros
         </span>
-        {trustedBy.map((b) => (
+        {[
+          "Blue Wave Pools JHB",
+          "Cape Aqua Services",
+          "Durban Pool Care",
+          "PE Crystal Clear Pools",
+        ].map((b) => (
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-              color: "rgba(255,255,255,0.2)",
-              letterSpacing: 0.4,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
+              fontSize: 15,
+              color: C.textMuted,
             }}
           >
             {b}
@@ -909,7 +857,6 @@ function Hero({ config, onRegister }) {
     </section>
   );
 }
-
 // ─── Features ─────────────────────────────────────────────────────────────────
 function Features({ config }) {
   return (

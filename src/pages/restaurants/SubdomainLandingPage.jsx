@@ -22,6 +22,19 @@ const T = {
   muted: "#718096",
   shadow: "rgba(27,42,61,0.07)",
 };
+const C = {
+  ink: "#0D1B2A", // deep navy
+  ink2: "#1B2E42", // mid navy
+  surface: "#F4F7FA", // cool light bg
+  white: "#FFFFFF",
+  orange: "#F97316", // primary accent
+  orangeD: "#C2580F",
+  orangeL: "#FFF0E5",
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
 
 /* ─── Scroll helper ─────────────────────────────────────────────────────── */
 const scrollTo = (id) =>
@@ -613,26 +626,12 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-/* ─── Hero ──────────────────────────────────────────────────────────────── */
-function Hero({ config, onRegister }) {
-  const stats = config.heroStats || [
-    ["800+", "Restaurants"],
-    ["R12M+", "Billed monthly"],
-    ["< 60s", "Invoice time"],
-  ];
-
-  const trustedBy = config.trustedBy || [
-    "Braai Brothers Grill",
-    "Cape Harvest Kitchen",
-    "Joburg Street Eats",
-    "Durban Spice House",
-  ];
-
+function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(150deg, ${config.color} 0%, ${config.colorMid || config.color} 55%, ${config.colorDark || config.color} 100%)`,
-        padding: "80px 28px 90px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -641,49 +640,52 @@ function Hero({ config, onRegister }) {
         justifyContent: "center",
       }}
     >
-     
-      {/* Glow blob */}
+      <style>{heroFontStyle}</style>
+
+      {/* Ambient glow, tinted with rust */}
       <div
         style={{
           position: "absolute",
-          top: -100,
-          right: -100,
-          width: 480,
-          height: 480,
-          borderRadius: "50%",
-          background: config.accent,
-          opacity: 0.12,
-          filter: "blur(90px)",
-          zIndex: 1,
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(194,65,12,.10) 0%, transparent 55%)",
+          pointerEvents: "none",
         }}
       />
 
-      {/* Content */}
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
-          zIndex: 2,
           width: "100%",
           display: "flex",
           alignItems: "center",
-          gap: 64,
+          gap: 60,
           flexWrap: "wrap",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
-        {/* LEFT */}
+        {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 7,
-              background: "rgba(255,255,255,0.1)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              borderRadius: 4,
-              padding: "5px 14px",
-              marginBottom: 24,
+              gap: 8,
+              background: "rgba(194,65,12,0.1)",
+              border: "1px solid rgba(194,65,12,0.28)",
+              borderRadius: 99,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span
@@ -691,126 +693,132 @@ function Hero({ config, onRegister }) {
                 width: 6,
                 height: 6,
                 borderRadius: "50%",
-                background: config.accent,
+                background: C.rust,
                 display: "inline-block",
               }}
             />
             <span
               style={{
-                color: "rgba(255,255,255,0.9)",
+                color: C.rust,
                 fontSize: 12,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
-                letterSpacing: "0.05em",
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
               }}
             >
-              Built for {config.label || "Restaurant"} Businesses
+              Built for Restaurants &amp; Kitchens
             </span>
           </div>
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(38px,5vw,66px)",
-              lineHeight: 1.02,
-              color: T.white,
-              margin: "0 0 18px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
             }}
           >
-            {config.headline || "Invoice every table. Get paid the same night."}
+            Invoice every table.
+            <br />
+            <em style={{ fontStyle: "italic", color: C.rust }}>Get paid the same night.</em>
+            <br />
+            Run your kitchen.
           </h1>
 
           <p
             style={{
-              color: "rgba(255,255,255,0.6)",
-              fontSize: 16,
-              lineHeight: 1.75,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
+              lineHeight: 1.7,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
-            {config.subheadline ||
-              "From dine-in bills to catering quotes — SolidFlo handles the paperwork so your kitchen can focus on the food."}
+            From dine-in bills to catering quotes, SolidFlo handles the
+            paperwork for SA restaurants so your kitchen can focus on the
+            food.
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 12,
-              flexWrap: "wrap",
-              marginBottom: 36,
-            }}
-          >
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
-                background: config.accent,
+                height: 52,
+                padding: "0 32px",
+                background: C.rust,
                 border: "none",
-                borderRadius: 7,
-                padding: "13px 28px",
-                color: T.white,
+                borderRadius: 4,
+                color: C.white,
                 fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: `0 6px 20px ${config.accent}55`,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "translateY(-2px)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "translateY(0)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              {config.cta || "Start for Free"} →
+              Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                borderRadius: 7,
-                padding: "13px 22px",
-                color: "rgba(255,255,255,0.8)",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
                 fontSize: 14,
-                fontWeight: 500,
-                fontFamily: "'Barlow', sans-serif",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              Explore Features
+              See How It Works
             </button>
           </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 18 }}>
-            {(
-              config.trustBadges || [
-                "Free forever plan",
-                "VAT-compliant invoices",
-                "WhatsApp delivery",
-                "SA-built & hosted",
-              ]
-            ).map((t) => (
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            {[
+              "Free plan forever",
+              "VAT-compliant invoices",
+              "WhatsApp invoicing",
+              "SA-built & hosted",
+            ].map((t) => (
               <span
                 key={t}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.4)",
+                  color: C.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 20 20"
-                  fill={config.accent}
-                >
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.rust}>
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -823,114 +831,73 @@ function Hero({ config, onRegister }) {
           </div>
         </div>
 
-        {/* RIGHT — Invoice card */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ position: "relative", width: "100%", maxWidth: 480 }}>
-            {/* Floating payment badge */}
+        {/* Right: Invoice preview */}
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
+          <div style={{ position: "relative" }}>
             <div
               style={{
                 position: "absolute",
-                top: -16,
-                right: -10,
+                top: -18,
+                right: -18,
                 zIndex: 2,
                 background: "#16A34A",
-                color: T.white,
-                borderRadius: 8,
-                padding: "7px 14px",
+                color: C.white,
+                borderRadius: 10,
+                padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 6px 18px rgba(22,163,74,0.35)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
               }}
             >
-              💰 Payment received!
+              <span>💰</span> Payment received!
             </div>
-            <MockInvoice config={config} />
-            {/* Mini stats */}
-            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-              {stats.map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: "rgba(255,255,255,0.07)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 8,
-                    padding: "10px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
-                      fontSize: 17,
-                      color: T.white,
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MockInvoice />
           </div>
         </div>
       </div>
 
-      {/* Trusted bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "56px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          paddingTop: 26,
+          margin: "40px auto 0",
           display: "flex",
-          gap: 36,
+          gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
           position: "relative",
-          zIndex: 2,
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.28)",
-            fontSize: 11,
-            fontFamily: "'Barlow', sans-serif",
-            fontWeight: 600,
-            letterSpacing: "0.1em",
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
             textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
           Trusted by SA restaurants
         </span>
-        {trustedBy.map((b) => (
+        {[
+          "Braai Brothers Grill",
+          "Cape Harvest Kitchen",
+          "Joburg Street Eats",
+          "Durban Spice House",
+        ].map((b) => (
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-              color: "rgba(255,255,255,0.2)",
-              letterSpacing: 0.4,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
+              fontSize: 15,
+              color: C.textMuted,
             }}
           >
             {b}
@@ -940,7 +907,6 @@ function Hero({ config, onRegister }) {
     </section>
   );
 }
-
 /* ─── How It Works ──────────────────────────────────────────────────────── */
 function HowItWorks({ config }) {
   const steps = config.howItWorks || [

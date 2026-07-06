@@ -590,7 +590,7 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-/* ─── Hero (flooring, restyled to match construction-style framed hero) ── */
+
 function Hero({ onRegister }) {
   return (
     <section
