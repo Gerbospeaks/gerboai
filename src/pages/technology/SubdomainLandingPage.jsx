@@ -2100,7 +2100,10 @@ export default function TechnologyLandingPage() {
   const navigate = useNavigate();
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "technology"); // use the real id
+  navigate("/register?industry=technology");
+};
 
   return (
     <>

@@ -2233,7 +2233,10 @@ export default function SubdomainLandingPage() {
   const config = getIndustryConfig(subdomain);
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+    localStorage.setItem("pendingDashboardId", "education");
+    navigate("/register?industry=education");
+  };
 
   return (
     <>

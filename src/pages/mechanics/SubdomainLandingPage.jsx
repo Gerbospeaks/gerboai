@@ -2067,7 +2067,10 @@ export default function SubdomainLandingPage() {
   const navigate = useNavigate();
   
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "mechanics"); // use the real id
+  navigate("/register?industry=mechanics");
+};
 
   return (
     <>

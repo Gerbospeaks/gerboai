@@ -2035,7 +2035,10 @@ export default function ElectricalLandingPage() {
   const navigate = useNavigate();
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "electrical"); // use the real id
+  navigate("/register?industry=electrical");
+};
 
   return (
     <>

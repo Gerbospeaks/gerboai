@@ -1829,7 +1829,10 @@ export default function SubdomainLandingPage() {
   const config = getIndustryConfig(subdomain);
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "painting"); // use the real id
+  navigate("/register?industry=painting");
+};
 
   return (
     <>

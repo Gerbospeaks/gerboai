@@ -2115,7 +2115,10 @@ function Footer({ onLogin, onRegister }) {
 export default function PestControlLandingPage() {
   const navigate = useNavigate();
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "pestcontrol"); // use the real id
+  navigate("/register?industry=pestcontrol");
+};
 
   return (
     <>

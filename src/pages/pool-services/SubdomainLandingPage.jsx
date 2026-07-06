@@ -1473,7 +1473,10 @@ export default function SubdomainLandingPage() {
   const config = getIndustryConfig(subdomain);
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "poolservices"); // use the real id
+  navigate("/register?industry=poolservices");
+};
 
   return (
     <>

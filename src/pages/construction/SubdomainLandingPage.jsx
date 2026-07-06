@@ -2038,7 +2038,10 @@ export default function ConstructionLandingPage() {
   const navigate = useNavigate();
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "construction"); // use the real id
+  navigate("/register?industry=construction");
+};
 
   return (
     <>

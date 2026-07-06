@@ -999,7 +999,10 @@ export default function SubdomainLandingPage() {
   const config = getIndustryConfig(subdomain);
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "towing"); // use the real id
+  navigate("/register?industry=towing");
+};
 
   return (
     <>

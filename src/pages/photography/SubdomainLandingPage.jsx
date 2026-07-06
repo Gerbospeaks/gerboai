@@ -2106,7 +2106,10 @@ export default function PhotographyLandingPage() {
   const navigate = useNavigate();
 
   const goLogin = () => navigate("/login");
-  const goRegister = () => navigate("/register");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "photography"); // use the real id
+  navigate("/register?industry=photography");
+};
 
   return (
     <>
