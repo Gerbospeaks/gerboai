@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/electrical-logo.png"
+import logotop from "../../assets/img/electrical-logo-top.png"
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -100,7 +101,7 @@ function MockInvoice() {
               }}
             >
               <span style={{ fontSize: 20 }}>
-                <img src={logo} width={160} alt="Electrical Logo" />
+                <img src={logotop} width={160} alt="Electrical Logo" />
               </span>
              
             </div>
@@ -354,7 +355,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -557,13 +558,12 @@ function Navbar({ onLogin, onRegister }) {
   );
 }
 
-/* ─── Hero ──────────────────────────────────────────────────────────────── */
 function Hero({ onRegister }) {
   return (
     <section
       style={{
-        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 60%, #1F1800 100%)`,
-        padding: "72px 24px 80px",
+        background: C.cream,
+        padding: "72px 24px 96px",
         position: "relative",
         overflow: "hidden",
         minHeight: "100vh",
@@ -572,46 +572,52 @@ function Hero({ onRegister }) {
         justifyContent: "center",
       }}
     >
-     
-      {/* Glow */}
+      <style>{heroFontStyle}</style>
+
+      {/* Ambient glow, tinted with electrical orange */}
       <div
         style={{
           position: "absolute",
-          top: -60,
-          right: -80,
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background: C.orange,
-          opacity: 0.07,
-          filter: "blur(80px)",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(245,158,11,.10) 0%, transparent 55%)",
+          pointerEvents: "none",
         }}
       />
 
+      {/* Framed "device" container */}
       <div
         style={{
           maxWidth: 1200,
           margin: "0 auto",
           position: "relative",
+          width: "100%",
           display: "flex",
           alignItems: "center",
           gap: 60,
           flexWrap: "wrap",
-          width: "100%",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
         }}
       >
         {/* Left */}
         <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(245,158,11,0.12)",
-              border: "1px solid rgba(245,158,11,0.3)",
+              background: "rgba(245,158,11,0.1)",
+              border: "1px solid rgba(245,158,11,0.28)",
               borderRadius: 99,
-              padding: "5px 14px",
-              marginBottom: 22,
+              padding: "6px 14px",
+              marginBottom: 28,
             }}
           >
             <span
@@ -628,7 +634,7 @@ function Hero({ onRegister }) {
                 color: C.orange,
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                fontFamily: "'Lato', sans-serif",
               }}
             >
               Built for Electricians &amp; Electrical Contractors
@@ -637,30 +643,29 @@ function Hero({ onRegister }) {
 
           <h1
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: "clamp(40px, 5vw, 64px)",
-              lineHeight: 1.05,
-              color: C.white,
-              margin: "0 0 20px",
-              letterSpacing: "-0.5px",
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
             }}
           >
             Invoice your clients.
             <br />
-            <span style={{ color: C.orange }}>Issue your CoC.</span>
+            <em style={{ fontStyle: "italic", color: C.orange }}>Issue your CoC.</em>
             <br />
             Run your business.
           </h1>
 
           <p
             style={{
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 17,
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
               lineHeight: 1.7,
-              margin: "0 0 36px",
-              fontFamily: "'Barlow', sans-serif",
-              maxWidth: 460,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
             }}
           >
             SolidFlo is purpose-built for SA electricians. Create professional
@@ -668,58 +673,64 @@ function Hero({ onRegister }) {
             Compliance, and send VAT invoices in under 60 seconds.
           </p>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
             <button
               onClick={onRegister}
               style={{
+                height: 52,
+                padding: "0 32px",
                 background: C.orange,
                 border: "none",
-                borderRadius: 10,
-                padding: "14px 28px",
+                borderRadius: 4,
                 color: C.white,
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(245,158,11,0.4)",
-                transition: "transform .15s",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.03)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
               Start Free — No Card Needed
             </button>
             <button
               onClick={() => scrollTo("features")}
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: 10,
-                padding: "14px 24px",
-                color: "rgba(255,255,255,0.75)",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Barlow', sans-serif",
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
                 cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
               }}
             >
-              See How It Works →
+              See How It Works
             </button>
           </div>
 
           {/* Trust row */}
-          <div
-            style={{
-              display: "flex",
-              gap: 24,
-              marginTop: 32,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
               "Free plan forever",
               "VAT-compliant invoices",
@@ -732,9 +743,11 @@ function Hero({ onRegister }) {
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
-                  color: "rgba(255,255,255,0.35)",
+                  color: C.textMuted,
                   fontSize: 12,
-                  fontFamily: "'Barlow', sans-serif",
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
                 }}
               >
                 <svg width="13" height="13" viewBox="0 0 20 20" fill={C.orange}>
@@ -751,15 +764,8 @@ function Hero({ onRegister }) {
         </div>
 
         {/* Right: Invoice preview */}
-        <div
-          style={{
-            flex: "1 1 340px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
           <div style={{ position: "relative" }}>
-            {/* Badge floating */}
             <div
               style={{
                 position: "absolute",
@@ -772,8 +778,8 @@ function Hero({ onRegister }) {
                 padding: "8px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                fontFamily: "'Barlow', sans-serif",
-                boxShadow: "0 8px 20px rgba(22,163,74,0.4)",
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
@@ -782,7 +788,6 @@ function Hero({ onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice />
-            {/* Stats row */}
             <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
               {[
                 ["R 38 500", "This Month"],
@@ -793,8 +798,8 @@ function Hero({ onRegister }) {
                   key={l}
                   style={{
                     flex: 1,
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: C.white,
+                    border: `1px solid ${C.creamDark}`,
                     borderRadius: 10,
                     padding: "10px 12px",
                     textAlign: "center",
@@ -802,10 +807,10 @@ function Hero({ onRegister }) {
                 >
                   <div
                     style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800,
+                      fontFamily: "'Playfair Display', serif",
+                      fontWeight: 700,
                       fontSize: 18,
-                      color: C.white,
+                      color: C.navy,
                     }}
                   >
                     {v}
@@ -813,8 +818,8 @@ function Hero({ onRegister }) {
                   <div
                     style={{
                       fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      fontFamily: "'Barlow', sans-serif",
+                      color: C.textMuted,
+                      fontFamily: "'Lato', sans-serif",
                     }}
                   >
                     {l}
@@ -826,27 +831,30 @@ function Hero({ onRegister }) {
         </div>
       </div>
 
-      {/* Trusted bar */}
+      {/* Trusted-by strip below the frame */}
       <div
         style={{
           maxWidth: 1200,
-          margin: "48px auto 0",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          paddingTop: 28,
+          margin: "40px auto 0",
           display: "flex",
           gap: 40,
           flexWrap: "wrap",
           alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
         }}
       >
         <span
           style={{
-            color: "rgba(255,255,255,0.3)",
-            fontSize: 13,
-            fontFamily: "'Barlow', sans-serif",
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
           }}
         >
-          TRUSTED BY SA ELECTRICIANS
+          Trusted by SA electricians
         </span>
         {[
           "Cape Wiring Solutions",
@@ -857,11 +865,10 @@ function Hero({ onRegister }) {
           <span
             key={b}
             style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
               fontSize: 15,
-              color: "rgba(255,255,255,0.25)",
-              letterSpacing: 0.5,
+              color: C.textMuted,
             }}
           >
             {b}
@@ -871,7 +878,6 @@ function Hero({ onRegister }) {
     </section>
   );
 }
-
 /* ─── How It Works ─────────────────────────────────────────────────────── */
 function HowItWorks() {
   const steps = [
@@ -1813,7 +1819,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
+        <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
