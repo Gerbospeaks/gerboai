@@ -2237,6 +2237,91 @@ export default function SubdomainLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>{config.metaTitle || `School Management & Invoicing Software for ${config.label || "Education"} | SolidFlo`}</title>
+  <meta
+    name="description"
+    content={
+      config.metaDescription ||
+      "Manage attendance, report cards, school notices, and fee invoicing — all in one place. Built for South African schools and education businesses. Free plan available, no credit card required."
+    }
+  />
+  <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta
+    property="og:title"
+    content={config.metaTitle || `School Management & Invoicing Software for ${config.label || "Education"} | SolidFlo`}
+  />
+  <meta
+    property="og:description"
+    content={
+      config.metaDescription ||
+      "Attendance, report cards, notices, and invoicing built for South African schools and education businesses."
+    }
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={`https://${subdomain}.solidflo.co.za/`} />
+  <meta property="og:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta
+    name="twitter:title"
+    content={config.metaTitle || `School Management & Invoicing Software for ${config.label || "Education"} | SolidFlo`}
+  />
+  <meta
+    name="twitter:description"
+    content={
+      config.metaDescription ||
+      "Attendance, report cards, and invoicing — built for South African schools."
+    }
+  />
+  <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": `SolidFlo for ${config.label || "Education"}`,
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": `https://${subdomain}.solidflo.co.za/`,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR",
+      },
+      ...(config.ratingValue && config.ratingCount
+        ? {
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": config.ratingValue,
+              "ratingCount": config.ratingCount,
+            },
+          }
+        : {}),
+    })}
+  </script>
+
+  {/* Structured data: FAQ */}
+  {config.faqs?.length > 0 && (
+    <script type="application/ld+json">
+      {JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": config.faqs.map((f) => ({
+          "@type": "Question",
+          "name": f.q,
+          "acceptedAnswer": { "@type": "Answer", "text": f.a },
+        })),
+      })}
+    </script>
+  )}
+</Helmet>
       <style>{fontStyle}</style>
       <div
         style={{

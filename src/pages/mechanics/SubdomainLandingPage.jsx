@@ -2071,6 +2071,115 @@ export default function SubdomainLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo</title>
+  <meta
+    name="description"
+    content="Create digital job cards, track parts and labour, and send VAT-compliant invoices in under 60 seconds. Built for South African motor mechanics and auto workshops. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://mechanics.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
+  <meta
+    property="og:description"
+    content="Job cards, parts tracking, and VAT invoicing — built for South African motor workshops."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mechanics.solidflo.co.za/" />
+  <meta property="og:image" content="https://mechanics.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="Job cards and VAT invoicing — built for South African motor workshops."
+  />
+  <meta name="twitter:image" content="https://mechanics.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Motor Workshops",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://mechanics.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1200"
+      }
+    })}
+  </script>
+
+  {/* Structured data: FAQ */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Workshop or Fleet for unlimited invoicing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are invoices VAT-compliant for SARS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. Every invoice includes your VAT registration number, correct VAT line items, and the required SARS fields. You can also run a VAT Output report for your accountant."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I send invoices on WhatsApp?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Our Workshop and Fleet plans include one-tap WhatsApp invoicing. The invoice is sent as a PDF link directly to your customer's WhatsApp — no app download required on their side."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I handle parts on job cards?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Add your parts to your inventory once, set your cost price and sell price. When you add a part to a job card, it auto-fills the price and deducts from stock. You always know what's in your storeroom."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can multiple technicians use the same account?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Workshop plan supports up to 5 technicians. Each tech gets their own login and can view and update their assigned jobs. The Fleet plan supports unlimited techs across multiple bays or locations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What payment methods can my customers use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Customers can pay via EFT (with auto-reconciliation), card (Visa/Mastercard via Peach Payments), and instant EFT. You get notified the moment payment is made."
+          }
+        }
+      ]
+    })}
+  </script>
+</Helmet>
       <style>{fontStyle}</style>
       <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
         <Navbar onLogin={goLogin} onRegister={goRegister} />

@@ -2059,6 +2059,115 @@ export default function SubdomainLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>Quoting & Invoicing Software for Flooring Contractors | SolidFlo</title>
+  <meta
+    name="description"
+    content="Calculate quotes by m², track material costs, and send VAT-compliant invoices in under 60 seconds. Built for South African flooring installers and tiling contractors. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://flooring.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Quoting & Invoicing Software for Flooring Contractors | SolidFlo" />
+  <meta
+    property="og:description"
+    content="m² quote calculator, material cost tracking, and VAT invoicing — built for South African flooring and tiling contractors."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://flooring.solidflo.co.za/" />
+  <meta property="og:image" content="https://flooring.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Quoting & Invoicing Software for Flooring Contractors | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="m² quote calculator and VAT invoicing — built for South African flooring contractors."
+  />
+  <meta name="twitter:image" content="https://flooring.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Flooring Contractors",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://flooring.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "600",
+      },
+    })}
+  </script>
+
+  {/* Structured data: FAQ */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo built specifically for flooring contractors?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The m² calculator, material tracking fields, and job costing tools are designed around how flooring and tiling businesses actually work — not adapted from generic invoicing software.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use it on site from my phone?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most contractors send their first quote within 10 minutes of signing up.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Does it handle VAT automatically?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. You can set VAT-inclusive or exclusive pricing per quote, and it calculates everything correctly for SARS compliance. Every invoice includes the required fields for a valid tax invoice.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Installer or Studio for unlimited invoicing.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "What if I have employees or a subcontractor?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Studio plan supports up to 5 users, each with their own login and permissions. Your team can log materials and time while you focus on client relationships.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can I import my existing client list?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, you can import clients via CSV. Our support team can also help you migrate from spreadsheets or another system — free of charge.",
+          },
+        },
+      ],
+    })}
+  </script>
+</Helmet>
       <style>{fontStyle}</style>
       <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
         <Navbar onLogin={goLogin} onRegister={goRegister} />

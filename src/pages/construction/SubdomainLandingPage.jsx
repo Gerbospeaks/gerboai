@@ -2042,6 +2042,115 @@ export default function ConstructionLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>Quoting & Invoicing Software for Contractors | SolidFlo</title>
+  <meta
+    name="description"
+    content="Create professional job quotes, track materials & labour, and send VAT-compliant invoices in under 60 seconds. Built for South African contractors and construction companies. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://construction.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Quoting & Invoicing Software for Contractors | SolidFlo" />
+  <meta
+    property="og:description"
+    content="Job quotes, materials tracking, labour billing, and VAT invoicing — built for South African contractors and construction companies."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://construction.solidflo.co.za/" />
+  <meta property="og:image" content="https://construction.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Quoting & Invoicing Software for Contractors | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="Job quotes, materials tracking, and VAT invoicing — built for South African contractors."
+  />
+  <meta name="twitter:image" content="https://construction.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Contractors",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://construction.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "850",
+      },
+    })}
+  </script>
+
+  {/* Structured data: FAQ */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — our Starter plan is free forever. You get 5 quotes and invoices per month with no credit card required. When you're ready to grow, upgrade to Contractor or Enterprise for unlimited invoicing.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Are invoices VAT-compliant for SARS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. Every invoice includes your VAT registration number, correct VAT line items, and the required SARS fields. You can also run a VAT Output report for your accountant.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can I send quotes and invoices on WhatsApp?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Our Contractor and Enterprise plans include one-tap WhatsApp quoting and invoicing. Documents are sent as PDF links directly to your client's WhatsApp — no app download required on their side.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "How do I handle materials on job sheets?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Add your materials to your inventory once, set your cost price and sell price. When you add a material to a job sheet, it auto-fills the price and deducts from stock. You always know what's on hand.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can multiple team members use the same account?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Contractor plan supports up to 5 users. Each team member gets their own login and can view and update their assigned jobs. The Enterprise plan supports unlimited users across multiple sites or locations.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "What payment methods can my clients use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Clients can pay via EFT (with auto-reconciliation), card (Visa/Mastercard via Peach Payments), and instant EFT. You get notified the moment payment is made.",
+          },
+        },
+      ],
+    })}
+  </script>
+</Helmet>
       <style>{fontStyle}</style>
       <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
         <Navbar onLogin={goLogin} onRegister={goRegister} />

@@ -2101,6 +2101,115 @@ export default function SubdomainLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo</title>
+  <meta
+    name="description"
+    content="Bill patients with built-in tariff codes, track medical aid claims, and send SARS & HPCSA-compliant invoices in under 60 seconds. Built for South African GPs, specialists, and allied health practitioners. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://healthcare.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo" />
+  <meta
+    property="og:description"
+    content="Tariff code billing, medical aid claim tracking, and compliant invoicing — built for South African healthcare practitioners."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://healthcare.solidflo.co.za/" />
+  <meta property="og:image" content="https://healthcare.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="Tariff code billing and medical aid claim tracking — built for South African healthcare practices."
+  />
+  <meta name="twitter:image" content="https://healthcare.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Healthcare Practices",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://healthcare.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "700",
+      },
+    })}
+  </script>
+
+  {/* Structured data: FAQ */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo built specifically for healthcare practices?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how South African healthcare practices actually bill — not adapted from generic invoicing software.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Does it support NHRPL and BHF tariff codes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. SolidFlo includes a built-in tariff code library for common NHRPL and BHF codes. Select a procedure and the correct billing rate populates automatically, reducing errors and saving time on every invoice.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can I track medical aid claims separately from private patients?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. You can tag invoices by payment type — medical aid scheme or private — and track each claim's status from submission through to remittance or rejection, all in one dashboard.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — our Solo plan is free forever. You get 10 invoices per month with no credit card required. When your practice grows, upgrade to Practice or Clinic for unlimited billing and medical aid tracking.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "What if I have a receptionist or billing administrator?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Clinic plan supports up to 8 users, each with their own login and role-based access. Your billing admin can manage invoices while you stay focused on patients.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can I import my existing patient records?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, you can import patient details via CSV. Our support team can also help migrate data from existing practice management software — free of charge.",
+          },
+        },
+      ],
+    })}
+  </script>
+</Helmet>
       <style>{fontStyle}</style>
       <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
         <Navbar onLogin={goLogin} onRegister={goRegister} />

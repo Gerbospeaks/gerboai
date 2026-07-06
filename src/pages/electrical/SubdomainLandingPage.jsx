@@ -2039,6 +2039,115 @@ export default function ElectricalLandingPage() {
 
   return (
     <>
+    <Helmet>
+  <title>Invoicing & CoC Software for Electricians | SolidFlo</title>
+  <meta
+    name="description"
+    content="Create job cards, issue SANS 10142-compliant Certificates of Compliance, and send VAT invoices in under 60 seconds. Built for South African electricians and electrical contractors. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://electrical.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Invoicing & CoC Software for Electricians | SolidFlo" />
+  <meta
+    property="og:description"
+    content="Job cards, Certificates of Compliance, materials tracking, and VAT invoicing — built for South African electricians."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://electrical.solidflo.co.za/" />
+  <meta property="og:image" content="https://electrical.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Invoicing & CoC Software for Electricians | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="Job cards, CoC certificates, and VAT invoicing — built for South African electricians."
+  />
+  <meta name="twitter:image" content="https://electrical.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Electricians",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://electrical.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "ZAR",
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "950",
+      },
+    })}
+  </script>
+
+  {/* Structured data: FAQ */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Sparky Pro or Enterprise for unlimited invoicing and CoC generation.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can I generate Certificates of Compliance (CoC)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! SolidFlo generates SANS 10142-compliant CoC certificates directly from your job card data. All required fields are pre-filled — just review, sign, and send. Available on Sparky Pro and Enterprise plans.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Are invoices VAT-compliant for SARS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. Every invoice includes your VAT registration number, correct VAT line items, and the required SARS fields. You can also run a VAT Output report for your accountant or SARS submission.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "Can I send invoices and CoC documents on WhatsApp?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Our Sparky Pro and Enterprise plans include one-tap WhatsApp delivery. Both the invoice and CoC are sent as a PDF link directly to your client's WhatsApp — no app download required on their side.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "How do I manage electrical materials and stock?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Add your materials — cable, conduit, circuit breakers, fittings — to your inventory once with cost and sell prices. When you add a material to a job card, it auto-fills the price and deducts from your stock count.",
+          },
+        },
+        {
+          "@type": "Question",
+          "name": "What payment methods can my clients use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Clients can pay via EFT (with auto-reconciliation), card (Visa/Mastercard via Peach Payments), and instant EFT. You get notified the moment payment is made — no more wondering if it's cleared.",
+          },
+        },
+      ],
+    })}
+  </script>
+</Helmet>
       <style>{fontStyle}</style>
       <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
         <Navbar onLogin={goLogin} onRegister={goRegister} />
