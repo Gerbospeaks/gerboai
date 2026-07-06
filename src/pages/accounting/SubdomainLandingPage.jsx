@@ -1891,6 +1891,13 @@ function CTABanner({ onRegister }) {
 
 /* ─── Footer ────────────────────────────────────────────────────────────── */
 function Footer({ onLogin, onRegister }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
   const cols = [
     {
       title: "Product",
@@ -1923,16 +1930,18 @@ function Footer({ onLogin, onRegister }) {
       style={{
         background: "#040e0b",
         borderTop: "1px solid rgba(255,255,255,0.05)",
-        padding: "56px 24px 32px",
+        padding: isMobile ? "48px 20px 28px" : "56px 24px 32px",
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr repeat(3, 1fr)",
-            gap: 40,
-            marginBottom: 48,
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "2fr repeat(3, 1fr)",
+            gap: isMobile ? 36 : 40,
+            marginBottom: isMobile ? 36 : 48,
           }}
         >
           {/* Brand */}
@@ -1956,9 +1965,8 @@ function Footer({ onLogin, onRegister }) {
                   fontSize: 16,
                 }}
               >
-               <img src={logo} alt="" />
+                <img src={logo} alt="" />
               </div>
-             
             </div>
             <p
               style={{
@@ -1967,7 +1975,7 @@ function Footer({ onLogin, onRegister }) {
                 lineHeight: 1.7,
                 fontFamily: "'Barlow', sans-serif",
                 marginBottom: 20,
-                maxWidth: 220,
+                maxWidth: isMobile ? "100%" : 220,
               }}
             >
               Professional invoicing software built specifically for South
@@ -1991,46 +1999,58 @@ function Footer({ onLogin, onRegister }) {
             </button>
           </div>
 
-          {cols.map((col, i) => (
-            <div key={i}>
-              <p
-                style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 800,
-                  fontSize: 14,
-                  color: "rgba(255,255,255,0.5)",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  margin: "0 0 16px",
-                }}
-              >
-                {col.title}
-              </p>
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
-              >
-                {col.links.map((l) => (
-                  <a
-                    key={l}
-                    href="#"
-                    style={{
-                      color: "rgba(255,255,255,0.35)",
-                      fontSize: 13,
-                      fontFamily: "'Barlow', sans-serif",
-                      textDecoration: "none",
-                      transition: "color .15s",
-                    }}
-                    onMouseEnter={(e) => (e.target.style.color = C.white)}
-                    onMouseLeave={(e) =>
-                      (e.target.style.color = "rgba(255,255,255,0.35)")
-                    }
-                  >
-                    {l}
-                  </a>
-                ))}
+          {/* Link columns — 2-up on mobile so they don't all stack to one long column */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "repeat(2, 1fr)"
+                : "repeat(3, 1fr)",
+              gap: isMobile ? "28px 16px" : 40,
+              gridColumn: isMobile ? "auto" : "span 3",
+            }}
+          >
+            {cols.map((col, i) => (
+              <div key={i}>
+                <p
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.5)",
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    margin: "0 0 16px",
+                  }}
+                >
+                  {col.title}
+                </p>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {col.links.map((l) => (
+                    <a
+                      key={l}
+                      href="#"
+                      style={{
+                        color: "rgba(255,255,255,0.35)",
+                        fontSize: 13,
+                        fontFamily: "'Barlow', sans-serif",
+                        textDecoration: "none",
+                        transition: "color .15s",
+                      }}
+                      onMouseEnter={(e) => (e.target.style.color = C.white)}
+                      onMouseLeave={(e) =>
+                        (e.target.style.color = "rgba(255,255,255,0.35)")
+                      }
+                    >
+                      {l}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <div
@@ -2038,8 +2058,9 @@ function Footer({ onLogin, onRegister }) {
             borderTop: "1px solid rgba(255,255,255,0.06)",
             paddingTop: 24,
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             flexWrap: "wrap",
             gap: 12,
           }}
@@ -2062,7 +2083,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 · 
+            Proudly South African 🇿🇦 ·
           </p>
         </div>
       </div>
