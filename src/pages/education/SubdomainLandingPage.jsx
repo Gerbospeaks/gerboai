@@ -24,7 +24,19 @@ const T = {
   muted: "#718096",
   shadow: "rgba(27,42,61,0.07)",
 };
-
+const C = {
+  ink: "#085041", // deep teal (was deep navy)
+  ink2: "#0F6E56", // mid teal (was mid navy)
+  surface: "#F0FAF6", // cool light teal bg (was cool light blue)
+  white: "#FFFFFF",
+  green: "#1D9E75", // primary accent (was orange)
+  greenD: "#0F6E56", // darker accent
+  greenL: "#E1F5EE", // light tint
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
 /* ─── Scroll helper ─────────────────────────────────────────────────────── */
 const scrollTo = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -2014,12 +2026,24 @@ function CTABanner({ config, onRegister }) {
   );
 }
 
-/* ─── Footer ── Zoho-style structured columns ───────────────────────────── */
-function Footer({ config, onLogin, onRegister }) {
+function Footer({ onLogin, onRegister }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
   const cols = [
     {
       title: "Product",
-      links: ["Features", "Pricing", "Report Cards", "Attendance", "Timetable"],
+      links: [
+        "Features",
+        "Pricing",
+        "Cash Flow Dashboard",
+        "Client Portal",
+        "Reports",
+      ],
     },
     {
       title: "Resources",
@@ -2028,7 +2052,7 @@ function Footer({ config, onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About Educare",
+        "About SolidFlo",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2040,48 +2064,68 @@ function Footer({ config, onLogin, onRegister }) {
   return (
     <footer
       style={{
-        background: "#0C1929",
-        borderTop: `1px solid rgba(255,255,255,0.05)`,
-        padding: "52px 28px 28px",
+        background: "#040e0b",
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        padding: isMobile ? "48px 20px 28px" : "56px 24px 32px",
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr repeat(3, 1fr)",
-            gap: 40,
-            marginBottom: 44,
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "2fr repeat(3, 1fr)",
+            gap: isMobile ? 36 : 40,
+            marginBottom: isMobile ? 36 : 48,
           }}
         >
+          {/* Brand */}
           <div>
-            <img
-              src={logo}
-              alt=""
-              style={{ height: 34, objectFit: "contain", marginBottom: 14 }}
-            />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 16,
+              }}
+            >
+              <div
+                style={{
+                  background: "transparent",
+                  width: 160,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                }}
+              >
+                <img src={logo} alt="" />
+              </div>
+            </div>
             <p
               style={{
                 color: "rgba(255,255,255,0.3)",
                 fontSize: 13,
                 lineHeight: 1.7,
                 fontFamily: "'Barlow', sans-serif",
-                marginBottom: 18,
-                maxWidth: 220,
+                marginBottom: 20,
+                maxWidth: isMobile ? "100%" : 220,
               }}
             >
-              Professional school management software built for South African
-              education businesses.
+              Professional invoicing software built specifically for South
+              African accounting firms and practitioners.
             </p>
             <button
               onClick={onRegister}
               style={{
-                background: config.accent,
+                background: C.green,
                 border: "none",
-                borderRadius: 6,
-                padding: "9px 18px",
-                color: T.white,
-                fontSize: 12.5,
+                borderRadius: 8,
+                padding: "10px 20px",
+                color: C.white,
+                fontSize: 13,
                 fontWeight: 700,
                 fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
@@ -2090,54 +2134,71 @@ function Footer({ config, onLogin, onRegister }) {
               Get started free
             </button>
           </div>
-          {cols.map((col, i) => (
-            <div key={i}>
-              <p
-                style={{
-                  fontFamily: "'Barlow', sans-serif",
-                  fontWeight: 700,
-                  fontSize: 12,
-                  color: "rgba(255,255,255,0.45)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  margin: "0 0 14px",
-                }}
-              >
-                {col.title}
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                {col.links.map((l) => (
-                  <a
-                    key={l}
-                    href="#"
-                    style={{
-                      color: "rgba(255,255,255,0.35)",
-                      fontSize: 13,
-                      fontFamily: "'Barlow', sans-serif",
-                      textDecoration: "none",
-                      transition: "color 0.15s",
-                    }}
-                    onMouseEnter={(e) => (e.target.style.color = T.white)}
-                    onMouseLeave={(e) =>
-                      (e.target.style.color = "rgba(255,255,255,0.35)")
-                    }
-                  >
-                    {l}
-                  </a>
-                ))}
+
+          {/* Link columns — 2-up on mobile so they don't all stack to one long column */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "repeat(2, 1fr)"
+                : "repeat(3, 1fr)",
+              gap: isMobile ? "28px 16px" : 40,
+              gridColumn: isMobile ? "auto" : "span 3",
+            }}
+          >
+            {cols.map((col, i) => (
+              <div key={i}>
+                <p
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.5)",
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    margin: "0 0 16px",
+                  }}
+                >
+                  {col.title}
+                </p>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {col.links.map((l) => (
+                    <a
+                      key={l}
+                      href="#"
+                      style={{
+                        color: "rgba(255,255,255,0.35)",
+                        fontSize: 13,
+                        fontFamily: "'Barlow', sans-serif",
+                        textDecoration: "none",
+                        transition: "color .15s",
+                      }}
+                      onMouseEnter={(e) => (e.target.style.color = C.white)}
+                      onMouseLeave={(e) =>
+                        (e.target.style.color = "rgba(255,255,255,0.35)")
+                      }
+                    >
+                      {l}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+
         <div
           style={{
             borderTop: "1px solid rgba(255,255,255,0.06)",
-            paddingTop: 22,
+            paddingTop: 24,
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             flexWrap: "wrap",
-            gap: 10,
+            gap: 12,
           }}
         >
           <p
@@ -2148,8 +2209,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo / Educare. All rights
-            reserved.
+            © {new Date().getFullYear()} SolidFlo. All rights reserved.
           </p>
           <p
             style={{
@@ -2159,14 +2219,13 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦
+            Proudly South African 🇿🇦 ·
           </p>
         </div>
       </div>
     </footer>
   );
 }
-
 /* ─── App ───────────────────────────────────────────────────────────────── */
 export default function SubdomainLandingPage() {
   const navigate = useNavigate();

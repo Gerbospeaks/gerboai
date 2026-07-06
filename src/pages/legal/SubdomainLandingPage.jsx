@@ -11,7 +11,19 @@ import Helmet from "react-helmet";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 `;
-
+const C = {
+  ink: "#085041", // deep teal (was deep navy)
+  ink2: "#0F6E56", // mid teal (was mid navy)
+  surface: "#F0FAF6", // cool light teal bg (was cool light blue)
+  white: "#FFFFFF",
+  green: "#1D9E75", // primary accent (was orange)
+  greenD: "#0F6E56", // darker accent
+  greenL: "#E1F5EE", // light tint
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
+};
 // ─── Scroll helper ────────────────────────────────────────────────────────────
 function scrollTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -1801,17 +1813,23 @@ function CTABanner({ config, onRegister }) {
   );
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer({ config, onLogin, onRegister }) {
+function Footer({ onLogin, onRegister }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
   const cols = [
     {
       title: "Product",
       links: [
         "Features",
         "Pricing",
-        "Invoice Builder",
+        "Cash Flow Dashboard",
+        "Client Portal",
         "Reports",
-        "Integrations",
       ],
     },
     {
@@ -1833,19 +1851,20 @@ function Footer({ config, onLogin, onRegister }) {
   return (
     <footer
       style={{
-        background: "#0e0b06",
-        borderTop: `1px solid ${config.accent}1A`,
-        padding: "56px 24px 32px",
-        fontFamily: "'Barlow', sans-serif",
+        background: "#040e0b",
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        padding: isMobile ? "48px 20px 28px" : "56px 24px 32px",
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr repeat(3, 1fr)",
-            gap: 40,
-            marginBottom: 48,
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "2fr repeat(3, 1fr)",
+            gap: isMobile ? 36 : 40,
+            marginBottom: isMobile ? 36 : 48,
           }}
         >
           {/* Brand */}
@@ -1858,30 +1877,44 @@ function Footer({ config, onLogin, onRegister }) {
                 marginBottom: 16,
               }}
             >
-              <img src={logo} width={160} alt="" />
+              <div
+                style={{
+                  background: "transparent",
+                  width: 160,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                }}
+              >
+                <img src={logo} alt="" />
+              </div>
             </div>
             <p
               style={{
-                color: "rgba(245,230,211,0.25)",
+                color: "rgba(255,255,255,0.3)",
                 fontSize: 13,
                 lineHeight: 1.7,
+                fontFamily: "'Barlow', sans-serif",
                 marginBottom: 20,
-                maxWidth: 220,
+                maxWidth: isMobile ? "100%" : 220,
               }}
             >
               Professional invoicing software built specifically for South
-              African {config.label.toLowerCase()} businesses.
+              African accounting firms and practitioners.
             </p>
             <button
               onClick={onRegister}
               style={{
-                background: config.accent,
+                background: C.green,
                 border: "none",
                 borderRadius: 8,
                 padding: "10px 20px",
-                color: "#fff",
+                color: C.white,
                 fontSize: 13,
                 fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
                 cursor: "pointer",
               }}
             >
@@ -1889,74 +1922,97 @@ function Footer({ config, onLogin, onRegister }) {
             </button>
           </div>
 
-          {cols.map((col, i) => (
-            <div key={i}>
-              <p
-                style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 800,
-                  fontSize: 14,
-                  color: "rgba(245,230,211,0.4)",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                  margin: "0 0 16px",
-                }}
-              >
-                {col.title}
-              </p>
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
-              >
-                {col.links.map((l) => (
-                  <a
-                    key={l}
-                    href="#"
-                    style={{
-                      color: "rgba(245,230,211,0.3)",
-                      fontSize: 13,
-                      textDecoration: "none",
-                      transition: "color .15s",
-                    }}
-                    onMouseEnter={(e) => (e.target.style.color = "#F5E6D3")}
-                    onMouseLeave={(e) =>
-                      (e.target.style.color = "rgba(245,230,211,0.3)")
-                    }
-                  >
-                    {l}
-                  </a>
-                ))}
+          {/* Link columns — 2-up on mobile so they don't all stack to one long column */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "repeat(2, 1fr)"
+                : "repeat(3, 1fr)",
+              gap: isMobile ? "28px 16px" : 40,
+              gridColumn: isMobile ? "auto" : "span 3",
+            }}
+          >
+            {cols.map((col, i) => (
+              <div key={i}>
+                <p
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.5)",
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    margin: "0 0 16px",
+                  }}
+                >
+                  {col.title}
+                </p>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {col.links.map((l) => (
+                    <a
+                      key={l}
+                      href="#"
+                      style={{
+                        color: "rgba(255,255,255,0.35)",
+                        fontSize: 13,
+                        fontFamily: "'Barlow', sans-serif",
+                        textDecoration: "none",
+                        transition: "color .15s",
+                      }}
+                      onMouseEnter={(e) => (e.target.style.color = C.white)}
+                      onMouseLeave={(e) =>
+                        (e.target.style.color = "rgba(255,255,255,0.35)")
+                      }
+                    >
+                      {l}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <div
           style={{
-            borderTop: `1px solid ${config.accent}14`,
+            borderTop: "1px solid rgba(255,255,255,0.06)",
             paddingTop: 24,
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             flexWrap: "wrap",
             gap: 12,
           }}
         >
           <p
-            style={{ color: "rgba(245,230,211,0.2)", fontSize: 12, margin: 0 }}
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
           >
             © {new Date().getFullYear()} SolidFlo. All rights reserved.
           </p>
           <p
-            style={{ color: "rgba(245,230,211,0.2)", fontSize: 12, margin: 0 }}
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
           >
-            Made with craft in South Africa 🇿🇦
+            Proudly South African 🇿🇦 ·
           </p>
         </div>
       </div>
     </footer>
   );
 }
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function SubdomainLandingPage() {
   const navigate = useNavigate();
