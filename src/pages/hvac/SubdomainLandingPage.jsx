@@ -1205,8 +1205,8 @@ function Testimonials({ config }) {
         >
           {(
             config.stats || [
-              ["10K+", "Active users"],
-              ["R5M+", "Billed monthly"],
+              ["100+", "Active users"],
+              ["500+", "Billed monthly"],
               ["4.9/5", "App rating"],
               ["99.9%", "Uptime"],
             ]
@@ -1378,22 +1378,7 @@ function CTABanner({ config, onRegister }) {
       }}
     >
       <DotGrid accent={C.accent} />
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "15rem",
-          lineHeight: 1,
-          opacity: 0.03,
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      >
-        {config.icon}
-      </div>
+     
 
       <div
         style={{

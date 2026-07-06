@@ -729,38 +729,6 @@ function Hero({ onRegister }) {
             </button>
           </div>
 
-          {/* Trust row */}
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            {[
-              "Free plan forever",
-              "VAT-compliant invoices",
-              "CoC certificate generation",
-              "SA-built & hosted",
-            ].map((t) => (
-              <span
-                key={t}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  color: C.textMuted,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  letterSpacing: "0.03em",
-                  fontFamily: "'Lato', sans-serif",
-                }}
-              >
-                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.orange}>
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {t}
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* Right: Invoice preview */}
@@ -788,45 +756,7 @@ function Hero({ onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice />
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {[
-                ["R 38 500", "This Month"],
-                ["24", "Open Jobs"],
-                ["4.9★", "Client Rating"],
-              ].map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: C.white,
-                    border: `1px solid ${C.creamDark}`,
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontWeight: 700,
-                      fontSize: 18,
-                      color: C.navy,
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: C.textMuted,
-                      fontFamily: "'Lato', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+           
           </div>
         </div>
       </div>

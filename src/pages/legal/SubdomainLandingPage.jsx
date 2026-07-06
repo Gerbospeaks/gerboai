@@ -1532,7 +1532,7 @@ function Testimonials({ config }) {
           {(
             config.stats || [
               ["500+", "Active businesses"],
-              ["R 14M+", "Invoiced monthly"],
+              ["700+", "Invoices monthly"],
               ["4.9/5", "App store rating"],
               ["60%", "Faster payments"],
             ]
@@ -1708,23 +1708,7 @@ function CTABanner({ config, onRegister }) {
       }}
     >
       <GrainOverlay opacity={0.04} />
-      {/* Giant background icon */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "18rem",
-          lineHeight: 1,
-          opacity: 0.04,
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      >
-        {config.icon}
-      </div>
+     
 
       <div
         style={{

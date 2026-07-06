@@ -800,45 +800,7 @@ function Hero({ onRegister }) {
               <span>💰</span> Payment received!
             </div>
             <MockInvoice />
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {[
-                ["R 42 800", "This Month"],
-                ["18", "Open Jobs"],
-                ["4.9★", "Customer Rating"],
-              ].map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: C.white,
-                    border: `1px solid ${C.creamDark}`,
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontWeight: 700,
-                      fontSize: 18,
-                      color: C.navy,
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: C.textMuted,
-                      fontFamily: "'Lato', sans-serif",
-                    }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+           
           </div>
         </div>
       </div>
@@ -1602,7 +1564,7 @@ function Testimonials() {
         >
           {[
             ["1 200+", "Active workshops"],
-            ["R 28M+", "Invoiced monthly"],
+            ["600+", "Invoiced monthly"],
             ["4.9/5", "App store rating"],
             ["< 60s", "Avg invoice time"],
           ].map(([v, l], i) => (

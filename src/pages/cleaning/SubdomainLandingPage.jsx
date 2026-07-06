@@ -1261,7 +1261,7 @@ function Testimonials({ config }) {
         >
           {[
             ["500+", "Active businesses"],
-            ["R 12M+", "Invoiced monthly"],
+            ["1000+", "Invoices monthly"],
             ["4.8/5", "App store rating"],
             ["21 days", "Avg payment time"],
           ].map(([v, l], i, arr) => (

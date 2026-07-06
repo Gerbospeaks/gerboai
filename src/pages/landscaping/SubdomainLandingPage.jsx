@@ -1206,25 +1206,7 @@ function CTABanner({ config, C, onRegister }) {
       }}
     >
       <NoiseTile opacity={0.04} />
-      {/* Giant bg icon */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "18rem",
-          lineHeight: 1,
-          opacity: 0.04,
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      >
-        {config.icon}
-      </div>
-
-      <div
+           <div
         style={{
           maxWidth: 680,
           margin: "0 auto",

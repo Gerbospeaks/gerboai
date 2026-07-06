@@ -1592,7 +1592,7 @@ function Testimonials() {
         >
           {[
             ["800+", "Active practices"],
-            ["R 28M+", "Invoiced monthly"],
+            ["200+", "Invoices monthly"],
             ["4.9/5", "App store rating"],
             ["18 days", "Avg debtor days"],
           ].map(([v, l], i) => (

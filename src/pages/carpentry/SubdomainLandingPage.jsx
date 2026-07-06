@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/img/carpentry-logo.png";
 import logotop from "../../assets/img/carpentry-logo-top.png";
+import google from "../../assets/google-play.png";
 import { Helmet } from "react-helmet";
 const fontStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
@@ -401,7 +402,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logo} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -1608,7 +1609,7 @@ function Testimonials() {
         >
           {[
             ["500+", "Active carpenters"],
-            ["R 14M+", "Quoted monthly"],
+            ["1000+", "Quotes monthly"],
             ["4.9/5", "App store rating"],
             ["60%", "Faster payments"],
           ].map(([v, l], i) => (
@@ -1828,19 +1829,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-        <p
-          style={{
-            color: C.amber,
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            fontFamily: "'Barlow', sans-serif",
-            marginBottom: 16,
-          }}
-        >
-          Get started today
-        </p>
+       <img src={google} alt="" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",

@@ -1642,7 +1642,7 @@ function Pricing({ config, onRegister }) {
 function Testimonials({ config }) {
   const statsStrip = config.statsStrip || [
     ["500+", "SA Schools onboarded"],
-    ["R 8M+", "Invoiced monthly"],
+    ["5000+", "Invoices monthly"],
     ["4.9/5", "App store rating"],
     ["< 60s", "Avg invoice time"],
   ];

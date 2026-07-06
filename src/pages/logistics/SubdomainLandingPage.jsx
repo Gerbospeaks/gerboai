@@ -518,32 +518,6 @@ function Hero({ config, onRegister }) {
             </button>
           </div>
 
-          {/* Trust row */}
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            {[
-              "No credit card required",
-              "Free plan available",
-              "Cancel anytime",
-              "South African business",
-            ].map((t) => (
-              <span
-                key={t}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  color: config.textMuted || "#8C7B6B",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  letterSpacing: "0.03em",
-                  fontFamily: "'Lato', sans-serif",
-                }}
-              >
-                <span style={{ color: config.accent, fontSize: 10 }}>✦</span>
-                {t}
-              </span>
-            ))}
-          </div>
         </div>
 
         {/* Right: Invoice preview */}
@@ -834,40 +808,7 @@ function Hero({ config, onRegister }) {
               </div>
             </div>
 
-            {/* Stats row */}
-            <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-              {[
-                ["R 94 800", "This Month"],
-                ["34", "Active Loads"],
-                ["4.8★", "Client Rating"],
-              ].map(([v, l]) => (
-                <div
-                  key={l}
-                  style={{
-                    flex: 1,
-                    background: "#fff",
-                    border: `1px solid ${config.creamDark || "#E8D9C4"}`,
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontWeight: 700,
-                      fontSize: 18,
-                      color: config.navy || "#1A1208",
-                    }}
-                  >
-                    {v}
-                  </div>
-                  <div style={{ fontSize: 11, color: config.textMuted || "#8C7B6B" }}>
-                    {l}
-                  </div>
-                </div>
-              ))}
-            </div>
+           
           </div>
         </div>
       </div>
@@ -1529,7 +1470,7 @@ function Testimonials({ config }) {
           {(
             config.stats || [
               ["800+", "Active operators"],
-              ["R 28M+", "Invoiced monthly"],
+              ["600+", "Invoices monthly"],
               ["4.8/5", "App store rating"],
               ["55%", "Faster payments"],
             ]
