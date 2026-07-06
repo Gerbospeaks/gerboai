@@ -130,7 +130,7 @@ const CleaningDashboard = () => {
   const [aiDocType, setAiDocType] = useState('invoice');
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
-  // ── Auth ──────────────────────────────────────────────────────────────────
+  const mobileNavPad = "pb-24 lg:pb-6";
   const { user, authUser } = useAuth();
   const location = useLocation();
 const [showStampModal, setShowStampModal] = useState(false);
@@ -1204,7 +1204,7 @@ const bottomNavItems = [
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               {/* ── LEFT: Form panel ──────────────────────────────────── */}
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                 <div className="space-y-5">
                   {/* ── Summary stat cards ─────────────────────────────── */}
                   <div className="grid grid-cols-3 gap-4">

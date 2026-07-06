@@ -1382,7 +1382,7 @@ function Testimonials({ config }) {
         >
           {[
             ["600+", "Active businesses"],
-            ["R 22M+", "Quoted monthly"],
+            ["200+", "Quotes monthly"],
             ["4.9/5", "App store rating"],
             ["70%", "Faster payments"],
           ].map(([v, l], i) => (

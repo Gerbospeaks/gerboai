@@ -126,7 +126,7 @@ const [stampConfig, setStampConfig] = useState(null);
   const [quoteId, setQuoteId] = useState(null);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
-
+  const mobileNavPad = "pb-24 lg:pb-6";
   // ── Customer state ────────────────────────────────────────────────────────
   const [customers, setCustomers] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
@@ -625,19 +625,6 @@ const handleAddNewCustomer = () => {
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
     {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    {
-      label: "Save PDF",
-      icon: Download,
-      onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    {
       label: "Save",
       icon: Save,
       onClick: handleSaveQuote,
@@ -1099,7 +1086,7 @@ const handleAddNewCustomer = () => {
             <div className="flex-1 overflow-hidden flex min-h-0">
 
               {/* ── LEFT: Form panel ──────────────────────────────────── */}
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                 <div className="space-y-5">
 
                   {/* ── Summary stat cards ─────────────────────────────── */}

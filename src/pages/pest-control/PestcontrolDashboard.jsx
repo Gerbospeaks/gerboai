@@ -128,7 +128,7 @@ const PestcontrolDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-
+const mobileNavPad = "pb-24 lg:pb-6";
   // ── auth ─────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
   const [showPreview, setShowPreview] = useState(false);
@@ -1570,7 +1570,7 @@ const [stampConfig, setStampConfig] = useState(null);
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               {/* ── LEFT: Form panel ─────────────────────────────────── */}
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                 <div className="space-y-5">
                   {/* Tab: Manual / AI */}
                   <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">

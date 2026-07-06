@@ -116,6 +116,7 @@ const [stampConfig, setStampConfig] = useState(null);
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [activeView, setActiveView] = useState("home");
+  const mobileNavPad = "pb-24 lg:pb-6";
   const handleQuickCreate = ({ view, action }) => {
     if (action === "newInvoice") {
       handleNewInvoice("invoice");
@@ -1115,7 +1116,7 @@ const bottomNavItems = [
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               {/* ── LEFT: Form panel ─────────────────────────────────────── */}
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                 <div className="space-y-5">
                   {/* Summary stat cards */}
                   <div className="grid grid-cols-3 gap-4">

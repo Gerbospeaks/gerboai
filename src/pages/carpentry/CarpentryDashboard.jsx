@@ -116,7 +116,7 @@ const CarpentryDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user, authUser } = useAuth();
-
+const mobileNavPad = "pb-24 lg:pb-6";
   const handleQuickCreate = ({ view, action }) => {
     if (action === "newInvoice") {
       handleNewInvoice();
@@ -1749,7 +1749,7 @@ const bottomNavItems = [
           {activeView === "quote" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               {/* LEFT: Form panel */}
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                 <div className="space-y-5">
                   {/* Summary stat cards */}
                   <div className="grid grid-cols-3 gap-4">

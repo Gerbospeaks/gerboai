@@ -917,7 +917,7 @@ useEffect(() => {
             <div className="flex-1 overflow-y-auto">
               {/* ── INVOICE / QUOTE BUILDER ──────────────────────────────── */}
               {(activeView === "invoice" || activeView === "quote") && (
-                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                   {/* Doc type toggle */}
                   <div className="flex items-center gap-3 bg-white border border-[#e2e8f0] rounded-xl p-3 shadow-sm">
                     <div
@@ -1329,7 +1329,7 @@ useEffect(() => {
 
               {/* ── PURCHASE ORDER ──────────────────────────────────────────── */}
               {activeView === "purchase_order" && (
-                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                   <div className="flex items-center gap-3 bg-white border border-[#e2e8f0] rounded-xl p-3 shadow-sm">
                     <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
                       <Truck className="w-5 h-5 text-[#7c3aed]" />

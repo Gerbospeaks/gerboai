@@ -198,7 +198,7 @@ const SidebarItem = ({
 // ─────────────────────────────────────────────────────────────────────────────
 const TechnologyDashboardInner = () => {
   const { requirePlan, canAccess, currentPlan } = usePlan();
-
+const mobileNavPad = "pb-24 lg:pb-6";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
   const [documentType, setDocumentType] = useState("invoice");

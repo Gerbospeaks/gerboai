@@ -463,7 +463,7 @@ const EducationDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
-
+const mobileNavPad = "pb-24 lg:pb-6";
   const todayISO = new Date().toISOString().split("T")[0];
   const today = new Date();
   const dayName = today.toLocaleDateString("en-ZA", { weekday: "long" });

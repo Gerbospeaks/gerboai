@@ -2811,7 +2811,7 @@ const LegalDashboard = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(true);
-
+const mobileNavPad = "pb-24 lg:pb-6";
   const [stampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -4021,7 +4021,7 @@ const [stampConfig, setStampConfig] = useState(null);
 )}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                 <div className="space-y-5">
                   <div className="grid grid-cols-3 gap-4">
                     {[

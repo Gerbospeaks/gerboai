@@ -213,6 +213,7 @@ const SecurityDashboard = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [showStampModal, setShowStampModal] = useState(false);
 const [stampConfig, setStampConfig] = useState(null);
+const mobileNavPad = "pb-24 lg:pb-6";
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -1499,7 +1500,7 @@ const [stampConfig, setStampConfig] = useState(null);
           {/* Incident report builder */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
-              <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                 <div className="space-y-5">
                   <div className="flex items-center gap-3 px-5 py-3.5 bg-[#fffbeb] border border-[#fde68a] rounded-xl">
                     <div className="w-8 h-8 bg-[#fef3c7] rounded-full flex items-center justify-center flex-shrink-0">

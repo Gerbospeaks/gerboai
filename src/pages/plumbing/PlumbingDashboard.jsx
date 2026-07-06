@@ -139,6 +139,7 @@ const PlumbingDashboard = () => {
     showDate: false,
     enabled: false,
   });
+  const mobileNavPad = "pb-24 lg:pb-6";
 const [showStampModal, setShowStampModal] = useState(false);
 const [stampConfig, setStampConfig] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({

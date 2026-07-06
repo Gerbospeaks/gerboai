@@ -140,7 +140,7 @@ const LogisticsDashboard = () => {
   const [customers, setCustomers] = useState([]);
   const [waybills, setWaybills] = useState([]);
   const [showWaybillsList, setShowWaybillsList] = useState(false);
-
+const mobileNavPad = "pb-24 lg:pb-6";
   const [showInTransitModal, setShowInTransitModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
@@ -1454,7 +1454,7 @@ const [stampConfig, setStampConfig] = useState(null);
             {activeView === "invoice" && (
               <div className="flex-1 overflow-hidden flex min-h-0">
                 {/* LEFT: Form panel */}
-                <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 min-w-0">
+                <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
                   <div className="space-y-5">
                     {/* In-transit status banner */}
                     <div className="flex items-center gap-3 px-4 py-3 bg-[#eff6ff] border border-[#bfdbfe] rounded-xl">
