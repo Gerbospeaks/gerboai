@@ -10,7 +10,7 @@ import { Helmet } from "react-helmet";
 import InstallButton from "../components/InstallButton";
 import CookieConsent from "../components/CookieConsent";
 import heroBg from "../assets/videos/world.mp4";
-import google from "../assets/google-play.png"
+import google from "../assets/google-play.png";
 import {
   Zap,
   Shield,
@@ -1204,7 +1204,7 @@ vapi-widget::part(button) {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     z-index: 200;
-    background: rgba(255,255,255,.97);
+    background: rgba(255, 255, 255, 0);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-top: 0.5px solid #e2e8f0;
@@ -1238,7 +1238,7 @@ vapi-widget::part(button) {
     top: 0; /* remove the 40px gap on mobile */
     height: 56px;
     padding: 0 16px;
-    background: rgba(255,255,255,.97) !important;
+    background: rgb(255, 255, 255) !important;
     backdrop-filter: blur(12px);
     border-bottom: 0.5px solid #e2e8f0;
   }
@@ -1248,7 +1248,7 @@ vapi-widget::part(button) {
    left: 0;
     right: 0;
     border-radius: 0;
-    background: rgba(255,255,255,.97) !important;
+    background: rgba(255, 255, 255, 0) !important;
     box-shadow: none;
   }
     .lp-nav-links, .lp-nav-ctas { display: none; }
@@ -1326,12 +1326,12 @@ const LandingPage = () => {
     if (usd === 0) return "Free";
     return formatPrice(usd, exchangeRate, currencyCode);
   };
-const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState("home");
 
-// scroll helpers
-const scrollTo = (id) => {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-};
+  // scroll helpers
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
   /* ── Calendly ── */
   useEffect(() => {
     const link = document.createElement("link");
@@ -1372,7 +1372,7 @@ const scrollTo = (id) => {
         widget.setAttribute("accent-color", "#000000");
         widget.setAttribute("position", "bottom-right");
         widget.setAttribute("title", "Solidflo Assistant");
-       widget.setAttribute("label", "");
+        widget.setAttribute("label", "");
         widget.setAttribute(
           "chat-first-message",
           "Hey, How can I help you today?",
@@ -1640,15 +1640,14 @@ const scrollTo = (id) => {
     },
   ];
 
-const stats = [
-  { value: "Real-time", label: "Sync", icon: <Zap size={18} /> },
-  { value: "256-bit", label: "Encryption", icon: <Lock size={18} /> },
-  { value: "99.9%", label: "Uptime SLA", icon: <Shield size={18} /> },
-  { value: "API", label: "First", icon: <Code size={18} /> },
-];
+  const stats = [
+    { value: "Real-time", label: "Sync", icon: <Zap size={18} /> },
+    { value: "256-bit", label: "Encryption", icon: <Lock size={18} /> },
+    { value: "99.9%", label: "Uptime SLA", icon: <Shield size={18} /> },
+    { value: "API", label: "First", icon: <Code size={18} /> },
+  ];
 
   const testimonials = [
-    
     {
       name: "Mark Moyo",
       role: "Electrician",
@@ -1756,70 +1755,82 @@ const stats = [
   return (
     <>
       {isOpen && <IndustryPickerModal onClose={close} intent={intent} />}
-     <Helmet>
-  <title>SolidFlo — Business Management Software for 26 Industries</title>
-  <meta
-    name="description"
-    content="SolidFlo is business management software built for every trade — invoicing, quotes, scheduling and client management for mechanics, electricians, construction, healthcare, education and more. Free plan available, no credit card required."
-  />
-  <link rel="canonical" href="https://solidflo.co.za/" />
+      <Helmet>
+        <title>SolidFlo — Business Management Software for 26 Industries</title>
+        <meta
+          name="description"
+          content="SolidFlo is business management software built for every trade — invoicing, quotes, scheduling and client management for mechanics, electricians, construction, healthcare, education and more. Free plan available, no credit card required."
+        />
+        <link rel="canonical" href="https://solidflo.co.za/" />
 
-  {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="SolidFlo — Business Management Software for 26 Industries" />
-  <meta
-    property="og:description"
-    content="Invoicing, quotes, scheduling and client management — one platform built for every trade. Start free, no credit card required."
-  />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://solidflo.co.za/" />
-  <meta property="og:image" content="https://solidflo.co.za/og-image.jpg" />
-  <meta property="og:locale" content="en_ZA" />
+        {/* Open Graph */}
+        <meta property="og:site_name" content="SolidFlo" />
+        <meta
+          property="og:title"
+          content="SolidFlo — Business Management Software for 26 Industries"
+        />
+        <meta
+          property="og:description"
+          content="Invoicing, quotes, scheduling and client management — one platform built for every trade. Start free, no credit card required."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://solidflo.co.za/" />
+        <meta
+          property="og:image"
+          content="https://solidflo.co.za/og-image.jpg"
+        />
+        <meta property="og:locale" content="en_ZA" />
 
-  {/* Twitter */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="SolidFlo — Business Management Software for 26 Industries" />
-  <meta
-    name="twitter:description"
-    content="Invoicing, quotes, scheduling and client management — one platform built for every trade."
-  />
-  <meta name="twitter:image" content="https://solidflo.co.za/og-image.jpg" />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="SolidFlo — Business Management Software for 26 Industries"
+        />
+        <meta
+          name="twitter:description"
+          content="Invoicing, quotes, scheduling and client management — one platform built for every trade."
+        />
+        <meta
+          name="twitter:image"
+          content="https://solidflo.co.za/og-image.jpg"
+        />
 
-  {/* Structured data: organization + software */}
-  <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "SolidFlo",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "url": "https://solidflo.co.za/",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD",
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "ratingCount": "10000",
-      },
-    })}
-  </script>
+        {/* Structured data: organization + software */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "SolidFlo",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            url: "https://solidflo.co.za/",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+            },
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: "4.9",
+              ratingCount: "10000",
+            },
+          })}
+        </script>
 
-  {/* Structured data: FAQ (matches your on-page FAQ section) */}
-  <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": faqs.map((f) => ({
-        "@type": "Question",
-        "name": f.q,
-        "acceptedAnswer": { "@type": "Answer", "text": f.a },
-      })),
-    })}
-  </script>
-</Helmet>
+        {/* Structured data: FAQ (matches your on-page FAQ section) */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          })}
+        </script>
+      </Helmet>
       <div className="lp">
         <style>{css}</style>
 
@@ -1847,7 +1858,6 @@ const stats = [
               >
                 Start Free <ArrowRight size={13} />
               </button>
-             
             </div>
 
             <button
@@ -1912,15 +1922,15 @@ const stats = [
           <div className="lp-hero-inner">
             {/* LEFT — text */}
             <div className="lp-hero-left">
-             <div className="lp-hero-badge">
-  <div className="lp-hero-badge-avatars">
-    <img src="https://i.pravatar.cc/60?img=1" alt="" />
-    <img src="https://i.pravatar.cc/60?img=2" alt="" />
-    <img src="https://i.pravatar.cc/60?img=3" alt="" />
-  </div>
-  <span className="lp-hero-badge-count">Plus 10k</span>
-  <span className="lp-hero-badge-text">26 industries</span>
-</div>
+              <div className="lp-hero-badge">
+                <div className="lp-hero-badge-avatars">
+                  <img src="https://i.pravatar.cc/60?img=1" alt="" />
+                  <img src="https://i.pravatar.cc/60?img=2" alt="" />
+                  <img src="https://i.pravatar.cc/60?img=3" alt="" />
+                </div>
+                <span className="lp-hero-badge-count">Plus 10k</span>
+                <span className="lp-hero-badge-text">26 industries</span>
+              </div>
 
               <h1>
                 Business Management
@@ -1931,7 +1941,10 @@ const stats = [
               <p className="lp-hero-sub">{ROTATING[currentWord].sub}</p>
 
               <div className="lp-hero-ctas">
-                <button className="lp-btn-primary" onClick={() => open("register")}>
+                <button
+                  className="lp-btn-primary"
+                  onClick={() => open("register")}
+                >
                   Start Free Trial <ArrowRight size={15} />
                 </button>
                 <button className="lp-hero-secondary" onClick={openCalendly}>
@@ -1957,7 +1970,9 @@ const stats = [
             </div>
 
             {/* RIGHT — orb visual */}
-           <div className="lp-hero-right"><HeroInvoiceOverlay /></div>
+            <div className="lp-hero-right">
+              <HeroInvoiceOverlay />
+            </div>
           </div>
         </section>
 
@@ -2335,8 +2350,6 @@ const stats = [
           <p>
             Join thousands of businesses across 50+ countries using SolidFlo.
           </p>
-
-         
         </section>
 
         {/* ── Pricing ── */}
@@ -2502,25 +2515,20 @@ const stats = [
             </button>
           </div>
           <p className="lp-cta-footnote">
-             No credit card required &nbsp; 14-day free trial &nbsp; Cancel
+            No credit card required &nbsp; 14-day free trial &nbsp; Cancel
             anytime
           </p>
         </section>
         <section className="kraal-section">
-  <div className="section-inner">
-   
-     
-
-      <div className="hero-app">
-        <h1 className="section-eyebrow light">
-        Download the Solidflo app
-      </h1>
-        <img src={google} alt="" />
-      </div>
-       
-   
-  </div>
-</section>
+          <div className="section-inner">
+            <div className="hero-app">
+              <h1 className="section-eyebrow light">
+                Download the Solidflo app
+              </h1>
+              <img src={google} alt="" />
+            </div>
+          </div>
+        </section>
         {/* ── Footer ── */}
         <footer className="lp-footer">
           <div className="lp-footer-grid">
@@ -2618,29 +2626,126 @@ const stats = [
             <span>Modern Invoicing &amp; Billing</span>
           </div>
         </footer>
-         <CookieConsent />
-          <div id="vapi-widget-container" />
+        <CookieConsent />
+        <div id="vapi-widget-container" />
       </div>
-{/* Bottom Nav */}
-<nav className="lp-bottom-nav">
-  {[
-    { id: 'home',         label: 'Home',      icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>, action: () => window.scrollTo({top:0,behavior:'smooth'}) },
-    { id: 'features',     label: 'Features',  icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>, action: () => scrollTo('features') },
-    { id: 'market',       label: 'Market',    icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 19h6"/></svg>, action: () => scrollTo('pricing') },
-    { id: 'faq',          label: 'FAQ',       icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>, action: () => scrollTo('faq') },
-    { id: 'start',        label: 'Start',     icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>, action: () => open('register') },
-  ].map(tab => (
-    <button
-      key={tab.id}
-      className={`lp-bottom-tab${activeTab === tab.id ? ' active' : ''}`}
-      onClick={() => { setActiveTab(tab.id); tab.action(); }}
-    >
-      {tab.icon}
-      {tab.label}
-    </button>
-  ))}
-</nav>
-     
+      {/* Bottom Nav */}
+      <nav className="lp-bottom-nav">
+        {[
+          {
+            id: "home",
+            label: "Home",
+            icon: (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+            ),
+            action: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+          },
+          {
+            id: "features",
+            label: "Features",
+            icon: (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            ),
+            action: () => scrollTo("features"),
+          },
+          {
+            id: "market",
+            label: "Market",
+            icon: (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 19h6"
+                />
+              </svg>
+            ),
+            action: () => scrollTo("pricing"),
+          },
+          {
+            id: "faq",
+            label: "FAQ",
+            icon: (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            ),
+            action: () => scrollTo("faq"),
+          },
+          {
+            id: "start",
+            label: "Start",
+            icon: (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            ),
+            action: () => open("register"),
+          },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            className={`lp-bottom-tab${activeTab === tab.id ? " active" : ""}`}
+            onClick={() => {
+              setActiveTab(tab.id);
+              tab.action();
+            }}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </nav>
     </>
   );
 };

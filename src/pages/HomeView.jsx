@@ -15,7 +15,9 @@ import {
   X,
   Clock,
   LayoutDashboard,
-  Menu,Eye, Download,
+  Menu,
+  Eye,
+  Download,
 } from "lucide-react";
 
 /* ─── Zoho design tokens ─────────────────────────────────────────────────── */
@@ -377,7 +379,6 @@ const KPI = ({
   </div>
 );
 
-
 export default function Home({
   onNavigate,
   onGoToDashboard,
@@ -386,7 +387,7 @@ export default function Home({
 }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [pdfViewer, setPdfViewer] = useState(null); 
+  const [pdfViewer, setPdfViewer] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [invoices, setInvoices] = useState([]);
@@ -400,10 +401,6 @@ export default function Home({
     pendingPayments: 0,
     loading: true,
   });
-
-  // ── Navigation helper ────────────────────────────────────────────────────
-  // When embedded in a dashboard, call onNavigate(view, docType).
-  // When standalone (own route), use react-router state.
   const nav = (view, documentType) => {
     if (onNavigate) {
       onNavigate(view, documentType);
@@ -422,12 +419,6 @@ export default function Home({
       navigate(getDashboardRoute(user?.dashboardId));
     }
   };
-
-  // ── Document-type-aware action handlers ──────────────────────────────────
-  // These pass the documentType so the carpentry dashboard (or any other) can
-  // set its own documentType state BEFORE switching views.  The carpentry
-  // sidebar uses a single "quote" view for both quotes and invoices, toggled
-  // by documentType.
   const handleNewInvoice = () => nav("quote", "invoice");
   const handleNewQuote = () => nav("quote", "quote");
   const handleNewEstimate = () => nav("estimate", "estimate");
@@ -616,9 +607,7 @@ export default function Home({
                 <span className="zh-panel-head-title">Quick Actions</span>
                 <ArrowRight size={13} color={Z.textMuted} />
               </div>
-              <div className="zh-panel-body">
-                
-              </div>
+              <div className="zh-panel-body"></div>
             </div>
           </div>
 
@@ -669,72 +658,106 @@ export default function Home({
                   <tbody>
                     {invoices.slice(0, 10).map((inv) => (
                       <tr key={inv.id} className="zh-inv-row">
-    <td className="zh-inv-num">
-      {inv.jobCardNumber || inv.quoteNumber || inv.invoiceNumber || inv.id}
-    </td>
-    <td className="zh-inv-client">
-      {inv.customer?.name || inv.customerName || "—"}
-    </td>
-    <td>
-      {inv.dates?.invoiceDate || inv.date
-        ? new Date(inv.dates?.invoiceDate || inv.date).toLocaleDateString("en-ZA")
-        : "—"}
-    </td>
-    <td>
-      <span className={badgeClass(inv.status)}>
-        {inv.status || "Draft"}
-      </span>
-    </td>
-    <td className="zh-inv-amount">
-      {fmtCurrency(inv.totals?.total || inv.total || 0)}
-    </td>
+                        <td className="zh-inv-num">
+                          {inv.jobCardNumber ||
+                            inv.quoteNumber ||
+                            inv.invoiceNumber ||
+                            inv.id}
+                        </td>
+                        <td className="zh-inv-client">
+                          {inv.customer?.name || inv.customerName || "—"}
+                        </td>
+                        <td>
+                          {inv.dates?.invoiceDate || inv.date
+                            ? new Date(
+                                inv.dates?.invoiceDate || inv.date,
+                              ).toLocaleDateString("en-ZA")
+                            : "—"}
+                        </td>
+                        <td>
+                          <span className={badgeClass(inv.status)}>
+                            {inv.status || "Draft"}
+                          </span>
+                        </td>
+                        <td className="zh-inv-amount">
+                          {fmtCurrency(inv.totals?.total || inv.total || 0)}
+                        </td>
 
-    {/* ── PDF column ── */}
-    <td onClick={(e) => e.stopPropagation()} style={{ whiteSpace: "nowrap" }}>
-      {inv.downloadUrl ? (
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-         <button
-      onClick={e => { e.stopPropagation(); setPdfViewer({ url: inv.downloadUrl, fileName: inv.jobCardNumber + ".pdf" }); }}
-      className="... your existing View button classes ..."
-    >
-      <Eye className="w-3 h-3" /> View
-    </button>
-          
-           <a href={inv.downloadUrl}
-            download
-            title="Download PDF"
-            style={{
-              display: "flex", alignItems: "center", gap: 4,
-              padding: "3px 8px", borderRadius: 3,
-              border: `1px solid ${Z.border}`, background: Z.bg,
-              color: Z.textMid, fontSize: 11, fontWeight: 700,
-              textDecoration: "none", transition: "all .15s",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = Z.greenLight;
-              e.currentTarget.style.color = Z.green;
-              e.currentTarget.style.borderColor = "#86efac";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = Z.bg;
-              e.currentTarget.style.color = Z.textMid;
-              e.currentTarget.style.borderColor = Z.border;
-            }}
-          >
-            <Download size={11} /> Save
-          </a>
-        </div>
-      ) : (
-        <span style={{
-          fontSize: 10, color: Z.textMuted,
-          padding: "3px 8px", borderRadius: 3,
-          border: `1px solid ${Z.border}`, background: Z.bg,
-        }}>
-          No PDF
-        </span>
-      )}
-    </td>
-  </tr>
+                        {/* ── PDF column ── */}
+                        <td
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {inv.downloadUrl ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              }}
+                            >
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPdfViewer({
+                                    url: inv.downloadUrl,
+                                    fileName: inv.jobCardNumber + ".pdf",
+                                  });
+                                }}
+                                className="... your existing View button classes ..."
+                              >
+                                <Eye className="w-3 h-3" /> View
+                              </button>
+
+                              <a
+                                href={inv.downloadUrl}
+                                download
+                                title="Download PDF"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  padding: "3px 8px",
+                                  borderRadius: 3,
+                                  border: `1px solid ${Z.border}`,
+                                  background: Z.bg,
+                                  color: Z.textMid,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  textDecoration: "none",
+                                  transition: "all .15s",
+                                }}
+                                onMouseOver={(e) => {
+                                  e.currentTarget.style.background =
+                                    Z.greenLight;
+                                  e.currentTarget.style.color = Z.green;
+                                  e.currentTarget.style.borderColor = "#86efac";
+                                }}
+                                onMouseOut={(e) => {
+                                  e.currentTarget.style.background = Z.bg;
+                                  e.currentTarget.style.color = Z.textMid;
+                                  e.currentTarget.style.borderColor = Z.border;
+                                }}
+                              >
+                                <Download size={11} /> Save
+                              </a>
+                            </div>
+                          ) : (
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: Z.textMuted,
+                                padding: "3px 8px",
+                                borderRadius: 3,
+                                border: `1px solid ${Z.border}`,
+                                background: Z.bg,
+                              }}
+                            >
+                              No PDF
+                            </span>
+                          )}
+                        </td>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
@@ -794,92 +817,128 @@ export default function Home({
                   </thead>
                   <tbody>
                     {invoices.slice(0, 10).map((inv) => (
-                       <tr key={inv.id} className="zh-inv-row">
-    <td className="zh-inv-num">
-      {inv.jobCardNumber || inv.quoteNumber || inv.invoiceNumber || inv.id}
-    </td>
-    <td className="zh-inv-client">
-      {inv.customer?.name || inv.customerName || "—"}
-    </td>
-    <td>
-      {inv.dates?.invoiceDate || inv.date
-        ? new Date(inv.dates?.invoiceDate || inv.date).toLocaleDateString("en-ZA")
-        : "—"}
-    </td>
-    <td>
-      <span className={badgeClass(inv.status)}>
-        {inv.status || "Draft"}
-      </span>
-    </td>
-    <td className="zh-inv-amount">
-      {fmtCurrency(inv.totals?.total || inv.total || 0)}
-    </td>
+                      <tr key={inv.id} className="zh-inv-row">
+                        <td className="zh-inv-num">
+                          {inv.jobCardNumber ||
+                            inv.quoteNumber ||
+                            inv.invoiceNumber ||
+                            inv.id}
+                        </td>
+                        <td className="zh-inv-client">
+                          {inv.customer?.name || inv.customerName || "—"}
+                        </td>
+                        <td>
+                          {inv.dates?.invoiceDate || inv.date
+                            ? new Date(
+                                inv.dates?.invoiceDate || inv.date,
+                              ).toLocaleDateString("en-ZA")
+                            : "—"}
+                        </td>
+                        <td>
+                          <span className={badgeClass(inv.status)}>
+                            {inv.status || "Draft"}
+                          </span>
+                        </td>
+                        <td className="zh-inv-amount">
+                          {fmtCurrency(inv.totals?.total || inv.total || 0)}
+                        </td>
 
-    {/* ── PDF column ── */}
-    <td onClick={(e) => e.stopPropagation()} style={{ whiteSpace: "nowrap" }}>
-      {inv.downloadUrl ? (
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <a
-            href={inv.downloadUrl}
-            target="_blank"
-            rel="noreferrer"
-            title="View PDF"
-            style={{
-              display: "flex", alignItems: "center", gap: 4,
-              padding: "3px 8px", borderRadius: 3,
-              border: `1px solid ${Z.border}`, background: Z.bg,
-              color: Z.textMid, fontSize: 11, fontWeight: 700,
-              textDecoration: "none", transition: "all .15s",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = Z.blueLight;
-              e.currentTarget.style.color = Z.blue;
-              e.currentTarget.style.borderColor = "#93c5fd";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = Z.bg;
-              e.currentTarget.style.color = Z.textMid;
-              e.currentTarget.style.borderColor = Z.border;
-            }}
-          >
-            <Eye size={11} /> View
-          </a>
-          
-           <a href={inv.downloadUrl}
-            download
-            title="Download PDF"
-            style={{
-              display: "flex", alignItems: "center", gap: 4,
-              padding: "3px 8px", borderRadius: 3,
-              border: `1px solid ${Z.border}`, background: Z.bg,
-              color: Z.textMid, fontSize: 11, fontWeight: 700,
-              textDecoration: "none", transition: "all .15s",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = Z.greenLight;
-              e.currentTarget.style.color = Z.green;
-              e.currentTarget.style.borderColor = "#86efac";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = Z.bg;
-              e.currentTarget.style.color = Z.textMid;
-              e.currentTarget.style.borderColor = Z.border;
-            }}
-          >
-            <Download size={11} /> Save
-          </a>
-        </div>
-      ) : (
-        <span style={{
-          fontSize: 10, color: Z.textMuted,
-          padding: "3px 8px", borderRadius: 3,
-          border: `1px solid ${Z.border}`, background: Z.bg,
-        }}>
-          No PDF
-        </span>
-      )}
-    </td>
-  </tr>
+                        {/* ── PDF column ── */}
+                        <td
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {inv.downloadUrl ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              }}
+                            >
+                              <a
+                                href={inv.downloadUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="View PDF"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  padding: "3px 8px",
+                                  borderRadius: 3,
+                                  border: `1px solid ${Z.border}`,
+                                  background: Z.bg,
+                                  color: Z.textMid,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  textDecoration: "none",
+                                  transition: "all .15s",
+                                }}
+                                onMouseOver={(e) => {
+                                  e.currentTarget.style.background =
+                                    Z.blueLight;
+                                  e.currentTarget.style.color = Z.blue;
+                                  e.currentTarget.style.borderColor = "#93c5fd";
+                                }}
+                                onMouseOut={(e) => {
+                                  e.currentTarget.style.background = Z.bg;
+                                  e.currentTarget.style.color = Z.textMid;
+                                  e.currentTarget.style.borderColor = Z.border;
+                                }}
+                              >
+                                <Eye size={11} /> View
+                              </a>
+
+                              <a
+                                href={inv.downloadUrl}
+                                download
+                                title="Download PDF"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  padding: "3px 8px",
+                                  borderRadius: 3,
+                                  border: `1px solid ${Z.border}`,
+                                  background: Z.bg,
+                                  color: Z.textMid,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  textDecoration: "none",
+                                  transition: "all .15s",
+                                }}
+                                onMouseOver={(e) => {
+                                  e.currentTarget.style.background =
+                                    Z.greenLight;
+                                  e.currentTarget.style.color = Z.green;
+                                  e.currentTarget.style.borderColor = "#86efac";
+                                }}
+                                onMouseOut={(e) => {
+                                  e.currentTarget.style.background = Z.bg;
+                                  e.currentTarget.style.color = Z.textMid;
+                                  e.currentTarget.style.borderColor = Z.border;
+                                }}
+                              >
+                                <Download size={11} /> Save
+                              </a>
+                            </div>
+                          ) : (
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: Z.textMuted,
+                                padding: "3px 8px",
+                                borderRadius: 3,
+                                border: `1px solid ${Z.border}`,
+                                background: Z.bg,
+                              }}
+                            >
+                              No PDF
+                            </span>
+                          )}
+                        </td>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
