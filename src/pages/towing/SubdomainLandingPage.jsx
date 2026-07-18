@@ -945,7 +945,7 @@ function Footer({ config, onLogin, onRegister }) {
               </div>
             </div>
             <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13, lineHeight: 1.7, fontFamily: "'Barlow', sans-serif", marginBottom: 18, maxWidth: 220 }}>
-              Professional invoicing software built for South African {config.label.toLowerCase()} operators.
+              Professional invoicing software built for African {config.label.toLowerCase()} operators.
             </p>
             <button
               onClick={onRegister}
@@ -984,7 +984,7 @@ function Footer({ config, onLogin, onRegister }) {
             © {new Date().getFullYear()} SolidFlo. All rights reserved.
           </p>
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, fontFamily: "'Barlow', sans-serif", margin: 0 }}>
-            Proudly South African 🇿🇦
+            Proudly  African
           </p>
         </div>
       </div>

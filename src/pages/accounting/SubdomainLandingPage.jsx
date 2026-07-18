@@ -1828,7 +1828,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 800+ South African accounting practices that bill professionally
+          Join 800+ African accounting practices that bill professionally
           and get paid faster with SolidFlo.
         </p>
         <div
@@ -2083,7 +2083,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2107,18 +2107,18 @@ export default function SubdomainLandingPage() {
         <title>Accounting Software for SA Practices | SolidFlo</title>
         <meta
           name="description"
-          content="SARS-compliant invoicing, automated payment reminders, and cash flow dashboards built for South African accounting firms. Free plan available — start in 60 seconds."
+          content="SARS-compliant invoicing, automated payment reminders, and cash flow dashboards built for African accounting firms. Free plan available — start in 60 seconds."
         />
         <link rel="canonical" href="https://accounting.solidflo.co.za/" />
 
         <meta property="og:title" content="Accounting Software for SA Practices | SolidFlo" />
-        <meta property="og:description" content="SARS-compliant invoicing and payment automation built for South African accounting firms." />
+        <meta property="og:description" content="SARS-compliant invoicing and payment automation built for African accounting firms." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://accounting.solidflo.co.za/" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Accounting Software for SA Practices | SolidFlo" />
-        <meta name="twitter:description" content="SARS-compliant invoicing and payment automation built for South African accounting firms." />
+        <meta name="twitter:description" content="SARS-compliant invoicing and payment automation built for African accounting firms." />
 
         <script type="application/ld+json">
           {JSON.stringify({

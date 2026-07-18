@@ -469,7 +469,7 @@ function Hero({ config, onRegister }) {
               "No credit card required",
               "Free plan available",
               "Cancel anytime",
-              "South African business",
+              "African business",
             ].map((t) => (
               <span
                 key={t}
@@ -1726,7 +1726,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -1751,7 +1751,7 @@ export default function SubdomainLandingPage() {
   <title>Invoicing & Booking Software for Cleaning Businesses | SolidFlo</title>
   <meta
     name="description"
-    content="Manage bookings, send professional invoices, and track recurring clients — all in one place. Built for South African cleaning businesses, from domestic to commercial. Free plan available, no credit card required."
+    content="Manage bookings, send professional invoices, and track recurring clients — all in one place. Built for African cleaning businesses, from domestic to commercial. Free plan available, no credit card required."
   />
   <link rel="canonical" href="https://cleaning.solidflo.co.za/" />
 
@@ -1760,7 +1760,7 @@ export default function SubdomainLandingPage() {
   <meta property="og:title" content="Invoicing & Booking Software for Cleaning Businesses | SolidFlo" />
   <meta
     property="og:description"
-    content="Bookings, invoicing, and client management built for South African cleaning businesses — domestic, office, and commercial."
+    content="Bookings, invoicing, and client management built for African cleaning businesses — domestic, office, and commercial."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://cleaning.solidflo.co.za/" />
@@ -1772,7 +1772,7 @@ export default function SubdomainLandingPage() {
   <meta name="twitter:title" content="Invoicing & Booking Software for Cleaning Businesses | SolidFlo" />
   <meta
     name="twitter:description"
-    content="Bookings, invoicing, and recurring client management — built for South African cleaning businesses."
+    content="Bookings, invoicing, and recurring client management — built for African cleaning businesses."
   />
   <meta name="twitter:image" content="https://cleaning.solidflo.co.za/og-image.jpg" />
 

@@ -148,7 +148,7 @@ export const INDUSTRY_SEO = {
         a: "Yes. Any work on water supply or drainage connecting to municipal supply must be done by a plumber registered with the PIRB (Plumbing Industry Registration Board).",
       },
       {
-        q: "What is the most common plumbing problem in South African homes?",
+        q: "What is the most common plumbing problem in African homes?",
         a: "Burst geysers, blocked drains and leaking pipes are the most common. Most can be diagnosed and repaired in a single visit by a qualified plumber.",
       },
     ],
@@ -514,7 +514,7 @@ function orgSchema() {
     url: MAIN,
     logo: `${MAIN}/logo.png`,
     description:
-      "SolidFlo is an invoicing and business management platform for South African service providers, with a public marketplace connecting Gauteng businesses with verified tradespeople.",
+      "SolidFlo is an invoicing and business management platform for African service providers, with a public marketplace connecting Gauteng businesses with verified tradespeople.",
     areaServed: { "@type": "State", name: "Gauteng", addressCountry: "ZA" },
     sameAs: [MAIN, BASE],
   };

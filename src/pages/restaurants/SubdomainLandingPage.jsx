@@ -2124,7 +2124,7 @@ function CTABanner({ config, onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join hundreds of South African{" "}
+          Join hundreds of African{" "}
           {(config.label || "restaurant").toLowerCase()} businesses that invoice
           professionally and get paid faster with SolidFlo.
         </p>
@@ -2350,7 +2350,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦
+            Proudly  African
           </p>
         </div>
       </div>

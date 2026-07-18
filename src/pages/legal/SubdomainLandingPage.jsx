@@ -640,7 +640,7 @@ function Hero({ config, onRegister }) {
                   <div>
                     <img src={logotop} width={100} alt="" />
                     <p style={{ fontSize: 12, color: "#8C7B6B", margin: 0 }}>
-                      South African Business
+                      African Business
                     </p>
                   </div>
                   <div style={{ textAlign: "right" }}>
@@ -1738,7 +1738,7 @@ function CTABanner({ config, onRegister }) {
             margin: "0 0 36px",
           }}
         >
-          Join hundreds of South African {config.label.toLowerCase()} businesses
+          Join hundreds of African {config.label.toLowerCase()} businesses
           that invoice professionally and get paid faster with SolidFlo.
         </p>
         <div
@@ -1990,7 +1990,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2017,7 +2017,7 @@ export default function SubdomainLandingPage() {
     name="description"
     content={
       config.metaDescription ||
-      "Bill clients, track matters, and send professional VAT-compliant invoices in minutes. Built for South African attorneys, law firms, and legal practitioners. Free plan available, no credit card required."
+      "Bill clients, track matters, and send professional VAT-compliant invoices in minutes. Built for African attorneys, law firms, and legal practitioners. Free plan available, no credit card required."
     }
   />
   <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
@@ -2032,7 +2032,7 @@ export default function SubdomainLandingPage() {
     property="og:description"
     content={
       config.metaDescription ||
-      "Client billing and VAT-compliant invoicing built for South African legal practices."
+      "Client billing and VAT-compliant invoicing built for African legal practices."
     }
   />
   <meta property="og:type" content="website" />
@@ -2050,7 +2050,7 @@ export default function SubdomainLandingPage() {
     name="twitter:description"
     content={
       config.metaDescription ||
-      "Client billing and invoicing — built for South African legal practices."
+      "Client billing and invoicing — built for African legal practices."
     }
   />
   <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />

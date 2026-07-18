@@ -677,7 +677,7 @@ function Hero({ onRegister }) {
                 letterSpacing: "0.05em",
               }}
             >
-              Purpose-Built for South African Carpenters
+              Purpose-Built for African Carpenters
             </span>
           </div>
 
@@ -709,7 +709,7 @@ function Hero({ onRegister }) {
             }}
           >
             Send professional quotes, track materials, and get paid on time —
-            purpose-built for South African carpenters and joinery businesses.
+            purpose-built for African carpenters and joinery businesses.
           </p>
 
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
@@ -1850,7 +1850,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 500+ South African carpenters and joinery businesses that quote
+          Join 500+ African carpenters and joinery businesses that quote
           professionally and get paid faster with SolidFlo.
         </p>
         <div
@@ -2104,7 +2104,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2128,7 +2128,7 @@ export default function SubdomainLandingPage() {
   <title>Invoicing Software for Carpenters & Joiners | SolidFlo</title>
   <meta
     name="description"
-    content="Send professional quotes, track materials, and get paid on time. VAT-compliant invoicing built for South African carpenters and joinery businesses. Free plan available — no credit card required."
+    content="Send professional quotes, track materials, and get paid on time. VAT-compliant invoicing built for African carpenters and joinery businesses. Free plan available — no credit card required."
   />
   <link rel="canonical" href="https://carpentry.solidflo.co.za/" />
 
@@ -2137,7 +2137,7 @@ export default function SubdomainLandingPage() {
   <meta property="og:title" content="Invoicing Software for Carpenters & Joiners | SolidFlo" />
   <meta
     property="og:description"
-    content="Quotes, materials tracking, and VAT-compliant invoicing — purpose-built for South African carpenters and joinery businesses."
+    content="Quotes, materials tracking, and VAT-compliant invoicing — purpose-built for African carpenters and joinery businesses."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://carpentry.solidflo.co.za/" />

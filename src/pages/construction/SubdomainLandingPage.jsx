@@ -1772,7 +1772,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 850+ South African contractors that quote professionally and get
+          Join 850+ African contractors that quote professionally and get
           paid faster with SolidFlo.
         </p>
         <div
@@ -2026,7 +2026,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2049,7 +2049,7 @@ export default function ConstructionLandingPage() {
   <title>Quoting & Invoicing Software for Contractors | SolidFlo</title>
   <meta
     name="description"
-    content="Create professional job quotes, track materials & labour, and send VAT-compliant invoices in under 60 seconds. Built for South African contractors and construction companies. Free plan available, no credit card required."
+    content="Create professional job quotes, track materials & labour, and send VAT-compliant invoices in under 60 seconds. Built for African contractors and construction companies. Free plan available, no credit card required."
   />
   <link rel="canonical" href="https://construction.solidflo.co.za/" />
 
@@ -2058,7 +2058,7 @@ export default function ConstructionLandingPage() {
   <meta property="og:title" content="Quoting & Invoicing Software for Contractors | SolidFlo" />
   <meta
     property="og:description"
-    content="Job quotes, materials tracking, labour billing, and VAT invoicing — built for South African contractors and construction companies."
+    content="Job quotes, materials tracking, labour billing, and VAT invoicing — built for African contractors and construction companies."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://construction.solidflo.co.za/" />
@@ -2070,7 +2070,7 @@ export default function ConstructionLandingPage() {
   <meta name="twitter:title" content="Quoting & Invoicing Software for Contractors | SolidFlo" />
   <meta
     name="twitter:description"
-    content="Job quotes, materials tracking, and VAT invoicing — built for South African contractors."
+    content="Job quotes, materials tracking, and VAT invoicing — built for African contractors."
   />
   <meta name="twitter:image" content="https://construction.solidflo.co.za/og-image.jpg" />
 

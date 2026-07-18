@@ -1870,7 +1870,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 700+ South African photographers and videographers who quote
+          Join 700+ African photographers and videographers who quote
           professionally and get paid faster with SolidFlo.
         </p>
         <div

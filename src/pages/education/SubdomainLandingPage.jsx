@@ -1965,7 +1965,7 @@ function CTABanner({ config, onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join hundreds of South African {config.label?.toLowerCase()}{" "}
+          Join hundreds of African {config.label?.toLowerCase()}{" "}
           businesses that bill professionally and get paid faster with Educare.
         </p>
         <div
@@ -2219,7 +2219,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2246,7 +2246,7 @@ export default function SubdomainLandingPage() {
     name="description"
     content={
       config.metaDescription ||
-      "Manage attendance, report cards, school notices, and fee invoicing — all in one place. Built for South African schools and education businesses. Free plan available, no credit card required."
+      "Manage attendance, report cards, school notices, and fee invoicing — all in one place. Built for African schools and education businesses. Free plan available, no credit card required."
     }
   />
   <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
@@ -2261,7 +2261,7 @@ export default function SubdomainLandingPage() {
     property="og:description"
     content={
       config.metaDescription ||
-      "Attendance, report cards, notices, and invoicing built for South African schools and education businesses."
+      "Attendance, report cards, notices, and invoicing built for African schools and education businesses."
     }
   />
   <meta property="og:type" content="website" />
@@ -2279,7 +2279,7 @@ export default function SubdomainLandingPage() {
     name="twitter:description"
     content={
       config.metaDescription ||
-      "Attendance, report cards, and invoicing — built for South African schools."
+      "Attendance, report cards, and invoicing — built for African schools."
     }
   />
   <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />

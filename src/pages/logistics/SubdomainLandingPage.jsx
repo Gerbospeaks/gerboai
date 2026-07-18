@@ -614,7 +614,7 @@ function Hero({ config, onRegister }) {
                   <div>
                     <img src={logotop} width={120} alt="" />
                     <p style={{ fontSize: 12, color: "#8C7B6B", margin: 0 }}>
-                      South African Business
+                      African Business
                     </p>
                   </div>
                   <div style={{ textAlign: "right" }}>
@@ -1928,7 +1928,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -1955,7 +1955,7 @@ export default function SubdomainLandingPage() {
     name="description"
     content={
       config.metaDescription ||
-      "Log loads, send VAT-compliant freight invoices, and get paid faster with payment links. Built for South African transport, logistics, and freight operators. Free plan available, no credit card required."
+      "Log loads, send VAT-compliant freight invoices, and get paid faster with payment links. Built for African transport, logistics, and freight operators. Free plan available, no credit card required."
     }
   />
   <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
@@ -1970,7 +1970,7 @@ export default function SubdomainLandingPage() {
     property="og:description"
     content={
       config.metaDescription ||
-      "Freight invoicing and faster payments built for South African logistics and transport operators."
+      "Freight invoicing and faster payments built for African logistics and transport operators."
     }
   />
   <meta property="og:type" content="website" />
@@ -1988,7 +1988,7 @@ export default function SubdomainLandingPage() {
     name="twitter:description"
     content={
       config.metaDescription ||
-      "Freight invoicing built for South African logistics and transport operators."
+      "Freight invoicing built for African logistics and transport operators."
     }
   />
   <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />

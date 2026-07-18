@@ -468,7 +468,7 @@ function buildAgentSystemPrompt(
         .join('\n')
     : '  No recent invoices.';
  
-  return `You are the SolidFlo AI assistant — embedded inside SolidFlo (solidflo.co.za), a South African multi-industry SaaS for small businesses.
+  return `You are the SolidFlo AI assistant — embedded inside SolidFlo (solidflo.co.za), an African multi-industry SaaS for small businesses.
  
 CURRENT USER:
 Industry: ${industry}

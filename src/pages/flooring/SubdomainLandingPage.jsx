@@ -664,7 +664,7 @@ function Hero({ onRegister }) {
                 fontFamily: "'Lato', sans-serif",
               }}
             >
-              Purpose-Built for South African Flooring Contractors
+              Purpose-Built for African Flooring Contractors
             </span>
           </div>
 
@@ -696,7 +696,7 @@ function Hero({ onRegister }) {
             }}
           >
             Send professional quotes, calculate materials by m², and get paid
-            on time — purpose-built for South African flooring installers and
+            on time — purpose-built for African flooring installers and
             tiling contractors.
           </p>
 
@@ -1824,7 +1824,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 600+ South African flooring contractors and tiling businesses
+          Join 600+ African flooring contractors and tiling businesses
           that quote professionally and get paid faster with SolidFlo.
         </p>
         <div
@@ -2066,7 +2066,7 @@ export default function SubdomainLandingPage() {
   <title>Quoting & Invoicing Software for Flooring Contractors | SolidFlo</title>
   <meta
     name="description"
-    content="Calculate quotes by m², track material costs, and send VAT-compliant invoices in under 60 seconds. Built for South African flooring installers and tiling contractors. Free plan available, no credit card required."
+    content="Calculate quotes by m², track material costs, and send VAT-compliant invoices in under 60 seconds. Built for African flooring installers and tiling contractors. Free plan available, no credit card required."
   />
   <link rel="canonical" href="https://flooring.solidflo.co.za/" />
 
@@ -2075,7 +2075,7 @@ export default function SubdomainLandingPage() {
   <meta property="og:title" content="Quoting & Invoicing Software for Flooring Contractors | SolidFlo" />
   <meta
     property="og:description"
-    content="m² quote calculator, material cost tracking, and VAT invoicing — built for South African flooring and tiling contractors."
+    content="m² quote calculator, material cost tracking, and VAT invoicing — built for African flooring and tiling contractors."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://flooring.solidflo.co.za/" />
@@ -2087,7 +2087,7 @@ export default function SubdomainLandingPage() {
   <meta name="twitter:title" content="Quoting & Invoicing Software for Flooring Contractors | SolidFlo" />
   <meta
     name="twitter:description"
-    content="m² quote calculator and VAT invoicing — built for South African flooring contractors."
+    content="m² quote calculator and VAT invoicing — built for African flooring contractors."
   />
   <meta name="twitter:image" content="https://flooring.solidflo.co.za/og-image.jpg" />
 

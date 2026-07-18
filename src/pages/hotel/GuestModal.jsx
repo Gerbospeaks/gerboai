@@ -25,7 +25,7 @@ const NATIONALITIES = [
 
 const EMPTY = {
   name: "", guestId: "", email: "", phone: "", address: "",
-  dateOfBirth: "", nationality: "South African",
+  dateOfBirth: "", nationality: "Zimbabwean",
   idType: "ID Document", idNumber: "",
   preferredRoom: "", dietaryRequirements: "",
   loyaltyNumber: "", notes: "", vip: false,

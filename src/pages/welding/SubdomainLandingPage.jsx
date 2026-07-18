@@ -1361,7 +1361,7 @@ function Footer({ config, onLogin, onRegister }) {
                 maxWidth: 220,
               }}
             >
-              Professional invoicing software built for South African{" "}
+              Professional invoicing software built for African{" "}
               {config.label.toLowerCase()} and fabrication businesses.
             </p>
             <button
@@ -1453,7 +1453,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦
+            Proudly African
           </p>
         </div>
       </div>

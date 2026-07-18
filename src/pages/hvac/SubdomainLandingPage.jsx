@@ -546,7 +546,7 @@ function Hero({ config, onRegister }) {
             "No credit card required",
             "Free plan available",
             "Cancel anytime",
-            "South African business",
+            "African business",
           ].map((t) => (
             <span
               key={t}
@@ -1674,7 +1674,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -1703,7 +1703,7 @@ export default function SubdomainLandingPage() {
     name="description"
     content={
       config.metaDescription ||
-      "Create job quotes, track parts and labour, and send VAT-compliant invoices in under 60 seconds. Built for South African HVAC and air conditioning contractors. Free plan available, no credit card required."
+      "Create job quotes, track parts and labour, and send VAT-compliant invoices in under 60 seconds. Built for African HVAC and air conditioning contractors. Free plan available, no credit card required."
     }
   />
   <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
@@ -1718,7 +1718,7 @@ export default function SubdomainLandingPage() {
     property="og:description"
     content={
       config.metaDescription ||
-      "Job quotes, parts tracking, and VAT invoicing — built for South African HVAC and air conditioning contractors."
+      "Job quotes, parts tracking, and VAT invoicing — built for African HVAC and air conditioning contractors."
     }
   />
   <meta property="og:type" content="website" />
@@ -1736,7 +1736,7 @@ export default function SubdomainLandingPage() {
     name="twitter:description"
     content={
       config.metaDescription ||
-      "Job quotes and VAT invoicing — built for South African HVAC contractors."
+      "Job quotes and VAT invoicing — built for African HVAC contractors."
     }
   />
   <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />

@@ -673,7 +673,7 @@ function Hero({ onRegister }) {
                 fontFamily: "'Lato', sans-serif",
               }}
             >
-              Purpose-Built for South African Healthcare Practices
+              Purpose-Built for African Healthcare Practices
             </span>
           </div>
 
@@ -705,7 +705,7 @@ function Hero({ onRegister }) {
             }}
           >
             Send professional invoices, manage medical aid claims, and get
-            paid on time — purpose-built for South African GPs, specialists,
+            paid on time — purpose-built for African GPs, specialists,
             and allied health practitioners.
           </p>
 
@@ -1654,7 +1654,8 @@ function FAQ() {
   const faqs = [
     {
       q: "Is SolidFlo built specifically for healthcare practices?",
-      a: "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how South African healthcare practices actually bill — not adapted from generic invoicing software.",
+      a: "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how 
+      African healthcare practices actually bill — not adapted from generic invoicing software.",
     },
     {
       q: "Does it support NHRPL and BHF tariff codes?",
@@ -1832,7 +1833,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 700+ South African practitioners and clinics that bill
+          Join 700+ African practitioners and clinics that bill
           professionally and get paid faster with SolidFlo.
         </p>
         <div
@@ -2085,7 +2086,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2108,7 +2109,7 @@ export default function SubdomainLandingPage() {
   <title>Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo</title>
   <meta
     name="description"
-    content="Bill patients with built-in tariff codes, track medical aid claims, and send SARS & HPCSA-compliant invoices in under 60 seconds. Built for South African GPs, specialists, and allied health practitioners. Free plan available, no credit card required."
+    content="Bill patients with built-in tariff codes, track medical aid claims, and send SARS & HPCSA-compliant invoices in under 60 seconds. Built for African GPs, specialists, and allied health practitioners. Free plan available, no credit card required."
   />
   <link rel="canonical" href="https://healthcare.solidflo.co.za/" />
 
@@ -2117,7 +2118,7 @@ export default function SubdomainLandingPage() {
   <meta property="og:title" content="Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo" />
   <meta
     property="og:description"
-    content="Tariff code billing, medical aid claim tracking, and compliant invoicing — built for South African healthcare practitioners."
+    content="Tariff code billing, medical aid claim tracking, and compliant invoicing — built for African healthcare practitioners."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://healthcare.solidflo.co.za/" />
@@ -2129,7 +2130,7 @@ export default function SubdomainLandingPage() {
   <meta name="twitter:title" content="Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo" />
   <meta
     name="twitter:description"
-    content="Tariff code billing and medical aid claim tracking — built for South African healthcare practices."
+    content="Tariff code billing and medical aid claim tracking — built for African healthcare practices."
   />
   <meta name="twitter:image" content="https://healthcare.solidflo.co.za/og-image.jpg" />
 
@@ -2166,7 +2167,7 @@ export default function SubdomainLandingPage() {
           "name": "Is SolidFlo built specifically for healthcare practices?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how South African healthcare practices actually bill — not adapted from generic invoicing software.",
+            "text": "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how African healthcare practices actually bill — not adapted from generic invoicing software.",
           },
         },
         {

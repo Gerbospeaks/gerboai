@@ -106,7 +106,7 @@ const INDUSTRIES = [
     badges: ["Dine-in", "Takeaways", "Catering", "Halaal", "Vegetarian options"],
     names: ["Spice Garden", "The Braai Spot", "Mama's Kitchen", "Urban Bites", "Flame & Fork"],
     abouts: [
-      "Family restaurant serving hearty South African meals. Fresh ingredients, generous portions.",
+      "Family restaurant serving hearty African meals. Fresh ingredients, generous portions.",
       "Street food-inspired eatery with bold flavours, quick service, and dine-in or takeaway.",
     ],
   },

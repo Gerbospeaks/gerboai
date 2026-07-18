@@ -1871,7 +1871,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 500+ South African tech businesses and consultants who quote
+          Join 500+ African tech businesses and consultants who quote
           professionally and get paid faster with SolidFlo.
         </p>
         <div

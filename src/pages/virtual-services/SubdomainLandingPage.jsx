@@ -1883,7 +1883,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 600+ South African freelancers, consultants, and digital agencies
+          Join 600+ African freelancers, consultants, and digital agencies
           who quote professionally and get paid faster with SolidFlo.
         </p>
         <div

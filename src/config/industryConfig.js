@@ -830,7 +830,7 @@ export const INDUSTRY_CONFIG = {
     label: "Carpentry",
     headline: "Invoicing Built for the Workshop, Not the Boardroom",
     subheadline:
-      "Send professional quotes, track materials, and get paid on time — purpose-built for South African carpenters and joinery businesses.",
+      "Send professional quotes, track materials, and get paid on time — purpose-built for African carpenters and joinery businesses.",
     cta: "Start Free Today",
     color: "#1A1208",
     accent: "#C67C3A",
@@ -1369,7 +1369,7 @@ export const INDUSTRY_CONFIG = {
     label: "Hospitality",
     headline: "Professional Invoicing for Guesthouses & Hotels",
     subheadline:
-      "Issue guest invoices, manage deposits, and track accommodation revenue — built for South African hospitality businesses.",
+      "Issue guest invoices, manage deposits, and track accommodation revenue — built for African hospitality businesses.",
     cta: "Start Free Today",
     color: "#1a0f0a",
     accent: "#b45309",
@@ -1637,7 +1637,7 @@ export const INDUSTRY_CONFIG = {
     label: "Landscaping",
     headline: "Professional Invoicing for Landscapers & Garden Services",
     subheadline:
-      "Quote for new gardens, invoice for ongoing maintenance, and get paid on time — built for South African landscaping businesses.",
+      "Quote for new gardens, invoice for ongoing maintenance, and get paid on time — built for African landscaping businesses.",
     cta: "Start Free Today",
     color: "#14280a",
     accent: "#65a30d",
@@ -1769,7 +1769,7 @@ export const INDUSTRY_CONFIG = {
   legal: {
     subdomain: "legal",
     label: "Legal",
-    headline: "Time Billing & Invoicing for South African Law Practices",
+    headline: "Time Billing & Invoicing for African Law Practices",
     subheadline:
       "Track billable hours, generate fee accounts, and get paid faster — built for attorneys, advocates and legal consultants.",
     cta: "Start Free Today",
@@ -2173,7 +2173,7 @@ export const INDUSTRY_CONFIG = {
     label: "Pest Control",
     headline: "Professional Invoicing for Pest Control Businesses",
     subheadline:
-      "Quote for treatments, invoice on completion, and manage recurring contracts — built for South African pest control operators.",
+      "Quote for treatments, invoice on completion, and manage recurring contracts — built for African pest control operators.",
     cta: "Start Free Today",
     color: "#1a1a0a",
     accent: "#84cc16",
@@ -2307,7 +2307,7 @@ export const INDUSTRY_CONFIG = {
     label: "Photography",
     headline: "Professional Invoicing for Photographers",
     subheadline:
-      "Quote for shoots, collect deposits, and invoice on delivery — built for South African photographers and videographers.",
+      "Quote for shoots, collect deposits, and invoice on delivery — built for African photographers and videographers.",
     cta: "Start Free Today",
     color: "#0f0f0f",
     accent: "#e11d48",
@@ -2843,7 +2843,7 @@ export const INDUSTRY_CONFIG = {
     label: "Retail",
     headline: "Professional Invoicing for Retail & Trade Businesses",
     subheadline:
-      "Issue trade invoices, manage wholesale accounts, and track outstanding payments — built for South African retail businesses.",
+      "Issue trade invoices, manage wholesale accounts, and track outstanding payments — built for African retail businesses.",
     cta: "Start Free Today",
     color: "#1a1a2e",
     accent: "#7c3aed",
@@ -3245,7 +3245,7 @@ export const INDUSTRY_CONFIG = {
     label: "Welding",
     headline: "Professional Quotes & Invoices for Welders",
     subheadline:
-      "Quote for fabrication, invoice on completion, and get paid without the paperwork — built for South African welders and metal workers.",
+      "Quote for fabrication, invoice on completion, and get paid without the paperwork — built for African welders and metal workers.",
     cta: "Start Free Today",
     color: "#1a0e00",
     accent: "#f97316",
@@ -3513,7 +3513,7 @@ export const INDUSTRY_CONFIG = {
     label: "Window Repair",
     headline: "Fast Invoicing for Glaziers & Window Repair Businesses",
     subheadline:
-      "Quote for glass replacements and installations, invoice on completion, and get paid on the day — built for South African glaziers.",
+      "Quote for glass replacements and installations, invoice on completion, and get paid on the day — built for African glaziers.",
     cta: "Start Free Today",
     color: "#0a1628",
     accent: "#38bdf8",
@@ -3645,7 +3645,7 @@ technology: {
   label: "Technology",
   headline: "Invoicing & Project Billing for IT Professionals",
   subheadline:
-    "Quote for projects, bill by the hour, and send professional invoices — purpose-built for South African IT consultants, developers and tech businesses.",
+    "Quote for projects, bill by the hour, and send professional invoices — purpose-built for African IT consultants, developers and tech businesses.",
   cta: "Start Free Today",
   color: "#0d1117",
   accent: "#6366f1",
@@ -3779,7 +3779,7 @@ upholstery: {
   label: "Upholstery",
   headline: "Quotes & Invoices for Upholsterers",
   subheadline:
-    "Quote for reupholstery jobs, track fabric and materials, and get paid on collection — built for South African upholstery businesses.",
+    "Quote for reupholstery jobs, track fabric and materials, and get paid on collection — built for African upholstery businesses.",
   cta: "Start Free Today",
   color: "#1a1008",
   accent: "#b45309",

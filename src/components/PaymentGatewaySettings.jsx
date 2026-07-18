@@ -33,7 +33,7 @@ const GATEWAYS = [
     id: "yoco",
     label: "Yoco",
     region: "za",
-    desc: "Simple card payments for South African businesses",
+    desc: "Simple card payments for African businesses",
     abbr: "YC",
     color: "#FAEEDA",
     textColor: "#854F0B",

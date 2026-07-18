@@ -1879,7 +1879,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 500+ South African pest control operators that quote
+          Join 500+ African pest control operators that quote
           professionally and get paid faster with SolidFlo.
         </p>
         <div
@@ -2011,7 +2011,7 @@ function Footer({ onLogin, onRegister }) {
                 maxWidth: 220,
               }}
             >
-              Professional invoicing software purpose-built for South African
+              Professional invoicing software purpose-built for African
               pest control operators and fumigation contractors.
             </p>
             <button

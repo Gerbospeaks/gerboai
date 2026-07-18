@@ -1314,7 +1314,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦
+            Proudly African
           </p>
         </div>
       </div>

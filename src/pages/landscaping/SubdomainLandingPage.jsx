@@ -541,7 +541,7 @@ function Hero({ config, C, onRegister }) {
             "No credit card required",
             "Free plan available",
             "Cancel anytime",
-            "South African business",
+            "African business",
           ].map((t) => (
             <span
               key={t}
@@ -1488,7 +1488,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -1518,7 +1518,7 @@ export default function SubdomainLandingPage() {
     name="description"
     content={
       config.metaDescription ||
-      "Send professional quotes, track materials and crew labour, and get paid faster. Built for South African landscaping and garden services businesses. Free plan available, no credit card required."
+      "Send professional quotes, track materials and crew labour, and get paid faster. Built for African landscaping and garden services businesses. Free plan available, no credit card required."
     }
   />
   <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
@@ -1533,7 +1533,7 @@ export default function SubdomainLandingPage() {
     property="og:description"
     content={
       config.metaDescription ||
-      "Quotes, material tracking, and invoicing built for South African landscaping businesses."
+      "Quotes, material tracking, and invoicing built for African landscaping businesses."
     }
   />
   <meta property="og:type" content="website" />
@@ -1551,7 +1551,7 @@ export default function SubdomainLandingPage() {
     name="twitter:description"
     content={
       config.metaDescription ||
-      "Quotes and invoicing — built for South African landscaping businesses."
+      "Quotes and invoicing — built for African landscaping businesses."
     }
   />
   <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />

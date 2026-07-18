@@ -528,7 +528,7 @@ function Hero({ config, onRegister }) {
             "No credit card required",
             "Free plan available",
             "Cancel anytime",
-            "South African business",
+            "African business",
           ].map((t) => (
             <span
               key={t}
@@ -1642,7 +1642,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -1677,7 +1677,7 @@ export default function SubdomainLandingPage() {
     name="description"
     content={
       config.metaDescription ||
-      "Manage bookings, guest invoicing, and payments in one place. Built for South African hotels, guesthouses, and B&Bs. Free plan available, no credit card required."
+      "Manage bookings, guest invoicing, and payments in one place. Built for African hotels, guesthouses, and B&Bs. Free plan available, no credit card required."
     }
   />
   <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
@@ -1692,7 +1692,7 @@ export default function SubdomainLandingPage() {
     property="og:description"
     content={
       config.metaDescription ||
-      "Bookings, guest invoicing, and payments built for South African hotels and guesthouses."
+      "Bookings, guest invoicing, and payments built for African hotels and guesthouses."
     }
   />
   <meta property="og:type" content="website" />
@@ -1710,7 +1710,7 @@ export default function SubdomainLandingPage() {
     name="twitter:description"
     content={
       config.metaDescription ||
-      "Bookings and guest invoicing — built for South African hotels and guesthouses."
+      "Bookings and guest invoicing — built for African hotels and guesthouses."
     }
   />
   <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />

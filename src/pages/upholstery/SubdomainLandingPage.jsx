@@ -1873,7 +1873,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 400+ South African upholsterers and soft furnishing studios that
+          Join 400+ African upholsterers and soft furnishing studios that
           quote professionally and get paid faster with SolidFlo.
         </p>
         <div

@@ -1801,7 +1801,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 1 200+ South African workshops that bill professionally and get
+          Join 1 200+ African workshops that bill professionally and get
           paid faster with SolidFlo.
         </p>
         <div
@@ -2055,7 +2055,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2078,7 +2078,7 @@ export default function SubdomainLandingPage() {
   <title>Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo</title>
   <meta
     name="description"
-    content="Create digital job cards, track parts and labour, and send VAT-compliant invoices in under 60 seconds. Built for South African motor mechanics and auto workshops. Free plan available, no credit card required."
+    content="Create digital job cards, track parts and labour, and send VAT-compliant invoices in under 60 seconds. Built for African motor mechanics and auto workshops. Free plan available, no credit card required."
   />
   <link rel="canonical" href="https://mechanics.solidflo.co.za/" />
 
@@ -2087,7 +2087,7 @@ export default function SubdomainLandingPage() {
   <meta property="og:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
   <meta
     property="og:description"
-    content="Job cards, parts tracking, and VAT invoicing — built for South African motor workshops."
+    content="Job cards, parts tracking, and VAT invoicing — built for African motor workshops."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mechanics.solidflo.co.za/" />
@@ -2099,7 +2099,7 @@ export default function SubdomainLandingPage() {
   <meta name="twitter:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
   <meta
     name="twitter:description"
-    content="Job cards and VAT invoicing — built for South African motor workshops."
+    content="Job cards and VAT invoicing — built for African motor workshops."
   />
   <meta name="twitter:image" content="https://mechanics.solidflo.co.za/og-image.jpg" />
 

@@ -1770,7 +1770,7 @@ function CTABanner({ onRegister }) {
             fontFamily: "'Barlow', sans-serif",
           }}
         >
-          Join 950+ South African electricians that invoice professionally,
+          Join 950+ African electricians that invoice professionally,
           issue CoCs instantly, and get paid faster with SolidFlo.
         </p>
         <div
@@ -2023,7 +2023,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            Proudly South African 🇿🇦 ·
+            Proudly  African ·
           </p>
         </div>
       </div>
@@ -2046,7 +2046,7 @@ export default function ElectricalLandingPage() {
   <title>Invoicing & CoC Software for Electricians | SolidFlo</title>
   <meta
     name="description"
-    content="Create job cards, issue SANS 10142-compliant Certificates of Compliance, and send VAT invoices in under 60 seconds. Built for South African electricians and electrical contractors. Free plan available, no credit card required."
+    content="Create job cards, issue SANS 10142-compliant Certificates of Compliance, and send VAT invoices in under 60 seconds. Built for African electricians and electrical contractors. Free plan available, no credit card required."
   />
   <link rel="canonical" href="https://electrical.solidflo.co.za/" />
 
@@ -2055,7 +2055,7 @@ export default function ElectricalLandingPage() {
   <meta property="og:title" content="Invoicing & CoC Software for Electricians | SolidFlo" />
   <meta
     property="og:description"
-    content="Job cards, Certificates of Compliance, materials tracking, and VAT invoicing — built for South African electricians."
+    content="Job cards, Certificates of Compliance, materials tracking, and VAT invoicing — built for African electricians."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://electrical.solidflo.co.za/" />
@@ -2067,7 +2067,7 @@ export default function ElectricalLandingPage() {
   <meta name="twitter:title" content="Invoicing & CoC Software for Electricians | SolidFlo" />
   <meta
     name="twitter:description"
-    content="Job cards, CoC certificates, and VAT invoicing — built for South African electricians."
+    content="Job cards, CoC certificates, and VAT invoicing — built for African electricians."
   />
   <meta name="twitter:image" content="https://electrical.solidflo.co.za/og-image.jpg" />
 

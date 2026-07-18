@@ -1722,7 +1722,7 @@ function Footer({ config, onLogin, onRegister }) {
                 maxWidth: 220,
               }}
             >
-              Professional invoicing software purpose-built for South African{" "}
+              Professional invoicing software purpose-built for African{" "}
               {config.label.toLowerCase()} businesses.
             </p>
             <button
@@ -1842,7 +1842,7 @@ export default function SubdomainLandingPage() {
     name="description"
     content={
       config.metaDescription ||
-      "Create professional quotes, track materials and labour, and send VAT-compliant invoices in under 60 seconds. Built for South African painting and decorating contractors. Free plan available, no credit card required."
+      "Create professional quotes, track materials and labour, and send VAT-compliant invoices in under 60 seconds. Built for African painting and decorating contractors. Free plan available, no credit card required."
     }
   />
   <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
@@ -1857,7 +1857,7 @@ export default function SubdomainLandingPage() {
     property="og:description"
     content={
       config.metaDescription ||
-      "Quotes, material tracking, and VAT invoicing built for South African painting contractors."
+      "Quotes, material tracking, and VAT invoicing built for African painting contractors."
     }
   />
   <meta property="og:type" content="website" />
@@ -1875,7 +1875,7 @@ export default function SubdomainLandingPage() {
     name="twitter:description"
     content={
       config.metaDescription ||
-      "Quotes and VAT invoicing — built for South African painting contractors."
+      "Quotes and VAT invoicing — built for African painting contractors."
     }
   />
   <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />
