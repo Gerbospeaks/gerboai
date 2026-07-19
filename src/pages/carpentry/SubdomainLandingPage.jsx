@@ -822,7 +822,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA carpenters
+          Trusted By African carpenters
         </span>
         {[
           "Van der Merwe Custom Furniture",
@@ -1941,7 +1941,7 @@ function Footer({ onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

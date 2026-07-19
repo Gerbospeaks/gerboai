@@ -553,7 +553,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA security companies
+          Trusted By African security companies
         </span>
         {[
           "Sentinel Guarding Group",

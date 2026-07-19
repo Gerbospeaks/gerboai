@@ -874,7 +874,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA painting contractors
+          Trusted By African painting contractors
         </span>
         {[
           "Cape Town Painters",
@@ -1675,7 +1675,7 @@ function Footer({ config, onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

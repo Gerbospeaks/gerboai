@@ -858,7 +858,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA tech businesses &amp; consultants
+          Trusted By African tech businesses &amp; consultants
         </span>
         {[
           "Nexus Tech Solutions",
@@ -1956,7 +1956,7 @@ function Footer({ onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

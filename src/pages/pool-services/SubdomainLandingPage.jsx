@@ -834,7 +834,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA pool service pros
+          Trusted By African pool service pros
         </span>
         {[
           "Blue Wave Pools JHB",
@@ -1319,7 +1319,7 @@ function Footer({ config, onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

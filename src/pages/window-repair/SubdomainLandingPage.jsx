@@ -824,7 +824,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA window &amp; glass repair businesses
+          Trusted By African window &amp; glass repair businesses
         </span>
         {[
           "Cape Clear Glass",
@@ -1175,7 +1175,7 @@ function Footer({ config, onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

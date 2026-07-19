@@ -884,7 +884,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA restaurants
+          Trusted By African restaurants
         </span>
         {[
           "Braai Brothers Grill",
@@ -2210,7 +2210,7 @@ function Footer({ config, onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

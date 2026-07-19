@@ -799,7 +799,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA contractors
+          Trusted By African contractors
         </span>
         {[
           "Cape Build & Civil",
@@ -1863,7 +1863,7 @@ function Footer({ onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

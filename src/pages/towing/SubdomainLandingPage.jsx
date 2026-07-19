@@ -670,7 +670,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA towing operators
+          Trusted By African towing operators
         </span>
         {[
           "JHB Recovery Co.",
@@ -921,7 +921,7 @@ function Footer({ config, onLogin, onRegister }) {
     },
     {
       title: "Company",
-      links: ["About SolidFlo", "Contact Us", "Privacy Policy", "Terms of Service", "Made in SA 🇿🇦"],
+      links: ["About SolidFlo", "Contact Us", "Privacy Policy", "Terms of Service", "Made in Africa"],
     },
   ];
 

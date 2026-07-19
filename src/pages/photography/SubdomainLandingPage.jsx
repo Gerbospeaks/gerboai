@@ -856,7 +856,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA photographers &amp; videographers
+          Trusted By African photographers &amp; videographers
         </span>
         {[
           "Langa Frame Studios",
@@ -1955,7 +1955,7 @@ function Footer({ onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

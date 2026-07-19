@@ -811,7 +811,7 @@ function Hero({ onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA flooring contractors
+          Trusted By African flooring contractors
         </span>
         {[
           "Dlamini Premium Flooring",
@@ -1903,7 +1903,7 @@ function Footer({ onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];

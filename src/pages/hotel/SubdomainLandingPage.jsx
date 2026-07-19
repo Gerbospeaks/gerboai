@@ -576,7 +576,7 @@ function Hero({ config, onRegister }) {
             fontFamily: "'Lato', sans-serif",
           }}
         >
-          Trusted by SA businesses
+          Trusted By African businesses
         </span>
         {(
           config.trustedBy || [
@@ -1479,7 +1479,7 @@ function Footer({ onLogin, onRegister }) {
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
-        "Made in SA 🇿🇦",
+        "Made in Africa",
       ],
     },
   ];
