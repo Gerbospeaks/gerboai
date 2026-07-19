@@ -1654,8 +1654,7 @@ function FAQ() {
   const faqs = [
     {
       q: "Is SolidFlo built specifically for healthcare practices?",
-      a: "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how 
-      African healthcare practices actually bill — not adapted from generic invoicing software.",
+      a: "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how African healthcare practices actually bill — not adapted from generic invoicing software.",
     },
     {
       q: "Does it support NHRPL and BHF tariff codes?",
