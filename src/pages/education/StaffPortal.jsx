@@ -445,7 +445,36 @@ const [hwError, setHwError] = useState("");
     });
     setPermSlipMap(map);
   }, [activePermEvent, students]);
+useEffect(() => {
+  if (!schoolName || schoolName === "School Portal") return; // or "School" for StaffPortal
 
+  const manifestData = {
+    short_name: schoolName,
+    name: `${schoolName} | Solidflo`,
+    start_url: window.location.href,
+    scope: window.location.pathname,
+    display: "standalone",
+    orientation: "portrait-primary",
+    theme_color: "#1a6b4a",
+    background_color: "#f8f7f4",
+    icons: [
+      { src: "/logo192.png", type: "image/png", sizes: "192x192", purpose: "any maskable" },
+      { src: "/logo512.png", type: "image/png", sizes: "512x512", purpose: "any maskable" }
+    ]
+  };
+
+  const blob = new Blob([JSON.stringify(manifestData)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.getElementById("manifest-link");
+  if (link) {
+    link.setAttribute("href", url);
+  } else {
+    console.warn("manifest-link tag not found in index.html — dynamic manifest not applied.");
+  }
+
+  return () => URL.revokeObjectURL(url);
+}, [schoolName]);
   // ── Save attendance ────────────────────────────────────────────────────────
   const saveAttendance = async () => {
     if (!uid || !classStudents.length) return;

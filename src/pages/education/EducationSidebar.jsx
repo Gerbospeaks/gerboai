@@ -302,6 +302,7 @@ export default function EducationSidebar({
               label="School Overview"
               onClick={() => goTo("overview")}
               color="indigo"
+              
             />
 
             <div className="pt-3 mt-3 border-t border-slate-700/50 space-y-0.5">
