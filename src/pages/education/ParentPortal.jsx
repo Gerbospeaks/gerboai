@@ -44,32 +44,32 @@ import {
   PlayCircle,
 } from "lucide-react";
 
-// ── Design tokens — warm editorial palette from SchoolOverview ─────────────
+// ── Design tokens — Zoho-style functional palette ─────────────
 const T = {
-  primary: "#1a6b4a",
-  primaryLight: "#e8f5ef",
-  primaryMid: "#2d8a62",
+  primary: "#1a73e8",
+  primaryLight: "#e8f0fe",
+  primaryMid: "#3b82f6",
   accent: "#f59e0b",
   accentLight: "#fef3c7",
   red: "#dc2626",
   redLight: "#fef2f2",
   blue: "#2563eb",
   blueLight: "#eff6ff",
-  purple: "#6b46c1",
-  purpleLight: "#faf5ff",
-  teal: "#0f766e",
+  purple: "#7c3aed",
+  purpleLight: "#f5f3ff",
+  teal: "#0d9488",
   tealLight: "#f0fdfa",
-  bg: "#f8f7f4",
+  bg: "#f5f6f8",
   surface: "#ffffff",
-  surfaceAlt: "#f1efe9",
-  border: "#e8e4db",
-  text: "#1a1814",
-  textMid: "#5c5850",
-  textSoft: "#9c9890",
-  textFaint: "#c4c0b8",
-  ink: "#2d2a26",
-  radius: 16,
-  shadow: "0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
+  surfaceAlt: "#eef1f5",
+  border: "#dfe3ea",
+  text: "#1f2937",
+  textMid: "#5b6472",
+  textSoft: "#8a93a3",
+  textFaint: "#b0b8c4",
+  ink: "#111827",
+  radius: 8,
+  shadow: "0 1px 2px rgba(15,23,42,0.06)",
 };
 
 const gradeColor = (g) =>
@@ -100,7 +100,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🔤",
     thumbnailBg: "#e8f5ef",
     thumbnailColor: T.primary,
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4", // ← replace with your real URL
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4", // ← replace with your real URL
     badge: "ABCs",
     badgeBg: T.primaryLight,
     badgeColor: T.primary,
@@ -115,7 +116,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🍎",
     thumbnailBg: "#fef2f2",
     thumbnailColor: T.red,
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "ABCs",
     badgeBg: T.primaryLight,
     badgeColor: T.primary,
@@ -130,7 +132,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🎈",
     thumbnailBg: T.blueLight,
     thumbnailColor: T.blue,
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "ABCs",
     badgeBg: T.primaryLight,
     badgeColor: T.primary,
@@ -144,7 +147,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🔢",
     thumbnailBg: T.purpleLight,
     thumbnailColor: T.purple,
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "Numbers",
     badgeBg: T.purpleLight,
     badgeColor: T.purple,
@@ -159,7 +163,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🖐",
     thumbnailBg: T.accentLight,
     thumbnailColor: "#b45309",
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "Numbers",
     badgeBg: T.purpleLight,
     badgeColor: T.purple,
@@ -173,7 +178,8 @@ const TUTORIALS = [
     thumbnailEmoji: "⭕",
     thumbnailBg: T.tealLight,
     thumbnailColor: T.teal,
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "Shapes",
     badgeBg: T.tealLight,
     badgeColor: T.teal,
@@ -188,7 +194,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🔷",
     thumbnailBg: T.blueLight,
     thumbnailColor: T.blue,
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "Shapes",
     badgeBg: T.tealLight,
     badgeColor: T.teal,
@@ -203,7 +210,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🌈",
     thumbnailBg: "#faf5ff",
     thumbnailColor: T.purple,
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "Colors",
     badgeBg: "#faf5ff",
     badgeColor: T.purple,
@@ -218,7 +226,8 @@ const TUTORIALS = [
     thumbnailEmoji: "🎨",
     thumbnailBg: T.accentLight,
     thumbnailColor: "#b45309",
-    videoUrl: "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
+    videoUrl:
+      "https://res.cloudinary.com/dbnbuy2kz/video/upload/v1774674458/education_xymj42.mp4",
     badge: "Colors",
     badgeBg: "#faf5ff",
     badgeColor: T.purple,
@@ -535,30 +544,42 @@ export default function ParentPortal() {
       : homework.filter((h) => h.grade === gradeFilter);
   const schoolName =
     businessInfo?.name || businessInfo?.businessName || "School Portal";
-    useEffect(() => {
-  if (!schoolName || schoolName === "School Portal") return;
+  useEffect(() => {
+    if (!schoolName || schoolName === "School Portal") return;
 
-  const manifestData = {
-    short_name: schoolName,
-    name: `${schoolName} | Solidflo`,
-    start_url: window.location.href,
-    scope: window.location.pathname,
-    display: "standalone",
-    orientation: "portrait-primary",
-    theme_color: "#1a6b4a",
-    background_color: "#f8f7f4",
-    icons: [
-      { src: "/logo192.png", type: "image/png", sizes: "192x192", purpose: "any maskable" },
-      { src: "/logo512.png", type: "image/png", sizes: "512x512", purpose: "any maskable" }
-    ]
-  };
+    const manifestData = {
+      short_name: schoolName,
+      name: `${schoolName} | Solidflo`,
+      start_url: window.location.href,
+      scope: window.location.pathname,
+      display: "standalone",
+      orientation: "portrait-primary",
+      theme_color: "#1a6b4a",
+      background_color: "#f8f7f4",
+      icons: [
+        {
+          src: "/logo192.png",
+          type: "image/png",
+          sizes: "192x192",
+          purpose: "any maskable",
+        },
+        {
+          src: "/logo512.png",
+          type: "image/png",
+          sizes: "512x512",
+          purpose: "any maskable",
+        },
+      ],
+    };
 
-  const blob = new Blob([JSON.stringify(manifestData)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  document.getElementById("manifest-link").setAttribute("href", url);
+    const blob = new Blob([JSON.stringify(manifestData)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    document.getElementById("manifest-link").setAttribute("href", url);
 
-  return () => URL.revokeObjectURL(url);
-}, [schoolName]);
+    return () => URL.revokeObjectURL(url);
+  }, [schoolName]);
   const noticeBadge =
     allNotices.filter((n) => !n.read).length || allNotices.length;
 
@@ -672,7 +693,7 @@ export default function ParentPortal() {
           style={{
             width: 56,
             height: 56,
-            borderRadius: 16,
+            borderRadius: 10,
             background: T.primary,
             display: "flex",
             alignItems: "center",
@@ -698,7 +719,7 @@ export default function ParentPortal() {
         </div>
         <p
           style={{
-            fontFamily: "'Sora',sans-serif",
+            fontFamily: "'Inter',sans-serif",
             fontSize: 13,
             color: T.textSoft,
           }}
@@ -728,7 +749,7 @@ export default function ParentPortal() {
           style={{
             width: 64,
             height: 64,
-            borderRadius: 16,
+            borderRadius: 10,
             background: T.redLight,
             display: "flex",
             alignItems: "center",
@@ -739,7 +760,7 @@ export default function ParentPortal() {
         </div>
         <p
           style={{
-            fontFamily: "'Crimson Pro',serif",
+            fontFamily: "'Inter',sans-serif",
             fontSize: 22,
             fontWeight: 600,
             color: T.ink,
@@ -750,7 +771,7 @@ export default function ParentPortal() {
         </p>
         <p
           style={{
-            fontFamily: "'Sora',sans-serif",
+            fontFamily: "'Inter',sans-serif",
             fontSize: 13,
             color: T.textSoft,
             maxWidth: 280,
@@ -769,7 +790,7 @@ export default function ParentPortal() {
       style={{
         minHeight: "100svh",
         background: T.bg,
-        fontFamily: "'Sora',sans-serif",
+        fontFamily: "'Inter',sans-serif",
         WebkitFontSmoothing: "antialiased",
       }}
     >
@@ -792,7 +813,7 @@ export default function ParentPortal() {
           <div
             style={{
               background: T.surface,
-              borderRadius: "22px 22px 0 0",
+              borderRadius: "14px 14px 0 0",
               width: "100%",
               maxWidth: 520,
               overflow: "hidden",
@@ -875,7 +896,7 @@ export default function ParentPortal() {
                   <p
                     style={{
                       margin: 0,
-                      fontFamily: "'Crimson Pro',serif",
+                      fontFamily: "'Inter',sans-serif",
                       fontSize: 20,
                       fontWeight: 600,
                       color: T.ink,
@@ -900,7 +921,7 @@ export default function ParentPortal() {
                   style={{
                     width: 32,
                     height: 32,
-                    borderRadius: 10,
+                    borderRadius: 6,
                     background: T.surfaceAlt,
                     border: `1px solid ${T.border}`,
                     display: "flex",
@@ -970,7 +991,7 @@ export default function ParentPortal() {
           <div
             style={{
               background: T.surface,
-              borderRadius: "22px 22px 0 0",
+              borderRadius: "14px 14px 0 0",
               width: "100%",
               maxWidth: 480,
               padding: "24px 24px calc(env(safe-area-inset-bottom,0px) + 24px)",
@@ -1002,7 +1023,7 @@ export default function ParentPortal() {
                 style={{
                   width: 44,
                   height: 44,
-                  borderRadius: 13,
+                  borderRadius: 8,
                   background: T.primaryLight,
                   display: "flex",
                   alignItems: "center",
@@ -1017,7 +1038,7 @@ export default function ParentPortal() {
                 <p
                   style={{
                     margin: 0,
-                    fontFamily: "'Crimson Pro',serif",
+                    fontFamily: "'Inter',sans-serif",
                     fontSize: 20,
                     fontWeight: 600,
                     color: T.ink,
@@ -1053,10 +1074,10 @@ export default function ParentPortal() {
                   style={{
                     width: "100%",
                     padding: "13px 16px",
-                    borderRadius: 13,
+                    borderRadius: 8,
                     border: `1.5px solid ${identityError ? T.red : T.border}`,
                     fontSize: 15,
-                    fontFamily: "'Sora',sans-serif",
+                    fontFamily: "'Inter',sans-serif",
                     outline: "none",
                     boxSizing: "border-box",
                     color: T.text,
@@ -1078,7 +1099,7 @@ export default function ParentPortal() {
                     gap: 8,
                     padding: "10px 13px",
                     background: T.redLight,
-                    borderRadius: 11,
+                    borderRadius: 7,
                     border: "1px solid #fecaca",
                   }}
                 >
@@ -1109,7 +1130,7 @@ export default function ParentPortal() {
                 disabled={verifying}
                 style={{
                   padding: "14px",
-                  borderRadius: 13,
+                  borderRadius: 8,
                   background: T.primary,
                   color: "#fff",
                   fontSize: 14,
@@ -1121,7 +1142,7 @@ export default function ParentPortal() {
                   justifyContent: "center",
                   gap: 8,
                   opacity: verifying ? 0.75 : 1,
-                  fontFamily: "'Sora',sans-serif",
+                  fontFamily: "'Inter',sans-serif",
                   letterSpacing: ".01em",
                 }}
               >
@@ -1147,13 +1168,11 @@ export default function ParentPortal() {
       {/* ── HEADER ────────────────────────────────────────────────────────── */}
       <div
         style={{
-          background: `linear-gradient(160deg,${T.primary} 0%,${T.primaryMid} 100%)`,
+          background: T.primary,
           paddingTop: "env(safe-area-inset-top,0px)",
         }}
       >
-        <div
-          style={{ padding: "20px 20px 0", maxWidth: 640, margin: "0 auto" }}
-        >
+        <div className="pp-container" style={{ padding: "20px 20px 0" }}>
           <div
             style={{
               display: "flex",
@@ -1167,7 +1186,7 @@ export default function ParentPortal() {
                 style={{
                   width: 46,
                   height: 46,
-                  borderRadius: 14,
+                  borderRadius: 8,
                   background: "rgba(255,255,255,0.15)",
                   border: "1.5px solid rgba(255,255,255,0.2)",
                   display: "flex",
@@ -1192,7 +1211,7 @@ export default function ParentPortal() {
                 <p
                   style={{
                     margin: 0,
-                    fontFamily: "'Crimson Pro',serif",
+                    fontFamily: "'Inter',sans-serif",
                     fontSize: 19,
                     fontWeight: 600,
                     color: "#fff",
@@ -1229,17 +1248,17 @@ export default function ParentPortal() {
                   gap: 8,
                   background: "rgba(255,255,255,0.15)",
                   border: "1.5px solid rgba(255,255,255,0.3)",
-                  borderRadius: 12,
+                  borderRadius: 7,
                   padding: "7px 12px",
                   cursor: "pointer",
-                  fontFamily: "'Sora',sans-serif",
+                  fontFamily: "'Inter',sans-serif",
                 }}
               >
                 <div
                   style={{
                     width: 28,
                     height: 28,
-                    borderRadius: 8,
+                    borderRadius: 5,
                     background: "rgba(255,255,255,0.2)",
                     display: "flex",
                     alignItems: "center",
@@ -1280,13 +1299,13 @@ export default function ParentPortal() {
                   gap: 7,
                   background: "rgba(255,255,255,0.15)",
                   border: "1.5px solid rgba(255,255,255,0.3)",
-                  borderRadius: 12,
+                  borderRadius: 7,
                   padding: "9px 14px",
                   color: "#fff",
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
-                  fontFamily: "'Sora',sans-serif",
+                  fontFamily: "'Inter',sans-serif",
                 }}
               >
                 <Lock style={{ width: 13, height: 13 }} /> My Child
@@ -1335,18 +1354,18 @@ export default function ParentPortal() {
                     activeTab === s.tab
                       ? "1.5px solid rgba(255,255,255,0.35)"
                       : "1.5px solid transparent",
-                  borderRadius: 13,
+                  borderRadius: 8,
                   padding: "10px 8px",
                   textAlign: "center",
                   cursor: "pointer",
                   transition: "all .2s",
-                  fontFamily: "'Sora',sans-serif",
+                  fontFamily: "'Inter',sans-serif",
                 }}
               >
                 <p
                   style={{
                     margin: 0,
-                    fontFamily: "'Crimson Pro',serif",
+                    fontFamily: "'Inter',sans-serif",
                     fontSize: 26,
                     fontWeight: 600,
                     color: s.color,
@@ -1374,17 +1393,17 @@ export default function ParentPortal() {
 
         {/* ── TABS ────────────────────────────────────────────────────────── */}
         <div
+          className="pp-container"
           style={{
             background: T.surface,
-            maxWidth: 640,
-            margin: "0 auto",
             overflowX: "auto",
             borderBottom: `1px solid ${T.border}`,
+            position: "sticky",
+            top: 0,
+            zIndex: 20,
           }}
         >
-          <div
-            style={{ display: "flex", minWidth: "max-content", width: "100%" }}
-          >
+          <div className="pp-tabs-row">
             {allTabs.map(({ id, label, icon: Icon, count, locked }) => (
               <button
                 key={id}
@@ -1422,7 +1441,7 @@ export default function ParentPortal() {
                   position: "relative",
                   top: 1,
                   whiteSpace: "nowrap",
-                  fontFamily: "'Sora',sans-serif",
+                  fontFamily: "'Inter',sans-serif",
                 }}
               >
                 {locked ? (
@@ -1453,9 +1472,7 @@ export default function ParentPortal() {
       </div>
 
       {/* ── CONTENT ───────────────────────────────────────────────────────── */}
-      <div
-        style={{ maxWidth: 640, margin: "0 auto", padding: "16px 16px 60px" }}
-      >
+      <div className="pp-container" style={{ padding: "16px 16px 60px" }}>
         {/* ══ NOTICES ══════════════════════════════════════════════════════ */}
         {activeTab === "notices" && (
           <div
@@ -1559,7 +1576,7 @@ export default function ParentPortal() {
                       <p
                         style={{
                           margin: 0,
-                          fontFamily: "'Crimson Pro',serif",
+                          fontFamily: "'Inter',sans-serif",
                           fontSize: 17,
                           fontWeight: 600,
                           color: T.ink,
@@ -1587,8 +1604,7 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: "6px 0 0",
-                            fontFamily: "'Crimson Pro',serif",
-                            fontStyle: "italic",
+                            fontFamily: "'Inter',sans-serif",
                             fontSize: 13,
                             color: T.textFaint,
                           }}
@@ -1615,7 +1631,7 @@ export default function ParentPortal() {
                             display: "flex",
                             alignItems: "center",
                             gap: 4,
-                            fontFamily: "'Sora',sans-serif",
+                            fontFamily: "'Inter',sans-serif",
                           }}
                         >
                           {isExpanded ? "Show less" : "Read more"}
@@ -1665,7 +1681,7 @@ export default function ParentPortal() {
                       color: gradeFilter === g ? "#fff" : T.textMid,
                       boxShadow: T.shadow,
                       transition: "all .15s",
-                      fontFamily: "'Sora',sans-serif",
+                      fontFamily: "'Inter',sans-serif",
                     }}
                   >
                     {g}
@@ -1720,7 +1736,7 @@ export default function ParentPortal() {
                             style={{
                               width: 42,
                               height: 42,
-                              borderRadius: 13,
+                              borderRadius: 8,
                               background: T.primaryLight,
                               display: "flex",
                               alignItems: "center",
@@ -1741,7 +1757,7 @@ export default function ParentPortal() {
                             <p
                               style={{
                                 margin: 0,
-                                fontFamily: "'Crimson Pro',serif",
+                                fontFamily: "'Inter',sans-serif",
                                 fontSize: 17,
                                 fontWeight: 600,
                                 color: T.ink,
@@ -1765,8 +1781,7 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: "2px 0 0",
-                                  fontFamily: "'Crimson Pro',serif",
-                                  fontStyle: "italic",
+                                  fontFamily: "'Inter',sans-serif",
                                   fontSize: 13,
                                   color: T.textFaint,
                                 }}
@@ -1798,7 +1813,7 @@ export default function ParentPortal() {
                               alignItems: "center",
                               gap: 7,
                               padding: "8px 12px",
-                              borderRadius: 10,
+                              borderRadius: 6,
                               background: isOverdue ? "#fff0f0" : T.surfaceAlt,
                               border: `1px solid ${isOverdue ? "#fecaca" : T.border}`,
                             }}
@@ -1933,7 +1948,7 @@ export default function ParentPortal() {
                         style={{
                           width: 52,
                           height: 58,
-                          borderRadius: 14,
+                          borderRadius: 8,
                           background: isClose ? "#fff0f0" : T.primaryLight,
                           border: `1.5px solid ${isClose ? "#fecaca" : "#c6e8d9"}`,
                           display: "flex",
@@ -1946,7 +1961,7 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: 0,
-                            fontFamily: "'Crimson Pro',serif",
+                            fontFamily: "'Inter',sans-serif",
                             fontSize: 24,
                             fontWeight: 600,
                             color: isClose ? T.red : T.primary,
@@ -1973,7 +1988,7 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: 0,
-                            fontFamily: "'Crimson Pro',serif",
+                            fontFamily: "'Inter',sans-serif",
                             fontSize: 17,
                             fontWeight: 600,
                             color: T.ink,
@@ -2078,7 +2093,7 @@ export default function ParentPortal() {
                         color: ttGrade === g ? "#fff" : T.textMid,
                         boxShadow: T.shadow,
                         transition: "all .15s",
-                        fontFamily: "'Sora',sans-serif",
+                        fontFamily: "'Inter',sans-serif",
                       }}
                     >
                       {g}
@@ -2105,7 +2120,7 @@ export default function ParentPortal() {
                         style={{
                           flexShrink: 0,
                           padding: "8px 14px",
-                          borderRadius: 12,
+                          borderRadius: 7,
                           fontSize: 11,
                           fontWeight: 700,
                           border: `1px solid ${ttDay === day ? "transparent" : T.border}`,
@@ -2125,7 +2140,7 @@ export default function ParentPortal() {
                           boxShadow: T.shadow,
                           transition: "all .15s",
                           position: "relative",
-                          fontFamily: "'Sora',sans-serif",
+                          fontFamily: "'Inter',sans-serif",
                         }}
                       >
                         {day.slice(0, 3)}
@@ -2207,7 +2222,7 @@ export default function ParentPortal() {
                               style={{
                                 width: 36,
                                 height: 36,
-                                borderRadius: 11,
+                                borderRadius: 7,
                                 background: ac.bg,
                                 display: "flex",
                                 alignItems: "center",
@@ -2218,7 +2233,7 @@ export default function ParentPortal() {
                             >
                               <span
                                 style={{
-                                  fontFamily: "'Crimson Pro',serif",
+                                  fontFamily: "'Inter',sans-serif",
                                   fontSize: 16,
                                   fontWeight: 600,
                                   color: ac.color,
@@ -2231,7 +2246,7 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: 0,
-                                  fontFamily: "'Crimson Pro',serif",
+                                  fontFamily: "'Inter',sans-serif",
                                   fontSize: 17,
                                   fontWeight: 600,
                                   color: T.ink,
@@ -2316,7 +2331,7 @@ export default function ParentPortal() {
                 gap: 10,
                 background: T.surface,
                 border: `1px solid ${T.border}`,
-                borderRadius: 13,
+                borderRadius: 8,
                 padding: "0 14px",
                 marginBottom: 14,
                 boxShadow: T.shadow,
@@ -2341,7 +2356,7 @@ export default function ParentPortal() {
                   fontSize: 14,
                   padding: "12px 0",
                   background: "transparent",
-                  fontFamily: "'Sora',sans-serif",
+                  fontFamily: "'Inter',sans-serif",
                   color: T.text,
                 }}
               />
@@ -2390,7 +2405,7 @@ export default function ParentPortal() {
                     color: tutorialCat === cat.id ? "#fff" : T.textMid,
                     boxShadow: T.shadow,
                     transition: "all .15s",
-                    fontFamily: "'Sora',sans-serif",
+                    fontFamily: "'Inter',sans-serif",
                   }}
                 >
                   <span style={{ fontSize: 13 }}>{cat.emoji}</span>
@@ -2409,13 +2424,7 @@ export default function ParentPortal() {
                 iconColor={T.primary}
               />
             ) : (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                  gap: 12,
-                }}
-              >
+              <div className="pp-tutorial-grid">
                 {filteredTutorials.map((tut, i) => (
                   <button
                     key={tut.id}
@@ -2431,7 +2440,7 @@ export default function ParentPortal() {
                       padding: 0,
                       animation: `fadeUp .3s ease ${i * 0.04}s both`,
                       transition: "transform .15s, box-shadow .15s",
-                      fontFamily: "'Sora',sans-serif",
+                      fontFamily: "'Inter',sans-serif",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "translateY(-2px)";
@@ -2481,7 +2490,7 @@ export default function ParentPortal() {
                       <p
                         style={{
                           margin: 0,
-                          fontFamily: "'Crimson Pro',serif",
+                          fontFamily: "'Inter',sans-serif",
                           fontSize: 15,
                           fontWeight: 600,
                           color: T.ink,
@@ -2615,7 +2624,7 @@ export default function ParentPortal() {
                             style={{
                               width: 46,
                               height: 46,
-                              borderRadius: 13,
+                              borderRadius: 8,
                               background: T.primaryLight,
                               display: "flex",
                               alignItems: "center",
@@ -2636,7 +2645,7 @@ export default function ParentPortal() {
                             <p
                               style={{
                                 margin: 0,
-                                fontFamily: "'Crimson Pro',serif",
+                                fontFamily: "'Inter',sans-serif",
                                 fontSize: 18,
                                 fontWeight: 600,
                                 color: T.ink,
@@ -2659,8 +2668,7 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: "2px 0 0",
-                                  fontFamily: "'Crimson Pro',serif",
-                                  fontStyle: "italic",
+                                  fontFamily: "'Inter',sans-serif",
                                   fontSize: 13,
                                   color: T.textFaint,
                                 }}
@@ -2722,7 +2730,7 @@ export default function ParentPortal() {
                             marginTop: 12,
                             width: "100%",
                             padding: "9px",
-                            borderRadius: 10,
+                            borderRadius: 6,
                             background: T.surfaceAlt,
                             border: `1px solid ${T.border}`,
                             fontSize: 12,
@@ -2733,7 +2741,7 @@ export default function ParentPortal() {
                             alignItems: "center",
                             justifyContent: "center",
                             gap: 6,
-                            fontFamily: "'Sora',sans-serif",
+                            fontFamily: "'Inter',sans-serif",
                           }}
                         >
                           <ClipboardList style={{ width: 13, height: 13 }} />
@@ -2764,7 +2772,7 @@ export default function ParentPortal() {
                           <div
                             style={{
                               padding: "12px 14px",
-                              borderRadius: 12,
+                              borderRadius: 7,
                               background: T.surface,
                               border: `1px solid ${T.border}`,
                               display: "grid",
@@ -2827,7 +2835,7 @@ export default function ParentPortal() {
                                   key={term}
                                   style={{
                                     padding: "12px 14px",
-                                    borderRadius: 12,
+                                    borderRadius: 7,
                                     background: T.primaryLight,
                                     border: "1px solid #c6e8d9",
                                   }}
@@ -2847,7 +2855,7 @@ export default function ParentPortal() {
                                   <p
                                     style={{
                                       margin: 0,
-                                      fontFamily: "'Crimson Pro',serif",
+                                      fontFamily: "'Inter',sans-serif",
                                       fontSize: 15,
                                       color: T.textMid,
                                       lineHeight: 1.65,
@@ -2866,7 +2874,7 @@ export default function ParentPortal() {
                                 color: T.textFaint,
                                 fontSize: 13,
                                 border: `1.5px dashed ${T.border}`,
-                                borderRadius: 12,
+                                borderRadius: 7,
                               }}
                             >
                               No teacher comments recorded yet
@@ -2951,7 +2959,7 @@ export default function ParentPortal() {
                               style={{
                                 width: 42,
                                 height: 42,
-                                borderRadius: 12,
+                                borderRadius: 7,
                                 background: T.blueLight,
                                 display: "flex",
                                 alignItems: "center",
@@ -2968,7 +2976,7 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: 0,
-                                  fontFamily: "'Crimson Pro',serif",
+                                  fontFamily: "'Inter',sans-serif",
                                   fontSize: 18,
                                   fontWeight: 600,
                                   color: T.ink,
@@ -2991,7 +2999,7 @@ export default function ParentPortal() {
                               <p
                                 style={{
                                   margin: 0,
-                                  fontFamily: "'Crimson Pro',serif",
+                                  fontFamily: "'Inter',sans-serif",
                                   fontSize: 26,
                                   fontWeight: 600,
                                   color: avgColor,
@@ -3061,7 +3069,7 @@ export default function ParentPortal() {
                                     <p
                                       style={{
                                         margin: 0,
-                                        fontFamily: "'Crimson Pro',serif",
+                                        fontFamily: "'Inter',sans-serif",
                                         fontSize: 16,
                                         fontWeight: 600,
                                         color: col,
@@ -3177,7 +3185,7 @@ export default function ParentPortal() {
                           style={{
                             width: 46,
                             height: 46,
-                            borderRadius: 13,
+                            borderRadius: 8,
                             background: T.tealLight,
                             display: "flex",
                             alignItems: "center",
@@ -3194,7 +3202,7 @@ export default function ParentPortal() {
                           <p
                             style={{
                               margin: 0,
-                              fontFamily: "'Crimson Pro',serif",
+                              fontFamily: "'Inter',sans-serif",
                               fontSize: 17,
                               fontWeight: 600,
                               color: T.ink,
@@ -3268,7 +3276,7 @@ export default function ParentPortal() {
               style={{
                 padding: "12px 14px",
                 background: T.blueLight,
-                borderRadius: 12,
+                borderRadius: 7,
                 border: "1px solid #bfdbfe",
                 marginBottom: 16,
                 display: "flex",
@@ -3389,7 +3397,7 @@ export default function ParentPortal() {
                             style={{
                               marginTop: 10,
                               padding: "8px 12px",
-                              borderRadius: 9,
+                              borderRadius: 5,
                               background: T.primaryLight,
                               border: "1px solid #c6e8d9",
                             }}
@@ -3525,7 +3533,7 @@ export default function ParentPortal() {
                       <p
                         style={{
                           margin: 0,
-                          fontFamily: "'Crimson Pro',serif",
+                          fontFamily: "'Inter',sans-serif",
                           fontSize: 18,
                           fontWeight: 600,
                           color: T.ink,
@@ -3565,7 +3573,7 @@ export default function ParentPortal() {
                       </span>
                       <span
                         style={{
-                          fontFamily: "'Crimson Pro',serif",
+                          fontFamily: "'Inter',sans-serif",
                           fontSize: 15,
                           fontWeight: 600,
                           color: sc.color,
@@ -3626,7 +3634,7 @@ export default function ParentPortal() {
                         style={{
                           textAlign: "center",
                           padding: "14px 8px",
-                          borderRadius: 14,
+                          borderRadius: 8,
                           background: item.bg,
                           border: `1px solid ${T.border}`,
                           boxShadow: T.shadow,
@@ -3635,7 +3643,7 @@ export default function ParentPortal() {
                         <p
                           style={{
                             margin: 0,
-                            fontFamily: "'Crimson Pro',serif",
+                            fontFamily: "'Inter',sans-serif",
                             fontSize: 18,
                             fontWeight: 600,
                             color: item.color,
@@ -3664,7 +3672,7 @@ export default function ParentPortal() {
                       display: "flex",
                       gap: 10,
                       padding: "12px 14px",
-                      borderRadius: 12,
+                      borderRadius: 7,
                       background: T.blueLight,
                       border: "1px solid #bfdbfe",
                     }}
@@ -3752,7 +3760,7 @@ export default function ParentPortal() {
                       style={{
                         textAlign: "center",
                         padding: "10px 4px",
-                        borderRadius: 12,
+                        borderRadius: 7,
                         background: s.bg,
                         border: `1px solid ${T.border}`,
                       }}
@@ -3760,7 +3768,7 @@ export default function ParentPortal() {
                       <p
                         style={{
                           margin: 0,
-                          fontFamily: "'Crimson Pro',serif",
+                          fontFamily: "'Inter',sans-serif",
                           fontSize: 22,
                           fontWeight: 600,
                           color: s.color,
@@ -3896,7 +3904,7 @@ export default function ParentPortal() {
         <p
           style={{
             margin: 0,
-            fontFamily: "'Crimson Pro',serif",
+            fontFamily: "'Inter',sans-serif",
             fontSize: 15,
             fontWeight: 600,
             color: T.textSoft,
@@ -3952,7 +3960,7 @@ function SectionHeader({ name, grade }) {
         marginBottom: 14,
         padding: "10px 14px",
         background: "#fff",
-        borderRadius: 12,
+        borderRadius: 7,
         border: "1px solid #e8e4db",
       }}
     >
@@ -3960,7 +3968,7 @@ function SectionHeader({ name, grade }) {
         style={{
           width: 34,
           height: 34,
-          borderRadius: 10,
+          borderRadius: 6,
           background: "#e8f5ef",
           display: "flex",
           alignItems: "center",
@@ -3974,7 +3982,7 @@ function SectionHeader({ name, grade }) {
         <p
           style={{
             margin: 0,
-            fontFamily: "'Crimson Pro',serif",
+            fontFamily: "'Inter',sans-serif",
             fontSize: 16,
             fontWeight: 600,
             color: "#1a1814",
@@ -4004,7 +4012,7 @@ function EmptyState({ icon: Icon, title, message, color, iconColor }) {
         style={{
           width: 60,
           height: 60,
-          borderRadius: 18,
+          borderRadius: 11,
           background: color,
           border: "1px solid #e8e4db",
           display: "flex",
@@ -4018,7 +4026,7 @@ function EmptyState({ icon: Icon, title, message, color, iconColor }) {
       <p
         style={{
           margin: 0,
-          fontFamily: "'Crimson Pro',serif",
+          fontFamily: "'Inter',sans-serif",
           fontSize: 20,
           fontWeight: 600,
           color: "#1a1814",
@@ -4043,9 +4051,21 @@ function EmptyState({ icon: Icon, title, message, color, iconColor }) {
 
 // ── Style constants ────────────────────────────────────────────────────────────
 const fonts = `
-  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-  button { font-family:'Sora',sans-serif; }
+  button { font-family:'Inter',sans-serif; }
+  ::-webkit-scrollbar { height:0; width:0; }
+  .pp-container { width:100%; max-width:640px; margin:0 auto; }
+  @media (min-width:768px){ .pp-container{ max-width:820px; } }
+  @media (min-width:1024px){ .pp-container{ max-width:1040px; } }
+  .pp-tutorial-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  @media (min-width:560px){ .pp-tutorial-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media (min-width:860px){ .pp-tutorial-grid{ grid-template-columns:repeat(4,minmax(0,1fr)); } }
+  @media (min-width:1024px){ .pp-tutorial-grid{ grid-template-columns:repeat(5,minmax(0,1fr)); } }
+  .pp-stats-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media (min-width:480px){ .pp-stats-strip{ gap:12px; } }
+  .pp-tabs-row { display:flex; min-width:max-content; width:100%; }
+  @media (min-width:768px){ .pp-tabs-row{ min-width:0; width:auto; justify-content:center; } }
 `;
 const keyframes = `
   @keyframes fadeUp {

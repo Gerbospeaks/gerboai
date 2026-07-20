@@ -1235,6 +1235,7 @@ const EducationDashboard = () => {
           className="lg:hidden"
           style={{
             flexShrink: 0,
+            display: "flex",
             alignItems: "stretch",
             background: "#fff",
             borderTop: "1px solid #e2e8f0",
