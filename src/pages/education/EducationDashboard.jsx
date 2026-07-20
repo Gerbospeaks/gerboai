@@ -1230,13 +1230,11 @@ const EducationDashboard = () => {
             />
           )}
         </main>
-         {/* ── Mobile bottom nav ── */}
+        {/* ── Mobile bottom nav ── */}
         <div
-          className="lg:hidden"
+          className="lg:hidden flex items-stretch"
           style={{
             flexShrink: 0,
-            display: "flex",
-            alignItems: "stretch",
             background: "#fff",
             borderTop: "1px solid #e2e8f0",
             zIndex: 40,
@@ -1283,7 +1281,6 @@ const EducationDashboard = () => {
             </button>
           ))}
         </div>
-      
       </div>
 
       {/* ── AI WINDOW ── */}
