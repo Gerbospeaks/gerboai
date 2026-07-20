@@ -393,7 +393,17 @@ const MOCK_NOTICES = [
 
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "10:30", "11:30", "12:30"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const CLASSES = ["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7"];
+const CLASSES = [
+  "Grade R",
+  "Grade 0",
+  "Grade 1",
+  "Grade 2",
+  "Grade 3",
+  "Grade 4",
+  "Grade 5",
+  "Grade 6",
+  "Grade 7",
+];
 
 const SUBJECT_ICONS = {
   Maths: Calculator,
@@ -463,7 +473,7 @@ const EducationDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
-const mobileNavPad = "pb-24 lg:pb-6";
+  const mobileNavPad = "pb-24 lg:pb-6";
   const todayISO = new Date().toISOString().split("T")[0];
   const today = new Date();
   const dayName = today.toLocaleDateString("en-ZA", { weekday: "long" });
@@ -496,7 +506,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const [students, setStudents] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
   const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [stampConfig, setStampConfig] = useState(null);
   useEffect(() => {
     if (!user?.uid) return;
     setStudentsLoading(true);
@@ -601,13 +611,13 @@ const [stampConfig, setStampConfig] = useState(null);
     () => notices.filter((n) => !n.read).length,
     [notices],
   );
-const bottomNavItems = [
-  { id: "home",       icon: Home,        label: "Home"       },
-  { id: "students",   icon: Baby,        label: "Students"   },
-  { id: "attendance", icon: UserCheck,   label: "Attendance" },
-  { id: "fees",       icon: CreditCard,  label: "Fees"       },
-  { id: "notices",    icon: Megaphone,   label: "Notices"    },
-];
+  const bottomNavItems = [
+    { id: "home", icon: Home, label: "Home" },
+    { id: "students", icon: Baby, label: "Students" },
+    { id: "attendance", icon: UserCheck, label: "Attendance" },
+    { id: "fees", icon: CreditCard, label: "Fees" },
+    { id: "notices", icon: Megaphone, label: "Notices" },
+  ];
   // ── Effects ──────────────────────────────────────────────────────────────────
 
   // Seed mock data once for new education users
@@ -1196,17 +1206,17 @@ const bottomNavItems = [
               <Templates user={user} />
             </div>
           )}
-{activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+          {activeView === "marketplace" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
 
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+          {activeView === "incoming-requests" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceRequestsView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
           {/* OVERVIEW */}
           {activeView === "overview" && (
             <SchoolOverview
@@ -1220,6 +1230,60 @@ const bottomNavItems = [
             />
           )}
         </main>
+         {/* ── Mobile bottom nav ── */}
+        <div
+          className="lg:hidden"
+          style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "stretch",
+            background: "#fff",
+            borderTop: "1px solid #e2e8f0",
+            zIndex: 40,
+          }}
+        >
+          {bottomNavItems.map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => navigate(id)}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "8px 4px 10px",
+                gap: 3,
+                fontSize: 10,
+                fontWeight: 600,
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+                color: activeView === id ? "var(--brand)" : "#94a3b8",
+                position: "relative",
+                transition: "color .15s",
+              }}
+            >
+              {activeView === id && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 28,
+                    height: 2,
+                    background: "var(--brand)",
+                    borderRadius: "0 0 4px 4px",
+                  }}
+                />
+              )}
+              <Icon style={{ width: 20, height: 20 }} />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+      
       </div>
 
       {/* ── AI WINDOW ── */}
@@ -1287,57 +1351,6 @@ const bottomNavItems = [
         onEdit={handleEditStudent}
         onDelete={handleDeleteStudent}
       />
-            {/* ── Mobile bottom nav ── */}
-<div
-  className="lg:hidden"
-  style={{
-    flexShrink: 0,
-    display: "flex",
-    alignItems: "stretch",
-    background: "#fff",
-    borderTop: "1px solid #e2e8f0",
-    zIndex: 40,
-  }}
->
-  {bottomNavItems.map(({ id, icon: Icon, label }) => (
-    <button
-      key={id}
-      onClick={() => navigate(id)}
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "8px 4px 10px",
-        gap: 3,
-        fontSize: 10,
-        fontWeight: 600,
-        border: "none",
-        background: "none",
-        cursor: "pointer",
-        color: activeView === id ? "var(--brand)" : "#94a3b8",
-        position: "relative",
-        transition: "color .15s",
-      }}
-    >
-      {activeView === id && (
-        <span style={{
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 28,
-          height: 2,
-          background: "var(--brand)",
-          borderRadius: "0 0 4px 4px",
-        }} />
-      )}
-      <Icon style={{ width: 20, height: 20 }} />
-      <span>{label}</span>
-    </button>
-  ))}
-</div>
     </div>
   );
 };
@@ -2946,11 +2959,19 @@ const HomeworkView = ({
                   setNewHomework((p) => ({ ...p, grade: e.target.value }))
                 }
               >
-                {["Grade R", "Grade 0", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7"].map(
-                  (g) => (
-                    <option key={g}>{g}</option>
-                  ),
-                )}
+                {[
+                  "Grade R",
+                  "Grade 0",
+                  "Grade 1",
+                  "Grade 2",
+                  "Grade 3",
+                  "Grade 4",
+                  "Grade 5",
+                  "Grade 6",
+                  "Grade 7",
+                ].map((g) => (
+                  <option key={g}>{g}</option>
+                ))}
               </select>
             </div>
             <div className="sm:col-span-2">
@@ -3372,21 +3393,21 @@ const NoticesView = ({
                     let targets = students.filter((s) => s.phone);
                     if (noticeForm.recipient === "Grade 1 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 1");
-                     else if (noticeForm.recipient === "Grade R Parents")
+                    else if (noticeForm.recipient === "Grade R Parents")
                       targets = targets.filter((s) => s.grade === "Grade R");
-                     else if (noticeForm.recipient === "Grade 0 Parents")
+                    else if (noticeForm.recipient === "Grade 0 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 0");
                     else if (noticeForm.recipient === "Grade 2 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 2");
                     else if (noticeForm.recipient === "Grade 3 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 3");
-                     else if (noticeForm.recipient === "Grade 4 Parents")
+                    else if (noticeForm.recipient === "Grade 4 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 4");
-                     else if (noticeForm.recipient === "Grade 5 Parents")
+                    else if (noticeForm.recipient === "Grade 5 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 5");
-                     else if (noticeForm.recipient === "Grade 6 Parents")
+                    else if (noticeForm.recipient === "Grade 6 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 6");
-                     else if (noticeForm.recipient === "Grade 7 Parents")
+                    else if (noticeForm.recipient === "Grade 7 Parents")
                       targets = targets.filter((s) => s.grade === "Grade 7");
                     const msg = encodeURIComponent(
                       `📚 *${noticeForm.title}*\n\n${noticeForm.message}\n\n_Sent by ${businessInfo?.name || "the school"}_`,
@@ -3880,7 +3901,6 @@ const EventsView = ({ events, onAdd, onDelete }) => {
           })}
         </div>
       )}
-
     </div>
   );
 };

@@ -74,11 +74,11 @@ export default function EducationSidebar({
 
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   const openModal = (fn) => {
-    setSidebarOpen(false);
+    setSidebarOpen(true);
     fn?.();
   };
 
