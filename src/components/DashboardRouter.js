@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { DASHBOARD_ID_TO_PATH } from "../App";
+import { DASHBOARD_ID_TO_PATH } from "../constants/dashboardPaths";
 
 function DashboardRouter() {
   const { user, userDashboard, loading } = useAuth();

@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AdminProvider } from "./contexts/AdminContext";
 import { getSubdomainFromHost } from "./utils/subdomain";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { DASHBOARD_ID_TO_PATH } from "./constants/dashboardPaths";
 import PWAInstallPrompt from "./components/Pwainstallprompt";
 import LandingPage from "./pages/LandingPage";
 import Register from "./pages/Register";
@@ -118,42 +119,6 @@ const PUBLIC_ROUTES = new Set([
   "/register",
   "/auth-action",
 ]);
-
-
-export const DASHBOARD_ID_TO_PATH = {
-  mechanics: "/mechanics",
-  healthcare: "/healthcare",
-  health: "/healthcare",
-  security: "/security",
-  electrical: "/electrical",
-  restaurant: "/restaurant",
-  construction: "/construction",
-  cleaning: "/cleaning",
-  education: "/education",
-  hotel: "/hotel",
-  legal: "/legal",
-  plumbing: "/plumbing",
-  retail: "/retail",
-  landscaping: "/landscaping",
-  logistics: "/logistics",
-  photography: "/photography",
-  realestate: "/realestate",
-  flooring: "/flooring",
-  hvac: "/hvac",
-  accounting: "/accounting",
-  painting: "/painting",
-  pestcontrol: "/pestcontrol",
-  poolservices: "/poolservices",
-  solarinstallation: "/solarinstallation",
-  towing: "/towing",
-  welding: "/welding",
-  carpentry: "/carpentry",
-  windowrepair: "/windowrepair",
-  technology:"/technology",
-  upholstery:"/upholstery",
-  virtualservice:"/virtualservice",
-  appliancerepair:"/appliancerepair"
-};
 
 // ─── Full-page spinner shown while Firebase resolves auth state ───────────────
 export function AppLoader() {
