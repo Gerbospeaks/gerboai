@@ -16,6 +16,7 @@ import {
   setDoc,
   updateDoc,
   increment,
+  runTransaction,
 } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 import {
@@ -83,22 +84,73 @@ import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
 const WORKER_URL = process.env.REACT_APP_API_URL;
+// Counter doc lives at users/{uid}/counters/{quotations|invoices}. The first
+// time it's used for an existing account it's seeded from whatever the
+// highest existing jobCardNumber is, so numbering picks up where the old
+// scheme left off instead of colliding with real quotes/invoices.
+const initializeCounterIfNeeded = async (db, userId, collectionName, counterRef) => {
+  const counterSnap = await getDoc(counterRef);
+  if (counterSnap.exists()) return counterSnap.data().value || 891;
+
+  const snapshot = await getDocs(collection(db, "users", userId, collectionName));
+  let maxNumber = 891;
+  snapshot.forEach((docSnap) => {
+    const match = docSnap.data()?.jobCardNumber?.match(/(\d+)$/);
+    if (match) {
+      const n = Number(match[1]);
+      if (n > maxNumber) maxNumber = n;
+    }
+  });
+  await setDoc(
+    counterRef,
+    { value: maxNumber, updatedAt: serverTimestamp() },
+    { merge: true },
+  );
+  return maxNumber;
+};
+
+// Atomically reserves the next quote/invoice number. Uses a Firestore
+// transaction on a dedicated counter doc rather than "read the most recent
+// doc and add 1" — the old approach could return the same number twice
+// (e.g. if createdAt hadn't resolved yet, or the latest doc's number didn't
+// parse), and since that number becomes the document ID, a repeat number
+// meant the new save silently overwrote an existing quote instead of
+// creating a new one.
 const generateJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
   const collectionName = documentType === "quote" ? "quotations" : "invoices";
   const prefix = documentType === "quote" ? "QT" : "JC";
-  const jobCardsRef = collection(db, "users", userId, collectionName);
-  const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(1));
-  const snapshot = await getDocs(q);
-  let lastNumber = 891;
-  if (!snapshot.empty) {
-    const lastJobCard = snapshot.docs[0].data();
-    const match = lastJobCard.jobCardNumber?.match(/(\d+)$/);
-    if (match) lastNumber = Number(match[1]);
-  }
-  const nextNumber = lastNumber + 1;
+  const counterRef = doc(db, "users", userId, "counters", collectionName);
+
+  await initializeCounterIfNeeded(db, userId, collectionName, counterRef);
+
+  const nextNumber = await runTransaction(db, async (transaction) => {
+    const counterSnap = await transaction.get(counterRef);
+    const current = counterSnap.exists() ? counterSnap.data().value || 891 : 891;
+    const next = current + 1;
+    transaction.set(
+      counterRef,
+      { value: next, updatedAt: serverTimestamp() },
+      { merge: true },
+    );
+    return next;
+  });
+
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
+};
+
+// Read-only preview of the next number, used purely for display (e.g. before
+// the user has actually saved). Does NOT reserve/increment the counter, so
+// just opening the form or switching tabs doesn't burn numbers.
+const peekNextJobCardNumber = async (userId, documentType) => {
+  const db = getFirestore();
+  const year = new Date().getFullYear();
+  const collectionName = documentType === "quote" ? "quotations" : "invoices";
+  const prefix = documentType === "quote" ? "QT" : "JC";
+  const counterRef = doc(db, "users", userId, "counters", collectionName);
+  const current = await initializeCounterIfNeeded(db, userId, collectionName, counterRef);
+  return `${prefix}-${year}-${String(current + 1).padStart(4, "0")}`;
 };
 
 const functions = getFunctions();
@@ -325,7 +377,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
   useEffect(() => {
     if (!user?.uid) return;
     const loadJobCardNumber = async () => {
-      const nextJobCard = await generateJobCardNumber(user.uid, documentType);
+      const nextJobCard = await peekNextJobCardNumber(user.uid, documentType);
       setJobCardNumber(nextJobCard);
     };
     loadJobCardNumber();
@@ -1244,7 +1296,7 @@ const handleStampConfirm = async (cfg) => {
     setCurrentStep(1);
     const loadNewNumber = async () => {
       if (user?.uid) {
-        const n = await generateJobCardNumber(user.uid, documentType);
+        const n = await peekNextJobCardNumber(user.uid, documentType);
         setJobCardNumber(n);
       }
     };

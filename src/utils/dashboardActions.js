@@ -92,7 +92,7 @@ export const getDashboardActions = (dashboardId, handlers = {}) => {
     plumbing:         invoiceQuote,
     poolservice:      invoiceQuote,
     realestate:       invoiceQuote,
-    restaurants:      invoiceQuote,
+    restaurant:      invoiceQuote,
     retail:           invoiceQuote,
     security:         invoiceQuote,
     solar:            invoiceQuote,
