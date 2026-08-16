@@ -84,10 +84,6 @@ import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import Vehicles from "./Vehicles";
 const WORKER_URL = process.env.REACT_APP_API_URL;
-// Counter doc lives at users/{uid}/counters/{quotations|invoices}. The first
-// time it's used for an existing account it's seeded from whatever the
-// highest existing jobCardNumber is, so numbering picks up where the old
-// scheme left off instead of colliding with real quotes/invoices.
 const initializeCounterIfNeeded = async (db, userId, collectionName, counterRef) => {
   const counterSnap = await getDoc(counterRef);
   if (counterSnap.exists()) return counterSnap.data().value || 891;
@@ -109,13 +105,6 @@ const initializeCounterIfNeeded = async (db, userId, collectionName, counterRef)
   return maxNumber;
 };
 
-// Atomically reserves the next quote/invoice number. Uses a Firestore
-// transaction on a dedicated counter doc rather than "read the most recent
-// doc and add 1" — the old approach could return the same number twice
-// (e.g. if createdAt hadn't resolved yet, or the latest doc's number didn't
-// parse), and since that number becomes the document ID, a repeat number
-// meant the new save silently overwrote an existing quote instead of
-// creating a new one.
 const generateJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
@@ -139,10 +128,6 @@ const generateJobCardNumber = async (userId, documentType) => {
 
   return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
 };
-
-// Read-only preview of the next number, used purely for display (e.g. before
-// the user has actually saved). Does NOT reserve/increment the counter, so
-// just opening the form or switching tabs doesn't burn numbers.
 const peekNextJobCardNumber = async (userId, documentType) => {
   const db = getFirestore();
   const year = new Date().getFullYear();
@@ -333,7 +318,6 @@ const mobileNavPad = "pb-24 lg:pb-6";
   );
   const poVat = poSubtotal * 0.15;
   const poTotal = poSubtotal + poVat;
-  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAIDataExtracted = (extractedData) => {
     if (extractedData.customer.name)
       setCustomerName(extractedData.customer.name);
@@ -758,7 +742,6 @@ const handleUnlockStamp = async () => {
         ),
       );
 
-      // ── 3. Capture ────────────────────────────────────────────────────────
       const canvas = await html2canvas(printArea, {
         scale: 2,
         useCORS: true,
@@ -768,7 +751,6 @@ const handleUnlockStamp = async () => {
         windowWidth: 794,
       });
 
-      // ── 4. Restore original hidden state ──────────────────────────────────
       printArea.classList.add("hidden");
       printArea.setAttribute("style", prevStyle);
 

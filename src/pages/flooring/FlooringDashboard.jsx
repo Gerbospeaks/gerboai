@@ -690,19 +690,8 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    {
-      label: "Save PDF",
-      icon: Download,
-      onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0891b2] hover:bg-[#0e7490] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
+    
+    
     {
       label: "Save",
       icon: Save,
@@ -729,12 +718,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-2 bg-[#d97706] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
-    {
-      label: "Send",
-      icon: Send,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-[#059669] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
-    },
+    
     {
       label: "PDF",
       icon: Download,
