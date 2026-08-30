@@ -32,22 +32,26 @@ import {
   UserPlus,
 } from "lucide-react";
 
+// ── Palette — matches HotelSidebar (dark navy shell + lime accent) ──────────
 const Z = {
-  red: "#e8442a",
-  redHover: "#c73b24",
-  redLight: "#fdf2f0",
-  navy: "#1a2340",
-  navyMid: "#2d3a55",
-  blue: "#1b6ec2",
+  accent: "#c6f135",
+  accentHover: "#b3dc2a",
+  accentText: "#0f1623",
+  navy: "#0f1623",
+  navyMid: "#1e2535",
+  navyRing: "#2d3a52",
+  blue: "#3b82f6",
   blueLight: "#e8f0fb",
-  green: "#1d8348",
+  green: "#059669",
   greenLight: "#eafaf1",
-  amber: "#b45309",
+  amber: "#d97706",
   amberLight: "#fffbeb",
+  danger: "#dc2626",
+  dangerLight: "#fdf2f0",
   border: "#d9dde6",
   bg: "#f4f5f8",
   white: "#ffffff",
-  text: "#1a2340",
+  text: "#0f1623",
   textMid: "#4a5568",
   textMuted: "#8a93a6",
 };
@@ -57,14 +61,23 @@ const css = `
 
   .zah * { font-family: 'Lato', sans-serif; box-sizing: border-box; }
 
+  /* Floating shell — same margin/rounding treatment as the sidebar cards */
+  .zah-shell {
+    padding: 12px 12px 0 12px;
+  }
+  @media (min-width: 768px) {
+    .zah-shell { padding: 12px 12px 0 0; }
+  }
+
   .zah-bar {
-    position: sticky; top: 0; z-index: 40;
-    background: transparent;
-    height: 52px;
+    position: sticky; top: 12px; z-index: 40;
+    background: ${Z.navy};
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(15,22,35,.18);
+    height: 56px;
     display: flex; align-items: center;
-    padding: 0 10px;
+    padding: 0 12px;
     gap: 4px;
-    border-bottom: 1px solid rgba(255,255,255,.07);
     min-width: 0;
   }
 
@@ -76,18 +89,18 @@ const css = `
   }
 
   .zah-hamburger {
-    width: 30px; height: 30px; border-radius: 4px;
+    width: 32px; height: 32px; border-radius: 10px;
     background: transparent; border: none; cursor: pointer;
-    color: rgb(16, 38, 97);
+    color: #94a3b8;
     display: flex; align-items: center; justify-content: center;
     transition: background .15s, color .15s;
     flex-shrink: 0;
   }
-  .zah-hamburger:hover { background: rgba(255,255,255,.1); color: #fff; }
+  .zah-hamburger:hover { background: ${Z.navyMid}; color: #fff; }
 
   .zah-logo-icon {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: ${Z.red};
+    width: 30px; height: 30px; border-radius: 10px;
+    background: ${Z.accent};
     display: none; align-items: center; justify-content: center; flex-shrink: 0;
   }
   @media (min-width: 640px) {
@@ -98,7 +111,7 @@ const css = `
     font-size: 14px; font-weight: 700; color: #fff; letter-spacing: .02em;
     white-space: nowrap; flex-shrink: 0;
   }
-  .zah-divider { width: 1px; height: 18px; background: rgba(255,255,255,.15); margin: 0 2px; flex-shrink: 0; }
+  .zah-divider { width: 1px; height: 18px; background: rgba(255,255,255,.1); margin: 0 2px; flex-shrink: 0; }
   .zah-page-title {
     font-size: 12px; color: rgba(255,255,255,.5); white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
@@ -114,14 +127,14 @@ const css = `
   .zah-plan {
     display: none;
     align-items: center;
-    padding: 2px 8px; border-radius: 20px;
+    padding: 2px 9px; border-radius: 20px;
     font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
     white-space: nowrap; flex-shrink: 0;
   }
   @media (min-width: 520px) {
     .zah-plan { display: inline-flex; }
   }
-  .zah-plan-pro        { background: rgb(8, 55, 102); color: #d2d2d3; }
+  .zah-plan-pro        { background: ${Z.navyMid}; color: #c6f135; }
   .zah-plan-enterprise { background: rgb(46, 2, 116); color: #c4b5fd; }
   .zah-plan-free       { background: rgb(97, 4, 4); color: rgba(255,255,255,.5); }
 
@@ -129,7 +142,7 @@ const css = `
     font-size: 10px; font-family: 'Courier New', monospace;
     color: rgba(255,255,255,.35);
     padding: 2px 8px; border: 1px solid rgba(255,255,255,.12);
-    border-radius: 3px; white-space: nowrap;
+    border-radius: 6px; white-space: nowrap;
     display: none;
   }
   @media (min-width: 1024px) {
@@ -139,29 +152,29 @@ const css = `
   .zah-spacer { flex: 1; min-width: 0; }
 
   .zah-right {
-    display: flex; align-items: center; gap: 2px;
+    display: flex; align-items: center; gap: 4px;
     flex-shrink: 0;
   }
   @media (min-width: 640px) {
-    .zah-right { gap: 4px; }
+    .zah-right { gap: 6px; }
   }
 
   .zah-icon-btn {
-    width: 32px; height: 32px; border-radius: 4px;
-    background: rgb(3, 44, 77); border: none; cursor: pointer;
-    color: rgb(255, 255, 255);
+    width: 34px; height: 34px; border-radius: 10px;
+    background: ${Z.navyMid}; border: none; cursor: pointer;
+    color: #fff;
     display: flex; align-items: center; justify-content: center;
     position: relative; transition: background .15s, color .15s;
     flex-shrink: 0;
   }
-  .zah-icon-btn:hover { background: rgb(255, 255, 255); color: #212a42; }
+  .zah-icon-btn:hover { background: ${Z.accent}; color: ${Z.accentText}; }
 
   .zah-search-pill {
     display: none;
     align-items: center; justify-content: center;
-    width: 32px; height: 30px;
-    background: rgb(2, 45, 65); border: 1px solid rgba(255,255,255,.12);
-    border-radius: 4px; cursor: pointer; color: rgba(255,255,255,.6);
+    width: 34px; height: 34px;
+    background: ${Z.navyMid}; border: 1px solid rgba(255,255,255,.06);
+    border-radius: 10px; cursor: pointer; color: rgba(255,255,255,.6);
     transition: background .15s, border-color .15s, color .15s;
     flex-shrink: 0;
     padding: 0;
@@ -170,43 +183,43 @@ const css = `
   @media (min-width: 640px) {
     .zah-search-pill {
       display: flex;
-      width: auto; padding: 0 10px; gap: 6px;
+      width: auto; padding: 0 12px; gap: 6px;
     }
   }
   .zah-search-pill:hover {
-    background: rgb(5, 41, 71); border-color: rgba(255,255,255,.22); color: rgba(255,255,255,.9);
+    background: rgb(30, 41, 64); border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.9);
   }
   .zah-search-label { font-size: 12px; white-space: nowrap; }
   .zah-kbd {
     padding: 1px 5px; background: rgba(255,255,255,.1);
     border: 1px solid rgba(255,255,255,.15);
-    border-radius: 3px; font-size: 10px; font-family: monospace;
+    border-radius: 5px; font-size: 10px; font-family: monospace;
     color: rgb(255, 255, 255);
   }
 
   .zah-create-btn {
-    height: 30px;
-    padding: 0 10px;
-    background: ${Z.red}; color: #fff;
-    border: none; border-radius: 4px; cursor: pointer;
+    height: 34px;
+    padding: 0 12px;
+    background: ${Z.accent}; color: ${Z.accentText};
+    border: none; border-radius: 10px; cursor: pointer;
     font-size: 12px; font-weight: 700; letter-spacing: .01em;
     display: flex; align-items: center; gap: 4px;
     transition: background .15s;
     font-family: 'Lato', sans-serif;
     white-space: nowrap; flex-shrink: 0;
   }
-  .zah-create-btn:hover { background: ${Z.redHover}; }
+  .zah-create-btn:hover { background: ${Z.accentHover}; }
   .zah-create-label { display: none; }
   @media (min-width: 400px) {
     .zah-create-label { display: inline; }
-    .zah-create-btn { padding: 0 12px; }
+    .zah-create-btn { padding: 0 14px; }
   }
 
   .zah-notif-dot {
-    position: absolute; top: 4px; right: 4px;
+    position: absolute; top: 3px; right: 3px;
     width: 14px; height: 14px; border-radius: 50%;
-    background: ${Z.red}; border: 2px solid ${Z.navy};
-    font-size: 8px; font-weight: 700; color: #fff;
+    background: ${Z.accent}; border: 2px solid ${Z.navy};
+    font-size: 8px; font-weight: 700; color: ${Z.accentText};
     display: flex; align-items: center; justify-content: center;
   }
 
@@ -223,23 +236,23 @@ const css = `
   }
 
   .zah-v-divider {
-    width: 1px; height: 20px; background: rgb(3, 44, 77);
+    width: 1px; height: 22px; background: rgba(255,255,255,.08);
     margin: 0 2px; flex-shrink: 0;
   }
 
   .zah-avatar-btn {
     display: flex; align-items: center; gap: 5px;
-    height: 32px; padding: 0 4px;
-    background: rgb(3, 44, 77); border: none; cursor: pointer;
-    border-radius: 4px; transition: background .15s;
+    height: 34px; padding: 0 4px;
+    background: ${Z.navyMid}; border: none; cursor: pointer;
+    border-radius: 10px; transition: background .15s;
     flex-shrink: 0;
   }
-  .zah-avatar-btn:hover { background: rgb(1, 100, 146); }
+  .zah-avatar-btn:hover { background: rgb(30, 41, 64); }
   .zah-avatar {
     width: 26px; height: 26px; border-radius: 50%;
-    background: ${Z.red};
+    background: ${Z.accent};
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+    font-size: 11px; font-weight: 700; color: ${Z.accentText}; flex-shrink: 0;
     overflow: hidden;
   }
   .zah-username {
@@ -250,7 +263,7 @@ const css = `
   }
   @media (min-width: 640px) {
     .zah-username { display: block; }
-    .zah-avatar-btn { padding: 0 6px 0 4px; gap: 7px; }
+    .zah-avatar-btn { padding: 0 8px 0 4px; gap: 7px; }
   }
   .zah-chevron  { color: rgba(255,255,255,.4); transition: transform .2s; flex-shrink: 0; }
   .zah-chevron.open { transform: rotate(180deg); }
@@ -259,8 +272,8 @@ const css = `
     position: fixed; z-index: 9999;
     background: ${Z.white};
     border: 1px solid ${Z.border};
-    border-radius: 4px;
-    box-shadow: 0 6px 24px rgba(20,26,48,.18);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(15,22,35,.2);
     overflow: hidden;
     animation: zah-drop .15s ease;
     max-width: calc(100vw - 20px);
@@ -268,7 +281,7 @@ const css = `
   @keyframes zah-drop { from { opacity:0; transform:translateY(-4px) } to { opacity:1; transform:translateY(0) } }
 
   .zah-drop-head {
-    padding: 9px 14px;
+    padding: 10px 14px;
     background: ${Z.bg};
     border-bottom: 1px solid ${Z.border};
   }
@@ -285,21 +298,21 @@ const css = `
   .zah-drop-item-left { display: flex; align-items: center; gap: 9px; }
   .zah-drop-item-kbd {
     padding: 1px 6px; background: ${Z.bg};
-    border: 1px solid ${Z.border}; border-radius: 3px;
+    border: 1px solid ${Z.border}; border-radius: 5px;
     font-size: 10px; font-family: monospace; color: ${Z.textMuted};
   }
   .zah-drop-divider { height: 1px; background: ${Z.border}; margin: 2px 0; }
 
   .zah-user-card {
-    padding: 12px 14px; background: ${Z.navy};
+    padding: 14px; background: ${Z.navy};
     border-bottom: 1px solid rgba(255,255,255,.08);
     display: flex; align-items: center; gap: 10px;
   }
   .zah-user-card-avatar {
     width: 34px; height: 34px; border-radius: 50%;
-    background: ${Z.red};
+    background: ${Z.accent};
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; overflow: hidden;
+    font-size: 13px; font-weight: 700; color: ${Z.accentText}; flex-shrink: 0; overflow: hidden;
   }
   .zah-user-card-name  { font-size: 13px; font-weight: 700; color: #fff; }
   .zah-user-card-email { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
@@ -307,11 +320,11 @@ const css = `
   .zah-user-badge-industry {
     padding: 1px 7px; border-radius: 20px;
     font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-    background: ${Z.red}; color: #fff;
+    background: ${Z.accent}; color: ${Z.accentText};
   }
 
-  .zah-drop-item.danger { color: ${Z.red}; }
-  .zah-drop-item.danger:hover { background: ${Z.redLight}; }
+  .zah-drop-item.danger { color: ${Z.danger}; }
+  .zah-drop-item.danger:hover { background: ${Z.dangerLight}; }
 
   .zah-notif-item {
     display: flex; align-items: flex-start; gap: 10px;
@@ -326,7 +339,7 @@ const css = `
   .zah-notif-time  { font-size: 10px; color: ${Z.textMuted}; margin-top: 3px; }
   .zah-notif-dismiss {
     background: none; border: none; cursor: pointer; padding: 2px;
-    color: ${Z.textMuted}; border-radius: 3px; flex-shrink: 0;
+    color: ${Z.textMuted}; border-radius: 5px; flex-shrink: 0;
     transition: background .12s, color .12s;
   }
   .zah-notif-dismiss:hover { background: ${Z.border}; color: ${Z.text}; }
@@ -341,7 +354,7 @@ const css = `
     font-family: 'Lato', sans-serif; padding: 2px;
     transition: color .12s;
   }
-  .zah-notif-footer-btn:hover { color: ${Z.redHover}; }
+  .zah-notif-footer-btn:hover { color: ${Z.accentHover}; }
 
   .zah-mark-all {
     background: none; border: none; cursor: pointer;
@@ -350,7 +363,7 @@ const css = `
     transition: color .12s;
     white-space: nowrap;
   }
-  .zah-mark-all:hover { color: ${Z.red}; }
+  .zah-mark-all:hover { color: ${Z.danger}; }
 
   .zah-notif-empty { padding: 24px 14px; text-align: center; }
   .zah-notif-empty-icon { width: 40px; height: 40px; background: ${Z.navy}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
@@ -358,7 +371,7 @@ const css = `
 
   .zah-search-overlay {
     position: fixed; inset: 0; z-index: 9999;
-    background: rgba(20,26,48,.5); backdrop-filter: blur(4px);
+    background: rgba(15,22,35,.55); backdrop-filter: blur(4px);
     display: flex; align-items: flex-start; justify-content: center;
     padding-top: 60px;
     animation: zah-fade .15s ease;
@@ -371,8 +384,8 @@ const css = `
   .zah-search-box {
     background: ${Z.white};
     border: 1px solid ${Z.border};
-    border-radius: 5px;
-    box-shadow: 0 8px 40px rgba(20,26,48,.22);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(15,22,35,.25);
     width: 100%; max-width: 520px;
     margin: 0 12px;
     overflow: hidden;
@@ -395,7 +408,7 @@ const css = `
   .zah-hint-chip {
     height: 26px; padding: 0 10px;
     background: ${Z.bg}; border: 1px solid ${Z.border};
-    border-radius: 3px; font-size: 11px; font-weight: 600; color: ${Z.textMid};
+    border-radius: 8px; font-size: 11px; font-weight: 600; color: ${Z.textMid};
     cursor: pointer; transition: border-color .12s, color .12s;
     font-family: 'Lato', sans-serif;
   }
@@ -409,7 +422,7 @@ const css = `
   .zah-search-foot span { font-size: 10px; color: ${Z.textMuted}; }
   .zah-search-foot-kbd {
     padding: 1px 5px; background: ${Z.white}; border: 1px solid ${Z.border};
-    border-radius: 3px; font-family: monospace; font-size: 10px; color: ${Z.textMid};
+    border-radius: 5px; font-family: monospace; font-size: 10px; color: ${Z.textMid};
   }
 
   /* ── Action buttons row (scrollable on mobile) ── */
@@ -418,8 +431,9 @@ const css = `
     align-items: center;
     gap: 4px;
     padding: 6px 10px;
-    border-bottom: 1px solid rgba(255,255,255,.07);
-    background: rgb(3, 26, 54);
+    border-top: 1px solid rgba(255,255,255,.07);
+    background: ${Z.navyMid};
+    border-radius: 0 0 16px 16px;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -683,7 +697,7 @@ const notifIcon = (type) => {
     return (
       <CheckCircle2
         size={14}
-        color="#1d8348"
+        color={Z.green}
         style={{ flexShrink: 0, marginTop: 1 }}
       />
     );
@@ -691,12 +705,12 @@ const notifIcon = (type) => {
     return (
       <AlertCircle
         size={14}
-        color="#b45309"
+        color={Z.amber}
         style={{ flexShrink: 0, marginTop: 1 }}
       />
     );
   return (
-    <Clock size={14} color="#1b6ec2" style={{ flexShrink: 0, marginTop: 1 }} />
+    <Clock size={14} color={Z.blue} style={{ flexShrink: 0, marginTop: 1 }} />
   );
 };
 
@@ -704,7 +718,7 @@ const useDropStyle = (desiredWidth = 220) => {
   const getStyle = () => {
     const vw = window.innerWidth;
     const safeWidth = Math.min(desiredWidth, vw - 20);
-    return { right: 10, top: 56, width: safeWidth };
+    return { right: 22, top: 68, width: safeWidth };
   };
   return getStyle;
 };
@@ -723,12 +737,12 @@ const AppHeader = ({
   notifications = [],
   pageTitle = "",
   plan = "pro",
-  showConvertButton = false,   // ← add
-  onConvert = () => {},         // ← add
+  showConvertButton = false, // ← add
+  onConvert = () => {}, // ← add
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  
+
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -832,7 +846,7 @@ const AppHeader = ({
     isMobile && mobileActions.length > 0 ? mobileActions : actions;
 
   return (
-    <div className="zah">
+    <div className="zah zah-shell">
       <style>{css}</style>
 
       {/* ── Search overlay ── */}
@@ -904,7 +918,7 @@ const AppHeader = ({
           </button>
 
           <div className="zah-logo-icon">
-            <LayoutDashboard size={14} color="#fff" />
+            <LayoutDashboard size={14} color={Z.accentText} />
           </div>
 
           {pageTitle && (
@@ -926,41 +940,41 @@ const AppHeader = ({
         {/* Right */}
         <div className="zah-right">
           {/* Search — desktop only */}
-         {showConvertButton ? (
-  <button
-    onClick={onConvert}
-    style={{
-      height: 30,
-      padding: "0 12px",
-      background: "#7c3aed",
-      color: "#fff",
-      border: "none",
-      borderRadius: 4,
-      fontSize: 12,
-      fontWeight: 700,
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      gap: 5,
-      fontFamily: "'Lato',sans-serif",
-      whiteSpace: "nowrap",
-      flexShrink: 0,
-    }}
-  >
-    <FileText size={13} />
-    Convert to Invoice
-  </button>
-) : (
-  <button
-    className="zah-search-pill"
-    onClick={() => setShowSearch(true)}
-    aria-label="Search"
-  >
-    <Search size={13} />
-    <span className="zah-search-label">Search…</span>
-    <span className="zah-kbd">⌘K</span>
-  </button>
-)}
+          {showConvertButton ? (
+            <button
+              onClick={onConvert}
+              style={{
+                height: 34,
+                padding: "0 14px",
+                background: Z.accent,
+                color: Z.accentText,
+                border: "none",
+                borderRadius: 10,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                fontFamily: "'Lato',sans-serif",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+              }}
+            >
+              <FileText size={13} />
+              Convert to Invoice
+            </button>
+          ) : (
+            <button
+              className="zah-search-pill"
+              onClick={() => setShowSearch(true)}
+              aria-label="Search"
+            >
+              <Search size={13} />
+              <span className="zah-search-label">Search…</span>
+              <span className="zah-kbd">⌘K</span>
+            </button>
+          )}
           {/* + Create */}
           <div style={{ position: "relative" }} ref={quickCreateRef}>
             <button
@@ -1036,12 +1050,12 @@ const AppHeader = ({
                   style={
                     variant === "primary"
                       ? {
-                          height: 30,
-                          padding: "0 12px",
-                          background: Z.red,
-                          color: "#fff",
+                          height: 34,
+                          padding: "0 14px",
+                          background: Z.accent,
+                          color: Z.accentText,
                           border: "none",
-                          borderRadius: 4,
+                          borderRadius: 10,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -1053,12 +1067,12 @@ const AppHeader = ({
                           flexShrink: 0,
                         }
                       : {
-                          height: 30,
-                          padding: "0 10px",
-                          background: "#ffffff",
-                          color: Z.navy,
-                          border: `1px solid ${Z.navy}`,
-                          borderRadius: 4,
+                          height: 34,
+                          padding: "0 12px",
+                          background: Z.navyMid,
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 10,
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: "pointer",
@@ -1225,7 +1239,6 @@ const AppHeader = ({
                       {getUserDisplayName()}
                     </div>
                     <div className="zah-user-card-email">{user?.email}</div>
-                    
                   </div>
                 </div>
 
@@ -1240,7 +1253,7 @@ const AppHeader = ({
                     <LayoutDashboard size={14} color={Z.textMuted} /> Dashboard
                   </span>
                 </button>
-                 {onTeamOpen && (
+                {onTeamOpen && (
                   <button
                     className="zah-drop-item"
                     onClick={() => {
@@ -1272,7 +1285,7 @@ const AppHeader = ({
 
                 <button className="zah-drop-item danger" onClick={handleLogout}>
                   <span className="zah-drop-item-left">
-                    <LogOut size={14} color={Z.red} /> Sign out
+                    <LogOut size={14} color={Z.danger} /> Sign out
                   </span>
                 </button>
               </div>
@@ -1280,7 +1293,6 @@ const AppHeader = ({
           </div>
         </div>
       </header>
-      
     </div>
   );
 };

@@ -45,7 +45,7 @@ export default function HotelSidebar({
   setShowInvoicesList,
   setShowGuestsListModal,
   handleAddNewGuest,
-   newRequestCount,
+  newRequestCount,
   setShowCheckInOutModal,
 }) {
   const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);
@@ -76,7 +76,7 @@ export default function HotelSidebar({
 
   // ── Shared sidebar body ─────────────────────────────────────────────────────
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-[#1e2535] flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
@@ -100,13 +100,13 @@ export default function HotelSidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-         <NavItem
+        <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
-        
+
         <NavItem
           icon={Settings}
           label="Settings"
@@ -118,13 +118,7 @@ export default function HotelSidebar({
 
         <SectionLabel>Finance</SectionLabel>
 
-        <NavItem
-          icon={TrendingUp}
-          label="Property Overview"
-          onClick={() => goTo("overview")}
-          active={activeView === "overview"}
-        />
-
+        
         {/* Invoices accordion */}
         <Accordion
           icon={Receipt}
@@ -137,7 +131,7 @@ export default function HotelSidebar({
             label="Create Invoice"
             onClick={() => {
               handleNewInvoice?.();
-              goTo("invoice");
+              
             }}
           />
           <SubItem
@@ -149,15 +143,14 @@ export default function HotelSidebar({
               if (isMobile) setSidebarOpen(false);
             }}
           />
-          <SubItem
-            dot="bg-[#d97706]"
-            label="Pending Payment"
-            onClick={() => goTo("invoices-pending")}
-          />
+         
         </Accordion>
-          <NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
         <NavItem
           icon={FileText}
           label="Invoice Templates"
@@ -203,6 +196,12 @@ export default function HotelSidebar({
           active={activeView === "reservations"}
         />
         <NavItem
+          icon={Utensils}
+          label="Restaurant / Bar"
+          onClick={() => goTo("restaurant")}
+          active={activeView === "restaurant"}
+        />
+        <NavItem
           icon={Bed}
           label="Room Management"
           onClick={() => goTo("rooms")}
@@ -214,30 +213,7 @@ export default function HotelSidebar({
           onClick={() => setShowCheckInOutModal?.(true)}
         />
 
-        {/* Payments accordion */}
-        <Accordion
-          icon={CreditCard}
-          label="Payments"
-          isOpen={isPaymentsOpen}
-          onToggle={() => setIsPaymentsOpen((p) => !p)}
-        >
-          <SubItem
-            dot="bg-[#0891b2]"
-            label="Process Payment"
-            onClick={() => goTo("payment-process")}
-          />
-          <SubItem
-            dot="bg-[#2563eb]"
-            label="Payment History"
-            onClick={() => goTo("payment-history")}
-          />
-          <SubItem
-            dot="bg-[#dc2626]"
-            label="Refunds"
-            onClick={() => goTo("refunds")}
-          />
-        </Accordion>
-
+       
         <SectionLabel>Insights</SectionLabel>
 
         {/* Reports accordion */}
@@ -288,12 +264,7 @@ export default function HotelSidebar({
           />
         </Accordion>
 
-        <NavItem
-          icon={Utensils}
-          label="Restaurant / Bar"
-          onClick={() => goTo("restaurant")}
-          active={activeView === "restaurant"}
-        />
+        
         <NavItem
           icon={Star}
           label="Reviews"
@@ -347,7 +318,7 @@ export default function HotelSidebar({
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Open menu"
-            className="fixed top-3 left-3 z-50 w-9 h-9 bg-[#0f1623] border border-[#1e2535] text-[#94a3b8] hover:text-white hover:bg-[#1e2535] rounded-lg flex items-center justify-center shadow-lg transition-all"
+            className="fixed top-3 left-3 z-50 w-9 h-9 bg-[#0f1623] border border-[#1e2535] text-[#94a3b8] hover:text-white hover:bg-[#1e2535] rounded-xl flex items-center justify-center shadow-lg transition-all"
           >
             <Menu className="w-4 h-4" />
           </button>
@@ -363,10 +334,10 @@ export default function HotelSidebar({
           onClick={() => setSidebarOpen(false)}
         />
 
-        {/* Drawer */}
+        {/* Drawer — floats with margin instead of running edge to edge */}
         <div
-          className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0f1623] shadow-2xl transform transition-transform duration-300 ease-in-out ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          className={`fixed inset-y-3 left-3 z-50 w-72 max-w-[85vw] rounded-2xl shadow-2xl transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+2rem)]"
           }`}
         >
           <SidebarContent />
@@ -375,11 +346,12 @@ export default function HotelSidebar({
 
       {/* ════════════════════════════════════════════════════════════════
           DESKTOP — collapsed icon rail OR expanded panel
+          Both float as rounded cards with vertical margin, not full height.
       ════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:flex print:hidden h-full">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
-          <div className="flex flex-col flex-shrink-0 w-16 bg-[#0f1623] border-r border-[#1e2535] h-full items-center py-4 gap-2 z-30">
+          <div className="flex flex-col flex-shrink-0 w-16 bg-[#0f1623] rounded-2xl h-full items-center py-4 gap-2 z-30 shadow-lg">
             <button
               onClick={() => setSidebarOpen(true)}
               title="Expand"
@@ -392,7 +364,7 @@ export default function HotelSidebar({
               <img src={logo} className="w-6 h-6 object-contain" alt="logo" />
             </div>
 
-            <div className="flex flex-col items-center gap-1 w-full px-2 mt-1">
+            <div className="flex flex-col items-center gap-1 w-full px-2 mt-1 overflow-y-auto">
               {[
                 {
                   icon: Home,
@@ -406,17 +378,12 @@ export default function HotelSidebar({
                   action: () => setShowSettings(true),
                   active: false,
                 },
-                {
-                  icon: TrendingUp,
-                  title: "Property Overview",
-                  action: () => goTo("overview"),
-                  active: activeView === "overview",
-                },
+               
                 {
                   icon: Receipt,
                   title: "Invoices",
                   action: () => handleNewInvoice?.(),
-                  active: activeView === "invoice",
+                  
                 },
                 {
                   icon: FileText,
@@ -442,18 +409,19 @@ export default function HotelSidebar({
                   action: () => goTo("rooms"),
                   active: activeView === "rooms",
                 },
+                 {
+                  icon: Utensils,
+                  title: "Restaurant / Bar",
+                  action: () => goTo("restaurant"),
+                  active: activeView === "restaurant",
+                },
                 {
                   icon: DoorOpen,
                   title: "Check-In / Out",
                   action: () => setShowCheckInOutModal?.(true),
                   active: false,
                 },
-                {
-                  icon: CreditCard,
-                  title: "Payments",
-                  action: () => goTo("payment-process"),
-                  active: activeView === "payment-process",
-                },
+                
                 {
                   icon: FileBarChart,
                   title: "Reports",
@@ -466,12 +434,7 @@ export default function HotelSidebar({
                   action: () => goTo("analytics-bookings"),
                   active: false,
                 },
-                {
-                  icon: Utensils,
-                  title: "Restaurant / Bar",
-                  action: () => goTo("restaurant"),
-                  active: activeView === "restaurant",
-                },
+               
                 {
                   icon: Star,
                   title: "Reviews",
@@ -483,15 +446,12 @@ export default function HotelSidebar({
                   key={title}
                   onClick={action}
                   title={title}
-                  className={`relative w-10 h-10 flex items-center justify-center rounded-lg transition-all ${
+                  className={`relative w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
                     active
-                      ? "bg-[#1e3a6e] text-[#60a5fa]"
+                      ? "bg-[#c6f135] text-[#0f1623]"
                       : "text-[#64748b] hover:text-white hover:bg-[#1e2535]"
                   }`}
                 >
-                  {active && (
-                    <span className="absolute left-0 top-[20%] h-[60%] w-[3px] bg-[#60a5fa] rounded-r-full" />
-                  )}
                   <Icon className="w-5 h-5" />
                 </button>
               ))}
@@ -515,7 +475,7 @@ export default function HotelSidebar({
 
         {/* Expanded panel */}
         {sidebarOpen && (
-          <div className="flex-shrink-0 w-64 bg-[#0f1623] border-r border-[#1e2535] h-full shadow-xl z-30">
+          <div className="flex-shrink-0 w-64 bg-[#0f1623] rounded-2xl h-full shadow-lg z-30">
             <SidebarContent />
           </div>
         )}
@@ -539,9 +499,9 @@ function NavItem({ icon: Icon, label, onClick, active = false }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all text-sm font-medium ${
         active
-          ? "bg-[#1e2535] text-white"
+          ? "bg-[#c6f135] text-[#0f1623]"
           : "text-[#94a3b8] hover:bg-[#1e2535] hover:text-white"
       }`}
     >
@@ -556,7 +516,7 @@ function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
     <div>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e2535] rounded-lg transition-all text-sm font-medium"
+        className="w-full flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e2535] rounded-xl transition-all text-sm font-medium"
       >
         <div className="flex items-center gap-3">
           <Icon className="w-4 h-4 flex-shrink-0" />
@@ -581,7 +541,7 @@ function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#1d4ed8]" }) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-[#1e2535] rounded-lg cursor-pointer transition-all text-sm"
+      className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-[#1e2535] rounded-xl cursor-pointer transition-all text-sm"
     >
       <div className="flex items-center gap-2 min-w-0">
         {dot && (
@@ -640,7 +600,7 @@ export function MobileBottomNav({
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0a0f1e] border-t border-[#1e2a45] print:hidden">
+    <div className="md:hidden fixed bottom-3 left-3 right-3 z-40 bg-[#0a0f1e] rounded-2xl shadow-lg print:hidden">
       <div className="flex items-center justify-around px-2 py-1 pb-safe">
         {navItems.map(({ icon: Icon, label, action, active, isPrimary }) =>
           isPrimary ? (
@@ -680,7 +640,7 @@ export function MobileBottomNav({
                 {label}
               </span>
             </button>
-          )
+          ),
         )}
       </div>
     </div>

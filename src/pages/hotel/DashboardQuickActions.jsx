@@ -74,31 +74,16 @@ export default function DashboardQuickActions({
       onClick: () => goTo("restaurant"),
       accent: "bg-[#ffedd5] text-[#ea580c]",
     },
-    {
-      key: "payments",
-      label: "Payments",
-      sub: "Record or review",
-      icon: CreditCard,
-      onClick: () => goTo("payment-process"),
-      accent: "bg-[#e0f2fe] text-[#0891b2]",
-    },
-    {
-      key: "reports",
-      label: "Reports",
-      sub: "Occupancy & revenue",
-      icon: FileBarChart,
-      onClick: () => goTo("report-occupancy"),
-      accent: "bg-[#e2e8f0] text-[#475569]",
-    },
+
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
       {actions.map(({ key, label, sub, icon: Icon, onClick, accent }) => (
         <button
           key={key}
           onClick={onClick}
-          className="flex flex-col items-start gap-3 p-4 bg-white border border-[#e2e8f0] rounded-xl shadow-sm hover:shadow-md hover:border-[#cbd5e1] transition-all text-left"
+          className="flex flex-col items-start gap-3 p-4 bg-gray-300 border border-[#e2e8f0] rounded-xl shadow-sm hover:shadow-md hover:border-[#cbd5e1] transition-all text-left"
         >
           <div
             className={`w-10 h-10 rounded-lg flex items-center justify-center ${accent}`}

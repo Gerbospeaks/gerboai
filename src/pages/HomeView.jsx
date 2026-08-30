@@ -350,8 +350,13 @@ const KPI = ({
   sub,
   trend,
   loading,
+  onClick,
 }) => (
-  <div className="zh-kpi">
+  <div
+    className="zh-kpi"
+    onClick={onClick}
+    style={{ cursor: onClick ? "pointer" : "default" }}
+  >
     <div className="zh-kpi-top">
       <div className="zh-kpi-icon" style={{ background: iconBg }}>
         <Icon size={15} color={iconColor} />
@@ -384,6 +389,8 @@ export default function Home({
   onGoToDashboard,
   onSidebarToggle,
   sidebarOpen,
+  onViewInvoices,
+  onViewGuests,
 }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -393,6 +400,7 @@ export default function Home({
   const [invoices, setInvoices] = useState([]);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
+  
   const [stats, setStats] = useState({
     totalInvoices: 0,
     totalQuotes: 0,
@@ -527,46 +535,49 @@ export default function Home({
         <div className="zh-body">
           {/* KPIs */}
           <div className="zh-section">Overview</div>
-          <div className="zh-kpi-grid">
-            <KPI
-              title="Invoices"
-              value={stats.totalInvoices}
-              icon={FileText}
-              iconBg="#ede9fe"
-              iconColor="#6d28d9"
-              sub="All time"
-              loading={stats.loading}
-              trend={12}
-            />
-            <KPI
-              title="Quotes"
-              value={stats.totalQuotes}
-              icon={Receipt}
-              iconBg={Z.blueLight}
-              iconColor={Z.blue}
-              sub="Generated"
-              loading={stats.loading}
-            />
-            <KPI
-              title="Revenue"
-              value={fmtCurrency(stats.totalInvoiced)}
-              icon={TrendingUp}
-              iconBg={Z.greenLight}
-              iconColor={Z.green}
-              sub="Total invoiced"
-              loading={stats.loading}
-              trend={8}
-            />
-            <KPI
-              title="Clients"
-              value={stats.totalClients}
-              icon={Users}
-              iconBg={Z.amberLight}
-              iconColor={Z.amber}
-              sub="Active"
-              loading={stats.loading}
-            />
-          </div>
+      <div className="zh-kpi-grid">
+    <KPI
+      title="Invoices"
+      value={stats.totalInvoices}
+      icon={FileText}
+      iconBg="#ede9fe"
+      iconColor="#6d28d9"
+      sub="All time"
+      loading={stats.loading}
+      trend={12}
+      onClick={onViewInvoices}
+    />
+    <KPI
+      title="Quotes"
+      value={stats.totalQuotes}
+      icon={Receipt}
+      iconBg={Z.blueLight}
+      iconColor={Z.blue}
+      sub="Generated"
+      loading={stats.loading}
+      // no onClick — there's no quotes list/view in this app yet
+    />
+    <KPI
+      title="Revenue"
+      value={fmtCurrency(stats.totalInvoiced)}
+      icon={TrendingUp}
+      iconBg={Z.greenLight}
+      iconColor={Z.green}
+      sub="Total invoiced"
+      loading={stats.loading}
+      trend={8}
+    />
+    <KPI
+      title="Clients"
+      value={stats.totalClients}
+      icon={Users}
+      iconBg={Z.amberLight}
+      iconColor={Z.amber}
+      sub="Active"
+      loading={stats.loading}
+      onClick={onViewGuests}
+    />
+  </div>
 
           {/* Mid row */}
           <div className="zh-section">Actions</div>

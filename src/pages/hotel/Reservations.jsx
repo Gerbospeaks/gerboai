@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   getFirestore,
   collection,
-  query,
-  orderBy,
   getDocs,
   addDoc,
   updateDoc,
@@ -99,6 +97,12 @@ const nights = (ci, co) => {
   return Math.max(0, Math.round(diff / 86400000));
 };
 
+// Firestore Timestamps expose toMillis(); fall back to 0 for records that
+// predate the createdAt field (or were added another way) so they still
+// sort predictably instead of breaking the sort.
+const toMillis = (ts) =>
+  ts && typeof ts.toMillis === "function" ? ts.toMillis() : 0;
+
 export default function Reservations({ user }) {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -123,12 +127,18 @@ export default function Reservations({ user }) {
   const fetchReservations = async () => {
     setLoading(true);
     try {
-      const q = query(
+      // NOTE: deliberately no server-side orderBy() here. Firestore's
+      // orderBy() silently EXCLUDES any document missing that field, so a
+      // reservation created without (or before) a `createdAt` timestamp
+      // would just vanish from the results — showing "No reservations
+      // found" even though the data is really there. Fetching everything
+      // and sorting client-side avoids that trap.
+      const snap = await getDocs(
         collection(db, "users", user.uid, "reservations"),
-        orderBy("createdAt", "desc"),
       );
-      const snap = await getDocs(q);
-      setReservations(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+      setReservations(data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -483,7 +493,11 @@ export default function Reservations({ user }) {
       ) : filtered.length === 0 ? (
         <div className="bg-white border border-[#e2e8f0] rounded-xl flex flex-col items-center justify-center py-16 gap-3">
           <Calendar className="w-10 h-10 text-[#cbd5e1]" />
-          <p className="text-sm text-[#94a3b8]">No reservations found</p>
+          <p className="text-sm text-[#94a3b8]">
+            {reservations.length === 0
+              ? "No reservations found"
+              : "No reservations match your search/filter"}
+          </p>
           <button
             onClick={openNew}
             className="text-sm text-[#1d4ed8] font-medium hover:underline"
