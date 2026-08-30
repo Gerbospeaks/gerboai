@@ -33,6 +33,30 @@ import {
   setDoc,
 } from "firebase/firestore";
 
+// ─────────────────────────────────────────────────────────────
+// Shared helper: keep the Room Management record in sync with
+// whatever is happening to a check-in (pending/checked-in/out).
+// ─────────────────────────────────────────────────────────────
+const ROOM_STATUS_BY_CHECKIN_STATUS = {
+  pending: "reserved",
+  checkedin: "occupied",
+  checkedout: "available",
+};
+
+export const syncRoomStatus = async (userId, roomId, status) => {
+  if (!userId || !roomId || !status) return;
+  try {
+    const db = getFirestore();
+    await updateDoc(doc(db, "users", userId, "rooms", roomId), {
+      status,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    // Don't let a room-sync failure block the check-in flow, just log it.
+    console.error("Error syncing room status:", error);
+  }
+};
+
 // Helper function to create check-in from invoice
 export const createCheckInFromInvoice = async (userId, invoiceData) => {
   if (!userId || !invoiceData) return;
@@ -49,6 +73,7 @@ export const createCheckInFromInvoice = async (userId, invoiceData) => {
       guestNationality: invoiceData.guest?.nationality || "",
       idType: invoiceData.guest?.idType || "",
       idNumber: invoiceData.guest?.idNumber || "",
+      roomId: invoiceData.booking?.roomId || "",
       roomNumber: invoiceData.booking?.roomNumber || "",
       roomType: invoiceData.booking?.roomType || "",
       checkInDate: invoiceData.booking?.checkInDate || "",
@@ -63,6 +88,9 @@ export const createCheckInFromInvoice = async (userId, invoiceData) => {
     };
 
     await addDoc(collection(db, "users", userId, "checkIns"), checkInData);
+    if (checkInData.roomId) {
+      await syncRoomStatus(userId, checkInData.roomId, "reserved");
+    }
     console.log("Check-in created from invoice successfully");
     return true;
   } catch (error) {
@@ -91,6 +119,7 @@ export const createCheckInFromGuest = async (
       guestNationality: guestData.nationality || "",
       idType: guestData.idType || "",
       idNumber: guestData.idNumber || "",
+      roomId: bookingData.roomId || "",
       roomNumber: bookingData.roomNumber || "",
       roomType: bookingData.roomType || "Standard Double Room",
       checkInDate: bookingData.checkInDate || "",
@@ -104,6 +133,9 @@ export const createCheckInFromGuest = async (
     };
 
     await addDoc(collection(db, "users", userId, "checkIns"), checkInData);
+    if (checkInData.roomId) {
+      await syncRoomStatus(userId, checkInData.roomId, "reserved");
+    }
     console.log("Check-in created from guest successfully");
     return true;
   } catch (error) {
@@ -162,6 +194,11 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
         updatedAt: serverTimestamp(),
       });
 
+      // Room is now occupied
+      if (checkInData.roomId) {
+        await syncRoomStatus(user.uid, checkInData.roomId, "occupied");
+      }
+
       alert("Guest checked in successfully!");
       loadCheckIns();
     } catch (error) {
@@ -181,6 +218,12 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
         updatedAt: serverTimestamp(),
       });
 
+      // Room frees up — Room Management will mark it available. If the
+      // room needs cleaning first, staff can flip it to "cleaning" there.
+      if (checkInData.roomId) {
+        await syncRoomStatus(user.uid, checkInData.roomId, "available");
+      }
+
       alert("Guest checked out successfully!");
       loadCheckIns();
     } catch (error) {
@@ -189,7 +232,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (checkInData) => {
     if (
       !window.confirm("Are you sure you want to delete this check-in record?")
     )
@@ -198,7 +241,13 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, "users", user.uid, "checkIns", id));
+      await deleteDoc(doc(db, "users", user.uid, "checkIns", checkInData.id));
+
+      // Deleting a pending/checked-in record releases the room again.
+      if (checkInData.roomId && checkInData.status !== "checkedout") {
+        await syncRoomStatus(user.uid, checkInData.roomId, "available");
+      }
+
       alert("Check-in deleted successfully!");
       loadCheckIns();
     } catch (error) {
@@ -512,7 +561,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(checkIn.id)}
+                        onClick={() => handleDelete(checkIn)}
                         className="flex items-center gap-2 px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-sm transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -557,6 +606,7 @@ const AddCheckInModal = ({
     guestId: "",
     guestEmail: "",
     guestPhone: "",
+    roomId: "",
     roomNumber: "",
     roomType: "Standard Double Room",
     checkInDate: "",
@@ -565,16 +615,66 @@ const AddCheckInModal = ({
     notes: "",
     status: "pending",
   });
+  const [rooms, setRooms] = useState([]);
+  const [roomsLoading, setRoomsLoading] = useState(false);
 
   useEffect(() => {
     if (existingCheckIn) {
-      setFormData(existingCheckIn);
+      setFormData({ roomId: "", ...existingCheckIn });
     }
   }, [existingCheckIn]);
+
+  // Pull the room list straight from Room Management so the dropdown is
+  // always in sync with whatever rooms actually exist.
+  useEffect(() => {
+    if (showModal && user?.uid) {
+      loadRooms();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showModal, user]);
+
+  const loadRooms = async () => {
+    if (!user?.uid) return;
+    setRoomsLoading(true);
+    try {
+      const db = getFirestore();
+      const q = query(
+        collection(db, "users", user.uid, "rooms"),
+        orderBy("roomNumber", "asc"),
+      );
+      const snap = await getDocs(q);
+      setRooms(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    } catch (error) {
+      console.error("Error loading rooms:", error);
+    } finally {
+      setRoomsLoading(false);
+    }
+  };
+
+  // Rooms selectable for a NEW check-in: only ones actually free right now,
+  // plus whichever room the existing record already has (so editing doesn't
+  // lose the current selection if that room is no longer "available").
+  const selectableRooms = rooms.filter(
+    (r) => r.status === "available" || r.id === formData.roomId,
+  );
+
+  const handleRoomSelect = (roomId) => {
+    const room = rooms.find((r) => r.id === roomId);
+    setFormData({
+      ...formData,
+      roomId,
+      roomNumber: room?.roomNumber || "",
+      roomType: room?.roomType || formData.roomType,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user?.uid) return;
+    if (!formData.roomId) {
+      alert("Please select a room.");
+      return;
+    }
 
     try {
       const db = getFirestore();
@@ -596,6 +696,13 @@ const AddCheckInModal = ({
           createdAt: serverTimestamp(),
         });
         alert("Check-in added successfully!");
+      }
+
+      // Reflect the check-in's current status back onto the room record
+      // (pending -> reserved, checkedin -> occupied, checkedout -> available).
+      const roomStatus = ROOM_STATUS_BY_CHECKIN_STATUS[dataToSave.status];
+      if (roomStatus) {
+        await syncRoomStatus(user.uid, formData.roomId, roomStatus);
       }
 
       onSaved();
@@ -685,40 +792,38 @@ const AddCheckInModal = ({
                 <label className="block text-sm font-medium mb-2">
                   Room Number *
                 </label>
-                <input
-                  type="text"
+                <select
                   required
-                  value={formData.roomNumber}
-                  onChange={(e) =>
-                    setFormData({ ...formData, roomNumber: e.target.value })
-                  }
+                  value={formData.roomId}
+                  onChange={(e) => handleRoomSelect(e.target.value)}
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
+                >
+                  <option value="">
+                    {roomsLoading
+                      ? "Loading rooms..."
+                      : selectableRooms.length === 0
+                        ? "No available rooms — add one in Room Management"
+                        : "Select a room"}
+                  </option>
+                  {selectableRooms.map((room) => (
+                    <option key={room.id} value={room.id}>
+                      {room.roomNumber} — {room.roomType}
+                      {room.status !== "available" ? ` (${room.status})` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Room Type *
+                  Room Type
                 </label>
-                <select
-                  required
+                <input
+                  type="text"
+                  readOnly
                   value={formData.roomType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, roomType: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Standard Single Room">
-                    Standard Single Room
-                  </option>
-                  <option value="Standard Double Room">
-                    Standard Double Room
-                  </option>
-                  <option value="Deluxe Single Room">Deluxe Single Room</option>
-                  <option value="Deluxe Double Room">Deluxe Double Room</option>
-                  <option value="Executive Suite">Executive Suite</option>
-                  <option value="Presidential Suite">Presidential Suite</option>
-                  <option value="Family Room">Family Room</option>
-                </select>
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-50 text-gray-600"
+                  placeholder="Auto-filled from selected room"
+                />
               </div>
             </div>
 

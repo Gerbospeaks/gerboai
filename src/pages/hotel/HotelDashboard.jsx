@@ -15,6 +15,8 @@ import HospitalityMultiStepForm from "./HospitalityMultiStepForm";
 import { getFunctions } from "firebase/functions";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import CheckInOutModal, { createCheckInFromInvoice } from "./CheckInOutModal";
+import InvoiceModal from "./InvoiceModal"; 
+import DashboardQuickActions from "./DashboardQuickActions"; 
 import {
   getFirestore,
   collection,
@@ -93,6 +95,7 @@ const HotelDashboard = () => {
   const [showGuestsListModal, setShowGuestsListModal] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showCheckInOutModal, setShowCheckInOutModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false); 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [autoCreateCheckIn] = useState(true);
@@ -259,7 +262,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setItems(invoice.items || []);
     setShowInvoicesList(false);
     setPaymentStatus({ totalPaid: invoice.totals?.paid || 0, balanceDue: invoice.totals?.due || invoice.totals?.total || 0, status: invoice.status || "pending" });
-    setActiveView("invoice");
+    setShowInvoiceModal(true);
   };
 
   const handleAIDataExtracted = (data) => {
@@ -331,7 +334,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setNumberOfNights("5"); setSpecialRequests("");
     setItems([]); setPaymentStatus({ totalPaid: 0, balanceDue: 0, status: "pending" });
     if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
-    setActiveView("invoice");
+    setShowInvoiceModal(true);
   };
 
   const handleAddItem = () => {
@@ -474,6 +477,7 @@ const [stampConfig, setStampConfig] = useState(null);
             existingGuest={selectedGuest}
             onGuestSaved={loadGuests}
           />
+           <InvoiceModal isOpen={showInvoiceModal} onClose={() => setShowInvoiceModal(false)} guestName={guestName} setGuestName={setGuestName} guestId={guestId} setGuestId={setGuestId} guestEmail={guestEmail} setGuestEmail={setGuestEmail} guestPhone={guestPhone} setGuestPhone={setGuestPhone} guestAddress={guestAddress} setGuestAddress={setGuestAddress} guestDOB={guestDOB} setGuestDOB={setGuestDOB} guestNationality={guestNationality} setGuestNationality={setGuestNationality} idType={idType} setIdType={setIdType} idNumber={idNumber} setIdNumber={setIdNumber} roomNumber={roomNumber} setRoomNumber={setRoomNumber} roomType={roomType} setRoomType={setRoomType} checkInDate={checkInDate} setCheckInDate={setCheckInDate} checkOutDate={checkOutDate} setCheckOutDate={setCheckOutDate} numberOfGuests={numberOfGuests} setNumberOfGuests={setNumberOfGuests} numberOfNights={numberOfNights} setNumberOfNights={setNumberOfNights} specialRequests={specialRequests} setSpecialRequests={setSpecialRequests} showGuestsListModal={showGuestsListModal} setShowGuestsListModal={setShowGuestsListModal} items={items} newItem={newItem} setNewItem={setNewItem} handleAddItem={handleAddItem} invoiceNumber={invoiceNumber} invoiceId={invoiceId} paymentStatus={paymentStatus} subtotal={subtotal} vat={vat} total={total} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} templateProps={templateProps} stampConfig={stampConfig} propertyInfo={propertyInfo} inputMode={inputMode} setInputMode={setInputMode} documentType={documentType} handleAIDataExtracted={handleAIDataExtracted} handleSaveInvoice={handleSaveInvoice} handleProcessPayment={handleProcessPayment} handlePrint={handlePrint} handleSavePDF={handleSavePDF} setShowStampModal={setShowStampModal} /> 
           <CheckInOutModal
             showModal={showCheckInOutModal}
             setShowModal={setShowCheckInOutModal}
@@ -596,6 +600,7 @@ const [stampConfig, setStampConfig] = useState(null);
           {/* ── View router ───────────────────────────────────────────── */}
          {activeView === "home" && (
                      <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
+                      <DashboardQuickActions onNewInvoice={handleNewInvoice} onAddGuest={handleAddNewGuest} onCheckInOut={() => setShowCheckInOutModal(true)} goTo={setActiveView} savedInvoicesCount={savedInvoices.length} savedGuestsCount={savedGuests.length} />
                        <HomeView
                          user={user}
                          onNavigate={(view, docType) => {
@@ -662,149 +667,7 @@ const [stampConfig, setStampConfig] = useState(null);
   </div>
 )}
           {/* ── Invoice split layout ──────────────────────────────────── */}
-          {activeView === "invoice" && (
-            <div className="flex-1 overflow-hidden flex min-h-0 pb-16 md:pb-0">
-              {/* LEFT: Form */}
-              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
-                <div className="space-y-5">
-                  {/* Stat cards */}
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { label: "Invoice Amount", value: `R${total.toFixed(2)}`,                   icon: DollarSign, iconBg: "bg-[#fef3c7]", iconColor: "text-[#d97706]", textColor: "text-[#1e293b]" },
-                      { label: "Paid",           value: `R${paymentStatus.totalPaid.toFixed(2)}`, icon: CheckSquare, iconBg: paymentStatus.totalPaid > 0 ? "bg-[#dcfce7]" : "bg-[#f1f5f9]", iconColor: paymentStatus.totalPaid > 0 ? "text-[#059669]" : "text-[#94a3b8]", textColor: paymentStatus.totalPaid > 0 ? "text-[#059669]" : "text-[#1e293b]" },
-                      { label: "Balance Due",    value: `R${paymentStatus.balanceDue.toFixed(2)}`,icon: Wallet, iconBg: paymentStatus.balanceDue <= 0 ? "bg-[#dcfce7]" : "bg-[#fef2f2]", iconColor: paymentStatus.balanceDue <= 0 ? "text-[#059669]" : "text-[#dc2626]", textColor: paymentStatus.balanceDue <= 0 ? "text-[#059669]" : "text-[#dc2626]" },
-                    ].map(({ label, value, icon: Icon, iconBg, iconColor, textColor }) => (
-                      <div key={label} className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">{label}</span>
-                          <div className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}>
-                            <Icon className={`w-4 h-4 ${iconColor}`} />
-                          </div>
-                        </div>
-                        <div className={`text-xl font-bold ${textColor}`}>{value}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Payment banner */}
-                  {invoiceId && (
-                    <div className={`px-5 py-3.5 rounded-xl border flex items-center justify-between ${
-                      paymentStatus.status === "paid" ? "bg-[#f0fdf4] border-[#bbf7d0]"
-                      : paymentStatus.status === "partially_paid" ? "bg-[#fffbeb] border-[#fde68a]"
-                      : "bg-[#fff7ed] border-[#fed7aa]"
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${paymentStatus.status === "paid" ? "bg-[#dcfce7]" : paymentStatus.status === "partially_paid" ? "bg-[#fef3c7]" : "bg-[#ffedd5]"}`}>
-                          <CreditCard className={`w-4 h-4 ${paymentStatus.status === "paid" ? "text-[#059669]" : paymentStatus.status === "partially_paid" ? "text-[#d97706]" : "text-[#ea580c]"}`} />
-                        </div>
-                        <div className={`text-sm font-semibold ${paymentStatus.status === "paid" ? "text-[#166534]" : paymentStatus.status === "partially_paid" ? "text-[#92400e]" : "text-[#9a3412]"}`}>
-                          {paymentStatus.status === "paid"
-                            ? "Invoice Fully Paid"
-                            : paymentStatus.status === "partially_paid"
-                            ? `R${paymentStatus.totalPaid.toFixed(2)} paid · R${paymentStatus.balanceDue.toFixed(2)} remaining`
-                            : `Payment Pending — R${paymentStatus.balanceDue.toFixed(2)} due on check-out`}
-                        </div>
-                      </div>
-                      {paymentStatus.status !== "paid" && (
-                        <button onClick={handleProcessPayment} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#f8fafc] transition-colors shadow-sm">
-                          <CreditCard className="w-4 h-4" /> Record Payment
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Form card */}
-                  <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-                    <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
-                      <button
-                        onClick={() => setInputMode("manual")}
-                        className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${inputMode === "manual" ? "border-[#d97706] text-[#d97706] bg-white" : "border-transparent text-[#64748b] hover:text-[#374151]"}`}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Manual Entry
-                      </button>
-                      <button
-                        onClick={() => setShowAIWindow(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white shadow-md shadow-[#7c3aed]/30 hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02] active:scale-[0.98]"
-                      >
-                        <Sparkles className="w-4 h-4" /> AI Mode
-                      </button>
-                    </div>
-
-                    {inputMode === "ai" && (
-                      <div className="p-6 border-b border-[#e2e8f0]">
-                        <HotelAIExtractor onDataExtracted={handleAIDataExtracted} documentType={documentType} />
-                      </div>
-                    )}
-
-                    {inputMode === "manual" && (
-                      <div className="p-6">
-                        <HospitalityMultiStepForm
-                          guestName={guestName} setGuestName={setGuestName}
-                          guestId={guestId} setGuestId={setGuestId}
-                          guestEmail={guestEmail} setGuestEmail={setGuestEmail}
-                          guestPhone={guestPhone} setGuestPhone={setGuestPhone}
-                          guestAddress={guestAddress} setGuestAddress={setGuestAddress}
-                          guestDOB={guestDOB} setGuestDOB={setGuestDOB}
-                          guestNationality={guestNationality} setGuestNationality={setGuestNationality}
-                          idType={idType} setIdType={setIdType}
-                          idNumber={idNumber} setIdNumber={setIdNumber}
-                          roomNumber={roomNumber} setRoomNumber={setRoomNumber}
-                          roomType={roomType} setRoomType={setRoomType}
-                          checkInDate={checkInDate} setCheckInDate={setCheckInDate}
-                          checkOutDate={checkOutDate} setCheckOutDate={setCheckOutDate}
-                          numberOfGuests={numberOfGuests} setNumberOfGuests={setNumberOfGuests}
-                          numberOfNights={numberOfNights} setNumberOfNights={setNumberOfNights}
-                          specialRequests={specialRequests} setSpecialRequests={setSpecialRequests}
-                          showGuestsListModal={showGuestsListModal} setShowGuestsListModal={setShowGuestsListModal}
-                          items={items} newItem={newItem} setNewItem={setNewItem} handleAddItem={handleAddItem}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {invoiceId && paymentStatus.status !== "paid" && (
-                    <button onClick={handleProcessPayment} className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#d97706] hover:bg-[#b45309] text-white rounded-xl font-medium transition-colors shadow-sm">
-                      <CreditCard className="w-4 h-4" /> Process Payment
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* RIGHT: Live preview */}
-              <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                  <TemplateSelector selectedTemplate={selectedTemplate} onTemplateChange={setSelectedTemplate} />
-                  <div className="flex items-center gap-1.5">
-                    <button onClick={handlePrint} className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors">
-                      <Printer className="w-3 h-3" /> Print
-                    </button>
-                    <button onClick={handleSavePDF} className="flex items-center gap-1 px-2.5 py-1.5 bg-[#d97706] text-white text-xs font-medium rounded-lg hover:bg-[#b45309] transition-colors">
-                      <Download className="w-3 h-3" /> PDF
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div className="bg-white shadow-lg rounded origin-top" style={{ position: "relative", width: "210mm", minHeight: "297mm", transform: "scale(0.44)", transformOrigin: "top left", marginBottom: `calc((297mm * 0.44) - 297mm)` }}>
-                    <TemplateRenderer {...templateProps} />
-                    <StampOverlay stampConfig={stampConfig} pageNumber={1} businessInfo={propertyInfo} />
-                  </div>
-                </div>
-                {/* ── Stamp button footer ── */}
-<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-  <button
-    onClick={() => setShowStampModal(true)}
-    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <Stamp className="w-4 h-4" />
-    Stamp &amp; Signature
-  </button>
-</div>
-              </div>
-            </div>
-          )}
+        
         </div>
       </div>
       <MobileBottomNav
