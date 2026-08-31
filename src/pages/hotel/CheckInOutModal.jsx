@@ -29,6 +29,14 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
+// ── Brand tokens — matches HotelSidebar / AppHeader ─────────────────────────
+const NAVY = "#0f1623";
+const NAVY_MID = "#1e2535";
+const ACCENT = "#c6f135";
+const ACCENT_TEXT = "#0f1623";
+const BORDER = "#e2e8f0";
+const TEXT_MUTED = "#64748b";
+
 // ─────────────────────────────────────────────────────────────
 // This modal now reads and writes the SAME `reservations` collection
 // that Reservations.jsx uses — check-in/check-out is just a status
@@ -309,19 +317,19 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-[#fef9c3] text-[#854d0e]";
       case "confirmed":
-        return "bg-blue-100 text-blue-800";
+        return "bg-[#dbeafe] text-[#1e40af]";
       case "checked_in":
-        return "bg-green-100 text-green-800";
+        return "bg-[#ecfccb] text-[#3f6212]";
       case "checked_out":
-        return "bg-gray-100 text-gray-800";
+        return "bg-[#f1f5f9] text-[#475569]";
       case "cancelled":
-        return "bg-red-100 text-red-800";
+        return "bg-[#fee2e2] text-[#991b1b]";
       case "no_show":
-        return "bg-orange-100 text-orange-800";
+        return "bg-[#ffedd5] text-[#9a3412]";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-[#f1f5f9] text-[#475569]";
     }
   };
 
@@ -351,111 +359,108 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
   if (!showModal) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-[#e2e8f0]">
         {/* Header */}
-        <div className="p-6 border-b flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-700 text-gray-800">
-          <div>
-            <h2 className="text-2xl font-bold">
-              Check-In / Check-Out Management
-            </h2>
-            <p className="text-sm text-blue-100 mt-1">
-              Manage guest arrivals and departures
-            </p>
+        <div
+          className="p-6 flex items-center justify-between flex-shrink-0"
+          style={{ background: NAVY }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: ACCENT }}
+            >
+              <Bed className="w-5 h-5" style={{ color: ACCENT_TEXT }} />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">
+                Check-In / Check-Out
+              </h2>
+              <p className="text-xs text-[#8a93a6] mt-0.5">
+                Manage guest arrivals and departures
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setShowModal(false)}
-            className="text-gray-800 hover:bg-blue-800 p-2 rounded-lg transition-colors"
+            className="p-2 rounded-lg text-[#94a3b8] hover:text-white transition-colors"
+            style={{ background: NAVY_MID }}
           >
-            <X className="w-6 h-6" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-4 gap-4 p-6 bg-gray-50 border-b">
-          <div className="bg-white p-4 rounded-lg border-2 border-yellow-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Upcoming</div>
-                <div className="text-2xl font-bold text-yellow-600">
-                  {stats.upcoming}
-                </div>
-              </div>
-              <Clock className="w-8 h-8 text-yellow-600" />
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border-2 border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Checked In</div>
-                <div className="text-2xl font-bold text-green-600">
-                  {stats.checkedIn}
-                </div>
-              </div>
-              <UserCheck className="w-8 h-8 text-green-600" />
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Checked Out</div>
-                <div className="text-2xl font-bold text-gray-600">
-                  {stats.checkedOut}
-                </div>
-              </div>
-              <UserX className="w-8 h-8 text-gray-600" />
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg border-2 border-blue-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Total</div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {stats.total}
-                </div>
-              </div>
-              <Bed className="w-8 h-8 text-blue-600" />
-            </div>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-6 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
+          <StatTile
+            label="Upcoming"
+            value={stats.upcoming}
+            icon={Clock}
+            accent="text-[#a16207]"
+            chipBg="bg-[#fef9c3]"
+          />
+          <StatTile
+            label="Checked In"
+            value={stats.checkedIn}
+            icon={UserCheck}
+            accent="text-[#3f6212]"
+            chipBg="bg-[#ecfccb]"
+          />
+          <StatTile
+            label="Checked Out"
+            value={stats.checkedOut}
+            icon={UserX}
+            accent="text-[#475569]"
+            chipBg="bg-[#f1f5f9]"
+          />
+          <StatTile
+            label="Total"
+            value={stats.total}
+            icon={Bed}
+            accent="text-[#0f1623]"
+            chipBg="bg-[#e2e8f0]"
+          />
         </div>
 
         {/* Search and Filters */}
-        <div className="p-6 border-b space-y-4">
-          <div className="flex flex-wrap gap-4">
+        <div className="p-6 border-b border-[#e2e8f0] space-y-4 flex-shrink-0">
+          <div className="flex flex-wrap gap-3">
             <div className="flex-1 min-w-64">
               <div className="relative">
-                <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94a3b8]" />
                 <input
                   type="text"
                   placeholder="Search by guest name, room number, or ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#c6f135] focus:border-[#c6f135] transition-shadow"
                 />
               </div>
             </div>
             <div className="flex gap-2">
               <div className="relative">
-                <Calendar className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Calendar className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94a3b8]" />
                 <input
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2.5 text-sm border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#c6f135] focus:border-[#c6f135] transition-shadow"
                 />
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors hover:brightness-95"
+                style={{ background: ACCENT, color: ACCENT_TEXT }}
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
                 Add Reservation
               </button>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 border-b">
+          <div className="flex gap-1 border-b border-[#e2e8f0]">
             {[
               { id: "all", label: "All", count: stats.total },
               { id: "upcoming", label: "Upcoming", count: stats.upcoming },
@@ -473,10 +478,10 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
                   activeTab === tab.id
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
+                    ? "border-[#0f1623] text-[#0f1623]"
+                    : "border-transparent text-[#64748b] hover:text-[#0f1623]"
                 }`}
               >
                 {tab.label} ({tab.count})
@@ -489,107 +494,125 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
         <div className="flex-1 overflow-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div
+                className="animate-spin rounded-full h-10 w-10 border-2 border-t-transparent"
+                style={{ borderColor: `${NAVY} transparent ${NAVY} ${NAVY}` }}
+              ></div>
             </div>
           ) : filteredReservations.length === 0 ? (
             <div className="text-center py-12">
-              <Bed className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No reservations found</p>
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-[#f1f5f9] flex items-center justify-center">
+                <Bed className="w-6 h-6 text-[#94a3b8]" />
+              </div>
+              <p className="text-[#374151] text-sm font-medium">
+                No reservations found
+              </p>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="mt-4 text-blue-600 hover:underline"
+                className="mt-3 text-sm font-semibold hover:underline"
+                style={{ color: NAVY }}
               >
                 Add your first reservation
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredReservations.map((reservation) => (
                 <div
                   key={reservation.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+                  className="border border-[#e2e8f0] rounded-2xl p-4 hover:shadow-md hover:border-[#cbd5e1] transition-all bg-white"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-3 flex-wrap">
+                        <h3 className="text-sm font-bold text-[#0f1623]">
                           {reservation.guestName}
                         </h3>
                         <span
-                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusBadge(reservation.status)}`}
+                          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusBadge(reservation.status)}`}
                         >
                           {getStatusIcon(reservation.status)}
                           {reservation.status?.replace("_", " ").toUpperCase()}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-[#64748b]">
                         <div>
-                          <div className="flex items-center gap-1">
-                            <User className="w-4 h-4" />
-                            <span className="text-sm font-medium">
-                              Guest ID:
+                          <div className="flex items-center gap-1.5 text-[#94a3b8]">
+                            <User className="w-3.5 h-3.5" />
+                            <span className="font-semibold uppercase tracking-wide text-[10px]">
+                              Guest ID
                             </span>
                           </div>
-                          <div className="ml-5">
+                          <div className="ml-5 mt-0.5 text-[#374151] font-medium">
                             {reservation.guestId || "N/A"}
                           </div>
                         </div>
                         <div>
-                          <div className="flex items-center gap-1">
-                            <Bed className="w-4 h-4" />
-                            <span className="text-sm font-medium">Room:</span>
+                          <div className="flex items-center gap-1.5 text-[#94a3b8]">
+                            <Bed className="w-3.5 h-3.5" />
+                            <span className="font-semibold uppercase tracking-wide text-[10px]">
+                              Room
+                            </span>
                           </div>
-                          <div className="ml-5">
+                          <div className="ml-5 mt-0.5 text-[#374151] font-medium">
                             {reservation.roomNumber} - {reservation.roomType}
                           </div>
                         </div>
                         <div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span className="text-sm font-medium">
-                              Check-In:
+                          <div className="flex items-center gap-1.5 text-[#94a3b8]">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span className="font-semibold uppercase tracking-wide text-[10px]">
+                              Check-In
                             </span>
                           </div>
-                          <div className="ml-5">{reservation.checkInDate}</div>
+                          <div className="ml-5 mt-0.5 text-[#374151] font-medium">
+                            {reservation.checkInDate}
+                          </div>
                         </div>
                         <div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span className="text-sm font-medium">
-                              Check-Out:
+                          <div className="flex items-center gap-1.5 text-[#94a3b8]">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span className="font-semibold uppercase tracking-wide text-[10px]">
+                              Check-Out
                             </span>
                           </div>
-                          <div className="ml-5">{reservation.checkOutDate}</div>
+                          <div className="ml-5 mt-0.5 text-[#374151] font-medium">
+                            {reservation.checkOutDate}
+                          </div>
                         </div>
                       </div>
 
                       {reservation.notes && (
-                        <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          <span className="text-sm font-medium">Notes:</span>{" "}
+                        <div className="mt-3 text-xs text-[#64748b] bg-[#f8fafc] border border-[#f1f5f9] p-2.5 rounded-lg">
+                          <span className="font-semibold text-[#374151]">
+                            Notes:
+                          </span>{" "}
                           {reservation.notes}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-2 ml-4">
+                    <div className="flex flex-col gap-2 flex-shrink-0">
                       {["pending", "confirmed"].includes(
                         reservation.status,
                       ) && (
                         <button
                           onClick={() => handleCheckIn(reservation)}
-                          className="flex items-center gap-2 px-3 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 text-sm transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors hover:brightness-95"
+                          style={{ background: ACCENT, color: ACCENT_TEXT }}
                         >
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-3.5 h-3.5" />
                           Check In
                         </button>
                       )}
                       {reservation.status === "checked_in" && (
                         <button
                           onClick={() => handleCheckOut(reservation)}
-                          className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 text-sm transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-xs font-semibold transition-colors hover:brightness-125"
+                          style={{ background: NAVY }}
                         >
-                          <UserX className="w-4 h-4" />
+                          <UserX className="w-3.5 h-3.5" />
                           Check Out
                         </button>
                       )}
@@ -598,16 +621,16 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                           setSelectedReservation(reservation);
                           setShowAddModal(true);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 border border-[#e2e8f0] rounded-lg hover:bg-[#f8fafc] text-xs font-semibold text-[#374151] transition-colors"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3.5 h-3.5" />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(reservation)}
-                        className="flex items-center gap-2 px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-sm transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 border border-[#fecaca] text-[#dc2626] rounded-lg hover:bg-[#fef2f2] text-xs font-semibold transition-colors"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                         Delete
                       </button>
                     </div>
@@ -635,6 +658,25 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
     </div>
   );
 };
+
+// Small stat tile used in the header stats row
+function StatTile({ label, value, icon: Icon, accent, chipBg }) {
+  return (
+    <div className="bg-white p-4 rounded-2xl border border-[#e2e8f0]">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs text-[#94a3b8] font-medium">{label}</div>
+          <div className={`text-2xl font-bold mt-0.5 ${accent}`}>{value}</div>
+        </div>
+        <div
+          className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${chipBg}`}
+        >
+          <Icon className={`w-5 h-5 ${accent}`} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Add/Edit Reservation Modal Component (quick check-in style form)
 const AddReservationModal = ({
@@ -761,18 +803,26 @@ const AddReservationModal = ({
 
   if (!showModal) return null;
 
+  const inputCls =
+    "w-full px-4 py-2.5 text-sm border border-[#e2e8f0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#c6f135] focus:border-[#c6f135] transition-shadow";
+  const labelCls = "block text-xs font-semibold text-[#374151] mb-2";
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
+    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-[#e2e8f0]">
+        <div
+          className="p-5 flex items-center justify-between flex-shrink-0"
+          style={{ background: NAVY }}
+        >
+          <h2 className="text-base font-bold text-white">
             {existingReservation ? "Edit Reservation" : "Add New Reservation"}
           </h2>
           <button
             onClick={() => setShowModal(false)}
-            className="text-gray-500 hover:text-gray-700"
+            className="p-1.5 rounded-lg text-[#94a3b8] hover:text-white transition-colors"
+            style={{ background: NAVY_MID }}
           >
-            <X className="w-6 h-6" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -780,9 +830,7 @@ const AddReservationModal = ({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Guest Name *
-                </label>
+                <label className={labelCls}>Guest Name *</label>
                 <input
                   type="text"
                   required
@@ -790,59 +838,55 @@ const AddReservationModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, guestName: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Guest ID
-                </label>
+                <label className={labelCls}>Guest ID</label>
                 <input
                   type="text"
                   value={formData.guestId}
                   onChange={(e) =>
                     setFormData({ ...formData, guestId: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={inputCls}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
+                <label className={labelCls}>Email</label>
                 <input
                   type="email"
                   value={formData.guestEmail}
                   onChange={(e) =>
                     setFormData({ ...formData, guestEmail: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Phone</label>
+                <label className={labelCls}>Phone</label>
                 <input
                   type="tel"
                   value={formData.guestPhone}
                   onChange={(e) =>
                     setFormData({ ...formData, guestPhone: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={inputCls}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Room Number *
-                </label>
+                <label className={labelCls}>Room Number *</label>
                 <select
                   required
                   value={formData.roomId}
                   onChange={(e) => handleRoomSelect(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={`${inputCls} cursor-pointer`}
                 >
                   <option value="">
                     {roomsLoading
@@ -860,14 +904,12 @@ const AddReservationModal = ({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Room Type
-                </label>
+                <label className={labelCls}>Room Type</label>
                 <input
                   type="text"
                   readOnly
                   value={formData.roomType}
-                  className="w-full px-4 py-2 border rounded-lg bg-gray-50 text-gray-600"
+                  className={`${inputCls} bg-[#f8fafc] text-[#64748b]`}
                   placeholder="Auto-filled from selected room"
                 />
               </div>
@@ -875,9 +917,7 @@ const AddReservationModal = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Check-In Date *
-                </label>
+                <label className={labelCls}>Check-In Date *</label>
                 <input
                   type="date"
                   required
@@ -885,13 +925,11 @@ const AddReservationModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, checkInDate: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Check-Out Date *
-                </label>
+                <label className={labelCls}>Check-Out Date *</label>
                 <input
                   type="date"
                   required
@@ -899,15 +937,13 @@ const AddReservationModal = ({
                   onChange={(e) =>
                     setFormData({ ...formData, checkOutDate: e.target.value })
                   }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className={inputCls}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Number of Guests
-              </label>
+              <label className={labelCls}>Number of Guests</label>
               <input
                 type="number"
                 min="1"
@@ -915,34 +951,35 @@ const AddReservationModal = ({
                 onChange={(e) =>
                   setFormData({ ...formData, numberOfGuests: e.target.value })
                 }
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className={inputCls}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Notes</label>
+              <label className={labelCls}>Notes</label>
               <textarea
                 value={formData.notes}
                 onChange={(e) =>
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 rows="3"
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className={`${inputCls} resize-none`}
                 placeholder="Special requests, preferences, etc."
               />
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-3 pt-2">
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 text-sm font-medium"
+                className="flex-1 py-3 rounded-xl text-sm font-semibold transition-colors hover:brightness-95"
+                style={{ background: ACCENT, color: ACCENT_TEXT }}
               >
                 {existingReservation ? "Update Reservation" : "Add Reservation"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 text-sm font-medium"
+                className="flex-1 border border-[#e2e8f0] py-3 rounded-xl hover:bg-[#f8fafc] text-sm font-semibold text-[#374151] transition-colors"
               >
                 Cancel
               </button>

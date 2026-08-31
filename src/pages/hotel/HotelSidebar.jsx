@@ -55,6 +55,12 @@ export default function HotelSidebar({
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  // Hotel dashboard stores its info under `propertyName`, not `businessName`
+  // (mechanics/other verticals use `businessName`) — check both so this
+  // sidebar works regardless of which shape the caller passes in.
+  const displayName =
+    businessInfo?.propertyName || businessInfo?.businessName || "HotelPro";
+
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", onResize);
@@ -85,7 +91,7 @@ export default function HotelSidebar({
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate leading-tight">
-              {businessInfo?.businessName || "HotelPro"}
+              {displayName}
             </p>
             <p className="text-[10px] text-[#64748b]">Management Suite</p>
           </div>
@@ -118,7 +124,6 @@ export default function HotelSidebar({
 
         <SectionLabel>Finance</SectionLabel>
 
-        
         {/* Invoices accordion */}
         <Accordion
           icon={Receipt}
@@ -131,7 +136,6 @@ export default function HotelSidebar({
             label="Create Invoice"
             onClick={() => {
               handleNewInvoice?.();
-              
             }}
           />
           <SubItem
@@ -143,7 +147,6 @@ export default function HotelSidebar({
               if (isMobile) setSidebarOpen(false);
             }}
           />
-         
         </Accordion>
         <NavItem
           icon={ShoppingBag}
@@ -213,7 +216,6 @@ export default function HotelSidebar({
           onClick={() => setShowCheckInOutModal?.(true)}
         />
 
-       
         <SectionLabel>Insights</SectionLabel>
 
         {/* Reports accordion */}
@@ -264,7 +266,6 @@ export default function HotelSidebar({
           />
         </Accordion>
 
-        
         <NavItem
           icon={Star}
           label="Reviews"
@@ -378,12 +379,11 @@ export default function HotelSidebar({
                   action: () => setShowSettings(true),
                   active: false,
                 },
-               
+
                 {
                   icon: Receipt,
                   title: "Invoices",
                   action: () => handleNewInvoice?.(),
-                  
                 },
                 {
                   icon: FileText,
@@ -409,7 +409,7 @@ export default function HotelSidebar({
                   action: () => goTo("rooms"),
                   active: activeView === "rooms",
                 },
-                 {
+                {
                   icon: Utensils,
                   title: "Restaurant / Bar",
                   action: () => goTo("restaurant"),
@@ -421,7 +421,7 @@ export default function HotelSidebar({
                   action: () => setShowCheckInOutModal?.(true),
                   active: false,
                 },
-                
+
                 {
                   icon: FileBarChart,
                   title: "Reports",
@@ -434,7 +434,7 @@ export default function HotelSidebar({
                   action: () => goTo("analytics-bookings"),
                   active: false,
                 },
-               
+
                 {
                   icon: Star,
                   title: "Reviews",

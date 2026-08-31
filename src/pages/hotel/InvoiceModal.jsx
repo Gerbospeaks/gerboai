@@ -6,6 +6,7 @@ import {
   CreditCard,
   Sparkles,
   Stamp,
+  UserSearch,
 } from "lucide-react";
 import HospitalityMultiStepForm from "./HospitalityMultiStepForm";
 import HotelAIExtractor from "./HotelAIExtractor";
@@ -192,7 +193,7 @@ export default function InvoiceModal({
 
               {/* Form card */}
               <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-                <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
+                <div className="flex items-center border-b border-[#e2e8f0] bg-[#f8fafc]">
                   <button
                     onClick={() => setInputMode("manual")}
                     className={`px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px ${
@@ -203,6 +204,18 @@ export default function InvoiceModal({
                   >
                     Manual Entry
                   </button>
+
+                  {/* Pull guest details from a saved profile instead of re-typing them */}
+                  {inputMode === "manual" && (
+                    <button
+                      onClick={() => setShowGuestsListModal(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 ml-3 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-semibold rounded-lg hover:bg-[#f1f5f9] hover:border-[#cbd5e1] transition-colors"
+                    >
+                      <UserSearch className="w-3.5 h-3.5" />
+                      Select Saved Guest
+                    </button>
+                  )}
+
                   <button
                     onClick={() => setInputMode("ai")}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto bg-gradient-to-r from-[#7c3aed] to-[#5b21b6] text-white shadow-md hover:scale-[1.02] active:scale-[0.98]"
@@ -222,6 +235,14 @@ export default function InvoiceModal({
 
                 {inputMode === "manual" && (
                   <div className="p-6">
+                    {/* Confirms which saved guest (if any) populated the form below */}
+                    {guestId && (
+                      <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg text-xs text-[#1d4ed8]">
+                        <UserSearch className="w-3.5 h-3.5 flex-shrink-0" />
+                        Loaded from saved guest — {guestName || guestId}. Edit
+                        any field below before saving.
+                      </div>
+                    )}
                     <HospitalityMultiStepForm
                       guestName={guestName}
                       setGuestName={setGuestName}

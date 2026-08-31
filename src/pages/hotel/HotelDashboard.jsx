@@ -222,20 +222,29 @@ const HotelDashboard = () => {
   }, [total, invoiceId]);
 
   // ── Loaders ────────────────────────────────────────────────────────────
-  const loadPropertyInfo = async () => {
-    if (!user?.uid) return;
-    try {
-      const db = getFirestore();
-      const snap = await getDoc(
-        doc(db, "users", user.uid, "settings", "propertyInfo"),
-      );
-      if (snap.exists()) setPropertyInfo(snap.data());
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+ const loadPropertyInfo = async () => {
+  if (!user?.uid) return;
+  try {
+    const db = getFirestore();
+    const snap = await getDoc(
+      doc(db, "users", user.uid, "settings", "businessInfo"), // ← was "propertyInfo"
+    );
+    if (snap.exists()) {
+      const data = snap.data();
+      setPropertyInfo((prev) => ({
+        ...prev,
+        ...data,
+        // BusinessSettingsModal saves the name as `businessName`;
+        // this dashboard's own state/UI expects `propertyName`.
+        propertyName: data.businessName || data.propertyName || prev.propertyName,
+      }));
     }
-  };
+  } catch (e) {
+    console.error(e);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const loadGuests = async () => {
     try {
@@ -711,8 +720,13 @@ const HotelDashboard = () => {
 
           {/* ── Modals ────────────────────────────────────────────────── */}
           {showSettings && (
-            <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-          )}
+  <BusinessSettingsModal
+    onClose={() => {
+      setShowSettings(false);
+      loadPropertyInfo(); 
+    }}
+  />
+)}
 
           <GuestsListModal
             showModal={showGuestsListModal}
