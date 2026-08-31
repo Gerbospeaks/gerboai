@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getFirestore, collection, doc, onSnapshot } from "firebase/firestore";
-import { Utensils, Flame, Loader2 } from "lucide-react";
+import { Utensils, Flame, Loader2, ImageOff } from "lucide-react";
 
-// Keep this order in sync with RestaurantBar.jsx's MENU_CATEGORIES so
-// sections appear in a sensible sequence rather than alphabetical.
 const MENU_CATEGORIES = [
   "Starters",
   "Mains",
@@ -21,16 +19,8 @@ const MENU_CATEGORIES = [
 ];
 
 /**
- * GuestMenuPage
- * Public, unauthenticated route: /menu/:propertyId
- * propertyId is the lodge's Firebase uid. Shows only items with
- * available === true, live, via onSnapshot. No edit affordances —
- * this is what a guest sees after scanning a table QR code.
- *
- * Requires a Firestore rule allowing public read on:
- *   users/{propertyId}/menuItems
- *   users/{propertyId}/settings/propertyInfo
- * See the accompanying rules snippet — nothing else should be public.
+ * GuestMenuPage — public, unauthenticated route: /menu/:propertyId
+ * Requires the public Firestore read rules on menuItems + settings/propertyInfo.
  */
 export default function GuestMenuPage() {
   const { propertyId } = useParams();
@@ -55,7 +45,6 @@ export default function GuestMenuPage() {
         setLoading(false);
       },
     );
-
     const unsubProperty = onSnapshot(
       doc(db, "users", propertyId, "settings", "propertyInfo"),
       (snap) => {
@@ -71,6 +60,9 @@ export default function GuestMenuPage() {
 
   const currency = propertyInfo?.currencySymbol || "$";
   const available = menuItems.filter((m) => m.available);
+  const categoriesWithItems = MENU_CATEGORIES.filter(
+    (cat) => available.filter((m) => m.category === cat).length > 0,
+  );
 
   if (loading) {
     return (
@@ -91,7 +83,6 @@ export default function GuestMenuPage() {
 
   return (
     <div className="min-h-screen bg-[#faf8f4]">
-      {/* Header */}
       <div className="bg-[#1e293b] text-white px-5 pt-8 pb-6 text-center">
         {propertyInfo?.logoUrl && (
           <img
@@ -108,9 +99,8 @@ export default function GuestMenuPage() {
         </p>
       </div>
 
-      {/* Menu */}
       <div className="max-w-md mx-auto px-4 py-6 pb-16">
-        {available.length === 0 ? (
+        {categoriesWithItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
             <Utensils className="w-8 h-8 text-[#cbd5e1]" />
             <p className="text-sm text-[#94a3b8]">
@@ -118,36 +108,54 @@ export default function GuestMenuPage() {
             </p>
           </div>
         ) : (
-          MENU_CATEGORIES.map((cat) => {
+          categoriesWithItems.map((cat) => {
             const items = available.filter((m) => m.category === cat);
-            if (items.length === 0) return null;
             return (
-              <div key={cat} className="mb-7">
-                <h2 className="text-xs font-bold text-[#92400e] uppercase tracking-widest mb-3 pb-2 border-b border-[#e7ddc9]">
-                  {cat}
-                </h2>
-                <div className="space-y-4">
+              <div key={cat} className="mb-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-1.5 h-5 bg-[#d97706] rounded-full" />
+                  <h2 className="text-xs font-bold text-[#92400e] uppercase tracking-widest">
+                    {cat}
+                  </h2>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
                   {items.map((item) => (
-                    <div key={item.id} className="flex justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-sm font-semibold text-[#1e293b]">
-                            {item.name}
-                          </p>
-                          {item.popular && (
-                            <Flame className="w-3.5 h-3.5 text-[#d97706] flex-shrink-0" />
-                          )}
-                        </div>
+                    <div
+                      key={item.id}
+                      className="bg-white border border-[#ece4d3] rounded-xl overflow-hidden shadow-sm"
+                    >
+                      <div className="aspect-square bg-[#f1ede2] relative">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageOff className="w-5 h-5 text-[#d6cdb8]" />
+                          </div>
+                        )}
+                        {item.popular && (
+                          <span className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-[#d97706] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                            <Flame className="w-2.5 h-2.5" /> Popular
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-2.5">
+                        <p className="text-xs font-semibold text-[#1e293b] leading-snug">
+                          {item.name}
+                        </p>
                         {item.description && (
-                          <p className="text-xs text-[#78716c] mt-0.5 leading-snug">
+                          <p className="text-[10px] text-[#a89f8e] mt-0.5 leading-snug line-clamp-2">
                             {item.description}
                           </p>
                         )}
+                        <span className="inline-block mt-1.5 text-xs font-bold text-white bg-[#92400e] px-2 py-0.5 rounded-md">
+                          {currency}
+                          {Number(item.price).toFixed(2)}
+                        </span>
                       </div>
-                      <span className="text-sm font-bold text-[#92400e] flex-shrink-0 whitespace-nowrap">
-                        {currency}
-                        {Number(item.price).toFixed(2)}
-                      </span>
                     </div>
                   ))}
                 </div>

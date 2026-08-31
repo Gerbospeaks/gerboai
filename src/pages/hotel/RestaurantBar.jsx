@@ -99,6 +99,7 @@ const EMPTY_MENU_ITEM = {
   available: true,
   popular: false,
   dietary: [],
+  imageUrl: "",
 };
 
 const EMPTY_ORDER = {
@@ -172,7 +173,14 @@ export default function RestaurantBar({ user }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   // Order builder: selected menu item to add
   const [orderItemQty, setOrderItemQty] = useState({});
-// Guest menu link (QR code for the dashboard's own menu tab) 
+const [uploadingImage, setUploadingImage] = useState(false); 
+const handleMenuImageUpload = async (e) => { 
+  const file = e.target.files?.[0]; if (!file) return; setUploadingImage(true); 
+  try { 
+    const token = await user.getIdToken(); 
+    
+     const res = await fetch("https://r2-upload-worker.v8-auto.workers.dev/upload-menu-image", 
+      { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": file.type }, body: file, }); const data = await res.json(); if (data.publicUrl) { setMenuForm((f) => ({ ...f, imageUrl: data.publicUrl })); } } catch (err) { console.error(err); } finally { setUploadingImage(false); } }; 
  const [showMenuLinkModal, setShowMenuLinkModal] = useState(false); 
  const [linkCopied, setLinkCopied] = useState(false); 
  const guestMenuUrl = user?.uid ? `${window.location.origin}/menu/${user.uid}` : ""; 
@@ -714,6 +722,7 @@ export default function RestaurantBar({ user }) {
                             key={item.id}
                             className={`bg-white border rounded-xl p-4 shadow-sm transition-all group ${item.available ? "border-[#e2e8f0]" : "border-[#f1f5f9] opacity-60"}`}
                           >
+                            {item.imageUrl && ( <img src={item.imageUrl} alt="" className="w-full h-28 object-cover rounded-lg mb-2" /> )}
                             <div className="flex items-start justify-between mb-1.5">
                               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                 <span className="text-sm font-bold text-[#1e293b] truncate">
@@ -918,6 +927,7 @@ export default function RestaurantBar({ user }) {
                     placeholder="0.00"
                   />
                 </div>
+                <div className="col-span-2"> <label className={labelCls}>Photo</label> <div className="flex items-center gap-3"> {menuForm.imageUrl && ( <img src={menuForm.imageUrl} alt="" className="w-16 h-16 object-cover rounded-lg border border-[#e2e8f0]" /> )} <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-dashed border-[#d1d5db] rounded-lg text-xs text-[#64748b] cursor-pointer hover:bg-[#f8fafc] transition-colors"> {uploadingImage ? "Uploading..." : menuForm.imageUrl ? "Change photo" : "Upload photo"} <input type="file" accept="image/*" className="hidden" onChange={handleMenuImageUpload} disabled={uploadingImage} /> </label> </div> </div>
                 <div className="col-span-2">
                   <label className={labelCls}>Description</label>
                   <textarea
