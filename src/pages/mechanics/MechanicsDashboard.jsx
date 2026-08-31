@@ -1976,7 +1976,7 @@ const handleStampConfirm = async (cfg) => {
           TemplateRenderer={TemplateRenderer}
         />
       )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* Sidebar */}
         <MechanicsSidebar
           navigate={navigate}

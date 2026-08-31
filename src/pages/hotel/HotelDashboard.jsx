@@ -686,7 +686,7 @@ const HotelDashboard = () => {
           setShowSettings={setShowSettings}
           handleNewInvoice={handleNewInvoice}
           handleAddNewGuest={handleAddNewGuest}
-          propertyInfo={propertyInfo}
+          businessInfo={propertyInfo}
           savedInvoices={savedInvoices}
           savedGuests={savedGuests}
           setShowInvoicesList={setShowInvoicesList}

@@ -38,7 +38,7 @@ export default function HotelSidebar({
   setShowSettings,
   handleNewInvoice,
   handleLogout,
-  propertyInfo,
+  businessInfo,
   savedInvoices,
   savedGuests,
   showInvoicesList,
@@ -85,7 +85,7 @@ export default function HotelSidebar({
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate leading-tight">
-              {propertyInfo?.businessName || "HotelPro"}
+              {businessInfo?.businessName || "HotelPro"}
             </p>
             <p className="text-[10px] text-[#64748b]">Management Suite</p>
           </div>
@@ -277,10 +277,10 @@ export default function HotelSidebar({
       <div className="border-t border-[#1e2535] px-4 py-3 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-[#1e2535] rounded-full flex items-center justify-center ring-1 ring-[#2d3a52] flex-shrink-0 overflow-hidden">
-            {propertyInfo?.logoUrl ? (
+            {businessInfo?.logoUrl ? (
               <img
-                src={propertyInfo.logoUrl}
-                alt="property"
+                src={businessInfo.logoUrl}
+                alt="business"
                 className="w-5 h-5 object-contain"
               />
             ) : (
@@ -459,11 +459,11 @@ export default function HotelSidebar({
 
             <div className="mt-auto pb-2">
               <div className="w-9 h-9 bg-[#1e2535] rounded-full flex items-center justify-center ring-1 ring-[#2d3a52] overflow-hidden">
-                {propertyInfo?.logoUrl ? (
+                {businessInfo?.logoUrl ? (
                   <img
-                    src={propertyInfo.logoUrl}
+                    src={businessInfo.logoUrl}
                     className="w-5 h-5 object-contain"
-                    alt="property"
+                    alt="business"
                   />
                 ) : (
                   <KeyRound className="w-4 h-4 text-[#3b82f6]" />

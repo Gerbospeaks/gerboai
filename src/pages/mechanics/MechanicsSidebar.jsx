@@ -75,9 +75,9 @@ export default function MechanicsSidebar({
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-[#253347] flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-4 flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
             <img src={logo} className="w-5 h-5 object-contain" alt="logo" />
           </div>
           <div className="min-w-0">
@@ -89,21 +89,21 @@ export default function MechanicsSidebar({
         </div>
         <button
           onClick={() => setSidebarOpen(false)}
-          className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all flex-shrink-0"
+          className="p-1.5 text-[#64748b] hover:text-white hover:bg-white/5 rounded-lg transition-all flex-shrink-0"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
       </div>
 
       {/* Scrollable nav */}
-      <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+      <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1">
         <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
-        
+
         <NavItem
           icon={Settings}
           label="Settings"
@@ -197,7 +197,7 @@ export default function MechanicsSidebar({
           onClick={() => goTo("templates")}
           active={activeView === "templates"}
         />
-         
+
         <NavItem
           icon={Car}
           label="Vehicles"
@@ -231,18 +231,20 @@ export default function MechanicsSidebar({
       </div>
 
       {isAdmin && (
-        <button
-          onClick={() => setShowUserManagement(true)}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
-        >
-          <Shield className="w-4 h-4" />
-          Manage Team
-        </button>
+        <div className="px-3">
+          <button
+            onClick={() => setShowUserManagement(true)}
+            className="flex items-center gap-2 px-3 py-2.5 text-sm text-[#94a3b8] hover:text-white hover:bg-white/5 rounded-xl w-full transition-all"
+          >
+            <Shield className="w-4 h-4" />
+            Manage Team
+          </button>
+        </div>
       )}
 
       {/* Footer */}
-      <div className="border-t border-[#253347] px-4 py-3 flex-shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="px-3 pt-3 pb-4 flex-shrink-0">
+        <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-3 py-3">
           <div className="w-8 h-8 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0 overflow-hidden">
             {businessInfo?.logoUrl ? (
               <img
@@ -265,7 +267,7 @@ export default function MechanicsSidebar({
           <button
             onClick={handleLogout}
             title="Log out"
-            className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all flex-shrink-0"
+            className="p-1.5 text-[#64748b] hover:text-white hover:bg-white/10 rounded-lg transition-all flex-shrink-0"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -334,15 +336,15 @@ export default function MechanicsSidebar({
 
         {/* Drawer */}
         <div
-          className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#1a2332] shadow-2xl transform transition-transform duration-300 ease-in-out ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          className={`fixed inset-y-3 left-3 z-50 w-72 bg-[#151a28] rounded-3xl shadow-2xl transform transition-transform duration-300 ease-in-out overflow-hidden ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+0.75rem)]"
           }`}
         >
           <SidebarContent />
         </div>
 
         {/* ── Bottom nav bar ── */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#1a2332] border-t border-[#253347]">
+        <div className="fixed bottom-3 left-3 right-3 z-40 bg-[#151a28] rounded-3xl shadow-2xl">
           <div className="flex items-center justify-around px-2 py-1 pb-safe">
             {bottomNavItems.map(
               ({ icon: Icon, label, action, active, badge, isPrimary }) =>
@@ -352,10 +354,10 @@ export default function MechanicsSidebar({
                     onClick={action}
                     className="flex flex-col items-center justify-center -mt-5"
                   >
-                    <div className="w-14 h-14 bg-[#059669] hover:bg-[#047857] rounded-full flex items-center justify-center shadow-lg shadow-[#059669]/30 border-4 border-[#1a2332] transition-all active:scale-95">
-                      <Icon className="w-6 h-6 text-white" />
+                    <div className="w-14 h-14 bg-[#c8f24c] hover:bg-[#bce83a] rounded-full flex items-center justify-center shadow-lg shadow-[#c8f24c]/30 border-4 border-[#151a28] transition-all active:scale-95">
+                      <Icon className="w-6 h-6 text-[#151a28]" />
                     </div>
-                    <span className="text-[10px] text-[#34d399] font-semibold mt-0.5">
+                    <span className="text-[10px] text-[#c8f24c] font-semibold mt-0.5">
                       {label}
                     </span>
                   </button>
@@ -367,16 +369,16 @@ export default function MechanicsSidebar({
                   >
                     <div className="relative w-6 h-6 flex items-center justify-center">
                       {active && (
-                        <span className="absolute inset-0 bg-[#059669]/10 rounded-lg" />
+                        <span className="absolute inset-0 bg-[#c8f24c]/10 rounded-lg" />
                       )}
                       <div className="relative">
                         <Icon
                           className={`w-5 h-5 transition-colors ${
-                            active ? "text-[#34d399]" : "text-[#64748b]"
+                            active ? "text-[#c8f24c]" : "text-[#64748b]"
                           }`}
                         />
                         {badge != null && (
-                          <span className="absolute -top-1.5 -right-2 bg-[#059669] text-white text-[9px] font-bold px-1 py-px rounded-full leading-none">
+                          <span className="absolute -top-1.5 -right-2 bg-[#c8f24c] text-[#151a28] text-[9px] font-bold px-1 py-px rounded-full leading-none">
                             {badge}
                           </span>
                         )}
@@ -384,7 +386,7 @@ export default function MechanicsSidebar({
                     </div>
                     <span
                       className={`text-[10px] font-medium transition-colors ${
-                        active ? "text-[#34d399]" : "text-[#64748b]"
+                        active ? "text-[#c8f24c]" : "text-[#64748b]"
                       }`}
                     >
                       {label}
@@ -398,26 +400,32 @@ export default function MechanicsSidebar({
 
       {/* ════════════════════════════════════════════════════════════════
           DESKTOP — collapsed icon rail OR expanded panel
+          Both float with margin and rounded corners, like a card.
       ════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:flex print:hidden h-full">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
-          <div className="flex flex-col flex-shrink-0 w-16 bg-[#1a2332] border-r border-[#253347] h-full items-center py-4 gap-2 z-30">
+          <div className="flex flex-col flex-shrink-0 w-16 bg-[#151a28] rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
             <button
               onClick={() => setSidebarOpen(true)}
               title="Expand"
-              className="p-2 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all"
+              className="p-2 text-[#64748b] hover:text-white hover:bg-white/5 rounded-lg transition-all"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
 
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center my-1">
+            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center my-1">
               <img src={logo} className="w-6 h-6 object-contain" alt="logo" />
             </div>
 
             <div className="flex flex-col items-center gap-1 w-full px-2 mt-1">
               {[
-                { icon: Home, title: "Home", action: () => goTo("home") },
+                {
+                  icon: Home,
+                  title: "Home",
+                  action: () => goTo("home"),
+                  active: activeView === "home",
+                },
                 {
                   icon: Settings,
                   title: "Settings",
@@ -427,6 +435,7 @@ export default function MechanicsSidebar({
                   icon: TrendingUp,
                   title: "Business Overview",
                   action: () => goTo("financial-overview"),
+                  active: activeView === "financial-overview",
                 },
                 {
                   icon: ClipboardList,
@@ -441,33 +450,40 @@ export default function MechanicsSidebar({
                   title: "Customers",
                   action: () => setShowCustomersListModal(true),
                 },
-                  {
-      
+                {
                   icon: Mail,
                   title: "Letterheads",
                   action: () => goTo("letterheads"),
+                  active: activeView === "letterheads",
                 },
                 {
                   icon: History,
                   title: "Job History",
                   action: () => goTo("history-view"),
+                  active: activeView === "history-view",
                 },
                 {
                   icon: StickyNote,
                   title: "Notes",
                   action: () => goTo("notes-view"),
+                  active: activeView === "notes-view",
                 },
                 {
                   icon: BarChart2,
                   title: "Reports & Analytics",
                   action: () => goTo("reports"),
+                  active: activeView === "reports",
                 },
-              ].map(({ icon: Icon, title, action }) => (
+              ].map(({ icon: Icon, title, action, active }) => (
                 <button
                   key={title}
                   onClick={action}
                   title={title}
-                  className="w-10 h-10 flex items-center justify-center text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg transition-all"
+                  className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
+                    active
+                      ? "bg-[#c8f24c] text-[#151a28]"
+                      : "text-[#64748b] hover:text-white hover:bg-white/5"
+                  }`}
                 >
                   <Icon className="w-5 h-5" />
                 </button>
@@ -477,7 +493,7 @@ export default function MechanicsSidebar({
             {isAdmin && (
               <button
                 onClick={() => setShowUserManagement(true)}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/10 rounded-lg w-full"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-white/5 rounded-xl w-full"
               >
                 <Shield className="w-4 h-4" />
               </button>
@@ -501,7 +517,7 @@ export default function MechanicsSidebar({
 
         {/* Expanded panel */}
         {sidebarOpen && (
-          <div className="flex-shrink-0 w-64 bg-[#1a2332] border-r border-[#253347] h-full shadow-xl z-30">
+          <div className="flex-shrink-0 w-64 bg-[#151a28] rounded-3xl h-full shadow-xl z-30 overflow-hidden">
             <SidebarContent />
           </div>
         )}
@@ -525,16 +541,22 @@ function NavItem({ icon: Icon, label, onClick, active = false, badge = null }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all text-sm font-medium ${
         active
-          ? "bg-[#253347] text-white"
-          : "text-[#94a3b8] hover:bg-[#253347] hover:text-white"
+          ? "bg-[#c8f24c] text-[#151a28]"
+          : "text-[#94a3b8] hover:bg-white/5 hover:text-white"
       }`}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
       <span className="truncate flex-1">{label}</span>
       {badge != null && (
-        <span className="bg-[#059669] text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0">
+        <span
+          className={`text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${
+            active
+              ? "bg-[#151a28] text-[#c8f24c]"
+              : "bg-[#c8f24c] text-[#151a28]"
+          }`}
+        >
           {badge}
         </span>
       )}
@@ -547,7 +569,7 @@ function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
     <div>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#253347] rounded-lg transition-all text-sm font-medium"
+        className="w-full flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-white/5 rounded-xl transition-all text-sm font-medium"
       >
         <div className="flex items-center gap-3">
           <Icon className="w-4 h-4 flex-shrink-0" />
@@ -572,7 +594,7 @@ function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#2563eb]" }) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-[#253347] rounded-lg cursor-pointer transition-all text-sm"
+      className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-white/5 rounded-xl cursor-pointer transition-all text-sm"
     >
       <div className="flex items-center gap-2 min-w-0">
         {dot && (
