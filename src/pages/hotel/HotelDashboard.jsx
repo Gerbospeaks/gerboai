@@ -50,7 +50,7 @@ import ReportsView from "./ReportsView";
 import AnalyticsView from "./AnalyticsView";
 import Reservations from "./Reservations";
 import RestaurantBar from "./RestaurantBar";
-
+import MenuDisplay from "./MenuDisplay"; 
 import {
   Eye,
   Save,
@@ -1031,6 +1031,7 @@ const HotelDashboard = () => {
               <RestaurantBar user={user} />
             </div>
           )}
+          {activeView === "menu-display" && ( <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-16 md:pb-0"> <MenuDisplay user={user} currencySymbol="$" /> </div> )}
           {/* Stubs for remaining sidebar items */}
           {[
             "overview",
