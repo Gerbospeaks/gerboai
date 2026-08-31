@@ -92,7 +92,19 @@ const ROOM_TYPES = [
   "Family Room",
   "Connecting Rooms",
   "Studio",
+  "Event Hosting",
+  "Conference Facilities",
 ];
+
+// Extra context for venue-style types (shown as a hint under the Room
+// Type dropdown once one of these is selected). Regular guest rooms don't
+// need a description, so this only covers the types that benefit from one.
+const ROOM_TYPE_DESCRIPTIONS = {
+  "Event Hosting":
+    "A popular venue for birthday parties, romantic escapes, and end-of-year celebrations.",
+  "Conference Facilities":
+    "Setup options available for meetings and corporate gatherings.",
+};
 
 const AMENITIES_LIST = [
   { key: "wifi", icon: Wifi, label: "Wi-Fi" },

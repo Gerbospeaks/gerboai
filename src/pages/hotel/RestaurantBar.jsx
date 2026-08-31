@@ -16,6 +16,8 @@ import {
   Plus,
   Search,
   X,
+  Link2,
+  Copy,
   Edit2,
   Trash2,
   AlertCircle,
@@ -170,7 +172,11 @@ export default function RestaurantBar({ user }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   // Order builder: selected menu item to add
   const [orderItemQty, setOrderItemQty] = useState({});
-
+// Guest menu link (QR code for the dashboard's own menu tab) 
+ const [showMenuLinkModal, setShowMenuLinkModal] = useState(false); 
+ const [linkCopied, setLinkCopied] = useState(false); 
+ const guestMenuUrl = user?.uid ? `${window.location.origin}/menu/${user.uid}` : ""; 
+ const copyGuestMenuLink = async () => { try { await navigator.clipboard.writeText(guestMenuUrl); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); } catch (e) { console.error(e); } }; 
   const db = getFirestore();
 
   useEffect(() => {
@@ -427,7 +433,10 @@ export default function RestaurantBar({ user }) {
           </p>
         </div>
         <div className="flex gap-2">
-          {activeTab === "menu" && (
+           <div className="flex gap-2"> 
+            <button onClick={() => setShowMenuLinkModal(true)} className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-semibold rounded-xl hover:bg-[#f8fafc] transition-colors shadow-sm" > 
+              <Link2 className="w-4 h-4" /> Guest Menu Link </button>
+                {activeTab === "menu" && (
             <button
               onClick={openNewMenu}
               className="flex items-center gap-2 px-4 py-2 bg-[#d97706] hover:bg-[#b45309] text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
@@ -451,6 +460,8 @@ export default function RestaurantBar({ user }) {
               <Plus className="w-4 h-4" /> Add Table
             </button>
           )}
+                </div>
+         
         </div>
       </div>
 
@@ -1242,7 +1253,9 @@ export default function RestaurantBar({ user }) {
             />
           </div>
         </div>
+        
       )}
+{showMenuLinkModal && ( <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"> <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 border border-[#e2e8f0] text-center"> <h3 className="text-sm font-bold text-[#1e293b] mb-1">Guest Menu Link</h3> <p className="text-xs text-[#64748b] mb-4"> Print this QR code on tables, or share the link directly. </p> <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(guestMenuUrl)}`} alt="Guest menu QR code" className="mx-auto mb-4 rounded-lg border border-[#e2e8f0]" /> <div className="flex items-center gap-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 mb-4"> <span className="text-xs text-[#64748b] truncate flex-1 text-left">{guestMenuUrl}</span> <button onClick={copyGuestMenuLink} className="flex-shrink-0 text-[#d97706]"> <Copy className="w-4 h-4" /> </button> </div> {linkCopied && <p className="text-xs text-[#059669] font-semibold mb-3">Copied!</p>} <button onClick={() => setShowMenuLinkModal(false)} className="w-full px-4 py-2.5 border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-xl hover:bg-[#f8fafc] transition-colors" > Close </button> </div> </div> )}
     </div>
   );
 }

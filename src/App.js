@@ -106,6 +106,8 @@ import ParentPortal from "./pages/education/ParentPortal";
 import StaffPortal from "./pages/education/StaffPortal";
 import { useSubAccount } from "./hooks/useSubAccount";
 import SubAccountDashboard from "./pages/mechanics/SubAccountDashboard";
+ import GuestMenuPage from "./pages/hotel/GuestMenuPage"; 
+ import MenuSignagePage from "./pages/hotel/MenuSignagePage";
 const IS_SUBDOMAIN = !!getSubdomainFromHost();
 
 const PUBLIC_ROUTES = new Set([
@@ -166,7 +168,9 @@ function PWAGate() {
   const isPublic =
     PUBLIC_ROUTES.has(pathname) ||
     pathname.startsWith("/parents/") ||
-    pathname.startsWith("/staff/");
+    pathname.startsWith("/staff/") || 
+    pathname.startsWith("/menu/") || 
+    pathname.startsWith("/display/");
 
   if (isPublic) return null;
   return <PWAInstallPrompt appReady={true} />;
@@ -211,6 +215,7 @@ function DashboardRoutes() {
   const { userDashboard } = useAuth();
   return (
    <>
+   
    <Routes>
       {/* 
         /dashboard is the entry point after login.
@@ -571,7 +576,12 @@ function DashboardRoutes() {
           </ProtectedRoute>
         }
       />
-
+{/* ── Education portals (intentionally unprotected ── public links for parents/staff) ── */}
+    <Route path="/parents/:portalSlug" element={<ParentPortal />} /> <Route path="/staff/:portalSlug" element={<StaffPortal />} /> 
+    {/* ── Hotel guest menu (intentionally unprotected ── public QR link + TV signage) ── */} 
+    <Route path="/menu/:propertyId" element={<GuestMenuPage />} /> 
+   <Route path="/display/:propertyId" element={<MenuSignagePage />} />
+    <Route path="*" element={<Navigate to="/" replace />} /> 
       {/* ── Education portals (intentionally unprotected — public links for parents/staff) ── */}
       <Route path="/parents/:portalSlug" element={<ParentPortal />} />
       <Route path="/staff/:portalSlug" element={<StaffPortal />} />

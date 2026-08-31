@@ -21,26 +21,33 @@ import {
 import {
   getFirestore,
   collection,
-  query,
-  orderBy,
   getDocs,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
   serverTimestamp,
-  where,
-  setDoc,
 } from "firebase/firestore";
 
 // ─────────────────────────────────────────────────────────────
-// Shared helper: keep the Room Management record in sync with
-// whatever is happening to a check-in (pending/checked-in/out).
+// This modal now reads and writes the SAME `reservations` collection
+// that Reservations.jsx uses — check-in/check-out is just a status
+// change on a reservation, not a separate record in a separate
+// collection. That's what keeps the two screens in sync.
+//
+// Status vocabulary matches Reservations.jsx's STATUS_CONFIG:
+// confirmed | pending | checked_in | checked_out | cancelled | no_show
 // ─────────────────────────────────────────────────────────────
-const ROOM_STATUS_BY_CHECKIN_STATUS = {
+
+// Keep Room Management's status in sync with whatever a reservation's
+// status becomes.
+const ROOM_STATUS_BY_RESERVATION_STATUS = {
+  confirmed: "reserved",
   pending: "reserved",
-  checkedin: "occupied",
-  checkedout: "available",
+  checked_in: "occupied",
+  checked_out: "available",
+  cancelled: "available",
+  no_show: "available",
 };
 
 export const syncRoomStatus = async (userId, roomId, status) => {
@@ -57,13 +64,18 @@ export const syncRoomStatus = async (userId, roomId, status) => {
   }
 };
 
-// Helper function to create check-in from invoice
+// Firestore Timestamps expose toMillis(); fall back to 0 for records that
+// predate the createdAt field so sorting doesn't silently drop them.
+const toMillis = (ts) =>
+  ts && typeof ts.toMillis === "function" ? ts.toMillis() : 0;
+
+// Helper function to create a reservation (status "pending") from an invoice
 export const createCheckInFromInvoice = async (userId, invoiceData) => {
   if (!userId || !invoiceData) return;
 
   try {
     const db = getFirestore();
-    const checkInData = {
+    const reservationData = {
       guestName: invoiceData.guest?.name || "",
       guestId: invoiceData.guest?.guestId || "",
       guestEmail: invoiceData.guest?.email || "",
@@ -87,19 +99,22 @@ export const createCheckInFromInvoice = async (userId, invoiceData) => {
       source: "invoice",
     };
 
-    await addDoc(collection(db, "users", userId, "checkIns"), checkInData);
-    if (checkInData.roomId) {
-      await syncRoomStatus(userId, checkInData.roomId, "reserved");
+    await addDoc(
+      collection(db, "users", userId, "reservations"),
+      reservationData,
+    );
+    if (reservationData.roomId) {
+      await syncRoomStatus(userId, reservationData.roomId, "reserved");
     }
-    console.log("Check-in created from invoice successfully");
+    console.log("Reservation created from invoice successfully");
     return true;
   } catch (error) {
-    console.error("Error creating check-in from invoice:", error);
+    console.error("Error creating reservation from invoice:", error);
     return false;
   }
 };
 
-// Helper function to create check-in from guest
+// Helper function to create a reservation (status "pending") from a guest
 export const createCheckInFromGuest = async (
   userId,
   guestData,
@@ -109,7 +124,7 @@ export const createCheckInFromGuest = async (
 
   try {
     const db = getFirestore();
-    const checkInData = {
+    const reservationData = {
       guestName: guestData.name || "",
       guestId: guestData.guestId || "",
       guestEmail: guestData.email || "",
@@ -132,149 +147,160 @@ export const createCheckInFromGuest = async (
       source: "guest",
     };
 
-    await addDoc(collection(db, "users", userId, "checkIns"), checkInData);
-    if (checkInData.roomId) {
-      await syncRoomStatus(userId, checkInData.roomId, "reserved");
+    await addDoc(
+      collection(db, "users", userId, "reservations"),
+      reservationData,
+    );
+    if (reservationData.roomId) {
+      await syncRoomStatus(userId, reservationData.roomId, "reserved");
     }
-    console.log("Check-in created from guest successfully");
+    console.log("Reservation created from guest successfully");
     return true;
   } catch (error) {
-    console.error("Error creating check-in from guest:", error);
+    console.error("Error creating reservation from guest:", error);
     return false;
   }
 };
 
 const CheckInOutModal = ({ showModal, setShowModal, user }) => {
-  const [activeTab, setActiveTab] = useState("pending"); // pending, checkedin, checkedout
+  const [activeTab, setActiveTab] = useState("upcoming"); // upcoming, checked_in, checked_out, all
   const [searchTerm, setSearchTerm] = useState("");
-  const [checkIns, setCheckIns] = useState([]);
+  const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedCheckIn, setSelectedCheckIn] = useState(null);
+  const [selectedReservation, setSelectedReservation] = useState(null);
   const [filterDate, setFilterDate] = useState("");
 
   useEffect(() => {
     if (showModal && user?.uid) {
-      loadCheckIns();
+      loadReservations();
     }
-  }, [showModal, user, activeTab]);
+  }, [showModal, user]);
 
-  const loadCheckIns = async () => {
+  const loadReservations = async () => {
     if (!user?.uid) return;
 
     setLoading(true);
     try {
       const db = getFirestore();
-      const checkInsRef = collection(db, "users", user.uid, "checkIns");
-
-      let q = query(checkInsRef, orderBy("createdAt", "desc"));
-
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setCheckIns(data);
+      // No server-side orderBy: Firestore's orderBy() silently excludes
+      // any document missing that field, which would hide reservations
+      // created without a createdAt timestamp. Sort client-side instead.
+      const snapshot = await getDocs(
+        collection(db, "users", user.uid, "reservations"),
+      );
+      const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+      setReservations(data);
     } catch (error) {
-      console.error("Error loading check-ins:", error);
+      console.error("Error loading reservations:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCheckIn = async (checkInData) => {
+  const handleCheckIn = async (reservation) => {
     if (!user?.uid) return;
 
     try {
       const db = getFirestore();
-      await updateDoc(doc(db, "users", user.uid, "checkIns", checkInData.id), {
-        status: "checkedin",
-        actualCheckInTime: new Date().toISOString(),
-        updatedAt: serverTimestamp(),
-      });
+      await updateDoc(
+        doc(db, "users", user.uid, "reservations", reservation.id),
+        {
+          status: "checked_in",
+          actualCheckInTime: new Date().toISOString(),
+          updatedAt: serverTimestamp(),
+        },
+      );
 
       // Room is now occupied
-      if (checkInData.roomId) {
-        await syncRoomStatus(user.uid, checkInData.roomId, "occupied");
+      if (reservation.roomId) {
+        await syncRoomStatus(user.uid, reservation.roomId, "occupied");
       }
 
       alert("Guest checked in successfully!");
-      loadCheckIns();
+      loadReservations();
     } catch (error) {
       console.error("Error checking in:", error);
       alert("Failed to check in guest");
     }
   };
 
-  const handleCheckOut = async (checkInData) => {
+  const handleCheckOut = async (reservation) => {
     if (!user?.uid) return;
 
     try {
       const db = getFirestore();
-      await updateDoc(doc(db, "users", user.uid, "checkIns", checkInData.id), {
-        status: "checkedout",
-        actualCheckOutTime: new Date().toISOString(),
-        updatedAt: serverTimestamp(),
-      });
+      await updateDoc(
+        doc(db, "users", user.uid, "reservations", reservation.id),
+        {
+          status: "checked_out",
+          actualCheckOutTime: new Date().toISOString(),
+          updatedAt: serverTimestamp(),
+        },
+      );
 
       // Room frees up — Room Management will mark it available. If the
       // room needs cleaning first, staff can flip it to "cleaning" there.
-      if (checkInData.roomId) {
-        await syncRoomStatus(user.uid, checkInData.roomId, "available");
+      if (reservation.roomId) {
+        await syncRoomStatus(user.uid, reservation.roomId, "available");
       }
 
       alert("Guest checked out successfully!");
-      loadCheckIns();
+      loadReservations();
     } catch (error) {
       console.error("Error checking out:", error);
       alert("Failed to check out guest");
     }
   };
 
-  const handleDelete = async (checkInData) => {
-    if (
-      !window.confirm("Are you sure you want to delete this check-in record?")
-    )
+  const handleDelete = async (reservation) => {
+    if (!window.confirm("Are you sure you want to delete this reservation?"))
       return;
     if (!user?.uid) return;
 
     try {
       const db = getFirestore();
-      await deleteDoc(doc(db, "users", user.uid, "checkIns", checkInData.id));
+      await deleteDoc(
+        doc(db, "users", user.uid, "reservations", reservation.id),
+      );
 
-      // Deleting a pending/checked-in record releases the room again.
-      if (checkInData.roomId && checkInData.status !== "checkedout") {
-        await syncRoomStatus(user.uid, checkInData.roomId, "available");
+      // Deleting an active (not yet checked-out/cancelled) reservation
+      // releases its room again.
+      if (
+        reservation.roomId &&
+        !["checked_out", "cancelled", "no_show"].includes(reservation.status)
+      ) {
+        await syncRoomStatus(user.uid, reservation.roomId, "available");
       }
 
-      alert("Check-in deleted successfully!");
-      loadCheckIns();
+      alert("Reservation deleted successfully!");
+      loadReservations();
     } catch (error) {
-      console.error("Error deleting check-in:", error);
-      alert("Failed to delete check-in");
+      console.error("Error deleting reservation:", error);
+      alert("Failed to delete reservation");
     }
   };
 
-  const filteredCheckIns = checkIns.filter((checkIn) => {
+  const filteredReservations = reservations.filter((r) => {
     const matchesSearch =
-      checkIn.guestName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      checkIn.roomNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      checkIn.guestId?.toLowerCase().includes(searchTerm.toLowerCase());
+      r.guestName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.roomNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.guestId?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesTab =
       activeTab === "all"
         ? true
-        : activeTab === "pending"
-          ? checkIn.status === "pending"
-          : activeTab === "checkedin"
-            ? checkIn.status === "checkedin"
-            : activeTab === "checkedout"
-              ? checkIn.status === "checkedout"
+        : activeTab === "upcoming"
+          ? ["pending", "confirmed"].includes(r.status)
+          : activeTab === "checked_in"
+            ? r.status === "checked_in"
+            : activeTab === "checked_out"
+              ? r.status === "checked_out"
               : true;
 
     const matchesDate = filterDate
-      ? checkIn.checkInDate?.startsWith(filterDate)
+      ? r.checkInDate?.startsWith(filterDate)
       : true;
 
     return matchesSearch && matchesTab && matchesDate;
@@ -284,10 +310,16 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
     switch (status) {
       case "pending":
         return "bg-yellow-100 text-yellow-800";
-      case "checkedin":
+      case "confirmed":
+        return "bg-blue-100 text-blue-800";
+      case "checked_in":
         return "bg-green-100 text-green-800";
-      case "checkedout":
+      case "checked_out":
         return "bg-gray-100 text-gray-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "no_show":
+        return "bg-orange-100 text-orange-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -296,10 +328,11 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case "pending":
+      case "confirmed":
         return <Clock className="w-4 h-4" />;
-      case "checkedin":
+      case "checked_in":
         return <UserCheck className="w-4 h-4" />;
-      case "checkedout":
+      case "checked_out":
         return <UserX className="w-4 h-4" />;
       default:
         return <Clock className="w-4 h-4" />;
@@ -307,10 +340,12 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
   };
 
   const stats = {
-    pending: checkIns.filter((c) => c.status === "pending").length,
-    checkedin: checkIns.filter((c) => c.status === "checkedin").length,
-    checkedout: checkIns.filter((c) => c.status === "checkedout").length,
-    total: checkIns.length,
+    upcoming: reservations.filter((r) =>
+      ["pending", "confirmed"].includes(r.status),
+    ).length,
+    checkedIn: reservations.filter((r) => r.status === "checked_in").length,
+    checkedOut: reservations.filter((r) => r.status === "checked_out").length,
+    total: reservations.length,
   };
 
   if (!showModal) return null;
@@ -341,9 +376,9 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
           <div className="bg-white p-4 rounded-lg border-2 border-yellow-200">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-600">Pending</div>
+                <div className="text-sm text-gray-600">Upcoming</div>
                 <div className="text-2xl font-bold text-yellow-600">
-                  {stats.pending}
+                  {stats.upcoming}
                 </div>
               </div>
               <Clock className="w-8 h-8 text-yellow-600" />
@@ -354,7 +389,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
               <div>
                 <div className="text-sm text-gray-600">Checked In</div>
                 <div className="text-2xl font-bold text-green-600">
-                  {stats.checkedin}
+                  {stats.checkedIn}
                 </div>
               </div>
               <UserCheck className="w-8 h-8 text-green-600" />
@@ -365,7 +400,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
               <div>
                 <div className="text-sm text-gray-600">Checked Out</div>
                 <div className="text-2xl font-bold text-gray-600">
-                  {stats.checkedout}
+                  {stats.checkedOut}
                 </div>
               </div>
               <UserX className="w-8 h-8 text-gray-600" />
@@ -414,7 +449,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                Add Check-In
+                Add Reservation
               </button>
             </div>
           </div>
@@ -423,12 +458,16 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
           <div className="flex gap-2 border-b">
             {[
               { id: "all", label: "All", count: stats.total },
-              { id: "pending", label: "Pending", count: stats.pending },
-              { id: "checkedin", label: "Checked In", count: stats.checkedin },
+              { id: "upcoming", label: "Upcoming", count: stats.upcoming },
               {
-                id: "checkedout",
+                id: "checked_in",
+                label: "Checked In",
+                count: stats.checkedIn,
+              },
+              {
+                id: "checked_out",
                 label: "Checked Out",
-                count: stats.checkedout,
+                count: stats.checkedOut,
               },
             ].map((tab) => (
               <button
@@ -446,41 +485,41 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
           </div>
         </div>
 
-        {/* Check-Ins List */}
+        {/* Reservations List */}
         <div className="flex-1 overflow-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
-          ) : filteredCheckIns.length === 0 ? (
+          ) : filteredReservations.length === 0 ? (
             <div className="text-center py-12">
               <Bed className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No check-ins found</p>
+              <p className="text-gray-500 text-lg">No reservations found</p>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="mt-4 text-blue-600 hover:underline"
               >
-                Add your first check-in
+                Add your first reservation
               </button>
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredCheckIns.map((checkIn) => (
+              {filteredReservations.map((reservation) => (
                 <div
-                  key={checkIn.id}
+                  key={reservation.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-gray-900">
-                          {checkIn.guestName}
+                          {reservation.guestName}
                         </h3>
                         <span
-                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusBadge(checkIn.status)}`}
+                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs text-sm font-medium ${getStatusBadge(reservation.status)}`}
                         >
-                          {getStatusIcon(checkIn.status)}
-                          {checkIn.status?.toUpperCase()}
+                          {getStatusIcon(reservation.status)}
+                          {reservation.status?.replace("_", " ").toUpperCase()}
                         </span>
                       </div>
 
@@ -492,7 +531,9 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                               Guest ID:
                             </span>
                           </div>
-                          <div className="ml-5">{checkIn.guestId || "N/A"}</div>
+                          <div className="ml-5">
+                            {reservation.guestId || "N/A"}
+                          </div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
@@ -500,7 +541,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                             <span className="text-sm font-medium">Room:</span>
                           </div>
                           <div className="ml-5">
-                            {checkIn.roomNumber} - {checkIn.roomType}
+                            {reservation.roomNumber} - {reservation.roomType}
                           </div>
                         </div>
                         <div>
@@ -510,7 +551,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                               Check-In:
                             </span>
                           </div>
-                          <div className="ml-5">{checkIn.checkInDate}</div>
+                          <div className="ml-5">{reservation.checkInDate}</div>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
@@ -519,31 +560,33 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                               Check-Out:
                             </span>
                           </div>
-                          <div className="ml-5">{checkIn.checkOutDate}</div>
+                          <div className="ml-5">{reservation.checkOutDate}</div>
                         </div>
                       </div>
 
-                      {checkIn.notes && (
+                      {reservation.notes && (
                         <div className="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
                           <span className="text-sm font-medium">Notes:</span>{" "}
-                          {checkIn.notes}
+                          {reservation.notes}
                         </div>
                       )}
                     </div>
 
                     <div className="flex flex-col gap-2 ml-4">
-                      {checkIn.status === "pending" && (
+                      {["pending", "confirmed"].includes(
+                        reservation.status,
+                      ) && (
                         <button
-                          onClick={() => handleCheckIn(checkIn)}
+                          onClick={() => handleCheckIn(reservation)}
                           className="flex items-center gap-2 px-3 py-2 bg-green-600 text-gray-800 rounded-lg hover:bg-green-700 text-sm transition-colors"
                         >
                           <CheckCircle className="w-4 h-4" />
                           Check In
                         </button>
                       )}
-                      {checkIn.status === "checkedin" && (
+                      {reservation.status === "checked_in" && (
                         <button
-                          onClick={() => handleCheckOut(checkIn)}
+                          onClick={() => handleCheckOut(reservation)}
                           className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-gray-800 rounded-lg hover:bg-blue-700 text-sm transition-colors"
                         >
                           <UserX className="w-4 h-4" />
@@ -552,7 +595,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                       )}
                       <button
                         onClick={() => {
-                          setSelectedCheckIn(checkIn);
+                          setSelectedReservation(reservation);
                           setShowAddModal(true);
                         }}
                         className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-colors"
@@ -561,7 +604,7 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(checkIn)}
+                        onClick={() => handleDelete(reservation)}
                         className="flex items-center gap-2 px-3 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 text-sm transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -578,14 +621,14 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <AddCheckInModal
+        <AddReservationModal
           showModal={showAddModal}
           setShowModal={setShowAddModal}
           user={user}
-          existingCheckIn={selectedCheckIn}
+          existingReservation={selectedReservation}
           onSaved={() => {
-            loadCheckIns();
-            setSelectedCheckIn(null);
+            loadReservations();
+            setSelectedReservation(null);
           }}
         />
       )}
@@ -593,12 +636,12 @@ const CheckInOutModal = ({ showModal, setShowModal, user }) => {
   );
 };
 
-// Add/Edit Check-In Modal Component
-const AddCheckInModal = ({
+// Add/Edit Reservation Modal Component (quick check-in style form)
+const AddReservationModal = ({
   showModal,
   setShowModal,
   user,
-  existingCheckIn,
+  existingReservation,
   onSaved,
 }) => {
   const [formData, setFormData] = useState({
@@ -619,10 +662,10 @@ const AddCheckInModal = ({
   const [roomsLoading, setRoomsLoading] = useState(false);
 
   useEffect(() => {
-    if (existingCheckIn) {
-      setFormData({ roomId: "", ...existingCheckIn });
+    if (existingReservation) {
+      setFormData({ roomId: "", ...existingReservation });
     }
-  }, [existingCheckIn]);
+  }, [existingReservation]);
 
   // Pull the room list straight from Room Management so the dropdown is
   // always in sync with whatever rooms actually exist.
@@ -638,12 +681,14 @@ const AddCheckInModal = ({
     setRoomsLoading(true);
     try {
       const db = getFirestore();
-      const q = query(
-        collection(db, "users", user.uid, "rooms"),
-        orderBy("roomNumber", "asc"),
+      const snap = await getDocs(collection(db, "users", user.uid, "rooms"));
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) =>
+        (a.roomNumber || "").localeCompare(b.roomNumber || "", undefined, {
+          numeric: true,
+        }),
       );
-      const snap = await getDocs(q);
-      setRooms(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      setRooms(data);
     } catch (error) {
       console.error("Error loading rooms:", error);
     } finally {
@@ -651,9 +696,9 @@ const AddCheckInModal = ({
     }
   };
 
-  // Rooms selectable for a NEW check-in: only ones actually free right now,
-  // plus whichever room the existing record already has (so editing doesn't
-  // lose the current selection if that room is no longer "available").
+  // Rooms selectable for a NEW reservation: only ones actually free right
+  // now, plus whichever room the existing record already has (so editing
+  // doesn't lose the current selection if that room's status moved on).
   const selectableRooms = rooms.filter(
     (r) => r.status === "available" || r.id === formData.roomId,
   );
@@ -684,23 +729,24 @@ const AddCheckInModal = ({
         updatedAt: serverTimestamp(),
       };
 
-      if (existingCheckIn) {
+      if (existingReservation) {
         await updateDoc(
-          doc(db, "users", user.uid, "checkIns", existingCheckIn.id),
+          doc(db, "users", user.uid, "reservations", existingReservation.id),
           dataToSave,
         );
-        alert("Check-in updated successfully!");
+        alert("Reservation updated successfully!");
       } else {
-        await addDoc(collection(db, "users", user.uid, "checkIns"), {
+        await addDoc(collection(db, "users", user.uid, "reservations"), {
           ...dataToSave,
           createdAt: serverTimestamp(),
         });
-        alert("Check-in added successfully!");
+        alert("Reservation added successfully!");
       }
 
-      // Reflect the check-in's current status back onto the room record
-      // (pending -> reserved, checkedin -> occupied, checkedout -> available).
-      const roomStatus = ROOM_STATUS_BY_CHECKIN_STATUS[dataToSave.status];
+      // Reflect the reservation's current status back onto the room
+      // record (pending/confirmed -> reserved, checked_in -> occupied,
+      // checked_out -> available).
+      const roomStatus = ROOM_STATUS_BY_RESERVATION_STATUS[dataToSave.status];
       if (roomStatus) {
         await syncRoomStatus(user.uid, formData.roomId, roomStatus);
       }
@@ -708,8 +754,8 @@ const AddCheckInModal = ({
       onSaved();
       setShowModal(false);
     } catch (error) {
-      console.error("Error saving check-in:", error);
-      alert("Failed to save check-in");
+      console.error("Error saving reservation:", error);
+      alert("Failed to save reservation");
     }
   };
 
@@ -720,7 +766,7 @@ const AddCheckInModal = ({
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b flex items-center justify-between">
           <h2 className="text-xl font-semibold">
-            {existingCheckIn ? "Edit Check-In" : "Add New Check-In"}
+            {existingReservation ? "Edit Reservation" : "Add New Reservation"}
           </h2>
           <button
             onClick={() => setShowModal(false)}
@@ -891,7 +937,7 @@ const AddCheckInModal = ({
                 type="submit"
                 className="flex-1 bg-blue-600 text-gray-800 py-3 rounded-lg hover:bg-blue-700 text-sm font-medium"
               >
-                {existingCheckIn ? "Update Check-In" : "Add Check-In"}
+                {existingReservation ? "Update Reservation" : "Add Reservation"}
               </button>
               <button
                 type="button"

@@ -71,11 +71,37 @@ const STATUS_CONFIG = {
   },
 };
 
+// Keep Room Management's status in sync with whatever a reservation's
+// status becomes. Same map CheckInOutModal uses — reservations and rooms
+// now share one source of truth.
+const ROOM_STATUS_BY_RESERVATION_STATUS = {
+  confirmed: "reserved",
+  pending: "reserved",
+  checked_in: "occupied",
+  checked_out: "available",
+  cancelled: "available",
+  no_show: "available",
+};
+
+const syncRoomStatus = async (db, userId, roomId, status) => {
+  if (!userId || !roomId || !status) return;
+  try {
+    await updateDoc(doc(db, "users", userId, "rooms", roomId), {
+      status,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    // Don't let a room-sync failure block saving the reservation.
+    console.error("Error syncing room status:", error);
+  }
+};
+
 const EMPTY_FORM = {
   guestName: "",
   guestEmail: "",
   guestPhone: "",
   guestId: "",
+  roomId: "",
   roomNumber: "",
   roomType: "",
   checkInDate: "",
@@ -117,11 +143,17 @@ export default function Reservations({ user }) {
   const [viewReservation, setViewReservation] = useState(null);
   // Calendar month state
   const [calMonth, setCalMonth] = useState(new Date());
+  // Rooms, pulled live from Room Management for the Room Number dropdown.
+  const [rooms, setRooms] = useState([]);
+  const [roomsLoading, setRoomsLoading] = useState(false);
 
   const db = getFirestore();
 
   useEffect(() => {
-    if (user?.uid) fetchReservations();
+    if (user?.uid) {
+      fetchReservations();
+      loadRooms();
+    }
   }, [user]);
 
   const fetchReservations = async () => {
@@ -144,6 +176,53 @@ export default function Reservations({ user }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadRooms = async () => {
+    if (!user?.uid) return;
+    setRoomsLoading(true);
+    try {
+      // Same reasoning as above: fetch raw and sort client-side rather
+      // than relying on a server-side orderBy that could hide rooms.
+      const snap = await getDocs(collection(db, "users", user.uid, "rooms"));
+      const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) =>
+        (a.roomNumber || "").localeCompare(b.roomNumber || "", undefined, {
+          numeric: true,
+        }),
+      );
+      setRooms(data);
+    } catch (e) {
+      console.error("Error loading rooms:", e);
+    } finally {
+      setRoomsLoading(false);
+    }
+  };
+
+  // Rooms selectable in the dropdown: only ones actually free right now,
+  // plus whichever room is already on this reservation (so editing doesn't
+  // lose the selection just because that room's status moved on).
+  const selectableRooms = rooms.filter(
+    (r) => r.status === "available" || r.id === form.roomId,
+  );
+
+  const handleRoomSelect = (roomId) => {
+    const room = rooms.find((r) => r.id === roomId);
+    const updated = {
+      ...form,
+      roomId,
+      roomNumber: room?.roomNumber || "",
+      roomType: room?.roomType || form.roomType,
+    };
+    // Convenience: pull the room's nightly rate across if one hasn't been
+    // set yet, and recalculate the total to match.
+    if (room?.ratePerNight && !form.ratePerNight) {
+      updated.ratePerNight = String(room.ratePerNight);
+      updated.totalAmount = String(
+        Number(form.numberOfNights || 0) * Number(room.ratePerNight),
+      );
+    }
+    setForm(updated);
   };
 
   // Auto-calc total when rate or nights change
@@ -193,8 +272,17 @@ export default function Reservations({ user }) {
           createdAt: serverTimestamp(),
         });
       }
+
+      // Keep the room's status in Room Management aligned with whatever
+      // this reservation's status now is.
+      const roomStatus = ROOM_STATUS_BY_RESERVATION_STATUS[payload.status];
+      if (roomStatus && form.roomId) {
+        await syncRoomStatus(db, user.uid, form.roomId, roomStatus);
+      }
+
       setShowModal(false);
       fetchReservations();
+      loadRooms();
     } catch (e) {
       console.error(e);
     } finally {
@@ -208,6 +296,13 @@ export default function Reservations({ user }) {
         status: newStatus,
         updatedAt: serverTimestamp(),
       });
+
+      const roomStatus = ROOM_STATUS_BY_RESERVATION_STATUS[newStatus];
+      if (roomStatus && r.roomId) {
+        await syncRoomStatus(db, user.uid, r.roomId, roomStatus);
+        loadRooms();
+      }
+
       setReservations((prev) =>
         prev.map((x) => (x.id === r.id ? { ...x, status: newStatus } : x)),
       );
@@ -220,7 +315,19 @@ export default function Reservations({ user }) {
 
   const handleDelete = async (id) => {
     try {
+      const target = reservations.find((r) => r.id === id);
       await deleteDoc(doc(db, "users", user.uid, "reservations", id));
+
+      // Deleting an active (not yet checked-out/cancelled) reservation
+      // releases its room back to available.
+      if (
+        target?.roomId &&
+        !["checked_out", "cancelled", "no_show"].includes(target.status)
+      ) {
+        await syncRoomStatus(db, user.uid, target.roomId, "available");
+        loadRooms();
+      }
+
       setDeleteConfirm(null);
       setViewReservation(null);
       fetchReservations();
@@ -913,24 +1020,35 @@ export default function Reservations({ user }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className={labelCls}>Room Number</label>
-                    <input
+                    <select
                       className={inputCls}
-                      value={form.roomNumber}
-                      onChange={(e) =>
-                        handleFormChange("roomNumber", e.target.value)
-                      }
-                      placeholder="e.g. 205"
-                    />
+                      value={form.roomId}
+                      onChange={(e) => handleRoomSelect(e.target.value)}
+                    >
+                      <option value="">
+                        {roomsLoading
+                          ? "Loading rooms..."
+                          : selectableRooms.length === 0
+                            ? "No available rooms — add one in Room Management"
+                            : "Select a room"}
+                      </option>
+                      {selectableRooms.map((room) => (
+                        <option key={room.id} value={room.id}>
+                          {room.roomNumber} — {room.roomType}
+                          {room.status !== "available"
+                            ? ` (${room.status})`
+                            : ""}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className={labelCls}>Room Type</label>
                     <input
-                      className={inputCls}
+                      className={`${inputCls} bg-[#f8fafc]`}
                       value={form.roomType}
-                      onChange={(e) =>
-                        handleFormChange("roomType", e.target.value)
-                      }
-                      placeholder="e.g. Deluxe Double"
+                      readOnly
+                      placeholder="Auto-filled from selected room"
                     />
                   </div>
                   <div>

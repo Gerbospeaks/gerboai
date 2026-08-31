@@ -43,8 +43,7 @@ import HotelAIExtractor from "./HotelAIExtractor";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import GuestsListModal from "./GuestsListModal";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
-
-// ── New sidebar + new pages ────────────────────────────────────────────────
+import GuestMenuPage from "./GuestMenuPage";
 import HotelSidebar, { MobileBottomNav } from "./HotelSidebar";
 import RoomManagement from "./RoomManagement";
 import ReportsView from "./ReportsView";
