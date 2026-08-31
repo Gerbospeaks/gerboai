@@ -17,16 +17,26 @@ const MENU_CATEGORIES = [
   "Soft Drinks",
   "Specials",
 ];
+const ROTATE_MS = 4000;
 
 /**
- * MenuSignagePage — public, unauthenticated route: /display/:propertyId
- * Meant to be left open full-screen on a TV/monitor at the lodge.
+ * MenuSignagePage — public route: /display/:propertyId
+ *
+ * Mirrors GuestMenuPage's design: one static grid (no page-level sliding),
+ * with each category cell independently rotating through its own items
+ * every ROTATE_MS. All cells share one tick counter for simplicity, but
+ * since each computes `tick % items.length` against its OWN item count,
+ * a category with 1 item never visibly changes while a category with 3
+ * cycles through all of them — reads as per-cell/independent rotation
+ * even though it's one timer. Kept as a dark, TV-friendly layout with a
+ * header clock since a TV has no one to swipe it.
  */
 export default function MenuSignagePage() {
   const { propertyId } = useParams();
   const [menuItems, setMenuItems] = useState([]);
   const [propertyInfo, setPropertyInfo] = useState(null);
   const [now, setNow] = useState(new Date());
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!propertyId) return;
@@ -52,36 +62,47 @@ export default function MenuSignagePage() {
     return () => clearInterval(t);
   }, []);
 
+  useEffect(() => {
+    const t = setInterval(() => setTick((v) => v + 1), ROTATE_MS);
+    return () => clearInterval(t);
+  }, []);
+
   const currency = propertyInfo?.currencySymbol || "$";
   const available = menuItems.filter((m) => m.available);
   const categoriesWithItems = MENU_CATEGORIES.filter(
     (cat) => available.filter((m) => m.category === cat).length > 0,
   );
-  const columnCount = Math.min(Math.max(categoriesWithItems.length, 1), 3);
 
   return (
-    <div className="min-h-screen bg-[#161311] text-[#f5f1ea] flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-10 py-6 border-b border-[#2e2a24] flex-shrink-0">
-        <div className="flex items-center gap-4">
+    <div className="h-screen w-full bg-[#161311] text-[#f5f1ea] flex flex-col overflow-hidden">
+      <style>{`
+        .slide-in { animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+      `}</style>
+
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#2e2a24] flex-shrink-0">
+        <div className="flex items-center gap-3">
           {propertyInfo?.logoUrl && (
             <img
               src={propertyInfo.logoUrl}
               alt=""
-              className="w-11 h-11 object-contain rounded"
+              className="w-9 h-9 object-contain rounded"
             />
           )}
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="text-xl font-bold tracking-tight leading-none">
               {propertyInfo?.propertyName || "Menu"}
             </h1>
-            <p className="text-xs text-[#a89f8e] mt-0.5">Today's offering</p>
+            <p className="text-[11px] text-[#a89f8e] mt-0.5">
+              Today's offering
+            </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xl font-semibold tabular-nums">
+          <p className="text-lg font-semibold tabular-nums leading-none">
             {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
-          <p className="text-xs text-[#a89f8e] mt-0.5">
+          <p className="text-[11px] text-[#a89f8e] mt-0.5">
             {now.toLocaleDateString([], {
               weekday: "long",
               month: "long",
@@ -91,73 +112,95 @@ export default function MenuSignagePage() {
         </div>
       </div>
 
-      <div className="flex-1 px-10 py-7 overflow-hidden">
-        {categoriesWithItems.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
-            <Utensils className="w-10 h-10 text-[#5a5347]" />
-            <p className="text-lg text-[#a89f8e]">
-              Menu will appear here once items are marked available.
-            </p>
-          </div>
-        ) : (
+      {categoriesWithItems.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center px-6">
+          <Utensils className="w-10 h-10 text-[#5a5347]" />
+          <p className="text-lg text-[#a89f8e]">
+            Menu will appear here once items are marked available.
+          </p>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto">
           <div
-            className="h-full grid gap-x-10"
-            style={{
-              gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
-            }}
+            className="grid gap-px bg-[#2e2a24]"
+            style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
           >
             {categoriesWithItems.map((cat) => {
               const items = available.filter((m) => m.category === cat);
+              const activeIdx = tick % items.length;
+              const activeItem = items[activeIdx];
+
               return (
-                <div key={cat} className="min-w-0 flex flex-col">
-                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#3a352c]">
+                <div
+                  key={cat}
+                  className="relative bg-[#161311] aspect-square overflow-hidden"
+                >
+                  {/* Full-bleed image, fills the whole cell */}
+                  {activeItem && (
+                    <div
+                      key={activeItem.id}
+                      className="slide-in absolute inset-0"
+                    >
+                      {activeItem.imageUrl ? (
+                        <img
+                          src={activeItem.imageUrl}
+                          alt={activeItem.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-[#211d19]">
+                          <ImageOff className="w-6 h-6 text-[#5a5347]" />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Gradient scrim so overlaid text stays legible over any image */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/40 pointer-events-none" />
+
+                  {/* Category label */}
+                  <div className="absolute top-0 left-0 right-0 flex items-center gap-2 px-3 py-2.5">
                     <span className="w-1.5 h-4 bg-[#d97706] rounded-full" />
-                    <h2 className="text-sm font-bold text-[#d97706] uppercase tracking-[0.2em]">
+                    <h2 className="text-sm font-bold text-[#f5f1ea] uppercase tracking-[0.15em] truncate drop-shadow">
                       {cat}
                     </h2>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 overflow-hidden">
-                    {items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="bg-[#211d19] border border-[#3a352c] rounded-lg overflow-hidden"
-                      >
-                        <div className="aspect-[4/3] bg-[#2a251f] relative">
-                          {item.imageUrl ? (
-                            <img
-                              src={item.imageUrl}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
+
+                  {activeItem?.popular && (
+                    <span className="absolute top-2.5 right-2.5 bg-[#d97706] text-white rounded-full p-1">
+                      <Flame className="w-3 h-3" />
+                    </span>
+                  )}
+
+                  {/* Name, price, and rotation dots pinned to the bottom of the cell */}
+                  {activeItem && (
+                    <div className="absolute bottom-0 left-0 right-0 px-3 pb-2.5">
+                      <p className="text-xs font-semibold leading-snug line-clamp-2 text-[#f5f1ea] drop-shadow">
+                        {activeItem.name}
+                      </p>
+                      <span className="inline-block mt-1.5 text-xs font-bold text-[#161311] bg-[#e8b978] px-2 py-0.5 rounded">
+                        {currency}
+                        {Number(activeItem.price).toFixed(2)}
+                      </span>
+
+                      {items.length > 1 && (
+                        <div className="flex gap-1 mt-2 justify-center">
+                          {items.map((_, i) => (
+                            <span
+                              key={i}
+                              className={`h-1 rounded-full transition-all ${i === activeIdx ? "w-4 bg-[#d97706]" : "w-1 bg-white/30"}`}
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageOff className="w-5 h-5 text-[#5a5347]" />
-                            </div>
-                          )}
-                          {item.popular && (
-                            <span className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-[#d97706] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                              <Flame className="w-2.5 h-2.5" /> Popular
-                            </span>
-                          )}
+                          ))}
                         </div>
-                        <div className="p-2">
-                          <p className="text-xs font-semibold leading-snug truncate">
-                            {item.name}
-                          </p>
-                          <span className="inline-block mt-1 text-xs font-bold text-[#161311] bg-[#e8b978] px-1.5 py-0.5 rounded">
-                            {currency}
-                            {Number(item.price).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

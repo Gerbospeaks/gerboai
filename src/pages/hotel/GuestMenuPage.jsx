@@ -17,10 +17,18 @@ const MENU_CATEGORIES = [
   "Soft Drinks",
   "Specials",
 ];
+const ROTATE_MS = 4000;
 
 /**
- * GuestMenuPage — public, unauthenticated route: /menu/:propertyId
- * Requires the public Firestore read rules on menuItems + settings/propertyInfo.
+ * GuestMenuPage — public route: /menu/:propertyId
+ *
+ * One static grid, 3 columns, as many rows as there are categories with
+ * items — no page-level sliding. Instead, each category cell independently
+ * rotates through its own items every ROTATE_MS if it has more than one.
+ * All cells share one tick counter for simplicity, but since each computes
+ * `tick % items.length` against its OWN item count, a category with 1 item
+ * never visibly changes while a category with 3 cycles through all of them —
+ * so the rotation reads as per-cell/independent even though it's one timer.
  */
 export default function GuestMenuPage() {
   const { propertyId } = useParams();
@@ -28,11 +36,11 @@ export default function GuestMenuPage() {
   const [propertyInfo, setPropertyInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!propertyId) return;
     const db = getFirestore();
-
     const unsubMenu = onSnapshot(
       collection(db, "users", propertyId, "menuItems"),
       (snap) => {
@@ -51,12 +59,16 @@ export default function GuestMenuPage() {
         if (snap.exists()) setPropertyInfo(snap.data());
       },
     );
-
     return () => {
       unsubMenu();
       unsubProperty();
     };
   }, [propertyId]);
+
+  useEffect(() => {
+    const t = setInterval(() => setTick((v) => v + 1), ROTATE_MS);
+    return () => clearInterval(t);
+  }, []);
 
   const currency = propertyInfo?.currencySymbol || "$";
   const available = menuItems.filter((m) => m.available);
@@ -64,17 +76,31 @@ export default function GuestMenuPage() {
     (cat) => available.filter((m) => m.category === cat).length > 0,
   );
 
+  const breakoutStyle = {
+    width: "100vw",
+    position: "relative",
+    left: "50%",
+    right: "50%",
+    marginLeft: "-50vw",
+    marginRight: "-50vw",
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#faf8f4] flex items-center justify-center">
+      <div
+        style={breakoutStyle}
+        className="min-h-screen bg-[#faf8f4] flex items-center justify-center"
+      >
         <Loader2 className="w-6 h-6 text-[#d97706] animate-spin" />
       </div>
     );
   }
-
   if (error) {
     return (
-      <div className="min-h-screen bg-[#faf8f4] flex flex-col items-center justify-center gap-2 px-6 text-center">
+      <div
+        style={breakoutStyle}
+        className="min-h-screen bg-[#faf8f4] flex flex-col items-center justify-center gap-2 px-6 text-center"
+      >
         <Utensils className="w-8 h-8 text-[#cbd5e1]" />
         <p className="text-sm text-[#64748b]">{error}</p>
       </div>
@@ -82,88 +108,88 @@ export default function GuestMenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf8f4]">
-      <div className="bg-[#1e293b] text-white px-5 pt-8 pb-6 text-center">
-        {propertyInfo?.logoUrl && (
-          <img
-            src={propertyInfo.logoUrl}
-            alt=""
-            className="w-12 h-12 object-contain mx-auto mb-3 rounded"
-          />
-        )}
-        <h1 className="text-lg font-bold tracking-tight">
-          {propertyInfo?.propertyName || "Today's Menu"}
-        </h1>
-        <p className="text-xs text-[#94a3b8] mt-1">
-          Restaurant &amp; Bar · updated live
-        </p>
-      </div>
+    <div style={breakoutStyle} className="min-h-screen bg-[#faf8f4]">
+      <style>{`
+        .slide-in { animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+      `}</style>
 
-      <div className="max-w-md mx-auto px-4 py-6 pb-16">
-        {categoriesWithItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-            <Utensils className="w-8 h-8 text-[#cbd5e1]" />
-            <p className="text-sm text-[#94a3b8]">
-              Nothing is marked available right now — check with your server.
-            </p>
-          </div>
-        ) : (
-          categoriesWithItems.map((cat) => {
+     
+
+      {categoriesWithItems.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center px-6">
+          <Utensils className="w-8 h-8 text-[#cbd5e1]" />
+          <p className="text-sm text-[#94a3b8]">
+            Nothing is marked available right now — check with your server.
+          </p>
+        </div>
+      ) : (
+        <div
+          className="grid gap-px bg-[#ece4d3]"
+          style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+        >
+          {categoriesWithItems.map((cat) => {
             const items = available.filter((m) => m.category === cat);
+            const activeIdx = tick % items.length;
+            const activeItem = items[activeIdx];
+
             return (
-              <div key={cat} className="mb-8">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-1.5 h-5 bg-[#d97706] rounded-full" />
-                  <h2 className="text-xs font-bold text-[#92400e] uppercase tracking-widest">
+              <div key={cat} className="bg-white p-2 flex flex-col">
+                <div className="flex items-center gap-1 mb-1.5">
+                  <span className="w-1 h-3 bg-[#d97706] rounded-full flex-shrink-0" />
+                  <h2 className="text-[9px] font-bold text-[#92400e] uppercase tracking-wide truncate">
                     {cat}
                   </h2>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-white border border-[#ece4d3] rounded-xl overflow-hidden shadow-sm"
-                    >
-                      <div className="aspect-square bg-[#f1ede2] relative">
-                        {item.imageUrl ? (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ImageOff className="w-5 h-5 text-[#d6cdb8]" />
-                          </div>
-                        )}
-                        {item.popular && (
-                          <span className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-[#d97706] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                            <Flame className="w-2.5 h-2.5" /> Popular
-                          </span>
-                        )}
-                      </div>
-                      <div className="p-2.5">
-                        <p className="text-xs font-semibold text-[#1e293b] leading-snug">
-                          {item.name}
-                        </p>
-                        {item.description && (
-                          <p className="text-[10px] text-[#a89f8e] mt-0.5 leading-snug line-clamp-2">
-                            {item.description}
-                          </p>
-                        )}
-                        <span className="inline-block mt-1.5 text-xs font-bold text-white bg-[#92400e] px-2 py-0.5 rounded-md">
-                          {currency}
-                          {Number(item.price).toFixed(2)}
+
+                {activeItem && (
+                  <div
+                    key={activeItem.id}
+                    className="slide-in flex-1 flex flex-col"
+                  >
+                    <div className="aspect-square bg-[#f1ede2] rounded-lg overflow-hidden relative mb-1.5">
+                      {activeItem.imageUrl ? (
+                        <img
+                          src={activeItem.imageUrl}
+                          alt={activeItem.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageOff className="w-4 h-4 text-[#d6cdb8]" />
+                        </div>
+                      )}
+                      {activeItem.popular && (
+                        <span className="absolute top-1 left-1 bg-[#d97706] text-white rounded-full p-0.5">
+                          <Flame className="w-2.5 h-2.5" />
                         </span>
-                      </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                    <p className="text-[9px] font-semibold text-[#1e293b] leading-tight line-clamp-2">
+                      {activeItem.name}
+                    </p>
+                    <span className="inline-block mt-1 text-[9px] font-bold text-white bg-[#92400e] px-1.5 py-0.5 rounded self-start">
+                      {currency}
+                      {Number(activeItem.price).toFixed(2)}
+                    </span>
+
+                    {items.length > 1 && (
+                      <div className="flex gap-0.5 mt-1.5 justify-center">
+                        {items.map((_, i) => (
+                          <span
+                            key={i}
+                            className={`w-1 h-1 rounded-full ${i === activeIdx ? "bg-[#92400e]" : "bg-[#e2d8c4]"}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
     </div>
   );
 }
