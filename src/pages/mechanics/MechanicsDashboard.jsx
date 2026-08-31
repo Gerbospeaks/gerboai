@@ -49,6 +49,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
+import DashboardQuickActions from "./DashboardQuickActions";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/img/solidflo-logo.png";
@@ -2330,19 +2331,33 @@ const handleStampConfirm = async (cfg) => {
 )}
           {/* ── Views ──────────────────────────────────────────────────────── */}
           {activeView === "home" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HomeView
-                user={user}
-                onNavigate={(view, docType) => {
-                  if (docType) setDocumentType(docType);
-                  setActiveView(view);
-                }}
-                onGoToDashboard={() => setActiveView("quote")}
-                onSidebarToggle={() => setSidebarOpen((p) => !p)}
-                sidebarOpen={sidebarOpen}
-              />
-            </div>
-          )}
+  <div className="flex-1 overflow-y-auto p-4">
+    <DashboardQuickActions
+      onNewInvoice={() => {
+        handleNewInvoice();
+        setActiveView("invoice");
+      }}
+      onNewQuote={() => {
+        handleNewQuote();
+        setActiveView("invoice");
+      }}
+      onAddCustomer={handleAddNewCustomer}
+      goTo={setActiveView}
+      savedJobCardsCount={savedJobCards.length}
+      savedCustomersCount={savedCustomers.length}
+    />
+    <HomeView
+      user={user}
+      onNavigate={(view, docType) => {
+        if (docType) setDocumentType(docType);
+        setActiveView(view);
+      }}
+      onGoToDashboard={() => setActiveView("quote")}
+      onSidebarToggle={() => setSidebarOpen((p) => !p)}
+      sidebarOpen={sidebarOpen}
+    />
+  </div>
+)}
           {activeView === "financial-overview" && (
             <div className="flex-1 overflow-y-auto p-4">
               <FinancialOverview user={user} />
