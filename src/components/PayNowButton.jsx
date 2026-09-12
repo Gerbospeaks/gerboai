@@ -1,6 +1,6 @@
 import React from "react";
 
-export const PayNowButton = ({ invoiceId, amount, currency = "ZAR", paymentUrl, color = "#6366f1" }) => {
+export const PayNowButton = ({ invoiceId, amount, currency = "USD", paymentUrl, color = "#6366f1" }) => {
   // Build the payment URL — swap this with your actual payment gateway link
   const url = paymentUrl || `https://pay.solidflo.co.za/${invoiceId}`;
 

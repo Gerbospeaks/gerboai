@@ -103,7 +103,7 @@ const functions = getFunctions();
 const inp =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-lg bg-white text-[#1e293b] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#7c3aed] focus:border-[#7c3aed] transition-colors";
 const formatCurrencyZAR = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(
+  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
     n || 0,
   );
 
@@ -2670,7 +2670,7 @@ function LegalBillingView({ user }) {
                       ))}
                     </select>
                   </Fld>
-                  <Fld label="Amount (ZAR)" req>
+                  <Fld label="Amount (USD)" req>
                     <input
                       type="number"
                       value={form.amount}
@@ -2696,7 +2696,7 @@ function LegalBillingView({ user }) {
                         ))}
                       </select>
                     </Fld>
-                    <Fld label="Rate (ZAR/hr)">
+                    <Fld label="Rate (USD/hr)">
                       <input
                         type="number"
                         value={form.rate}
@@ -3598,7 +3598,7 @@ const [stampConfig, setStampConfig] = useState(null);
         />
       )}
 
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         <LegalSidebar
           user={user}
           activeView={activeView}

@@ -37,12 +37,12 @@ export default function CarpentrySidebar({
   setShowCustomersListModal,
   handleAddNewCustomer,
   documentType,
-   newRequestCount,
+  newRequestCount,
 }) {
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);  
+  const [isQuotesInvoicesOpen2, setIsQuotesInvoicesOpen2] = useState(false);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", onResize);
@@ -64,7 +64,7 @@ export default function CarpentrySidebar({
 
   // ── Shared sidebar body ─────────────────────────────────────────────────────
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-[#253347] flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
@@ -88,13 +88,13 @@ export default function CarpentrySidebar({
 
       {/* Scrollable nav */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-         <NavItem
+        <NavItem
           icon={Home}
           label="Home"
           onClick={() => goTo("home")}
           active={activeView === "home"}
         />
-        
+
         <NavItem
           icon={Settings}
           label="Settings"
@@ -146,9 +146,12 @@ export default function CarpentrySidebar({
             }}
           />
         </Accordion>
-<NavItem icon={ShoppingBag} label="Purchase Orders"
-  onClick={() => goTo("purchase-orders")}
-  active={activeView === "purchase-orders"} />
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
         <SectionLabel>Operations</SectionLabel>
 
         {/* Projects accordion */}
@@ -216,7 +219,6 @@ export default function CarpentrySidebar({
           onClick={() => goTo("schedule")}
           active={activeView === "schedule"}
         />
-       
       </div>
 
       {/* Footer */}
@@ -280,10 +282,10 @@ export default function CarpentrySidebar({
           onClick={() => setSidebarOpen(false)}
         />
 
-        {/* Drawer */}
+        {/* Drawer — floats with margin instead of running edge to edge */}
         <div
-          className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#1a2332] shadow-2xl transform transition-transform duration-300 ease-in-out ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          className={`fixed inset-y-3 left-3 z-50 w-72 max-w-[85vw] rounded-2xl shadow-2xl transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+2rem)]"
           }`}
         >
           <SidebarContent />
@@ -292,11 +294,12 @@ export default function CarpentrySidebar({
 
       {/* ════════════════════════════════════════════════════════════════
           DESKTOP — collapsed icon rail OR expanded panel
+          Both float as rounded cards with vertical margin, not full height.
       ════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:flex print:hidden h-full">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
-          <div className="flex flex-col flex-shrink-0 w-16 bg-[#1a2332] border-r border-[#253347] h-full items-center py-4 gap-2 z-30">
+          <div className="flex flex-col flex-shrink-0 w-16 bg-[#1a2332] rounded-2xl h-full items-center py-4 gap-2 z-30 shadow-lg">
             <button
               onClick={() => setSidebarOpen(true)}
               title="Expand"
@@ -362,7 +365,6 @@ export default function CarpentrySidebar({
                   action: () => goTo("schedule"),
                   active: activeView === "schedule",
                 },
-                
               ].map(({ icon: Icon, title, action, active }) => (
                 <button
                   key={title}
@@ -400,7 +402,7 @@ export default function CarpentrySidebar({
 
         {/* Expanded panel */}
         {sidebarOpen && (
-          <div className="flex-shrink-0 w-64 bg-[#1a2332] border-r border-[#253347] h-full shadow-xl z-30">
+          <div className="flex-shrink-0 w-64 bg-[#1a2332] rounded-2xl h-full shadow-lg z-30">
             <SidebarContent />
           </div>
         )}

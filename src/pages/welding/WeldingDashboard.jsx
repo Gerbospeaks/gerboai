@@ -864,7 +864,7 @@ const [stampConfig, setStampConfig] = useState(null);
   const formatCurrency = (n) =>
     new Intl.NumberFormat("en-ZA", {
       style: "currency",
-      currency: "ZAR",
+      currency: "USD",
     }).format(n);
 
   const statusBadge = (s) =>
@@ -1218,7 +1218,7 @@ const [stampConfig, setStampConfig] = useState(null);
   }}
   />
 )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* ── Sidebar ─────────────────────────────────────────────────────── */}
        <WeldingSidebar
   navigate={navigate}

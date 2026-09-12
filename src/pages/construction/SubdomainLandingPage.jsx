@@ -2086,7 +2086,7 @@ export default function ConstructionLandingPage() {
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "ZAR",
+        "priceCurrency": "USD",
       },
       "aggregateRating": {
         "@type": "AggregateRating",

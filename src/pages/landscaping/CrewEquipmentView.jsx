@@ -408,7 +408,7 @@ function CrewPanel({ user }) {
 
                 <div>
                   <label className={labelCls}>ID Number</label>
-                  <input value={form.idNumber} onChange={(e) => setForm((f) => ({ ...f, idNumber: e.target.value }))} placeholder="SA ID number" className={inputCls} />
+                  <input value={form.idNumber} onChange={(e) => setForm((f) => ({ ...f, idNumber: e.target.value }))} placeholder="ID number" className={inputCls} />
                 </div>
 
                 <div className="col-span-2">

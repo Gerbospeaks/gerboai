@@ -86,7 +86,7 @@ const labelCls =
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const formatZAR = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(
+  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
     Number(n) || 0
   );
 

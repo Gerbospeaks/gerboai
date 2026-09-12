@@ -298,7 +298,7 @@ const [stampConfig, setStampConfig] = useState(null);
   const formatCurrency = (n) =>
     new Intl.NumberFormat("en-ZA", {
       style: "currency",
-      currency: "ZAR",
+      currency: "USD",
     }).format(n);
 
   // ── Effects ───────────────────────────────────────────────────────────────
@@ -1214,7 +1214,7 @@ const [stampConfig, setStampConfig] = useState(null);
     TemplateRenderer={TemplateRenderer}   
   />
             )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* ── Sidebar backdrop (mobile) ──────────────────────────────────── */}
         {sidebarOpen && (
           <div
@@ -2525,7 +2525,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                       "Bank Transfer, Card, EFT",
                                     ],
                                     ["Quote Valid For", "30 Days"],
-                                    ["Currency", "ZAR (South African Rand)"],
+                                    ["Currency", "USD (US Dollar  ($ / USD))"],
                                   ].map(([k, v]) => (
                                     <div
                                       key={k}

@@ -787,7 +787,7 @@ const [stampConfig, setStampConfig] = useState(null);
   }}
   />
 )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* ── Sidebar backdrop ──────────────────────────────────────────────── */}
         {sidebarOpen && (
           <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -1353,7 +1353,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                 ["Payment Schedule", "Milestone-Based"],
                                 ["Payment Methods", "Bank Transfer, Card, EFT"],
                                 ["Quote Valid For", "30 Days"],
-                                ["Currency", "ZAR (South African Rand)"],
+                                ["Currency", "USD (US Dollar  ($ / USD))"],
                                 ["Total Due", formatCurrency(total)],
                               ].map(([k, v]) => (
                                 <div key={k} className="flex items-center justify-between px-5 py-3 text-sm">

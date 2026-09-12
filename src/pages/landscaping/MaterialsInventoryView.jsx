@@ -217,7 +217,7 @@ export default function MaterialsInventoryView({ user }) {
   const formatZAR = (n) =>
     new Intl.NumberFormat("en-ZA", {
       style: "currency",
-      currency: "ZAR",
+      currency: "USD",
     }).format(n);
 
   return (

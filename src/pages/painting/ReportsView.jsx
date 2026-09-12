@@ -30,7 +30,7 @@ import {
 const fmt = (n) =>
   new Intl.NumberFormat("en-ZA", {
     style: "currency",
-    currency: "ZAR",
+    currency: "USD",
     maximumFractionDigits: 0,
   }).format(n || 0);
 

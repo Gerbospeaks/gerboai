@@ -61,7 +61,7 @@ export default function EducationSidebar({
   onOpenEventModal,
   onOpenStaffModal,
   onOpenTimetableModal,
-   newRequestCount,
+  newRequestCount,
 }) {
   const [isReportCardsOpen, setIsReportCardsOpen] = useState(false);
   const [isStudentsOpen, setIsStudentsOpen] = useState(false);
@@ -144,7 +144,7 @@ export default function EducationSidebar({
       action: () => goTo("curriculum"),
       color: "from-teal-600 to-teal-700",
     },
-     {
+    {
       icon: BookOpen,
       title: "Library",
       action: () => goTo("library"),
@@ -156,7 +156,7 @@ export default function EducationSidebar({
       action: () => goTo("assessment"),
       color: "from-blue-600 to-blue-700",
     },
-   
+
     {
       icon: Users,
       title: "Staff",
@@ -174,7 +174,7 @@ export default function EducationSidebar({
       title: "Documents & Compliance",
       action: () => goTo("documents"),
       color: "from-teal-600 to-teal-700",
-    }, 
+    },
     {
       icon: Clock,
       title: "Timetable",
@@ -193,70 +193,74 @@ export default function EducationSidebar({
         />
       )}
 
-      {/* ── Collapsed rail (desktop only) ──────────────────────────────── */}
+      {/* ── Collapsed rail (desktop only) — floats as a rounded card with margin ── */}
       {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-slate-900 to-slate-800 h-full print:hidden shadow-xl z-30">
-          <div className="flex flex-col items-center py-4 space-y-3 flex-1 overflow-y-auto scrollbar-thin">
-            {/* Expand toggle */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="group p-2 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 hover:shadow-blue-500/40 hover:shadow-lg hover:scale-110"
-              title="Expand Sidebar"
-            >
-              <ChevronRight className="w-5 h-5 group-hover:animate-pulse" />
-            </button>
+        <div className="hidden md:flex h-full py-3 pl-3 print:hidden">
+          <div className="flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-slate-900 to-slate-800 rounded-2xl h-full shadow-lg z-30">
+            <div className="flex flex-col items-center py-4 space-y-3 flex-1 overflow-y-auto scrollbar-thin">
+              {/* Expand toggle */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="group p-2 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 hover:shadow-blue-500/40 hover:shadow-lg hover:scale-110"
+                title="Expand Sidebar"
+              >
+                <ChevronRight className="w-5 h-5 group-hover:animate-pulse" />
+              </button>
 
-            {/* School logo */}
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-              {businessInfo?.logoUrl ? (
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Logo"
-                  className="w-6 h-6 object-contain rounded"
-                />
-              ) : (
-                <School className="w-5 h-5 text-white" />
-              )}
+              {/* School logo */}
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                {businessInfo?.logoUrl ? (
+                  <img
+                    src={businessInfo.logoUrl}
+                    alt="Logo"
+                    className="w-6 h-6 object-contain rounded"
+                  />
+                ) : (
+                  <School className="w-5 h-5 text-white" />
+                )}
+              </div>
+
+              <div className="w-8 border-t border-slate-700" />
+
+              {/* Icon nav */}
+              {iconRailItems.map(({ icon: Icon, title, action, color }) => (
+                <button
+                  key={title}
+                  onClick={action}
+                  className="group relative p-2 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 flex items-center justify-center overflow-hidden"
+                  title={title}
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}
+                  />
+                  <Icon className="w-5 h-5 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                </button>
+              ))}
             </div>
 
-            <div className="w-8 border-t border-slate-700" />
-
-            {/* Icon nav */}
-            {iconRailItems.map(({ icon: Icon, title, action, color }) => (
-              <button
-                key={title}
-                onClick={action}
-                className="group relative p-2 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 flex items-center justify-center overflow-hidden"
-                title={title}
-              >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-r ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}
-                />
-                <Icon className="w-5 h-5 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-              </button>
-            ))}
-          </div>
-
-          {/* Bottom school avatar */}
-          <div className="flex justify-center pb-4">
-            <div className="w-10 h-10 shadow-lg flex items-center justify-center overflow-hidden">
-              {businessInfo?.logoUrl ? (
-                <img
-                  src={businessInfo.logoUrl}
-                  className="w-6 h-6 object-contain"
-                  alt="school"
-                />
-              ) : (
-                <GraduationCap className="w-5 h-5 text-blue-600" />
-              )}
+            {/* Bottom school avatar */}
+            <div className="flex justify-center pb-4">
+              <div className="w-10 h-10 shadow-lg flex items-center justify-center overflow-hidden">
+                {businessInfo?.logoUrl ? (
+                  <img
+                    src={businessInfo.logoUrl}
+                    className="w-6 h-6 object-contain"
+                    alt="school"
+                  />
+                ) : (
+                  <GraduationCap className="w-5 h-5 text-blue-600" />
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Expanded sidebar ───────────────────────────────────────────── */}
+      {/* ── Expanded sidebar ─────────────────────────────────────────────
+          Mobile: floats with inset margin. Desktop: floats as a card with
+          my-3 ml-3 margin, matching the collapsed rail treatment above. */}
       {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 bg-gradient-to-b from-slate-900 to-slate-800 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0 flex flex-col">
+        <div className="flex-shrink-0 w-72 max-w-[85vw] bg-gradient-to-b from-slate-900 to-slate-800 rounded-2xl print:hidden shadow-2xl overflow-y-auto z-50 fixed inset-y-3 left-3 md:static md:inset-auto md:w-64 md:my-3 md:ml-3 md:h-[calc(100%-1.5rem)] flex flex-col">
           {/* Header */}
           <div className="p-5 border-b border-slate-700/60">
             <div className="flex items-center gap-3">
@@ -288,7 +292,6 @@ export default function EducationSidebar({
             </div>
           </div>
 
-         
           {/* ── Nav ─────────────────────────────────────────────────────── */}
           <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
             <NavItem
@@ -302,7 +305,6 @@ export default function EducationSidebar({
               label="School Overview"
               onClick={() => goTo("overview")}
               color="indigo"
-              
             />
 
             <div className="pt-3 mt-3 border-t border-slate-700/50 space-y-0.5">
@@ -330,14 +332,12 @@ export default function EducationSidebar({
                   onClick={() => goTo("templates")}
                 />
               </Accordion>
-
               <NavItem
                 icon={FileText}
                 label="Templates"
                 onClick={() => goTo("templates")}
                 color="purple"
               />
-
               {/* ── Students ── */}
               <Accordion
                 icon={Users}
@@ -356,7 +356,6 @@ export default function EducationSidebar({
                   onClick={() => openModal(onOpenStudentsListModal)}
                 />
               </Accordion>
-
               {/* ── Attendance ── */}
               <Accordion
                 icon={UserCheck}
@@ -373,7 +372,6 @@ export default function EducationSidebar({
                   onClick={() => goTo("attendance")}
                 />
               </Accordion>
-
               {/* ── Notices ── */}
               <Accordion
                 icon={Megaphone}
@@ -387,7 +385,6 @@ export default function EducationSidebar({
                 />
                 <SubItem label="All Notices" onClick={() => goTo("notices")} />
               </Accordion>
-
               {/* ── Homework ── */}
               <Accordion
                 icon={BookMarked}
@@ -395,7 +392,7 @@ export default function EducationSidebar({
                 isOpen={isHomeworkOpen}
                 onToggle={() => setIsHomeworkOpen((p) => !p)}
               >
-                 <SubItem
+                <SubItem
                   label="Set Homework"
                   onClick={() => openModal(onOpenHomeworkModal)}
                 />
@@ -403,8 +400,8 @@ export default function EducationSidebar({
                   label="View Homework"
                   onClick={() => goTo("homework")}
                 />
-              </Accordion>``
-
+              </Accordion>
+              ``
               {/* ── Staff ── */}
               <Accordion
                 icon={UserCheck}
@@ -418,7 +415,6 @@ export default function EducationSidebar({
                 />
                 <SubItem label="View All Staff" onClick={() => goTo("staff")} />
               </Accordion>
-
               {/* ── Standalone items ── */}
               <NavItem
                 icon={Clock}
@@ -426,7 +422,7 @@ export default function EducationSidebar({
                 onClick={() => openModal(onOpenTimetableModal)}
                 color="teal"
               />
-               <NavItem
+              <NavItem
                 icon={BookOpen}
                 label="Library"
                 onClick={() => goTo("library")}
@@ -450,17 +446,17 @@ export default function EducationSidebar({
                 onClick={() => openModal(onOpenEventModal)}
                 color="blue"
               />
-                <NavItem
+              <NavItem
                 icon={Shield}
                 label="Documents & Compliance"
                 onClick={() => goTo("documents")}
                 color="teal"
-              />  
+              />
             </div>
           </nav>
 
           {/* ── Footer ──────────────────────────────────────────────────── */}
-          <div className="sticky bottom-0 p-4 border-t border-slate-700/50 bg-slate-900 space-y-1">
+          <div className="sticky bottom-0 p-4 border-t border-slate-700/50 bg-slate-900 space-y-1 rounded-b-2xl">
             <button
               onClick={() => {
                 setShowSettings(true);

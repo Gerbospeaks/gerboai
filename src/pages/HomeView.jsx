@@ -327,7 +327,7 @@ const css = `
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 const fmtCurrency = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(
+  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
     n,
   );
 

@@ -2127,7 +2127,7 @@ export default function SubdomainLandingPage() {
             "name": "SolidFlo for Accounting Practices",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "ZAR" },
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": "4.9",

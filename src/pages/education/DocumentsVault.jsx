@@ -147,7 +147,7 @@ const DOCUMENT_CATEGORIES = [
       {
         id: "owner_id",
         name: "Owner / Principal ID Copy",
-        sub: "Certified copy of SA ID or passport",
+        sub: "Certified copy of ID or passport",
         hasExpiry: false,
         required: true,
         link: null,

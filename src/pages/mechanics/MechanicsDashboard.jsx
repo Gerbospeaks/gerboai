@@ -1420,7 +1420,7 @@ const handleStampConfirm = async (cfg) => {
   const formatCurrency = (n) =>
     new Intl.NumberFormat("en-ZA", {
       style: "currency",
-      currency: "ZAR",
+      currency: "USD",
     }).format(n);
 
   const statusBadge = (s) =>

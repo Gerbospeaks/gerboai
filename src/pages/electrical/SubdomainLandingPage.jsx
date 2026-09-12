@@ -2083,7 +2083,7 @@ export default function ElectricalLandingPage() {
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "ZAR",
+        "priceCurrency": "USD",
       },
       "aggregateRating": {
         "@type": "AggregateRating",

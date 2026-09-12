@@ -903,7 +903,7 @@ const bottomNavItems = [
   const formatCurrency = (n) =>
     new Intl.NumberFormat("en-ZA", {
       style: "currency",
-      currency: "ZAR",
+      currency: "USD",
     }).format(n);
 
   // ── Shared template props ──────────────────────────────────────────────────
@@ -1110,7 +1110,7 @@ const bottomNavItems = [
         />
       )}
 
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* Sidebar */}
         <CarpentrySidebar
           user={user}
@@ -2417,7 +2417,7 @@ const bottomNavItems = [
                                       "Bank Transfer, Card, EFT",
                                     ],
                                     ["Quote Valid For", "30 Days"],
-                                    ["Currency", "ZAR (South African Rand)"],
+                                    ["Currency", "USD (US Dollar  ($ / USD))"],
                                     ["Total Due", `R${total.toFixed(2)}`],
                                   ].map(([k, v]) => (
                                     <div

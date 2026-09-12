@@ -2103,7 +2103,7 @@ export default function SubdomainLandingPage() {
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "ZAR",
+        "priceCurrency": "USD",
       },
       "aggregateRating": {
         "@type": "AggregateRating",

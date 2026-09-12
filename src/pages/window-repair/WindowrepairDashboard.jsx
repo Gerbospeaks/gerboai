@@ -210,7 +210,7 @@ const handleAddNewCustomer = () => {
   const formatCurrency = (n) =>
     new Intl.NumberFormat("en-ZA", {
       style: "currency",
-      currency: "ZAR",
+      currency: "USD",
     }).format(n);
 
   const statusBadge = (s) =>
@@ -1047,7 +1047,7 @@ const handleAddNewCustomer = () => {
   }}
   />
 )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
 <WindowRepairSidebar
   navigate={navigate}

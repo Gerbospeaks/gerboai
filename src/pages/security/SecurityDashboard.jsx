@@ -868,7 +868,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
           TemplateRenderer={TemplateRenderer}
         />
       )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* Sidebar backdrop (mobile) */}
         {sidebarOpen && (
           <div

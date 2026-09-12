@@ -127,7 +127,7 @@ export default function PaymentPage() {
 
   // ─── Format helpers ────────────────────────────────────────────────────────
   const fmt = (n) =>
-    new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(n || 0);
+    new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(n || 0);
 
   // ─── ALREADY PAID ──────────────────────────────────────────────────────────
   if (status === "already_paid") {

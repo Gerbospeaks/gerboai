@@ -28,7 +28,7 @@ import {
 } from "firebase/firestore";
 
 const formatCurrency = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(
+  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
     n || 0,
   );
 

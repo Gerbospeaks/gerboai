@@ -693,7 +693,7 @@ const bottomNavItems = [
   }}
   />
 )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         <ConstructionSidebar
          user={user}
@@ -1564,7 +1564,7 @@ const bottomNavItems = [
                                     ["Payment Schedule", "Milestone-Based"],
                                     ["Payment Methods", "Bank Transfer, Card, EFT"],
                                     ["Quote Valid For", "30 Days"],
-                                    ["Currency", "ZAR (South African Rand)"],
+                                    ["Currency", "USD (US Dollar  ($ / USD))"],
                                     ["Total Due", `R${total.toFixed(2)}`],
                                   ].map(([k, v]) => (
                                     <div key={k} className="flex items-center justify-between px-5 py-3 text-sm">

@@ -21,7 +21,7 @@ const EMPTY_FORM = {
 };
 
 const fmtZAR = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR" }).format(n || 0);
+  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(n || 0);
 
 export default function PartsInventory({ user }) {
   const [parts, setParts] = useState([]);

@@ -449,7 +449,7 @@ export default function AIInvoiceChat({
         documentType: d.documentType || documentType,
         notes: d.notes || "",
         paymentTerms: d.paymentTerms || "",
-        currency: d.currency || "ZAR",
+        currency: d.currency || "USD",
         dueInDays: d.dueInDays || 30,
       });
 

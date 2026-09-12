@@ -2348,7 +2348,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                     Currency:
                                   </span>
                                   <span className="font-bold text-slate-900">
-                                    ZAR (South African Rand)
+                                    USD (US Dollar  ($ / USD))
                                   </span>
                                 </div>
                               </div>

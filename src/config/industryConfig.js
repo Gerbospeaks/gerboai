@@ -1492,7 +1492,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         q: "Does it support foreign guest billing?",
-        a: "You can invoice in ZAR and include your banking details for international transfers.",
+        a: "You can invoice in USD and include your banking details for international transfers.",
       },
     ],
   },

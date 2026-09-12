@@ -139,7 +139,7 @@ function BankAccountsTab({ user, clientBase, clientName }) {
     bank: "",
     accountNumber: "",
     type: "Cheque",
-    currency: "ZAR",
+    currency: "USD",
     openingBalance: "",
   });
 
@@ -166,7 +166,7 @@ function BankAccountsTab({ user, clientBase, clientName }) {
     bank: "",
     accountNumber: "",
     type: "Cheque",
-    currency: "ZAR",
+    currency: "USD",
     openingBalance: "",
   });
   const openAdd = () => {
@@ -181,7 +181,7 @@ function BankAccountsTab({ user, clientBase, clientName }) {
       bank: a.bank || "",
       accountNumber: a.accountNumber || "",
       type: a.type || "Cheque",
-      currency: a.currency || "ZAR",
+      currency: a.currency || "USD",
       openingBalance: a.openingBalance || "",
     });
     setShowModal(true);

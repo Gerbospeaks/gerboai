@@ -435,11 +435,7 @@ async function handleAIAgent(
     return Response.json({ error: err.message }, { status: 500, headers: corsHeaders });
   }
 }
- 
-// ─────────────────────────────────────────────────────────────────────────────
-// STEP 3 — Add this helper function (paste right below handleAIAgent)
-// ─────────────────────────────────────────────────────────────────────────────
- 
+
 function buildAgentSystemPrompt(
   industry: string,
   context: {
@@ -475,7 +471,7 @@ function buildAgentSystemPrompt(
  
 CURRENT USER:
 Industry: ${industry}
-Currency: South African Rand (R / ZAR)
+Currency: US Dollar ($ / USD)
 VAT Rate: 15%
 Today: ${new Date().toLocaleDateString('en-ZA')}
  

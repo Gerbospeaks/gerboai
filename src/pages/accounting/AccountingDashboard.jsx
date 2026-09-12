@@ -779,7 +779,7 @@ const bottomNavItems = [
           TemplateRenderer={TemplateRenderer}
         />
       )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* Sidebar */}
         <AccountingSidebar
           user={user}
@@ -1787,7 +1787,7 @@ const bottomNavItems = [
                                       "Bank Transfer, Card, Cash",
                                     ],
                                     ["Late Payment Fee", "2% per month"],
-                                    ["Currency", "ZAR (South African Rand)"],
+                                    ["Currency", "USD (US Dollar  ($ / USD))"],
                                     ["Total Due", `R${total.toFixed(2)}`],
                                   ].map(([k, v]) => (
                                     <div

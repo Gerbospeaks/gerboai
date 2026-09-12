@@ -23,6 +23,10 @@ import SignatureStamp from "../SignatureStamp";
 import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TechnologyMultiStepForm from "./TechnologyMultiStepForm";
 import TechnologySidebar from "./TechnologySidebar";
+import DeploymentsView from "./DeploymentsView";
+import DomainsView from "./DomainsView";
+import DatabasesView from "./DatabasesView";
+import IntegrationsView from "./IntegrationsView";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -198,7 +202,7 @@ const SidebarItem = ({
 // ─────────────────────────────────────────────────────────────────────────────
 const TechnologyDashboardInner = () => {
   const { requirePlan, canAccess, currentPlan } = usePlan();
-const mobileNavPad = "pb-24 lg:pb-6";
+  const mobileNavPad = "pb-24 lg:pb-6";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
   const [documentType, setDocumentType] = useState("invoice");
@@ -232,9 +236,9 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [savedProjects, setSavedProjects] = useState([]);
-const [savedClients, setSavedClients] = useState([]);
-const [showProjectsList, setShowProjectsList] = useState(false);
-const [showClientsModal, setShowClientsModal] = useState(false);
+  const [savedClients, setSavedClients] = useState([]);
+  const [showProjectsList, setShowProjectsList] = useState(false);
+  const [showClientsModal, setShowClientsModal] = useState(false);
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -281,9 +285,9 @@ const [showClientsModal, setShowClientsModal] = useState(false);
     qty: "",
     type: "Technology",
   });
-const handleAddNewClient = () => {
-  setShowClientsModal(true); 
-};
+  const handleAddNewClient = () => {
+    setShowClientsModal(true);
+  };
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const vat = subtotal * 0.15;
   const total = subtotal + vat;
@@ -314,11 +318,11 @@ const handleAddNewClient = () => {
     showStampDate: stampSettings?.showDate || false,
     stampConfig,
   };
- useEffect(() => {
+  useEffect(() => {
     if (!user) return;
     const q = query(collection(db, "projects"), where("uid", "==", user.uid));
     getDocs(q).then((snap) =>
-      setSavedProjects(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+      setSavedProjects(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
     );
   }, [user]);
 
@@ -326,7 +330,7 @@ const handleAddNewClient = () => {
     if (!user) return;
     const q = query(collection(db, "clients"), where("uid", "==", user.uid));
     getDocs(q).then((snap) =>
-      setSavedClients(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+      setSavedClients(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
     );
   }, [user]);
   // ── Effects ────────────────────────────────────────────────────────────────
@@ -482,21 +486,21 @@ const handleAddNewClient = () => {
     setCustomerId(customer.customerId || "");
   };
 
-const loadInvoice = (invoice) => {
-  setInvoiceId(invoice.id);
-  setInvoiceNumber(invoice.invoiceNumber || "");
-  setDocumentType(invoice.documentType || "invoice");
-  setCustomerName(invoice.customer?.name || "");
-  setCustomerEmail(invoice.customer?.email || "");
-  setCustomerPhone(invoice.customer?.phone || "");
-  setCustomerAddress(invoice.customer?.address || "");
-  setCustomerId(invoice.customer?.customerId || "");
-  setProjectDate(invoice.project?.date || "");
-  setProjectName(invoice.project?.name || "");
-  setProjectScope(invoice.project?.scope || "");
-  setItems(invoice.items || []);
-  setShowInvoicesList(false);
-};
+  const loadInvoice = (invoice) => {
+    setInvoiceId(invoice.id);
+    setInvoiceNumber(invoice.invoiceNumber || "");
+    setDocumentType(invoice.documentType || "invoice");
+    setCustomerName(invoice.customer?.name || "");
+    setCustomerEmail(invoice.customer?.email || "");
+    setCustomerPhone(invoice.customer?.phone || "");
+    setCustomerAddress(invoice.customer?.address || "");
+    setCustomerId(invoice.customer?.customerId || "");
+    setProjectDate(invoice.project?.date || "");
+    setProjectName(invoice.project?.name || "");
+    setProjectScope(invoice.project?.scope || "");
+    setItems(invoice.items || []);
+    setShowInvoicesList(false);
+  };
 
   const buildInvoicePayload = (numberToUse) => ({
     invoiceNumber: numberToUse,
@@ -604,20 +608,20 @@ const loadInvoice = (invoice) => {
     setShowPaymentModal(false);
   };
 
-const handleNewInvoice = () => {
-  setInvoiceId(null);
-  setInvoiceNumber("");
-  setCustomerName("");
-  setCustomerId("");
-  setCustomerEmail("");
-  setCustomerPhone("");
-  setCustomerAddress("");
-  setProjectDate(new Date().toISOString().split("T")[0]);
-  setProjectName("");
-  setProjectScope("");
-  setItems([]);
-  if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
-};
+  const handleNewInvoice = () => {
+    setInvoiceId(null);
+    setInvoiceNumber("");
+    setCustomerName("");
+    setCustomerId("");
+    setCustomerEmail("");
+    setCustomerPhone("");
+    setCustomerAddress("");
+    setProjectDate(new Date().toISOString().split("T")[0]);
+    setProjectName("");
+    setProjectScope("");
+    setItems([]);
+    if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
+  };
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -858,81 +862,76 @@ const handleNewInvoice = () => {
   ].filter(Boolean);
 
   return (
-   <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
-         {/* Print area */}
-         <div
-           id="print-area"
-           className="hidden print:block bg-white"
-           style={{ width: "210mm", minHeight: "297mm" }}
-         >
-           {activeView === "purchase-orders" ? (
-             <div id="po-printable" style={{ position: "relative" }}>
-              
-               <StampOverlay
-                 stampConfig={stampConfig}
-                 pageNumber={1}
-                 businessInfo={businessInfo}
-               />
-             </div>
-           ) : (
-             <div id="invoice-printable" style={{ position: "relative" }}>
-               <TemplateRenderer {...templateProps} />
-               <StampOverlay
-                 stampConfig={stampConfig}
-                 pageNumber={1}
-                 businessInfo={businessInfo}
-               />
-             </div>
-           )}
-           {documentType === "jobcard" && (
-             <div
-               id="jobcard-printable"
-               style={{
-                 pageBreakBefore: "always",
-                 breakBefore: "page",
-                 padding: "40px 0",
-                 boxSizing: "border-box",
-                 width: "210mm",
-               }}
-             >
-              
-             </div>
-           )}
-         </div>
-         {showAIWindow && (
-           <AIInvoiceWindow
-             user={user}
-             businessInfo={businessInfo}
-             documentType={documentType}
-             onExit={() => setShowAIWindow(false)}
-             onNavigateTo={(view) => {
-              
-               setActiveView(view);
-             }}
-             industry="mechanics"
-             TemplateRenderer={TemplateRenderer}
-           />
-         )}
-          <div className="flex-1 flex overflow-hidden min-h-0">
-      
-      <TechnologySidebar
-        user={user}                              // from AuthContext
-        activeView={activeView}
-        setActiveView={setActiveView}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        setShowSettings={setShowSettings}
-        handleLogout={handleLogout}
-        businessInfo={businessInfo}              // { name, logoUrl }
-        savedProjects={savedProjects}            // array
-        savedClients={savedClients}              // array
-        showProjectsList={showProjectsList}
-        setShowProjectsList={setShowProjectsList}
-        setShowClientsModal={setShowClientsModal}
-        handleAddNewClient={handleAddNewClient}
-        newRequestCount={0}
-      />
-      {/* ── Main Content Area ────────────────────────────────────────────── */}
+    <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
+      {/* Print area */}
+      <div
+        id="print-area"
+        className="hidden print:block bg-white"
+        style={{ width: "210mm", minHeight: "297mm" }}
+      >
+        {activeView === "purchase-orders" ? (
+          <div id="po-printable" style={{ position: "relative" }}>
+            <StampOverlay
+              stampConfig={stampConfig}
+              pageNumber={1}
+              businessInfo={businessInfo}
+            />
+          </div>
+        ) : (
+          <div id="invoice-printable" style={{ position: "relative" }}>
+            <TemplateRenderer {...templateProps} />
+            <StampOverlay
+              stampConfig={stampConfig}
+              pageNumber={1}
+              businessInfo={businessInfo}
+            />
+          </div>
+        )}
+        {documentType === "jobcard" && (
+          <div
+            id="jobcard-printable"
+            style={{
+              pageBreakBefore: "always",
+              breakBefore: "page",
+              padding: "40px 0",
+              boxSizing: "border-box",
+              width: "210mm",
+            }}
+          ></div>
+        )}
+      </div>
+      {showAIWindow && (
+        <AIInvoiceWindow
+          user={user}
+          businessInfo={businessInfo}
+          documentType={documentType}
+          onExit={() => setShowAIWindow(false)}
+          onNavigateTo={(view) => {
+            setActiveView(view);
+          }}
+          industry="mechanics"
+          TemplateRenderer={TemplateRenderer}
+        />
+      )}
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
+        <TechnologySidebar
+          user={user} // from AuthContext
+          activeView={activeView}
+          setActiveView={setActiveView}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          setShowSettings={setShowSettings}
+          handleLogout={handleLogout}
+          businessInfo={businessInfo} // { name, logoUrl }
+          savedProjects={savedProjects} // array
+          savedClients={savedClients} // array
+          showProjectsList={showProjectsList}
+          setShowProjectsList={setShowProjectsList}
+          setShowClientsModal={setShowClientsModal}
+          handleAddNewClient={handleAddNewClient}
+          newRequestCount={0}
+        />
+        {/* ── Main Content Area ────────────────────────────────────────────── */}
 
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           <AppHeader
@@ -1131,6 +1130,12 @@ const handleNewInvoice = () => {
             )}
 
             {activeView === "templates" && <Templates user={user} />}
+            {activeView === "deployments" && <DeploymentsView user={user} />}
+            {activeView === "domains" && (
+              <DomainsView user={user} businessInfo={businessInfo} />
+            )}
+            {activeView === "databases" && <DatabasesView user={user} />}
+            {activeView === "integrations" && <IntegrationsView user={user} />}
             {activeView === "home" && (
               <div className="flex-1 overflow-y-auto p-4">
                 <HomeView
@@ -1202,21 +1207,31 @@ const handleNewInvoice = () => {
                         </button>
                       </div>
                     </div>
-{documentType === "quote" && invoiceId && (
-  <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-    <div className="flex-1">
-      <p className="text-sm font-semibold text-amber-800">Quote ready to convert</p>
-      <p className="text-xs text-amber-600 mt-0.5">{invoiceNumber} · R{total.toFixed(2)}</p>
-    </div>
-    <button
-      onClick={() => requirePlan("convertToInvoice", handleConvertToInvoice, "Convert to Invoice")}
-      className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors whitespace-nowrap"
-    >
-      <FileText className="w-4 h-4" />
-      Convert →
-    </button>
-  </div>
-)}
+                    {documentType === "quote" && invoiceId && (
+                      <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-amber-800">
+                            Quote ready to convert
+                          </p>
+                          <p className="text-xs text-amber-600 mt-0.5">
+                            {invoiceNumber} · R{total.toFixed(2)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            requirePlan(
+                              "convertToInvoice",
+                              handleConvertToInvoice,
+                              "Convert to Invoice",
+                            )
+                          }
+                          className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors whitespace-nowrap"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Convert →
+                        </button>
+                      </div>
+                    )}
                     {inputMode === "manual" && (
                       <>
                         <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-1 w-fit">
@@ -1270,41 +1285,65 @@ const handleNewInvoice = () => {
                         </div>
 
                         <TechnologyMultiStepForm
-  customerName={customerName}        setCustomerName={setCustomerName}
-  customerId={customerId}            setCustomerId={setCustomerId}
-  customerEmail={customerEmail}      setCustomerEmail={setCustomerEmail}
-  customerPhone={customerPhone}      setCustomerPhone={setCustomerPhone}
-  customerAddress={customerAddress}  setCustomerAddress={setCustomerAddress}
-  projectDate={projectDate}          setProjectDate={setProjectDate}
-  projectName={projectName}          setProjectName={setProjectName}
-  projectScope={projectScope}        setProjectScope={setProjectScope}
-  items={items}
-  newItem={newItem}
-  setNewItem={setNewItem}
-  handleAddItem={handleAddItem}
-  documentType={documentType}
-/>
-                       <div className="bg-white border border-gray-200 rounded-lg p-6">
-  <h2 className="text-lg font-semibold mb-4">Payment Terms</h2>
-  <div className="space-y-3 text-sm">
-    <div className="flex justify-between py-2 border-b">
-      <span className="text-gray-600">Payment Method:</span>
-      <span className="font-medium">EFT / Card / PayFast</span>
-    </div>
-    <div className="flex justify-between py-2 border-b">
-      <span className="text-gray-600">Deposit Required:</span>
-      <span className="font-medium">50% on Acceptance</span>
-    </div>
-    <div className="flex justify-between py-2 border-b">
-      <span className="text-gray-600">Balance Due:</span>
-      <span className="font-medium">On Project Completion</span>
-    </div>
-    <div className="flex justify-between py-2">
-      <span className="text-gray-600">Quote Valid For:</span>
-      <span className="font-medium">30 Days</span>
-    </div>
-  </div>
-</div>
+                          customerName={customerName}
+                          setCustomerName={setCustomerName}
+                          customerId={customerId}
+                          setCustomerId={setCustomerId}
+                          customerEmail={customerEmail}
+                          setCustomerEmail={setCustomerEmail}
+                          customerPhone={customerPhone}
+                          setCustomerPhone={setCustomerPhone}
+                          customerAddress={customerAddress}
+                          setCustomerAddress={setCustomerAddress}
+                          projectDate={projectDate}
+                          setProjectDate={setProjectDate}
+                          projectName={projectName}
+                          setProjectName={setProjectName}
+                          projectScope={projectScope}
+                          setProjectScope={setProjectScope}
+                          items={items}
+                          newItem={newItem}
+                          setNewItem={setNewItem}
+                          handleAddItem={handleAddItem}
+                          documentType={documentType}
+                        />
+                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                          <h2 className="text-lg font-semibold mb-4">
+                            Payment Terms
+                          </h2>
+                          <div className="space-y-3 text-sm">
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">
+                                Payment Method:
+                              </span>
+                              <span className="font-medium">
+                                EFT / Card / PayFast
+                              </span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">
+                                Deposit Required:
+                              </span>
+                              <span className="font-medium">
+                                50% on Acceptance
+                              </span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">
+                                Balance Due:
+                              </span>
+                              <span className="font-medium">
+                                On Project Completion
+                              </span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                              <span className="text-gray-600">
+                                Quote Valid For:
+                              </span>
+                              <span className="font-medium">30 Days</span>
+                            </div>
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
@@ -1367,10 +1406,8 @@ const handleNewInvoice = () => {
             )}
           </div>
         </div>
-     
-
-    </div>
-     <SolidFloAgent industry="technology" />
+      </div>
+      <SolidFloAgent industry="technology" />
     </div>
   );
 };

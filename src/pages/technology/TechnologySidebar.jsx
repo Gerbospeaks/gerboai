@@ -28,7 +28,6 @@ import {
   Database,
 } from "lucide-react";
 
-
 import { usePlan, UpgradeModal } from "./planGating";
 let _usePlan;
 try {
@@ -62,7 +61,14 @@ export default function TechnologySidebar({
   handleAddNewClient,
   newRequestCount,
 }) {
-  const { requirePlan, canAccess, currentPlan } = _usePlan();
+  const planState = _usePlan();
+
+  // ── Sidebar unlocked: ignore real plan restrictions here ────────────────────
+  // Every nav item runs its action immediately and nothing shows as locked.
+  // Remove this block (and use `planState` directly) to restore normal gating.
+  const requirePlan = (_featureKey, action) => action?.();
+  const canAccess = () => true;
+  const currentPlan = planState.currentPlan;
 
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
@@ -70,7 +76,7 @@ export default function TechnologySidebar({
   const [isReportsOpen, setIsReportsOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" && window.innerWidth < 768
+    typeof window !== "undefined" && window.innerWidth < 768,
   );
 
   useEffect(() => {
@@ -78,6 +84,14 @@ export default function TechnologySidebar({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // Lock body scroll when the mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, sidebarOpen]);
 
   const goTo = (view) => {
     setActiveView(view);
@@ -105,7 +119,12 @@ export default function TechnologySidebar({
     {
       icon: TrendingUp,
       title: "Business Overview",
-      action: () => requirePlan("businessOverview", () => goTo("overview"), "Business Overview"),
+      action: () =>
+        requirePlan(
+          "businessOverview",
+          () => goTo("overview"),
+          "Business Overview",
+        ),
       featureKey: "businessOverview",
     },
     {
@@ -117,13 +136,19 @@ export default function TechnologySidebar({
     {
       icon: Users,
       title: "Clients",
-      action: () => requirePlan("allClients", () => setShowClientsModal?.(true), "All Clients"),
+      action: () =>
+        requirePlan(
+          "allClients",
+          () => setShowClientsModal?.(true),
+          "All Clients",
+        ),
       featureKey: "allClients",
     },
     {
       icon: GitBranch,
       title: "Deployments",
-      action: () => requirePlan("bookings", () => goTo("deployments"), "Deployments"),
+      action: () =>
+        requirePlan("bookings", () => goTo("deployments"), "Deployments"),
       featureKey: "bookings",
     },
     {
@@ -135,7 +160,8 @@ export default function TechnologySidebar({
     {
       icon: Database,
       title: "Databases",
-      action: () => requirePlan("packages", () => goTo("databases"), "Databases"),
+      action: () =>
+        requirePlan("packages", () => goTo("databases"), "Databases"),
       featureKey: "packages",
     },
     {
@@ -153,341 +179,446 @@ export default function TechnologySidebar({
     {
       icon: BarChart3,
       title: "Analytics",
-      action: () => requirePlan("analytics", () => goTo("analytics"), "Analytics"),
+      action: () =>
+        requirePlan("analytics", () => goTo("analytics"), "Analytics"),
       featureKey: "analytics",
     },
   ];
+
+  // ── Shared sidebar body (header / scrollable nav / footer) ──────────────────
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-4 border-b border-[#1E2A3A] flex-shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#6366F1] flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
+            {logo ? (
+              <img src={logo} alt="Logo" className="w-5 h-5 object-contain" />
+            ) : (
+              <Cpu className="w-4 h-4 text-white" />
+            )}
+          </div>
+          <span className="text-sm font-semibold text-white tracking-tight truncate">
+            {businessInfo?.name || "TechStack"}
+          </span>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="p-1.5 text-slate-500 hover:text-white hover:bg-[#1A2540] rounded-lg transition-all duration-200 flex-shrink-0"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Scrollable nav */}
+      <div className="flex-1 overflow-y-auto px-3 py-3">
+        {/* Plan badge */}
+        <div className="flex items-center justify-between mb-4 px-3 py-2 bg-[#111827] rounded-lg border border-[#1E2A3A]">
+          <span className="text-xs text-slate-500">Plan</span>
+          <div className="flex items-center gap-2">
+            <PlanBadge currentPlan={currentPlan} />
+            {currentPlan !== "elite" && (
+              <button
+                onClick={() => requirePlan("elite", () => {}, "Elite plan")}
+                className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+              >
+                Upgrade ↑
+              </button>
+            )}
+          </div>
+        </div>
+
+        <nav className="space-y-0.5">
+          <NavItem
+            icon={Home}
+            label="Dashboard"
+            onClick={() => goTo("home")}
+            active={activeView === "home"}
+          />
+          <NavItem
+            icon={Settings}
+            label="Settings"
+            onClick={() => {
+              setShowSettings(true);
+              setSidebarOpen(false);
+            }}
+          />
+
+          <div className="pt-4 mt-3 border-t border-[#1E2A3A] space-y-0.5">
+            {/* Overview — gated: elite */}
+            <NavItem
+              icon={TrendingUp}
+              label="Business Overview"
+              locked={!canAccess("businessOverview")}
+              onClick={() =>
+                gatedGoTo("businessOverview", "overview", "Business Overview")
+              }
+            />
+
+            {/* Projects accordion — free */}
+            <Accordion
+              icon={Code2}
+              label="Projects"
+              isOpen={isProjectsOpen}
+              onToggle={() => setIsProjectsOpen((p) => !p)}
+            >
+              <SubItem
+                label="New Project"
+                onClick={() => goTo("project-new")}
+              />
+              <SubItem
+                label="All Projects"
+                badge={savedProjects?.length ?? 0}
+                onClick={() => {
+                  setShowProjectsList?.((p) => !p);
+                  setSidebarOpen(false);
+                }}
+              />
+              <SubItem
+                label="Archived"
+                onClick={() => goTo("projects-archived")}
+              />
+            </Accordion>
+
+            {/* Clients accordion — gated: growth */}
+            <Accordion
+              icon={Users}
+              label="Clients"
+              isOpen={isClientsOpen}
+              onToggle={() => setIsClientsOpen((p) => !p)}
+            >
+              <SubItem
+                label="Add Client"
+                locked={!canAccess("addClient")}
+                onClick={() =>
+                  requirePlan(
+                    "addClient",
+                    () => {
+                      handleAddNewClient?.();
+                      setSidebarOpen(false);
+                    },
+                    "Add Client",
+                  )
+                }
+              />
+              <SubItem
+                label="All Clients"
+                badge={savedClients?.length ?? 0}
+                locked={!canAccess("allClients")}
+                onClick={() =>
+                  requirePlan(
+                    "allClients",
+                    () => {
+                      setShowClientsModal?.(true);
+                      setSidebarOpen(false);
+                    },
+                    "All Clients",
+                  )
+                }
+              />
+            </Accordion>
+
+            {/* Templates — gated: growth */}
+            <NavItem
+              icon={FileText}
+              label="Proposal Templates"
+              locked={!canAccess("templates")}
+              onClick={() =>
+                gatedGoTo("templates", "templates", "Proposal Templates")
+              }
+            />
+
+            {/* Deployments — gated: elite */}
+            <NavItem
+              icon={GitBranch}
+              label="Deployments"
+              locked={!canAccess("bookings")}
+              onClick={() =>
+                gatedGoTo("bookings", "deployments", "Deployments")
+              }
+              badge={newRequestCount > 0 ? newRequestCount : null}
+            />
+
+            {/* Domains — gated: elite */}
+            <NavItem
+              icon={Globe}
+              label="Domains"
+              locked={!canAccess("portfolio")}
+              onClick={() => gatedGoTo("portfolio", "domains", "Domains")}
+            />
+
+            {/* Databases — gated: elite */}
+            <NavItem
+              icon={Database}
+              label="Databases"
+              locked={!canAccess("packages")}
+              onClick={() => gatedGoTo("packages", "databases", "Databases")}
+            />
+
+            {/* Integrations — gated: elite */}
+            <NavItem
+              icon={Webhook}
+              label="Integrations"
+              locked={!canAccess("packages")}
+              onClick={() =>
+                gatedGoTo("packages", "integrations", "Integrations")
+              }
+            />
+
+            {/* Billing accordion — gated: growth */}
+            <Accordion
+              icon={CreditCard}
+              label="Billing"
+              isOpen={isBillingOpen}
+              onToggle={() =>
+                requirePlan(
+                  "payments",
+                  () => setIsBillingOpen((p) => !p),
+                  "Billing",
+                )
+              }
+              locked={!canAccess("payments")}
+            >
+              <SubItem
+                label="Invoices"
+                onClick={() => goTo("billing-invoices")}
+              />
+              <SubItem
+                label="Payment History"
+                onClick={() => goTo("billing-history")}
+              />
+              <SubItem
+                label="Subscriptions"
+                onClick={() => goTo("billing-subscriptions")}
+              />
+            </Accordion>
+
+            {/* Reports accordion — gated: elite */}
+            <Accordion
+              icon={FileBarChart}
+              label="Reports"
+              isOpen={isReportsOpen}
+              onToggle={() =>
+                requirePlan(
+                  "reports",
+                  () => setIsReportsOpen((p) => !p),
+                  "Reports",
+                )
+              }
+              locked={!canAccess("reports")}
+            >
+              <SubItem
+                label="Project Reports"
+                onClick={() => goTo("report-projects")}
+              />
+              <SubItem
+                label="Revenue Reports"
+                onClick={() => goTo("report-revenue")}
+              />
+              <SubItem
+                label="Client Reports"
+                onClick={() => goTo("report-clients")}
+              />
+            </Accordion>
+
+            {/* Analytics accordion — gated: elite */}
+            <Accordion
+              icon={BarChart3}
+              label="Analytics"
+              isOpen={isAnalyticsOpen}
+              onToggle={() =>
+                requirePlan(
+                  "analytics",
+                  () => setIsAnalyticsOpen((p) => !p),
+                  "Analytics",
+                )
+              }
+              locked={!canAccess("analytics")}
+            >
+              <SubItem
+                label="Traffic Trends"
+                onClick={() => goTo("analytics-traffic")}
+              />
+              <SubItem
+                label="Revenue Trends"
+                onClick={() => goTo("analytics-revenue")}
+              />
+              <SubItem
+                label="Client Insights"
+                onClick={() => goTo("analytics-clients")}
+              />
+            </Accordion>
+
+            {!isMobile && (
+              <>
+                <NavItem
+                  icon={ShieldCheck}
+                  label="Security"
+                  locked={!canAccess("reports")}
+                  onClick={() => gatedGoTo("reports", "security", "Security")}
+                />
+                <NavItem
+                  icon={Terminal}
+                  label="Audit Logs"
+                  locked={!canAccess("analytics")}
+                  onClick={() =>
+                    gatedGoTo("analytics", "audit-logs", "Audit Logs")
+                  }
+                />
+                <NavItem
+                  icon={Star}
+                  label="Reviews"
+                  onClick={() => goTo("reviews")}
+                />
+              </>
+            )}
+          </div>
+        </nav>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#1E2A3A] px-4 py-3 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full ring-1 ring-[#1E2A3A] bg-[#1A2540] flex items-center justify-center overflow-hidden flex-shrink-0">
+            {businessInfo?.logoUrl ? (
+              <img
+                src={businessInfo.logoUrl}
+                alt="Business Logo"
+                className="max-h-[70%] max-w-[70%] object-contain"
+              />
+            ) : (
+              <Cpu className="w-4 h-4 text-blue-400" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate">
+              {user?.name || "User"}
+            </p>
+            <p className="text-xs text-slate-500 truncate">
+              {user?.email || "user@example.com"}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 flex-shrink-0"
+            title="Sign out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
       {/* ── Upgrade modal — renders above everything ──────────────────────── */}
       <UpgradeModal />
 
-      {/* ── Mobile overlay ────────────────────────────────────────────────── */}
-      {sidebarOpen && (
+      {/* ════════════════════════════════════════════════════════════════
+          MOBILE — dim overlay + floating slide-in drawer (margin + rounded)
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="md:hidden print:hidden">
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+            sidebarOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
           onClick={() => setSidebarOpen(false)}
         />
-      )}
 
-      {/* ── Collapsed sidebar (icon rail) ─────────────────────────────────── */}
-      {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 bg-[#0A0E1A] border-r border-[#1E2A3A] h-full print:hidden shadow-2xl z-30">
-          <div className="flex flex-col items-center py-5 space-y-3 flex-1">
-            {/* Expand toggle */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="group p-2 text-slate-500 hover:text-white hover:bg-[#1A2540] rounded-lg transition-all duration-200"
-              title="Expand Sidebar"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-
-            {/* Logo mark */}
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#6366F1] flex items-center justify-center shadow-lg shadow-blue-500/20">
-              {logo ? (
-                <img src={logo} alt="Logo" className="w-6 h-6 object-contain" />
-              ) : (
-                <Cpu className="w-4 h-4 text-white" />
-              )}
-            </div>
-
-            <div className="w-8 border-t border-[#1E2A3A]" />
-
-            {/* Icon buttons */}
-            <div className="flex flex-col items-center space-y-1 w-full px-2">
-              {iconRailItems.map(({ icon: Icon, title, action, featureKey }) => {
-                const locked = featureKey && !canAccess(featureKey);
-                return (
-                  <button
-                    key={title}
-                    onClick={action}
-                    className="group relative w-10 h-10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-[#1A2540] rounded-lg transition-all duration-200"
-                    title={title}
-                  >
-                    <Icon className="w-5 h-5" />
-                    {locked && (
-                      <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Avatar bottom */}
-          <div className="flex justify-center pb-5">
-            <div className="w-9 h-9 rounded-full ring-1 ring-[#1E2A3A] bg-[#1A2540] flex items-center justify-center overflow-hidden">
-              {businessInfo?.logoUrl ? (
-                <img src={businessInfo.logoUrl} className="w-6 h-6 object-contain" alt="biz" />
-              ) : (
-                <Cpu className="w-4 h-4 text-blue-400" />
-              )}
-            </div>
+        <div
+          className={`fixed inset-y-3 left-3 z-50 w-64 max-w-[85vw] rounded-2xl shadow-2xl transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+2rem)]"
+          }`}
+        >
+          <div className="bg-[#0A0E1A] h-full rounded-2xl">
+            <SidebarContent />
           </div>
         </div>
-      )}
+      </div>
 
-      {/* ── Expanded sidebar ──────────────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 bg-[#0A0E1A] border-r border-[#1E2A3A] h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
-          <div className="p-5">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-7">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#6366F1] flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  {logo ? (
-                    <img src={logo} alt="Logo" className="w-5 h-5 object-contain" />
-                  ) : (
-                    <Cpu className="w-4 h-4 text-white" />
-                  )}
-                </div>
-                <span className="text-sm font-semibold text-white tracking-tight">
-                  {businessInfo?.name || "TechStack"}
-                </span>
-              </div>
+      {/* ════════════════════════════════════════════════════════════════
+          DESKTOP — collapsed icon rail OR expanded panel, both floating
+          as rounded cards with vertical + left margin, not full height.
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
+        {/* Collapsed icon rail */}
+        {!sidebarOpen && (
+          <div className="flex flex-col flex-shrink-0 w-16 bg-[#0A0E1A] rounded-2xl h-full shadow-lg z-30">
+            <div className="flex flex-col items-center py-5 space-y-3 flex-1 min-h-0">
+              {/* Expand toggle */}
               <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-1.5 text-slate-500 hover:text-white hover:bg-[#1A2540] rounded-lg transition-all duration-200"
+                onClick={() => setSidebarOpen(true)}
+                className="group p-2 text-slate-500 hover:text-white hover:bg-[#1A2540] rounded-lg transition-all duration-200"
+                title="Expand Sidebar"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
-            </div>
 
-            {/* Plan badge */}
-            <div className="flex items-center justify-between mb-5 px-3 py-2 bg-[#111827] rounded-lg border border-[#1E2A3A]">
-              <span className="text-xs text-slate-500">Plan</span>
-              <div className="flex items-center gap-2">
-                <PlanBadge currentPlan={currentPlan} />
-                {currentPlan !== "elite" && (
-                  <button
-                    onClick={() => requirePlan("elite", () => {}, "Elite plan")}
-                    className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-                  >
-                    Upgrade ↑
-                  </button>
+              {/* Logo mark */}
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#6366F1] flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
+                {logo ? (
+                  <img
+                    src={logo}
+                    alt="Logo"
+                    className="w-6 h-6 object-contain"
+                  />
+                ) : (
+                  <Cpu className="w-4 h-4 text-white" />
+                )}
+              </div>
+
+              <div className="w-8 border-t border-[#1E2A3A] flex-shrink-0" />
+
+              {/* Icon buttons */}
+              <div className="flex flex-col items-center space-y-1 w-full px-2 flex-1 overflow-y-auto">
+                {iconRailItems.map(
+                  ({ icon: Icon, title, action, featureKey }) => {
+                    const locked = featureKey && !canAccess(featureKey);
+                    return (
+                      <button
+                        key={title}
+                        onClick={action}
+                        className="group relative w-10 h-10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-[#1A2540] rounded-lg transition-all duration-200 flex-shrink-0"
+                        title={title}
+                      >
+                        <Icon className="w-5 h-5" />
+                        {locked && (
+                          <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
+                        )}
+                      </button>
+                    );
+                  },
                 )}
               </div>
             </div>
 
-            {/* Nav */}
-            <nav className="space-y-0.5">
-              <NavItem
-                icon={Home}
-                label="Dashboard"
-                onClick={() => goTo("home")}
-                active={activeView === "home"}
-              />
-              <NavItem
-                icon={Settings}
-                label="Settings"
-                onClick={() => { setShowSettings(true); setSidebarOpen(false); }}
-              />
-
-              <div className="pt-4 mt-3 border-t border-[#1E2A3A] space-y-0.5">
-
-                {/* Overview — gated: elite */}
-                <NavItem
-                  icon={TrendingUp}
-                  label="Business Overview"
-                  locked={!canAccess("businessOverview")}
-                  onClick={() => gatedGoTo("businessOverview", "overview", "Business Overview")}
-                />
-
-                {/* Projects accordion — free */}
-                <Accordion
-                  icon={Code2}
-                  label="Projects"
-                  isOpen={isProjectsOpen}
-                  onToggle={() => setIsProjectsOpen((p) => !p)}
-                >
-                  <SubItem
-                    label="New Project"
-                    onClick={() => goTo("project-new")}
-                  />
-                  <SubItem
-                    label="All Projects"
-                    badge={savedProjects?.length ?? 0}
-                    onClick={() => {
-                      setShowProjectsList?.((p) => !p);
-                      setSidebarOpen(false);
-                    }}
-                  />
-                  <SubItem
-                    label="Archived"
-                    onClick={() => goTo("projects-archived")}
-                  />
-                </Accordion>
-
-                {/* Clients accordion — gated: growth */}
-                <Accordion
-                  icon={Users}
-                  label="Clients"
-                  isOpen={isClientsOpen}
-                  onToggle={() => setIsClientsOpen((p) => !p)}
-                >
-                  <SubItem
-                    label="Add Client"
-                    locked={!canAccess("addClient")}
-                    onClick={() =>
-                      requirePlan("addClient", () => { handleAddNewClient?.(); setSidebarOpen(false); }, "Add Client")
-                    }
-                  />
-                  <SubItem
-                    label="All Clients"
-                    badge={savedClients?.length ?? 0}
-                    locked={!canAccess("allClients")}
-                    onClick={() =>
-                      requirePlan("allClients", () => { setShowClientsModal?.(true); setSidebarOpen(false); }, "All Clients")
-                    }
-                  />
-                </Accordion>
-
-                {/* Templates — gated: growth */}
-                <NavItem
-                  icon={FileText}
-                  label="Proposal Templates"
-                  locked={!canAccess("templates")}
-                  onClick={() => gatedGoTo("templates", "templates", "Proposal Templates")}
-                />
-
-                {/* Deployments — gated: elite */}
-                <NavItem
-                  icon={GitBranch}
-                  label="Deployments"
-                  locked={!canAccess("bookings")}
-                  onClick={() => gatedGoTo("bookings", "deployments", "Deployments")}
-                  badge={newRequestCount > 0 ? newRequestCount : null}
-                />
-
-                {/* Domains — gated: elite */}
-                <NavItem
-                  icon={Globe}
-                  label="Domains"
-                  locked={!canAccess("portfolio")}
-                  onClick={() => gatedGoTo("portfolio", "domains", "Domains")}
-                />
-
-                {/* Databases — gated: elite */}
-                <NavItem
-                  icon={Database}
-                  label="Databases"
-                  locked={!canAccess("packages")}
-                  onClick={() => gatedGoTo("packages", "databases", "Databases")}
-                />
-
-                {/* Integrations — gated: elite */}
-                <NavItem
-                  icon={Webhook}
-                  label="Integrations"
-                  locked={!canAccess("packages")}
-                  onClick={() => gatedGoTo("packages", "integrations", "Integrations")}
-                />
-
-                {/* Billing accordion — gated: growth */}
-                <Accordion
-                  icon={CreditCard}
-                  label="Billing"
-                  isOpen={isBillingOpen}
-                  onToggle={() =>
-                    requirePlan("payments", () => setIsBillingOpen((p) => !p), "Billing")
-                  }
-                  locked={!canAccess("payments")}
-                >
-                  <SubItem label="Invoices" onClick={() => goTo("billing-invoices")} />
-                  <SubItem label="Payment History" onClick={() => goTo("billing-history")} />
-                  <SubItem label="Subscriptions" onClick={() => goTo("billing-subscriptions")} />
-                </Accordion>
-
-                {/* Reports accordion — gated: elite */}
-                <Accordion
-                  icon={FileBarChart}
-                  label="Reports"
-                  isOpen={isReportsOpen}
-                  onToggle={() =>
-                    requirePlan("reports", () => setIsReportsOpen((p) => !p), "Reports")
-                  }
-                  locked={!canAccess("reports")}
-                >
-                  <SubItem label="Project Reports" onClick={() => goTo("report-projects")} />
-                  <SubItem label="Revenue Reports" onClick={() => goTo("report-revenue")} />
-                  <SubItem label="Client Reports" onClick={() => goTo("report-clients")} />
-                </Accordion>
-
-                {/* Analytics accordion — gated: elite */}
-                <Accordion
-                  icon={BarChart3}
-                  label="Analytics"
-                  isOpen={isAnalyticsOpen}
-                  onToggle={() =>
-                    requirePlan("analytics", () => setIsAnalyticsOpen((p) => !p), "Analytics")
-                  }
-                  locked={!canAccess("analytics")}
-                >
-                  <SubItem label="Traffic Trends" onClick={() => goTo("analytics-traffic")} />
-                  <SubItem label="Revenue Trends" onClick={() => goTo("analytics-revenue")} />
-                  <SubItem label="Client Insights" onClick={() => goTo("analytics-clients")} />
-                </Accordion>
-
-                {!isMobile && (
-                  <>
-                    <NavItem
-                      icon={ShieldCheck}
-                      label="Security"
-                      locked={!canAccess("reports")}
-                      onClick={() => gatedGoTo("reports", "security", "Security")}
-                    />
-                    <NavItem
-                      icon={Terminal}
-                      label="Audit Logs"
-                      locked={!canAccess("analytics")}
-                      onClick={() => gatedGoTo("analytics", "audit-logs", "Audit Logs")}
-                    />
-                    <NavItem
-                      icon={Star}
-                      label="Reviews"
-                      onClick={() => goTo("reviews")}
-                    />
-                  </>
-                )}
-              </div>
-            </nav>
-          </div>
-
-          {/* Footer */}
-          <div className="sticky bottom-0 p-4 border-t border-[#1E2A3A] bg-[#0A0E1A]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full ring-1 ring-[#1E2A3A] bg-[#1A2540] flex items-center justify-center overflow-hidden flex-shrink-0">
+            {/* Avatar bottom */}
+            <div className="flex justify-center pb-5 flex-shrink-0">
+              <div className="w-9 h-9 rounded-full ring-1 ring-[#1E2A3A] bg-[#1A2540] flex items-center justify-center overflow-hidden">
                 {businessInfo?.logoUrl ? (
                   <img
                     src={businessInfo.logoUrl}
-                    alt="Business Logo"
-                    className="max-h-[70%] max-w-[70%] object-contain"
+                    className="w-6 h-6 object-contain"
+                    alt="biz"
                   />
                 ) : (
                   <Cpu className="w-4 h-4 text-blue-400" />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  {user?.name || "User"}
-                </p>
-                <p className="text-xs text-slate-500 truncate">
-                  {user?.email || "user@example.com"}
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 flex-shrink-0"
-                title="Sign out"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Expanded panel */}
+        {sidebarOpen && (
+          <div className="flex-shrink-0 w-64 bg-[#0A0E1A] rounded-2xl h-full shadow-lg z-30">
+            <SidebarContent />
+          </div>
+        )}
+      </div>
     </>
   );
 }
@@ -495,13 +626,19 @@ export default function TechnologySidebar({
 // ── Plan badge ────────────────────────────────────────────────────────────────
 function PlanBadge({ currentPlan }) {
   const styles = {
-    starter: { label: "Starter", bg: "bg-slate-700/50", text: "text-slate-300" },
+    starter: {
+      label: "Starter",
+      bg: "bg-slate-700/50",
+      text: "text-slate-300",
+    },
     growth: { label: "Growth", bg: "bg-blue-500/15", text: "text-blue-400" },
     elite: { label: "Elite", bg: "bg-indigo-500/15", text: "text-indigo-400" },
   };
   const s = styles[currentPlan] ?? styles.starter;
   return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.bg} ${s.text}`}>
+    <span
+      className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.bg} ${s.text}`}
+    >
       {s.label}
     </span>
   );

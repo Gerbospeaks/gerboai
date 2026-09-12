@@ -100,7 +100,7 @@ export default function LegalBilling({ user }) {
     return matchSearch && matchStatus && matchType;
   });
 
-  const fmt = (n) => new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).format(n||0);
+  const fmt = (n) => new Intl.NumberFormat("en-ZA",{style:"currency",currency:"USD"}).format(n||0);
 
   const totalUnbilled = entries.filter(e=>e.status==="unbilled").reduce((s,e)=>s+parseFloat(e.amount||0),0);
   const totalBilled   = entries.filter(e=>e.status==="billed").reduce((s,e)=>s+parseFloat(e.amount||0),0);
@@ -383,7 +383,7 @@ export default function LegalBilling({ user }) {
                       {DISBURSEMENT_TYPES.map(t=><option key={t}>{t}</option>)}
                     </select>
                   </Fld>
-                  <Fld label="Amount (ZAR)" req>
+                  <Fld label="Amount (USD)" req>
                     <input type="number" value={form.amount} onChange={e=>set("amount",e.target.value)}
                       placeholder="0.00" min="0" step="0.01" className={inp}/>
                   </Fld>
@@ -396,7 +396,7 @@ export default function LegalBilling({ user }) {
                         {Object.keys(RATES).map(r=><option key={r}>{r}</option>)}
                       </select>
                     </Fld>
-                    <Fld label="Rate (ZAR/hr)">
+                    <Fld label="Rate (USD/hr)">
                       <input type="number" value={form.rate} onChange={e=>set("rate",e.target.value)}
                         placeholder="0.00" min="0" step="50" className={inp}/>
                     </Fld>
@@ -408,7 +408,7 @@ export default function LegalBilling({ user }) {
                   <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-4 py-3 flex items-center justify-between">
                     <span className="text-sm text-[#64748b]">Calculated Amount</span>
                     <span className="text-lg font-bold text-[#7c3aed]">
-                      {new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).format(
+                      {new Intl.NumberFormat("en-ZA",{style:"currency",currency:"USD"}).format(
                         (parseFloat(form.rate)||0)*(parseFloat(form.hours)||0)
                       )}
                     </span>

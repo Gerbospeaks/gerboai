@@ -446,7 +446,7 @@ export const TemplateRenderer = ({
           <p>• Payment is due within 30 days of invoice date</p>
           <p>• Late payments may incur a 2% monthly interest charge</p>
           <p>• Please reference invoice number in all payments</p>
-          <p>• All prices are in South African Rand (ZAR)</p>
+          <p>• All prices are in US Dollar  ($ / USD) (USD)</p>
         </div>
       </div>
 
@@ -1148,7 +1148,7 @@ export const TemplateRenderer = ({
             </p>
             <p>
               <span className="font-semibold text-slate-700">Currency:</span>{" "}
-              All amounts in ZAR
+              All amounts in USD
             </p>
           </div>
         </div>

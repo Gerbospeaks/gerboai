@@ -282,7 +282,7 @@ const Templates = ({ user }) => {
         templateId: showPayment,
         templateName: TEMPLATES[showPayment].name,
         amount: TEMPLATES[showPayment].price,
-        currency: "ZAR",
+        currency: "USD",
         timestamp: serverTimestamp(),
         status: "completed",
       });

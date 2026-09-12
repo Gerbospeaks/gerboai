@@ -707,7 +707,7 @@ const [stampConfig, setStampConfig] = useState(null);
   const formatCurrency = (n) =>
     new Intl.NumberFormat("en-ZA", {
       style: "currency",
-      currency: "ZAR",
+      currency: "USD",
     }).format(n);
 
   const statusBadge = (s) =>

@@ -769,7 +769,7 @@ const bottomNavItems = [
   }}
   />
 )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
         {/* FIX: All required props are now passed to CleaningSidebar */}
         <CleaningSidebar
@@ -1658,7 +1658,7 @@ const bottomNavItems = [
                                     ["Payment Due",     "Upon Completion"],
                                     ["Payment Methods", "Bank Transfer, Card, Cash"],
                                     ["Quote Valid For", "30 Days"],
-                                    ["Currency",        "ZAR (South African Rand)"],
+                                    ["Currency",        "USD (US Dollar  ($ / USD))"],
                                     ["Total Due",       `R${total.toFixed(2)}`],
                                   ].map(([k, v]) => (
                                     <div key={k} className="flex items-center justify-between px-5 py-3 text-sm">

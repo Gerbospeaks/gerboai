@@ -201,7 +201,7 @@ export default function AnalyticsView() {
             <h3 className="text-sm font-semibold text-[#1e293b]">
               Revenue trend
             </h3>
-            <span className="text-xs text-[#94a3b8]">ZAR</span>
+            <span className="text-xs text-[#94a3b8]">USD</span>
           </div>
           <svg viewBox="0 0 300 120" className="w-full h-36">
             <defs>

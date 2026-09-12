@@ -38,6 +38,7 @@ import {
 } from "firebase/firestore";
 import { Printer, Download, Sparkles } from "lucide-react";
 import { db } from "../../firebase";
+import HealthDashboardQuickActions from "./HealthDashboardQuickActions"
 import PatientModal from "./PatientModal";
 import PracticeOverview from "./PracticeOverview";
 import PatientsListModal from "./PatientsListModal";
@@ -522,7 +523,7 @@ const [stampConfig, setStampConfig] = useState(null);
           }}
           />
         )}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
 
         {/* ── New HealthSidebar ──────────────────────────────────────────── */}
         <HealthSidebar
@@ -534,7 +535,7 @@ const [stampConfig, setStampConfig] = useState(null);
           setShowSettings={setShowSettings}
           handleNewInvoice={handleNewInvoice}
           handleAddNewPatient={handleAddNewPatient}
-          facilityInfo={facilityInfo}
+          businessInfo={facilityInfo}
           savedInvoices={savedInvoices}
           savedPatients={savedPatients}
           setShowInvoicesList={setShowInvoicesList}
@@ -587,7 +588,7 @@ const [stampConfig, setStampConfig] = useState(null);
           <SickNoteModal
             isOpen={showSickNoteModal}
             onClose={() => setShowSickNoteModal(false)}
-            facilityInfo={facilityInfo}
+            buinessInfo={facilityInfo}
             patientName={patientName}
             patientId={patientId}
             patientDOB={patientDOB}
@@ -756,6 +757,14 @@ const [stampConfig, setStampConfig] = useState(null);
           {/* ── View router ───────────────────────────────────────────── */}
           {activeView === "home" && (
                       <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
+                        <HealthDashboardQuickActions
+  onNewInvoice={handleNewInvoice}
+  onAddPatient={handleAddNewPatient}
+  onAppointments={() => setActiveView("appointments")}
+  goTo={setActiveView}
+  savedInvoicesCount={savedInvoices.length}
+  savedPatientsCount={savedPatients.length}
+/>
                         <HomeView
                           user={user}
                           onNavigate={(view, docType) => {
