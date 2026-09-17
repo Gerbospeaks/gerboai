@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getDashboardRoute } from "../utils/dashboardRoutes";
 import { getDashboardActions } from "../utils/dashboardActions";
 import { useAuth } from "../contexts/AuthContext";
+import { useCurrency as useAppCurrency } from "../contexts/CurrencyContext";
 import BusinessSettingsModal from "./BusinessSettingsModal";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import {
@@ -325,11 +326,47 @@ const css = `
   @keyframes zh-up   { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
 `;
 
-/* ─── Helpers ─────────────────────────────────────────────────────────────── */
-const fmtCurrency = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
-    n,
-  );
+const localeCurrencyMap = {
+  US: "USD",
+  GB: "GBP",
+  EU: "EUR",
+  DE: "EUR",
+  FR: "EUR",
+  IT: "EUR",
+  ES: "EUR",
+  JP: "JPY",
+  CN: "CNY",
+  IN: "INR",
+  ZA: "ZAR",
+  CA: "CAD",
+  AU: "AUD",
+  BR: "BRL",
+  RU: "RUB",
+  KR: "KRW",
+  MX: "MXN",
+  CH: "CHF",
+  SG: "SGD",
+  NG: "NGN",
+  KE: "KES",
+  AE: "AED",
+  SA: "SAR",
+};
+
+function getUserLocaleAndCurrency() {
+  const locale =
+    typeof navigator !== "undefined" ? navigator.language : "en-US";
+  const region = locale.split("-")[1]?.toUpperCase();
+  const currency = localeCurrencyMap[region] || "USD"; // always falls back
+  return { locale, currency };
+}
+
+// Default params here are your safety net
+const fmtCurrency = (n, locale = "en-US", currency = "USD") =>
+  new Intl.NumberFormat(locale, { style: "currency", currency }).format(n);
+
+// Usage:
+const { locale, currency } = getUserLocaleAndCurrency();
+const formatted = fmtCurrency(1234.56, locale, currency);
 
 const badgeClass = (s) =>
   s === "paid"
@@ -394,13 +431,15 @@ export default function Home({
 }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmtCurrency = (n) => formatVisitorCurrency(n, "ZAR");
   const [pdfViewer, setPdfViewer] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
-  
+
   const [stats, setStats] = useState({
     totalInvoices: 0,
     totalQuotes: 0,
@@ -535,49 +574,49 @@ export default function Home({
         <div className="zh-body">
           {/* KPIs */}
           <div className="zh-section">Overview</div>
-      <div className="zh-kpi-grid">
-    <KPI
-      title="Invoices"
-      value={stats.totalInvoices}
-      icon={FileText}
-      iconBg="#ede9fe"
-      iconColor="#6d28d9"
-      sub="All time"
-      loading={stats.loading}
-      trend={12}
-      onClick={onViewInvoices}
-    />
-    <KPI
-      title="Quotes"
-      value={stats.totalQuotes}
-      icon={Receipt}
-      iconBg={Z.blueLight}
-      iconColor={Z.blue}
-      sub="Generated"
-      loading={stats.loading}
-      // no onClick — there's no quotes list/view in this app yet
-    />
-    <KPI
-      title="Revenue"
-      value={fmtCurrency(stats.totalInvoiced)}
-      icon={TrendingUp}
-      iconBg={Z.greenLight}
-      iconColor={Z.green}
-      sub="Total invoiced"
-      loading={stats.loading}
-      trend={8}
-    />
-    <KPI
-      title="Clients"
-      value={stats.totalClients}
-      icon={Users}
-      iconBg={Z.amberLight}
-      iconColor={Z.amber}
-      sub="Active"
-      loading={stats.loading}
-      onClick={onViewGuests}
-    />
-  </div>
+          <div className="zh-kpi-grid">
+            <KPI
+              title="Invoices"
+              value={stats.totalInvoices}
+              icon={FileText}
+              iconBg="#ede9fe"
+              iconColor="#6d28d9"
+              sub="All time"
+              loading={stats.loading}
+              trend={12}
+              onClick={onViewInvoices}
+            />
+            <KPI
+              title="Quotes"
+              value={stats.totalQuotes}
+              icon={Receipt}
+              iconBg={Z.blueLight}
+              iconColor={Z.blue}
+              sub="Generated"
+              loading={stats.loading}
+              // no onClick — there's no quotes list/view in this app yet
+            />
+            <KPI
+              title="Revenue"
+              value={fmtCurrency(stats.totalInvoiced)}
+              icon={TrendingUp}
+              iconBg={Z.greenLight}
+              iconColor={Z.green}
+              sub="Total invoiced"
+              loading={stats.loading}
+              trend={8}
+            />
+            <KPI
+              title="Clients"
+              value={stats.totalClients}
+              icon={Users}
+              iconBg={Z.amberLight}
+              iconColor={Z.amber}
+              sub="Active"
+              loading={stats.loading}
+              onClick={onViewGuests}
+            />
+          </div>
 
           {/* Mid row */}
           <div className="zh-section">Actions</div>

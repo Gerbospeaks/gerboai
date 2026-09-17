@@ -10,6 +10,7 @@ import {
 import { injectDynamicManifest } from "./utils/generateManifest";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AdminProvider } from "./contexts/AdminContext";
+import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { getSubdomainFromHost } from "./utils/subdomain";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { DASHBOARD_ID_TO_PATH } from "./constants/dashboardPaths";
@@ -694,6 +695,7 @@ useEffect(() => {
   }, []);
   return (
     <Router>
+      <CurrencyProvider>
       <AuthProvider>
         <AdminProvider>
           {IS_SUBDOMAIN ? (
@@ -785,6 +787,7 @@ useEffect(() => {
           )}
         </AdminProvider>
       </AuthProvider>
+      </CurrencyProvider>
     </Router>
   );
 }

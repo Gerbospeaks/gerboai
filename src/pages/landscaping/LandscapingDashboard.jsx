@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
 import StampPaywallModal from "../StampPaywallModal";
@@ -611,11 +612,8 @@ const [stampConfig, setStampConfig] = useState(null);
   ].filter(Boolean);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  const formatCurrency = (n) =>
-    new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "USD",
-    }).format(n);
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrency = (n) => formatVisitorCurrency(n, "ZAR");
 
   const statusBadge = (s) =>
     s === "paid"

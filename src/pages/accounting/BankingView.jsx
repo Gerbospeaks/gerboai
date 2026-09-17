@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -39,8 +40,6 @@ const labelCls =
   "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
 const selectCls =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 const fmtDate = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-ZA") : "—";
 
@@ -129,6 +128,8 @@ export default function BankingView({
 
 // ── Bank Accounts ─────────────────────────────────────────────────────────────
 function BankAccountsTab({ user, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -230,7 +231,7 @@ function BankAccountsTab({ user, clientBase, clientName }) {
               Bank Accounts
             </h2>
             <p className="text-xs text-[#64748b]">
-              {clientName} · {accounts.length} accounts · Total R{fmt(totalBal)}
+              {clientName} · {accounts.length} accounts · Total {fmt(totalBal)}
             </p>
           </div>
         </div>
@@ -289,7 +290,7 @@ function BankAccountsTab({ user, clientBase, clientName }) {
                 <p
                   className={`text-xl font-bold ${(a.currentBalance || 0) >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
                 >
-                  R{fmt(a.currentBalance)}
+                  {fmt(a.currentBalance)}
                 </p>
               </div>
             </div>
@@ -377,6 +378,8 @@ function BankAccountsTab({ user, clientBase, clientName }) {
 
 // ── Transactions ──────────────────────────────────────────────────────────────
 function TransactionsTab({ user, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [transactions, setTransactions] = useState([]);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -494,21 +497,21 @@ function TransactionsTab({ user, clientBase, clientName }) {
         {[
           {
             label: "Total Debits",
-            value: `R${fmt(totalDebits)}`,
+            value: `${fmt(totalDebits)}`,
             icon: TrendingDown,
             bg: "bg-[#fef2f2]",
             color: "text-[#dc2626]",
           },
           {
             label: "Total Credits",
-            value: `R${fmt(totalCredits)}`,
+            value: `${fmt(totalCredits)}`,
             icon: TrendingUp,
             bg: "bg-[#f0fdf4]",
             color: "text-[#059669]",
           },
           {
             label: "Net",
-            value: `R${fmt(totalCredits - totalDebits)}`,
+            value: `${fmt(totalCredits - totalDebits)}`,
             icon: DollarSign,
             bg: "bg-[#eff6ff]",
             color:
@@ -626,7 +629,7 @@ function TransactionsTab({ user, clientBase, clientName }) {
                   <td
                     className={`px-4 py-3 text-sm font-semibold ${tx.type === "credit" ? "text-[#059669]" : "text-[#dc2626]"}`}
                   >
-                    {tx.type === "credit" ? "+" : "-"}R{fmt(tx.amount)}
+                    {tx.type === "credit" ? "+" : "-"}{fmt(tx.amount)}
                   </td>
                   <td className="px-4 py-3">
                     {tx.reconciled ? (
@@ -749,6 +752,8 @@ function TransactionsTab({ user, clientBase, clientName }) {
 
 // ── Reconciliation ────────────────────────────────────────────────────────────
 function ReconciliationTab({ user, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [bankAccounts, setBankAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [selectedAcc, setSelectedAcc] = useState("");
@@ -886,7 +891,7 @@ function ReconciliationTab({ user, clientBase, clientName }) {
               {statementBal
                 ? isBalanced
                   ? "Balanced ✓"
-                  : `Difference: R${fmt(Math.abs(diff))}`
+                  : `Difference: ${fmt(Math.abs(diff))}`
                 : "Enter statement balance"}
             </div>
           </div>
@@ -894,11 +899,11 @@ function ReconciliationTab({ user, clientBase, clientName }) {
         {selAcc_ && (
           <div className="mt-4 grid grid-cols-3 gap-3 pt-4 border-t border-[#f1f5f9]">
             {[
-              { label: "Book Balance", value: `R${fmt(bookBal)}` },
-              { label: "Cleared Adjustments", value: `R${fmt(checkedTot)}` },
+              { label: "Book Balance", value: `${fmt(bookBal)}` },
+              { label: "Cleared Adjustments", value: `${fmt(checkedTot)}` },
               {
                 label: "Adjusted Balance",
-                value: `R${fmt(bookBal + checkedTot)}`,
+                value: `${fmt(bookBal + checkedTot)}`,
               },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
@@ -979,7 +984,7 @@ function ReconciliationTab({ user, clientBase, clientName }) {
                   <td
                     className={`px-4 py-3 text-sm font-semibold ${tx.type === "credit" ? "text-[#059669]" : "text-[#dc2626]"}`}
                   >
-                    {tx.type === "credit" ? "+" : "-"}R{fmt(tx.amount)}
+                    {tx.type === "credit" ? "+" : "-"}{fmt(tx.amount)}
                   </td>
                 </tr>
               ))}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -42,8 +43,6 @@ const labelCls =
   "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
 const selectCls =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 const fmtDate = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-ZA") : "—";
 const today = () => new Date().toISOString().split("T")[0];
@@ -240,6 +239,8 @@ const CategoryIcon = ({ category }) => {
 // Props: user, clientId, clientName
 // ══════════════════════════════════════════════════════════════════════════════
 export default function FixedAssetRegister({ user, clientId, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -454,28 +455,28 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
         {[
           {
             label: "Total Cost",
-            value: `R${fmt(totalCost)}`,
+            value: `${fmt(totalCost)}`,
             icon: DollarSign,
             bg: "bg-[#eff6ff]",
             color: "text-[#2563eb]",
           },
           {
             label: "Accum. Depreciation",
-            value: `R${fmt(totalAccumDep)}`,
+            value: `${fmt(totalAccumDep)}`,
             icon: TrendingDown,
             bg: "bg-[#fef2f2]",
             color: "text-[#dc2626]",
           },
           {
             label: "Net Book Value",
-            value: `R${fmt(totalBookVal)}`,
+            value: `${fmt(totalBookVal)}`,
             icon: BarChart3,
             bg: "bg-[#f0fdf4]",
             color: "text-[#059669]",
           },
           {
             label: "Annual Dep. Charge",
-            value: `R${fmt(totalAnnualDep)}`,
+            value: `${fmt(totalAnnualDep)}`,
             icon: Calendar,
             bg: "bg-[#fff7ed]",
             color: "text-[#ea580c]",
@@ -639,18 +640,18 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                             {fmtDate(asset.purchaseDate)}
                           </td>
                           <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                            R{fmt(asset.cost)}
+                            {fmt(asset.cost)}
                           </td>
                           <td className="px-4 py-3 text-sm text-[#dc2626] font-medium">
-                            R{fmt(dep.accumDep)}
+                            {fmt(dep.accumDep)}
                           </td>
                           <td className="px-4 py-3 text-sm font-bold text-[#059669]">
-                            R{fmt(dep.bookValue)}
+                            {fmt(dep.bookValue)}
                           </td>
                           <td className="px-4 py-3 text-sm text-[#ea580c]">
                             {asset.depreciationMethod === "none"
                               ? "—"
-                              : `R${fmt(dep.annualDep)}/yr`}
+                              : `${fmt(dep.annualDep)}/yr`}
                           </td>
                           <td className="px-4 py-3">
                             <StatusBadge status={status} />
@@ -716,7 +717,7 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                                       : ""}
                                     {" · "}Useful life {asset.usefulLifeYears}{" "}
                                     yrs
-                                    {" · "}Residual R{fmt(asset.residualValue)}
+                                    {" · "}Residual {fmt(asset.residualValue)}
                                   </span>
                                 </div>
 
@@ -765,16 +766,16 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                                                 )}
                                               </td>
                                               <td className="px-4 py-2 text-[#64748b]">
-                                                R{fmt(row.openBook)}
+                                                {fmt(row.openBook)}
                                               </td>
                                               <td className="px-4 py-2 text-[#dc2626] font-medium">
-                                                R{fmt(row.depreciation)}
+                                                {fmt(row.depreciation)}
                                               </td>
                                               <td className="px-4 py-2 text-[#64748b]">
-                                                R{fmt(row.accumDep)}
+                                                {fmt(row.accumDep)}
                                               </td>
                                               <td className="px-4 py-2 font-semibold text-[#059669]">
-                                                R{fmt(row.closeBook)}
+                                                {fmt(row.closeBook)}
                                               </td>
                                             </tr>
                                           );
@@ -796,7 +797,7 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                                       return (
                                         <div
                                           key={row.year}
-                                          title={`${row.year}: R${fmt(row.closeBook)}`}
+                                          title={`${row.year}: ${fmt(row.closeBook)}`}
                                           className="flex-1 rounded-t transition-all"
                                           style={{
                                             height: `${Math.max(4, pct)}%`,
@@ -829,7 +830,7 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                       Totals ({filtered.length} assets)
                     </td>
                     <td className="px-4 py-3 text-sm font-bold text-[#1e293b]">
-                      R{fmt(filtered.reduce((s, a) => s + (a.cost || 0), 0))}
+                      {fmt(filtered.reduce((s, a) => s + (a.cost || 0), 0))}
                     </td>
                     <td className="px-4 py-3 text-sm font-bold text-[#dc2626]">
                       R
@@ -905,19 +906,19 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                       <span>
                         Cost:{" "}
                         <span className="font-semibold text-[#1e293b]">
-                          R{fmt(asset.cost)}
+                          {fmt(asset.cost)}
                         </span>
                       </span>
                       <span>
                         Annual dep:{" "}
                         <span className="font-semibold text-[#ea580c]">
-                          R{fmt(calcDepreciation(asset).annualDep)}
+                          {fmt(calcDepreciation(asset).annualDep)}
                         </span>
                       </span>
                       <span>
                         Residual:{" "}
                         <span className="font-semibold text-[#1e293b]">
-                          R{fmt(asset.residualValue)}
+                          {fmt(asset.residualValue)}
                         </span>
                       </span>
                     </div>
@@ -965,16 +966,16 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                               )}
                             </td>
                             <td className="px-4 py-2.5 text-[#64748b]">
-                              R{fmt(row.openBook)}
+                              {fmt(row.openBook)}
                             </td>
                             <td className="px-4 py-2.5 text-[#dc2626] font-medium">
-                              R{fmt(row.depreciation)}
+                              {fmt(row.depreciation)}
                             </td>
                             <td className="px-4 py-2.5 text-[#64748b]">
-                              R{fmt(row.accumDep)}
+                              {fmt(row.accumDep)}
                             </td>
                             <td className="px-4 py-2.5 font-semibold text-[#059669]">
-                              R{fmt(row.closeBook)}
+                              {fmt(row.closeBook)}
                             </td>
                             <td className="px-4 py-2.5">
                               <div className="flex items-center gap-2">
@@ -1244,17 +1245,17 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                           {[
                             {
                               label: "Annual Dep.",
-                              value: `R${fmt(preview.annualDep)}`,
+                              value: `${fmt(preview.annualDep)}`,
                               color: "text-[#ea580c]",
                             },
                             {
                               label: "To Date",
-                              value: `R${fmt(preview.accumDep)}`,
+                              value: `${fmt(preview.accumDep)}`,
                               color: "text-[#dc2626]",
                             },
                             {
                               label: "Current BV",
-                              value: `R${fmt(preview.bookValue)}`,
+                              value: `${fmt(preview.bookValue)}`,
                               color: "text-[#059669]",
                             },
                           ].map(({ label, value, color }) => (
@@ -1326,8 +1327,8 @@ export default function FixedAssetRegister({ user, clientId, clientName }) {
                       {Number(form.disposalValue) >=
                       calcDepreciation({ ...form, cost: Number(form.cost) })
                         .bookValue
-                        ? `Gain on disposal: R${fmt(Number(form.disposalValue) - calcDepreciation({ ...form, cost: Number(form.cost) }).bookValue)}`
-                        : `Loss on disposal: R${fmt(calcDepreciation({ ...form, cost: Number(form.cost) }).bookValue - Number(form.disposalValue))}`}
+                        ? `Gain on disposal: ${fmt(Number(form.disposalValue) - calcDepreciation({ ...form, cost: Number(form.cost) }).bookValue)}`
+                        : `Loss on disposal: ${fmt(calcDepreciation({ ...form, cost: Number(form.cost) }).bookValue - Number(form.disposalValue))}`}
                     </div>
                   )}
                 </FormSection>

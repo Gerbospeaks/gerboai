@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   BarChart2,
   TrendingUp,
@@ -27,11 +28,6 @@ import {
   query,
 } from "firebase/firestore";
 
-const formatCurrency = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
-    n || 0,
-  );
-
 const MONTHS = [
   "Jan",
   "Feb",
@@ -54,6 +50,8 @@ const PERIOD_OPTIONS = [
 ];
 
 export default function ReportsView({ user }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrency = (n) => formatVisitorCurrency(n || 0, "ZAR");
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState(6);

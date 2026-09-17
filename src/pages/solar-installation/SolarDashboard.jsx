@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import HomeView from "../HomeView";
 import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import BusinessSettingsModal from "../BusinessSettingsModal";
@@ -143,9 +144,6 @@ const statusBadge = (s) =>
     ? "bg-[#dbeafe] text-[#1e40af]"
     : "bg-[#fef2f2] text-[#991b1b]";
 
-const formatCurrency = (n) =>
-  `R${Number(n).toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
 // ─── Step indicator ────────────────────────────────────────────────────────────
 const StepIndicator = ({ steps, currentStep }) => (
   <div className="flex items-center px-6 py-4 bg-[#f8fafc] border-b border-[#e2e8f0]">
@@ -186,6 +184,8 @@ const SolarDashboard = () => {
 const mobileNavPad = "pb-24 lg:pb-6";
   // ── auth ──────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrency = (n) => formatVisitorCurrency(n, "ZAR");
 
   // ── quote / invoice state ──────────────────────────────────────────────────
   const [quoteNumber, setQuoteNumber] = useState("");

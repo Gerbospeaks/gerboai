@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -20,8 +21,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 const MONTHS = [
   "Jan",
   "Feb",
@@ -105,6 +104,8 @@ export default function ReportsView({
 
 // ── P & L ─────────────────────────────────────────────────────────────────────
 function PnLReport({ db, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [year, setYear] = useState(CURR_YEAR);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -205,21 +206,21 @@ function PnLReport({ db, clientBase, clientName }) {
             {[
               {
                 label: "Total Revenue",
-                value: `R${fmt(data.totalRevenue)}`,
+                value: `${fmt(data.totalRevenue)}`,
                 icon: ArrowUpRight,
                 bg: "bg-[#f0fdf4]",
                 color: "text-[#059669]",
               },
               {
                 label: "Total Expenses",
-                value: `R${fmt(data.totalExpenses)}`,
+                value: `${fmt(data.totalExpenses)}`,
                 icon: ArrowDownRight,
                 bg: "bg-[#fef2f2]",
                 color: "text-[#dc2626]",
               },
               {
                 label: "Net Profit",
-                value: `R${fmt(data.grossProfit)}`,
+                value: `${fmt(data.grossProfit)}`,
                 icon: DollarSign,
                 bg: data.grossProfit >= 0 ? "bg-[#eff6ff]" : "bg-[#fef2f2]",
                 color:
@@ -283,15 +284,15 @@ function PnLReport({ db, clientBase, clientName }) {
                         {row.month}
                       </td>
                       <td className="px-5 py-3 text-sm text-[#059669] font-medium">
-                        R{fmt(row.revenue)}
+                        {fmt(row.revenue)}
                       </td>
                       <td className="px-5 py-3 text-sm text-[#dc2626] font-medium">
-                        R{fmt(row.expenses)}
+                        {fmt(row.expenses)}
                       </td>
                       <td
                         className={`px-5 py-3 text-sm font-bold ${row.profit >= 0 ? "text-[#2563eb]" : "text-[#dc2626]"}`}
                       >
-                        R{fmt(row.profit)}
+                        {fmt(row.profit)}
                       </td>
                       <td className="px-5 py-3 text-sm text-[#64748b]">{m}</td>
                     </tr>
@@ -304,15 +305,15 @@ function PnLReport({ db, clientBase, clientName }) {
                     Total
                   </td>
                   <td className="px-5 py-3 text-sm font-bold text-[#059669]">
-                    R{fmt(data.totalRevenue)}
+                    {fmt(data.totalRevenue)}
                   </td>
                   <td className="px-5 py-3 text-sm font-bold text-[#dc2626]">
-                    R{fmt(data.totalExpenses)}
+                    {fmt(data.totalExpenses)}
                   </td>
                   <td
                     className={`px-5 py-3 text-sm font-bold ${data.grossProfit >= 0 ? "text-[#2563eb]" : "text-[#dc2626]"}`}
                   >
-                    R{fmt(data.grossProfit)}
+                    {fmt(data.grossProfit)}
                   </td>
                   <td className="px-5 py-3 text-sm font-bold text-[#7c3aed]">
                     {data.margin}%
@@ -329,6 +330,8 @@ function PnLReport({ db, clientBase, clientName }) {
 
 // ── Balance Sheet ─────────────────────────────────────────────────────────────
 function BalanceSheet({ db, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -379,7 +382,7 @@ function BalanceSheet({ db, clientBase, clientName }) {
     <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
       <div className="px-5 py-3.5 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
         <span className={`text-sm font-bold ${color}`}>{title}</span>
-        <span className="text-sm font-bold text-[#1e293b]">R{fmt(total)}</span>
+        <span className="text-sm font-bold text-[#1e293b]">{fmt(total)}</span>
       </div>
       <table className="w-full">
         <tbody>
@@ -390,7 +393,7 @@ function BalanceSheet({ db, clientBase, clientName }) {
             >
               <td className="px-5 py-2.5 text-sm text-[#374151]">{r.name}</td>
               <td className="px-5 py-2.5 text-sm font-semibold text-[#1e293b] text-right">
-                R{fmt(r.balance)}
+                {fmt(r.balance)}
               </td>
             </tr>
           ))}
@@ -411,7 +414,7 @@ function BalanceSheet({ db, clientBase, clientName }) {
               Total
             </td>
             <td className="px-5 py-3 text-sm font-bold text-[#1e293b] text-right">
-              R{fmt(total)}
+              {fmt(total)}
             </td>
           </tr>
         </tfoot>
@@ -453,7 +456,7 @@ function BalanceSheet({ db, clientBase, clientName }) {
             <p
               className={`text-2xl font-black ${data.netAssets >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
             >
-              R{fmt(data.netAssets)}
+              {fmt(data.netAssets)}
             </p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -481,7 +484,7 @@ function BalanceSheet({ db, clientBase, clientName }) {
                   Total Assets
                 </span>
                 <span className="text-sm font-black text-[#1e293b]">
-                  R{fmt(data.totalAssets)}
+                  {fmt(data.totalAssets)}
                 </span>
               </div>
             </div>
@@ -509,7 +512,7 @@ function BalanceSheet({ db, clientBase, clientName }) {
                   Total Liabilities + Equity
                 </span>
                 <span className="text-sm font-black text-[#1e293b]">
-                  R{fmt(data.totalLiab + data.totalEquity)}
+                  {fmt(data.totalLiab + data.totalEquity)}
                 </span>
               </div>
             </div>
@@ -522,6 +525,8 @@ function BalanceSheet({ db, clientBase, clientName }) {
 
 // ── Cash Flow ─────────────────────────────────────────────────────────────────
 function CashFlowReport({ db, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [year, setYear] = useState(CURR_YEAR);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -590,19 +595,19 @@ function CashFlowReport({ db, clientBase, clientName }) {
             {[
               {
                 label: "Total Inflows",
-                value: `R${fmt(data.totalIn)}`,
+                value: `${fmt(data.totalIn)}`,
                 color: "text-[#059669]",
                 bg: "bg-[#f0fdf4]",
               },
               {
                 label: "Total Outflows",
-                value: `R${fmt(data.totalOut)}`,
+                value: `${fmt(data.totalOut)}`,
                 color: "text-[#dc2626]",
                 bg: "bg-[#fef2f2]",
               },
               {
                 label: "Net Cash Flow",
-                value: `R${fmt(data.netCashFlow)}`,
+                value: `${fmt(data.netCashFlow)}`,
                 color:
                   data.netCashFlow >= 0 ? "text-[#2563eb]" : "text-[#dc2626]",
                 bg: data.netCashFlow >= 0 ? "bg-[#eff6ff]" : "bg-[#fef2f2]",
@@ -697,20 +702,20 @@ function CashFlowReport({ db, clientBase, clientName }) {
                           {row.month}
                         </td>
                         <td className="px-5 py-3 text-sm text-[#059669] font-medium">
-                          R{fmt(row.inflows)}
+                          {fmt(row.inflows)}
                         </td>
                         <td className="px-5 py-3 text-sm text-[#dc2626] font-medium">
-                          R{fmt(row.outflows)}
+                          {fmt(row.outflows)}
                         </td>
                         <td
                           className={`px-5 py-3 text-sm font-bold ${row.net >= 0 ? "text-[#2563eb]" : "text-[#dc2626]"}`}
                         >
-                          R{fmt(row.net)}
+                          {fmt(row.net)}
                         </td>
                         <td
                           className={`px-5 py-3 text-sm font-semibold ${r >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
                         >
-                          R{fmt(r)}
+                          {fmt(r)}
                         </td>
                       </tr>
                     );
@@ -727,6 +732,8 @@ function CashFlowReport({ db, clientBase, clientName }) {
 
 // ── Tax Summary ───────────────────────────────────────────────────────────────
 function TaxReport({ db, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [year, setYear] = useState(CURR_YEAR);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -813,21 +820,21 @@ function TaxReport({ db, clientBase, clientName }) {
             {[
               {
                 label: "Output VAT (Collected)",
-                value: `R${fmt(data.totals.vatOut)}`,
+                value: `${fmt(data.totals.vatOut)}`,
                 color: "text-[#dc2626]",
                 bg: "bg-[#fef2f2]",
                 note: "From credit transactions",
               },
               {
                 label: "Input VAT (Paid)",
-                value: `R${fmt(data.totals.vatIn)}`,
+                value: `${fmt(data.totals.vatIn)}`,
                 color: "text-[#059669]",
                 bg: "bg-[#f0fdf4]",
                 note: "From debit transactions",
               },
               {
                 label: "Net VAT Payable",
-                value: `R${fmt(data.totals.netVat)}`,
+                value: `${fmt(data.totals.netVat)}`,
                 color:
                   data.totals.netVat >= 0 ? "text-[#ea580c]" : "text-[#059669]",
                 bg: "bg-[#fff7ed]",
@@ -879,18 +886,18 @@ function TaxReport({ db, clientBase, clientName }) {
                       {q.label}
                     </td>
                     <td className="px-5 py-3 text-sm text-[#1e293b]">
-                      R{fmt(q.revenue)}
+                      {fmt(q.revenue)}
                     </td>
                     <td className="px-5 py-3 text-sm text-[#dc2626] font-medium">
-                      R{fmt(q.vatOut)}
+                      {fmt(q.vatOut)}
                     </td>
                     <td className="px-5 py-3 text-sm text-[#059669] font-medium">
-                      R{fmt(q.vatIn)}
+                      {fmt(q.vatIn)}
                     </td>
                     <td
                       className={`px-5 py-3 text-sm font-bold ${q.netVat >= 0 ? "text-[#ea580c]" : "text-[#059669]"}`}
                     >
-                      R{fmt(q.netVat)}
+                      {fmt(q.netVat)}
                     </td>
                   </tr>
                 ))}
@@ -901,18 +908,18 @@ function TaxReport({ db, clientBase, clientName }) {
                     Annual Total
                   </td>
                   <td className="px-5 py-3 text-sm font-bold text-[#1e293b]">
-                    R{fmt(data.totals.revenue)}
+                    {fmt(data.totals.revenue)}
                   </td>
                   <td className="px-5 py-3 text-sm font-bold text-[#dc2626]">
-                    R{fmt(data.totals.vatOut)}
+                    {fmt(data.totals.vatOut)}
                   </td>
                   <td className="px-5 py-3 text-sm font-bold text-[#059669]">
-                    R{fmt(data.totals.vatIn)}
+                    {fmt(data.totals.vatIn)}
                   </td>
                   <td
                     className={`px-5 py-3 text-sm font-black ${data.totals.netVat >= 0 ? "text-[#ea580c]" : "text-[#059669]"}`}
                   >
-                    R{fmt(data.totals.netVat)}
+                    {fmt(data.totals.netVat)}
                   </td>
                 </tr>
               </tfoot>

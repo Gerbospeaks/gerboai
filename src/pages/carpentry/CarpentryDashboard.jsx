@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import HomeView from "../HomeView";
 import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import BusinessSettingsModal from "../BusinessSettingsModal";
@@ -900,11 +901,8 @@ const bottomNavItems = [
     }
   };
 
-  const formatCurrency = (n) =>
-    new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "USD",
-    }).format(n);
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrency = (n) => formatVisitorCurrency(n, "ZAR");
 
   // ── Shared template props ──────────────────────────────────────────────────
   const templateProps = {

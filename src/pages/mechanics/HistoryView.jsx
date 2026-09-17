@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   History,
   Search,
@@ -72,11 +73,6 @@ const statusConfig = {
   },
 };
 
-const formatCurrency = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
-    n || 0,
-  );
-
 const formatDate = (val) => {
   if (!val) return "—";
   if (val?.toDate) return val.toDate().toLocaleDateString("en-ZA");
@@ -85,6 +81,8 @@ const formatDate = (val) => {
 };
 
 export default function HistoryView({ user }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrency = (n) => formatVisitorCurrency(n || 0, "ZAR");
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -100,8 +101,6 @@ const labelCls =
   "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
 const selectCls =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 const fmtDate = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-ZA") : "—";
 
@@ -288,6 +287,8 @@ export default function ExpensesView({ user }) {
 // EXPENSES WORKSPACE
 // ══════════════════════════════════════════════════════════════════════════════
 function ExpensesWorkspace({ user, client, onBack }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -562,7 +563,7 @@ function ExpensesWorkspace({ user, client, onBack }) {
               {[
                 {
                   label: "Total (Excl. VAT)",
-                  value: `R${fmt(totalExcl)}`,
+                  value: `${fmt(totalExcl)}`,
                   sub: `${filtered.length} items`,
                   bg: "bg-[#fff7ed]",
                   border: "border-[#fed7aa]",
@@ -570,7 +571,7 @@ function ExpensesWorkspace({ user, client, onBack }) {
                 },
                 {
                   label: "VAT Amount",
-                  value: `R${fmt(totalVat)}`,
+                  value: `${fmt(totalVat)}`,
                   sub: "15% standard",
                   bg: "bg-[#fef2f2]",
                   border: "border-[#fecaca]",
@@ -578,7 +579,7 @@ function ExpensesWorkspace({ user, client, onBack }) {
                 },
                 {
                   label: "Total (Incl. VAT)",
-                  value: `R${fmt(totalIncl)}`,
+                  value: `${fmt(totalIncl)}`,
                   sub: "Gross spend",
                   bg: "bg-[#f8fafc]",
                   border: "border-[#e2e8f0]",
@@ -586,7 +587,7 @@ function ExpensesWorkspace({ user, client, onBack }) {
                 },
                 {
                   label: "Claimable VAT Input",
-                  value: `R${fmt(vatClaim)}`,
+                  value: `${fmt(vatClaim)}`,
                   sub: "Standard-rated only",
                   bg: "bg-[#f0fdf4]",
                   border: "border-[#bbf7d0]",
@@ -756,17 +757,17 @@ function ExpensesWorkspace({ user, client, onBack }) {
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm font-medium text-[#374151]">
-                            R{fmt(exp.amountExcl)}
+                            {fmt(exp.amountExcl)}
                           </td>
                           <td className="px-4 py-3 text-sm text-[#94a3b8]">
                             {exp.vatRate >= 0 ? (
-                              `R${fmt(exp.vatAmount)}`
+                              `${fmt(exp.vatAmount)}`
                             ) : (
                               <span className="text-xs italic">Exempt</span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                            R{fmt(exp.amountIncl)}
+                            {fmt(exp.amountIncl)}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
@@ -797,13 +798,13 @@ function ExpensesWorkspace({ user, client, onBack }) {
                         Total ({filtered.length} items)
                       </td>
                       <td className="px-4 py-3 text-sm font-bold text-[#374151]">
-                        R{fmt(totalExcl)}
+                        {fmt(totalExcl)}
                       </td>
                       <td className="px-4 py-3 text-sm font-bold text-[#dc2626]">
-                        R{fmt(totalVat)}
+                        {fmt(totalVat)}
                       </td>
                       <td className="px-4 py-3 text-sm font-black text-[#1e293b]">
-                        R{fmt(totalIncl)}
+                        {fmt(totalIncl)}
                       </td>
                       <td />
                     </tr>
@@ -847,22 +848,22 @@ function ExpensesWorkspace({ user, client, onBack }) {
               {[
                 {
                   label: "Annual Excl. VAT",
-                  value: `R${fmt(yearExp.reduce((s, e) => s + (e.amountExcl || 0), 0))}`,
+                  value: `${fmt(yearExp.reduce((s, e) => s + (e.amountExcl || 0), 0))}`,
                   color: "text-[#ea580c]",
                 },
                 {
                   label: "Annual VAT",
-                  value: `R${fmt(yearExp.reduce((s, e) => s + (e.vatAmount || 0), 0))}`,
+                  value: `${fmt(yearExp.reduce((s, e) => s + (e.vatAmount || 0), 0))}`,
                   color: "text-[#dc2626]",
                 },
                 {
                   label: "Annual Incl. VAT",
-                  value: `R${fmt(yearIncl)}`,
+                  value: `${fmt(yearIncl)}`,
                   color: "text-[#1e293b]",
                 },
                 {
                   label: "Claimable VAT Input",
-                  value: `R${fmt(yearExp.filter((e) => e.vatRate === 15).reduce((s, e) => s + (e.vatAmount || 0), 0))}`,
+                  value: `${fmt(yearExp.filter((e) => e.vatRate === 15).reduce((s, e) => s + (e.vatAmount || 0), 0))}`,
                   color: "text-[#059669]",
                 },
               ].map(({ label, value, color }) => (
@@ -898,7 +899,7 @@ function ExpensesWorkspace({ user, client, onBack }) {
                         height: `${(m.incl / maxMo) * 110}px`,
                         minHeight: m.incl > 0 ? "4px" : "0",
                       }}
-                      title={`R${fmt(m.incl)}`}
+                      title={`${fmt(m.incl)}`}
                     />
                     <span className="text-[10px] text-[#94a3b8]">
                       {m.month}
@@ -936,13 +937,13 @@ function ExpensesWorkspace({ user, client, onBack }) {
                           {m.count}
                         </td>
                         <td className="py-2.5 text-sm text-[#374151]">
-                          R{fmt(m.excl)}
+                          {fmt(m.excl)}
                         </td>
                         <td className="py-2.5 text-sm text-[#dc2626]">
-                          R{fmt(m.vat)}
+                          {fmt(m.vat)}
                         </td>
                         <td className="py-2.5 text-sm font-bold text-[#1e293b]">
-                          R{fmt(m.incl)}
+                          {fmt(m.incl)}
                         </td>
                       </tr>
                     ))}
@@ -996,7 +997,7 @@ function ExpensesWorkspace({ user, client, onBack }) {
                             </div>
                             <div className="text-right">
                               <span className="text-sm font-bold text-[#1e293b]">
-                                R{fmt(total)}
+                                {fmt(total)}
                               </span>
                               <span className="text-xs text-[#94a3b8] ml-2">
                                 {pct}%
@@ -1011,10 +1012,10 @@ function ExpensesWorkspace({ user, client, onBack }) {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-xs text-[#94a3b8]">
-                              VAT: R{fmt(vat)}
+                              VAT: {fmt(vat)}
                             </span>
                             <span className="text-xs text-[#94a3b8]">
-                              Excl: R{fmt(total - vat)}
+                              Excl: {fmt(total - vat)}
                             </span>
                           </div>
                         </div>
@@ -1153,20 +1154,20 @@ function ExpensesWorkspace({ user, client, onBack }) {
                     {[
                       {
                         label: "Excl. VAT",
-                        value: `R${fmt(preview.amountExcl)}`,
+                        value: `${fmt(preview.amountExcl)}`,
                         color: "text-[#374151]",
                       },
                       {
                         label: "VAT",
                         value:
                           form.vatRate >= 0
-                            ? `R${fmt(preview.vatAmount)}`
+                            ? `${fmt(preview.vatAmount)}`
                             : "Exempt",
                         color: "text-[#dc2626]",
                       },
                       {
                         label: "Incl. VAT",
-                        value: `R${fmt(preview.amountIncl)}`,
+                        value: `${fmt(preview.amountIncl)}`,
                         color: "text-[#1e293b] font-black",
                       },
                     ].map(({ label, value, color }) => (

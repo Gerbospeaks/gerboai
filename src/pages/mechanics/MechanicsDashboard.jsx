@@ -55,6 +55,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/img/solidflo-logo.png";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import { db } from "../../firebase";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import HomeView from "../HomeView";
@@ -1417,11 +1418,8 @@ const handleStampConfirm = async (cfg) => {
     },
   ].filter(Boolean);
   // ── Helpers ───────────────────────────────────────────────────────────────
-  const formatCurrency = (n) =>
-    new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "USD",
-    }).format(n);
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrency = (n) => formatVisitorCurrency(n, "ZAR");
 
   const statusBadge = (s) =>
     s === "paid"

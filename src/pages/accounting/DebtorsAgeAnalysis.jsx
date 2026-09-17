@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -26,8 +27,6 @@ import {
 } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 const fmtDate = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-ZA") : "—";
 
@@ -178,6 +177,8 @@ function buildDebtorMap(invoices) {
 
 // ── Mini horizontal bar ───────────────────────────────────────────────────────
 function AgingBar({ debtor, total }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   if (total <= 0) return null;
   return (
     <div className="flex h-2 rounded-full overflow-hidden w-full min-w-[80px]">
@@ -188,7 +189,7 @@ function AgingBar({ debtor, total }) {
         return (
           <div
             key={b.key}
-            title={`${b.label}: R${fmt(val)}`}
+            title={`${b.label}: ${fmt(val)}`}
             style={{ width: `${pct}%`, background: b.bar }}
           />
         );
@@ -202,6 +203,8 @@ function AgingBar({ debtor, total }) {
 // Props: user  (reads from top-level users/{uid}/invoices)
 // ══════════════════════════════════════════════════════════════════════════════
 export default function DebtorsAgeAnalysis({ user }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [debtors, setDebtors] = useState([]);
   const [allInvoices, setAllInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -325,7 +328,7 @@ export default function DebtorsAgeAnalysis({ user }) {
             Total Outstanding
           </p>
           <p className="text-xl font-black text-white mt-1">
-            R{fmt(grandTotal)}
+            {fmt(grandTotal)}
           </p>
           <p className="text-[10px] text-[#475569] mt-1">
             {allInvoices.length} invoices
@@ -342,7 +345,7 @@ export default function DebtorsAgeAnalysis({ user }) {
           >
             <p className={`text-xs font-semibold text-[#64748b]`}>{b.label}</p>
             <p className={`text-xl font-black mt-1 ${b.text}`}>
-              R{fmt(bucketTotals[b.key])}
+              {fmt(bucketTotals[b.key])}
             </p>
             <p className="text-[10px] text-[#94a3b8] mt-1">
               {grandTotal > 0
@@ -361,7 +364,7 @@ export default function DebtorsAgeAnalysis({ user }) {
             <AlertCircle className="w-5 h-5 text-[#dc2626] flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-[#991b1b]">
-                R{fmt(overdueTotal)} is overdue across{" "}
+                {fmt(overdueTotal)} is overdue across{" "}
                 {
                   debtors.filter((d) => d.b30 || d.b60 || d.b90 || d.b90plus)
                     .length
@@ -369,7 +372,7 @@ export default function DebtorsAgeAnalysis({ user }) {
                 debtors
               </p>
               <p className="text-xs text-[#dc2626] mt-0.5">
-                R{fmt(bucketTotals.b90plus)} is over 90 days — consider
+                {fmt(bucketTotals.b90plus)} is over 90 days — consider
                 escalating collection
               </p>
             </div>
@@ -396,7 +399,7 @@ export default function DebtorsAgeAnalysis({ user }) {
             return (
               <div
                 key={b.key}
-                title={`${b.label}: R${fmt(bucketTotals[b.key])} (${pct.toFixed(1)}%)`}
+                title={`${b.label}: ${fmt(bucketTotals[b.key])} (${pct.toFixed(1)}%)`}
                 className="flex items-center justify-center text-white text-[10px] font-bold transition-all hover:opacity-90 cursor-pointer rounded-sm"
                 style={{
                   width: `${pct}%`,
@@ -548,18 +551,18 @@ export default function DebtorsAgeAnalysis({ user }) {
                           </div>
                         </td>
                         <td className="px-4 py-3.5 text-right text-sm text-[#059669] font-medium">
-                          {debtor.current > 0 ? `R${fmt(debtor.current)}` : "—"}
+                          {debtor.current > 0 ? `${fmt(debtor.current)}` : "—"}
                         </td>
                         {BUCKETS.slice(1).map((b) => (
                           <td
                             key={b.key}
                             className={`px-4 py-3.5 text-right text-sm font-medium ${debtor[b.key] > 0 ? b.text : "text-[#d1d5db]"}`}
                           >
-                            {debtor[b.key] > 0 ? `R${fmt(debtor[b.key])}` : "—"}
+                            {debtor[b.key] > 0 ? `${fmt(debtor[b.key])}` : "—"}
                           </td>
                         ))}
                         <td className="px-4 py-3.5 text-right text-sm font-black text-[#1e293b]">
-                          R{fmt(debtor.total)}
+                          {fmt(debtor.total)}
                         </td>
                         <td className="px-4 py-3.5 min-w-[100px]">
                           <AgingBar debtor={debtor} total={debtor.total} />
@@ -636,10 +639,10 @@ export default function DebtorsAgeAnalysis({ user }) {
                                             )}
                                           </td>
                                           <td className="py-2 pr-4 text-[#374151]">
-                                            R{fmt(inv.totals?.total)}
+                                            {fmt(inv.totals?.total)}
                                           </td>
                                           <td className="py-2 pr-4 text-[#059669]">
-                                            R{fmt(inv.totals?.paid)}
+                                            {fmt(inv.totals?.paid)}
                                           </td>
                                           <td
                                             className={`py-2 pr-4 font-bold ${bucket.text}`}
@@ -671,7 +674,7 @@ export default function DebtorsAgeAnalysis({ user }) {
                                       Debtor total
                                     </td>
                                     <td className="pt-2 font-black text-[#1e293b]">
-                                      R{fmt(debtor.total)}
+                                      {fmt(debtor.total)}
                                     </td>
                                     <td />
                                   </tr>
@@ -696,18 +699,18 @@ export default function DebtorsAgeAnalysis({ user }) {
                     Grand Total ({filtered.length} debtors)
                   </td>
                   <td className="px-4 py-3.5 text-right text-sm font-bold text-[#4ade80]">
-                    R{fmt(filtered.reduce((s, d) => s + d.current, 0))}
+                    {fmt(filtered.reduce((s, d) => s + d.current, 0))}
                   </td>
                   {BUCKETS.slice(1).map((b) => (
                     <td
                       key={b.key}
                       className="px-4 py-3.5 text-right text-sm font-bold text-white"
                     >
-                      R{fmt(filtered.reduce((s, d) => s + (d[b.key] || 0), 0))}
+                      {fmt(filtered.reduce((s, d) => s + (d[b.key] || 0), 0))}
                     </td>
                   ))}
                   <td className="px-4 py-3.5 text-right text-sm font-black text-white">
-                    R{fmt(filtered.reduce((s, d) => s + d.total, 0))}
+                    {fmt(filtered.reduce((s, d) => s + d.total, 0))}
                   </td>
                   <td colSpan={2} className="px-4 py-3.5">
                     <AgingBar
@@ -747,7 +750,7 @@ export default function DebtorsAgeAnalysis({ user }) {
                   {b.label}
                 </p>
                 <p className={`text-lg font-black mt-1 ${b.text}`}>
-                  R{fmt(bucketTotals[b.key])}
+                  {fmt(bucketTotals[b.key])}
                 </p>
                 <p className="text-xs text-[#94a3b8] mt-1">
                   {debtorsInBucket.length} debtor
@@ -763,7 +766,7 @@ export default function DebtorsAgeAnalysis({ user }) {
                         {d.name}
                       </span>
                       <span className={`text-[10px] font-semibold ${b.text}`}>
-                        R{fmt(d[b.key])}
+                        {fmt(d[b.key])}
                       </span>
                     </div>
                   ))}

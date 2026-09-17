@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import HomeView from "../HomeView";
 import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
 import BusinessSettingsModal from "../BusinessSettingsModal";
@@ -207,11 +208,8 @@ const handleAddNewCustomer = () => {
   const selectCls =
     "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
 
-  const formatCurrency = (n) =>
-    new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "USD",
-    }).format(n);
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrency = (n) => formatVisitorCurrency(n, "ZAR");
 
   const statusBadge = (s) =>
     s === "paid"

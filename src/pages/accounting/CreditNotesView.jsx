@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -46,8 +47,6 @@ const labelCls =
 const selectCls =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
 
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 const fmtDate = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-ZA") : "—";
 const today = () => new Date().toISOString().split("T")[0];
@@ -101,6 +100,8 @@ const PRINT_STYLES = `@media print { * { -webkit-print-color-adjust: exact !impo
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════════════════════
 export default function CreditNotesView({ user, businessInfo }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [view, setView] = useState("list"); // list | create | detail
   const [creditNotes, setCreditNotes] = useState([]);
   const [invoices, setInvoices] = useState([]);
@@ -253,7 +254,7 @@ export default function CreditNotesView({ user, businessInfo }) {
             },
             {
               label: "Issued",
-              value: `R${fmt(totalIssued)}`,
+              value: `${fmt(totalIssued)}`,
               suffix: "pending",
               icon: AlertCircle,
               bg: "bg-[#fff7ed]",
@@ -261,7 +262,7 @@ export default function CreditNotesView({ user, businessInfo }) {
             },
             {
               label: "Applied",
-              value: `R${fmt(totalApplied)}`,
+              value: `${fmt(totalApplied)}`,
               suffix: "credited",
               icon: CheckCircle,
               bg: "bg-[#f0fdf4]",
@@ -386,7 +387,7 @@ export default function CreditNotesView({ user, businessInfo }) {
                       {fmtDate(cn.dates?.cnDate)}
                     </td>
                     <td className="px-4 py-3 text-sm font-bold text-[#1e293b]">
-                      R{fmt(cn.totals?.total)}
+                      {fmt(cn.totals?.total)}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={cn.status} />
@@ -425,6 +426,8 @@ function CreateCreditNote({
   onSaved,
   onBack,
 }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [cnNumber, setCnNumber] = useState("");
   const [linkedInv, setLinkedInv] = useState("");
   const [reason, setReason] = useState("");
@@ -799,16 +802,16 @@ function CreateCreditNote({
                           {it.description}
                         </td>
                         <td className="px-4 py-3 text-sm text-[#374151]">
-                          R{fmt(it.rate)}
+                          {fmt(it.rate)}
                         </td>
                         <td className="px-4 py-3 text-sm text-[#374151]">
                           {it.qty}
                         </td>
                         <td className="px-4 py-3 text-sm text-[#374151]">
-                          R{fmt(it.taxAmount)}
+                          {fmt(it.taxAmount)}
                         </td>
                         <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                          R{fmt(it.totalAmount)}
+                          {fmt(it.totalAmount)}
                         </td>
                         <td className="px-4 py-3">
                           <button
@@ -828,18 +831,18 @@ function CreateCreditNote({
                     <div className="flex justify-between w-52 text-[#64748b]">
                       <span>Subtotal</span>
                       <span className="font-medium text-[#374151]">
-                        R{fmt(subtotal)}
+                        {fmt(subtotal)}
                       </span>
                     </div>
                     <div className="flex justify-between w-52 text-[#64748b]">
                       <span>VAT</span>
                       <span className="font-medium text-[#374151]">
-                        R{fmt(totalTax)}
+                        {fmt(totalTax)}
                       </span>
                     </div>
                     <div className="flex justify-between w-52 pt-2 border-t border-[#e2e8f0] font-bold text-[#1e293b]">
                       <span>Credit Total</span>
-                      <span className="text-[#dc2626]">R{fmt(total)}</span>
+                      <span className="text-[#dc2626]">{fmt(total)}</span>
                     </div>
                   </div>
                 </div>
@@ -976,6 +979,8 @@ function CreditNoteDetail({
   onRefresh,
   onPrint,
 }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [applying, setApplying] = useState(false);
   const [voiding, setVoiding] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -993,7 +998,7 @@ function CreditNoteDetail({
     }
     if (
       !window.confirm(
-        `Apply R${fmt(cn.totals?.total)} credit to invoice ${cn.linkedInvoiceNumber}?`,
+        `Apply ${fmt(cn.totals?.total)} credit to invoice ${cn.linkedInvoiceNumber}?`,
       )
     )
       return;
@@ -1033,7 +1038,7 @@ function CreditNoteDetail({
 
       onRefresh();
       alert(
-        `Credit note applied. Invoice ${cn.linkedInvoiceNumber} balance reduced to R${fmt(newDue)}.`,
+        `Credit note applied. Invoice ${cn.linkedInvoiceNumber} balance reduced to ${fmt(newDue)}.`,
       );
     } finally {
       setApplying(false);
@@ -1108,16 +1113,14 @@ function CreditNoteDetail({
                   Linked to {linkedInvoice.invoiceNumber}
                 </p>
                 <p className="text-xs text-[#3b82f6] mt-0.5">
-                  {linkedInvoice.customer?.name} · Invoice total R
-                  {fmt(linkedInvoice.totals?.total)} · Balance due R
-                  {fmt(
+                  {linkedInvoice.customer?.name} · Invoice total {fmt(linkedInvoice.totals?.total)} · Balance due {fmt(
                     linkedInvoice.totals?.due || linkedInvoice.totals?.total,
                   )}
                 </p>
               </div>
             </div>
             <span className="text-xs font-bold text-[#2563eb]">
-              R{fmt(linkedInvoice.totals?.due || linkedInvoice.totals?.total)}{" "}
+              {fmt(linkedInvoice.totals?.due || linkedInvoice.totals?.total)}{" "}
               due
             </span>
           </div>
@@ -1128,21 +1131,21 @@ function CreditNoteDetail({
           {[
             {
               label: "Credit Amount",
-              value: `R${fmt(cn.totals?.total)}`,
+              value: `${fmt(cn.totals?.total)}`,
               icon: DollarSign,
               bg: "bg-[#fef2f2]",
               color: "text-[#dc2626]",
             },
             {
               label: "Subtotal",
-              value: `R${fmt(cn.totals?.subtotal)}`,
+              value: `${fmt(cn.totals?.subtotal)}`,
               icon: FileText,
               bg: "bg-[#f8fafc]",
               color: "text-[#64748b]",
             },
             {
               label: "VAT",
-              value: `R${fmt(cn.totals?.tax)}`,
+              value: `${fmt(cn.totals?.tax)}`,
               icon: Receipt,
               bg: "bg-[#fff7ed]",
               color: "text-[#ea580c]",
@@ -1215,16 +1218,16 @@ function CreditNoteDetail({
                       {it.description}
                     </td>
                     <td className="px-5 py-3 text-sm text-[#374151]">
-                      R{fmt(it.rate)}
+                      {fmt(it.rate)}
                     </td>
                     <td className="px-5 py-3 text-sm text-[#374151]">
                       {it.qty}
                     </td>
                     <td className="px-5 py-3 text-sm text-[#374151]">
-                      R{fmt(it.taxAmount)}
+                      {fmt(it.taxAmount)}
                     </td>
                     <td className="px-5 py-3 text-sm font-semibold text-[#dc2626]">
-                      R{fmt(it.totalAmount)}
+                      {fmt(it.totalAmount)}
                     </td>
                   </tr>
                 ))}
@@ -1235,16 +1238,16 @@ function CreditNoteDetail({
                 <div className="flex justify-between w-full text-[#64748b]">
                   <span>Subtotal</span>
                   <span className="font-medium">
-                    R{fmt(cn.totals?.subtotal)}
+                    {fmt(cn.totals?.subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between w-full text-[#64748b]">
                   <span>VAT</span>
-                  <span className="font-medium">R{fmt(cn.totals?.tax)}</span>
+                  <span className="font-medium">{fmt(cn.totals?.tax)}</span>
                 </div>
                 <div className="flex justify-between w-full pt-2 border-t border-[#e2e8f0] font-bold text-[#dc2626]">
                   <span>Credit Total</span>
-                  <span>R{fmt(cn.totals?.total)}</span>
+                  <span>{fmt(cn.totals?.total)}</span>
                 </div>
               </div>
             </div>
@@ -1333,6 +1336,8 @@ function CreditNoteDocument({
   notes,
   status,
 }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const bi = businessInfo || {};
   return (
     <div
@@ -1559,7 +1564,7 @@ function CreditNoteDocument({
                   textAlign: "right",
                 }}
               >
-                R{fmt(it.rate)}
+                {fmt(it.rate)}
               </td>
               <td
                 style={{
@@ -1579,7 +1584,7 @@ function CreditNoteDocument({
                   textAlign: "right",
                 }}
               >
-                R{fmt(it.taxAmount)}
+                {fmt(it.taxAmount)}
               </td>
               <td
                 style={{
@@ -1590,7 +1595,7 @@ function CreditNoteDocument({
                   textAlign: "right",
                 }}
               >
-                R{fmt(it.totalAmount)}
+                {fmt(it.totalAmount)}
               </td>
             </tr>
           ))}
@@ -1607,8 +1612,8 @@ function CreditNoteDocument({
       >
         <div style={{ width: "220px" }}>
           {[
-            ["Subtotal", `R${fmt(subtotal)}`],
-            ["VAT", `R${fmt(totalTax)}`],
+            ["Subtotal", `${fmt(subtotal)}`],
+            ["VAT", `${fmt(totalTax)}`],
           ].map(([k, v]) => (
             <div
               key={k}
@@ -1636,7 +1641,7 @@ function CreditNoteDocument({
             }}
           >
             <span>Credit Total</span>
-            <span>R{fmt(total)}</span>
+            <span>{fmt(total)}</span>
           </div>
         </div>
       </div>

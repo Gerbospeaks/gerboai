@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -56,8 +57,6 @@ const labelCls =
   "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
 const selectCls =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 
 const TABS = [
   { id: "employees", label: "Employees", icon: Users },
@@ -120,6 +119,8 @@ export default function PayrollView({ user, clientId, clientName }) {
 
 // ── Employees ─────────────────────────────────────────────────────────────────
 function EmployeesTab({ db, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -236,8 +237,7 @@ function EmployeesTab({ db, clientBase, clientName }) {
           <div>
             <h2 className="text-base font-bold text-[#1e293b]">Employees</h2>
             <p className="text-xs text-[#64748b]">
-              {clientName} · {activeCount} active · Payroll: R
-              {fmt(totalPayroll)}/mo
+              {clientName} · {activeCount} active · Payroll: {fmt(totalPayroll)}/mo
             </p>
           </div>
         </div>
@@ -267,13 +267,13 @@ function EmployeesTab({ db, clientBase, clientName }) {
           },
           {
             label: "Gross Payroll",
-            value: `R${fmt(totalPayroll)}`,
+            value: `${fmt(totalPayroll)}`,
             color: "text-[#7c3aed]",
             bg: "bg-[#faf5ff]",
           },
           {
             label: "Est. PAYE",
-            value: `R${fmt(employees.filter((e) => e.isActive !== false).reduce((s, e) => s + monthlyPAYE(e.grossSalary || 0), 0))}`,
+            value: `${fmt(employees.filter((e) => e.isActive !== false).reduce((s, e) => s + monthlyPAYE(e.grossSalary || 0), 0))}`,
             color: "text-[#ea580c]",
             bg: "bg-[#fff7ed]",
           },
@@ -359,16 +359,16 @@ function EmployeesTab({ db, clientBase, clientName }) {
                       {emp.employmentType}
                     </td>
                     <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                      R{fmt(g)}
+                      {fmt(g)}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#ea580c]">
-                      R{fmt(p)}
+                      {fmt(p)}
                     </td>
                     <td className="px-4 py-3 text-sm text-[#d97706]">
-                      R{fmt(u)}
+                      {fmt(u)}
                     </td>
                     <td className="px-4 py-3 text-sm font-bold text-[#059669]">
-                      R{fmt(n)}
+                      {fmt(n)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
@@ -646,6 +646,8 @@ function EmployeesTab({ db, clientBase, clientName }) {
 
 // ── Payroll Runs ──────────────────────────────────────────────────────────────
 function PayrollRunsTab({ db, clientBase, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [runs, setRuns] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -833,16 +835,16 @@ function PayrollRunsTab({ db, clientBase, clientName }) {
                     {run.totals?.count || 0}
                   </td>
                   <td className="px-4 py-3 text-sm font-medium text-[#1e293b]">
-                    R{fmt(run.totals?.gross)}
+                    {fmt(run.totals?.gross)}
                   </td>
                   <td className="px-4 py-3 text-sm text-[#ea580c]">
-                    R{fmt(run.totals?.paye)}
+                    {fmt(run.totals?.paye)}
                   </td>
                   <td className="px-4 py-3 text-sm text-[#d97706]">
-                    R{fmt(run.totals?.uif)}
+                    {fmt(run.totals?.uif)}
                   </td>
                   <td className="px-4 py-3 text-sm font-bold text-[#059669]">
-                    R{fmt(run.totals?.net)}
+                    {fmt(run.totals?.net)}
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -899,15 +901,15 @@ function PayrollRunsTab({ db, clientBase, clientName }) {
                   ["Employees", employees.length],
                   [
                     "Total Gross",
-                    `R${fmt(employees.reduce((s, e) => s + (e.grossSalary || 0), 0))}`,
+                    `${fmt(employees.reduce((s, e) => s + (e.grossSalary || 0), 0))}`,
                   ],
                   [
                     "Total PAYE",
-                    `R${fmt(employees.reduce((s, e) => s + monthlyPAYE(e.grossSalary || 0), 0))}`,
+                    `${fmt(employees.reduce((s, e) => s + monthlyPAYE(e.grossSalary || 0), 0))}`,
                   ],
                   [
                     "Total UIF",
-                    `R${fmt(employees.reduce((s, e) => s + monthlyUIF(e.grossSalary || 0), 0))}`,
+                    `${fmt(employees.reduce((s, e) => s + monthlyUIF(e.grossSalary || 0), 0))}`,
                   ],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-sm">
@@ -1052,16 +1054,16 @@ function PayrollRunsTab({ db, clientBase, clientName }) {
                         {e.department}
                       </td>
                       <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
-                        R{fmt(e.grossSalary)}
+                        {fmt(e.grossSalary)}
                       </td>
                       <td className="px-4 py-3 text-sm text-[#ea580c]">
-                        R{fmt(e.paye)}
+                        {fmt(e.paye)}
                       </td>
                       <td className="px-4 py-3 text-sm text-[#d97706]">
-                        R{fmt(e.uif)}
+                        {fmt(e.uif)}
                       </td>
                       <td className="px-4 py-3 text-sm font-bold text-[#059669]">
-                        R{fmt(e.netPay)}
+                        {fmt(e.netPay)}
                       </td>
                       <td className="px-4 py-3 text-xs text-[#94a3b8]">
                         {e.bankName}{" "}

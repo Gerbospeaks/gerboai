@@ -36,72 +36,14 @@ import facebook from "../assets/images/facebook.png";
 import twitter from "../assets/images/twitter.png";
 import linkedin from "../assets/images/linkedin.png";
 import computer from "../assets/images/new_solidflo_bg_transp_text.png";
+import { useCurrency as useAppCurrency } from "../contexts/CurrencyContext";
 
-/* ─── Currency utilities (unchanged) ─────────────────────────────────────── */
-const fetchGeoInfo = async () => {
-  try {
-    const res = await fetch("https://ipapi.co/json/");
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    return {
-      currencyCode: data.currency || "USD",
-      countryName: data.country_name || "Unknown",
-    };
-  } catch {
-    return { currencyCode: "USD", countryName: "Unknown" };
-  }
-};
-
-const fetchExchangeRate = async (targetCurrency) => {
-  if (targetCurrency === "USD") return 1;
-  try {
-    const res = await fetch(`https://open.er-api.com/v6/latest/USD`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    return data.rates?.[targetCurrency] ?? 1;
-  } catch {
-    return 1;
-  }
-};
-
-const formatPrice = (usdPrice, rate, currencyCode) => {
-  const converted = usdPrice * rate;
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: currencyCode,
-      maximumFractionDigits: 0,
-    }).format(converted);
-  } catch {
-    return `${currencyCode} ${Math.round(converted)}`;
-  }
-};
-
-const useCurrency = () => {
-  const [currencyCode, setCurrencyCode] = useState("USD");
-  const [exchangeRate, setExchangeRate] = useState(1);
-  const [countryName, setCountryName] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { currencyCode: code, countryName: country } = await fetchGeoInfo();
-      const rate = await fetchExchangeRate(code);
-      if (!cancelled) {
-        setCurrencyCode(code);
-        setExchangeRate(rate);
-        setCountryName(country);
-        setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { currencyCode, exchangeRate, countryName, loading };
-};
+/* ─── Currency ────────────────────────────────────────────────────────────
+   Subscription plan prices on this page are authored in USD. Visitor-local
+   pricing now comes from the shared CurrencyContext (see
+   src/contexts/CurrencyContext.js) so the same geo-detection, caching and
+   exchange-rate logic is reused everywhere in the app instead of being
+   duplicated per-page. */
 
 /* ─── Styles ─────────────────────────────────────────────────────────────── */
 const css = `
@@ -1273,10 +1215,10 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const {
     currencyCode,
-    exchangeRate,
     countryName,
     loading: currencyLoading,
-  } = useCurrency();
+    formatCurrency: formatVisitorCurrency,
+  } = useAppCurrency();
 
   const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
@@ -1324,7 +1266,7 @@ const LandingPage = () => {
   const localPrice = (usd) => {
     if (currencyLoading) return null;
     if (usd === 0) return "Free";
-    return formatPrice(usd, exchangeRate, currencyCode);
+    return formatVisitorCurrency(usd, "USD", { fractionDigits: 0 });
   };
   const [activeTab, setActiveTab] = useState("home");
 

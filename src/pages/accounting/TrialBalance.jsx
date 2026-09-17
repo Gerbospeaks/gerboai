@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   collection,
@@ -27,8 +28,6 @@ import {
 } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const fmt = (n) =>
-  Number(n || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 });
 const fmtDate = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-ZA") : "—";
 const today = () => new Date().toISOString().split("T")[0];
@@ -90,6 +89,8 @@ const PRINT_STYLES = `@media print {
 // Props: user, clientId, clientName
 // ══════════════════════════════════════════════════════════════════════════════
 export default function TrialBalance({ user, clientId, clientName }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const fmt = (n) => formatVisitorCurrency(n, "ZAR");
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -395,20 +396,19 @@ export default function TrialBalance({ user, clientId, clientName }) {
             >
               {isBalanced
                 ? "Trial balance is in balance ✓"
-                : `Out of balance by R${fmt(difference)}`}
+                : `Out of balance by ${fmt(difference)}`}
             </p>
             <p
               className={`text-xs mt-0.5 ${isBalanced ? "text-[#15803d]" : "text-[#dc2626]"}`}
             >
-              Total Debits: R{fmt(totalDebits)} · Total Credits: R
-              {fmt(totalCredits)}
+              Total Debits: {fmt(totalDebits)} · Total Credits: {fmt(totalCredits)}
             </p>
           </div>
         </div>
         <div
           className={`text-2xl font-black ${isBalanced ? "text-[#059669]" : "text-[#dc2626]"}`}
         >
-          {isBalanced ? "✓" : `−R${fmt(difference)}`}
+          {isBalanced ? "✓" : `−${fmt(difference)}`}
         </div>
       </div>
 
@@ -417,28 +417,28 @@ export default function TrialBalance({ user, clientId, clientName }) {
         {[
           {
             label: "Total Assets",
-            value: `R${fmt(typeSubtotals.Asset?.debit || 0)}`,
+            value: `${fmt(typeSubtotals.Asset?.debit || 0)}`,
             icon: TrendingUp,
             bg: "bg-[#eff6ff]",
             color: "text-[#2563eb]",
           },
           {
             label: "Total Liabilities",
-            value: `R${fmt(typeSubtotals.Liability?.credit || 0)}`,
+            value: `${fmt(typeSubtotals.Liability?.credit || 0)}`,
             icon: TrendingDown,
             bg: "bg-[#fef2f2]",
             color: "text-[#dc2626]",
           },
           {
             label: "Total Revenue",
-            value: `R${fmt(totalRevenue)}`,
+            value: `${fmt(totalRevenue)}`,
             icon: ArrowUpRight,
             bg: "bg-[#faf5ff]",
             color: "text-[#7c3aed]",
           },
           {
             label: netProfit >= 0 ? "Net Profit" : "Net Loss",
-            value: `R${fmt(Math.abs(netProfit))}`,
+            value: `${fmt(Math.abs(netProfit))}`,
             icon: DollarSign,
             bg: netProfit >= 0 ? "bg-[#f0fdf4]" : "bg-[#fef2f2]",
             color: netProfit >= 0 ? "text-[#059669]" : "text-[#dc2626]",
@@ -720,7 +720,7 @@ export default function TrialBalance({ user, clientId, clientName }) {
                 ) : (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-[#fef2f2] text-[#dc2626]">
                     <AlertCircle className="w-3 h-3" />
-                    Diff: R{fmt(difference)}
+                    Diff: {fmt(difference)}
                   </span>
                 )}
               </div>
@@ -766,7 +766,7 @@ export default function TrialBalance({ user, clientId, clientName }) {
                     <div className="flex justify-between">
                       <span className="text-[#64748b]">Assets</span>
                       <span className="font-semibold text-[#2563eb]">
-                        R{fmt(assets)}
+                        {fmt(assets)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -774,14 +774,14 @@ export default function TrialBalance({ user, clientId, clientName }) {
                         Liabilities + Equity
                       </span>
                       <span className="font-semibold text-[#dc2626]">
-                        R{fmt(rhs)}
+                        {fmt(rhs)}
                       </span>
                     </div>
                     <div
                       className={`flex justify-between border-t border-[#e2e8f0] pt-1 font-bold ${balanced ? "text-[#059669]" : "text-[#dc2626]"}`}
                     >
                       <span>Difference</span>
-                      <span>R{fmt(Math.abs(assets - rhs))}</span>
+                      <span>{fmt(Math.abs(assets - rhs))}</span>
                     </div>
                   </div>
                 </div>
@@ -797,20 +797,20 @@ export default function TrialBalance({ user, clientId, clientName }) {
                 <div className="flex justify-between">
                   <span className="text-[#64748b]">Revenue</span>
                   <span className="font-semibold text-[#7c3aed]">
-                    R{fmt(totalRevenue)}
+                    {fmt(totalRevenue)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#64748b]">Expenses</span>
                   <span className="font-semibold text-[#ea580c]">
-                    R{fmt(totalExpenses)}
+                    {fmt(totalExpenses)}
                   </span>
                 </div>
                 <div
                   className={`flex justify-between border-t border-[#e9d5ff] pt-1 font-bold ${netProfit >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
                 >
                   <span>{netProfit >= 0 ? "Net Profit" : "Net Loss"}</span>
-                  <span>R{fmt(Math.abs(netProfit))}</span>
+                  <span>{fmt(Math.abs(netProfit))}</span>
                 </div>
               </div>
             </div>

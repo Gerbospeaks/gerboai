@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
 import BusinessSettingsModal from "../BusinessSettingsModal";
 import AppHeader from "../AppHeader";
 import StampPaywallModal from "../StampPaywallModal";
@@ -102,11 +103,6 @@ const generateInvoiceNumber = async (userId, documentType = "invoice") => {
 const functions = getFunctions();
 const inp =
   "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-lg bg-white text-[#1e293b] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#7c3aed] focus:border-[#7c3aed] transition-colors";
-const formatCurrencyZAR = (n) =>
-  new Intl.NumberFormat("en-ZA", { style: "currency", currency: "USD" }).format(
-    n || 0,
-  );
-
 // ─── COURT DATES CONSTANTS ─────────────────────────────────────────────────────
 const COURT_TYPES = [
   "Hearing",
@@ -2071,6 +2067,8 @@ function LegalCalendarView({ user }) {
 // BILLING VIEW
 // ═══════════════════════════════════════════════════════════════════════════════
 function LegalBillingView({ user }) {
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrencyZAR = (n) => formatVisitorCurrency(n || 0, "ZAR");
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -2793,6 +2791,8 @@ const LegalDashboard = () => {
   const [documentType, setDocumentType] = useState("invoice");
   const [activeView, setActiveView] = useState("home");
   const { user } = useAuth();
+  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
+  const formatCurrencyZAR = (n) => formatVisitorCurrency(n || 0, "ZAR");
   const [showAIWindow, setShowAIWindow] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
