@@ -1,4213 +1,2200 @@
-import { getAuth, signOut } from "firebase/auth";
-import JobCardTemplate from "./JobCardTemplate";
-import LetterheadEditor from "../../components/LetterheadEditor";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  getFirestore,
-  limit,
-  deleteDoc,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  increment,
-  runTransaction,
-} from "firebase/firestore";
-import { getFunctions } from "firebase/functions";
-import {
-  ArrowRight,
-  Building2,
-  Car,
-  Stamp,
-  CheckSquare,
-  ChevronLeft,
-  ChevronRight,
-  CreditCard,
-  Download,
-  Eye,
-  ClipboardList,
-  FileText,
-  MapPin,
-  Package,
-  Plus,
-  Printer,
-  Receipt,
-  Save,
-  Send,
-  Trash2,
-  Sparkles,
-  TrendingDown,
-  TrendingUp,
-  Truck,
-  Users,
-  Wallet,
-  Wrench,
-  X,
-} from "lucide-react";
-import DashboardQuickActions from "./DashboardQuickActions";
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import logo from "../../assets/img/solidflo-logo.png";
-import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
-import { useAuth } from "../../contexts/AuthContext";
-import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
-import { db } from "../../firebase";
-import uploadLogoToR2 from "../../utils/uploadLogoToR2";
-import HomeView from "../HomeView";
-import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
-import AIInvoiceWindow from "../AIInvoiceWindow";
-import AppHeader from "../AppHeader";
-import StampPaywallModal from "../StampPaywallModal";
-import StampSignatureModal from "../StampSignatureModal";
-import { POTemplateRenderer } from "../Purchaseordertemplates";
-import SubUserManagement from "../SubUserManagement";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import BusinessSettingsModal from "../BusinessSettingsModal";
-import CustomerModal from "../CustomerModal";
-import CustomersListModal from "../CustomersListModal";
-import FinancialOverview from "../FinancialOverview";
-import ReportsView from "./ReportsView";
-import HistoryView from "./HistoryView";
-import MechanicsSidebar from "./MechanicsSidebar";
-import NotesView from "./NotesView";
-import PartsInventory from "./PartsInventory";
-import { usePermissions } from "../../hooks/usePermissions";
-import Templates from "./Templates";
-import ServiceMarketplaceView from "../ServiceMarketplaceView";
-import ServiceRequestsView from "../ServiceRequestsView";
-import PurchaseOrders from "../PurchaseOrders";
-import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
-import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
-import Vehicles from "./Vehicles";
-const WORKER_URL = process.env.REACT_APP_API_URL;
-const initializeCounterIfNeeded = async (
-  db,
-  userId,
-  collectionName,
-  counterRef,
-) => {
-  const counterSnap = await getDoc(counterRef);
-  if (counterSnap.exists()) return counterSnap.data().value || 891;
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import logo from "../../assets/img/mechanics-logo.png";
+import logotop from "../../assets/img/mechanics-logo-top.png";
+import { HC, heroFontStyle } from "../../styles/landingTokens";
+import google from "../../assets/google-play.png";
+import Helmet from "react-helmet";
+const fontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
+`;
 
-  const snapshot = await getDocs(
-    collection(db, "users", userId, collectionName),
-  );
-  let maxNumber = 891;
-  snapshot.forEach((docSnap) => {
-    const match = docSnap.data()?.jobCardNumber?.match(/(\d+)$/);
-    if (match) {
-      const n = Number(match[1]);
-      if (n > maxNumber) maxNumber = n;
-    }
-  });
-  await setDoc(
-    counterRef,
-    { value: maxNumber, updatedAt: serverTimestamp() },
-    { merge: true },
-  );
-  return maxNumber;
+/* ─── Design Tokens ────────────────────────────────────────────────────── */
+const C = {
+  ink: "#0D1B2A", // deep navy
+  ink2: "#1B2E42", // mid navy
+  surface: "#F4F7FA", // cool light bg
+  white: "#FFFFFF",
+  orange: "#F97316", // primary accent
+  orangeD: "#C2580F",
+  orangeL: "#FFF0E5",
+  steel: "#64748B",
+  border: "#E2E8F0",
+  text: "#1E293B",
+  muted: "#64748B",
 };
 
-const generateJobCardNumber = async (userId, documentType) => {
-  const db = getFirestore();
-  const year = new Date().getFullYear();
-  const collectionName = documentType === "quote" ? "quotations" : "invoices";
-  const prefix = documentType === "quote" ? "QT" : "JC";
-  const counterRef = doc(db, "users", userId, "counters", collectionName);
-
-  await initializeCounterIfNeeded(db, userId, collectionName, counterRef);
-
-  const nextNumber = await runTransaction(db, async (transaction) => {
-    const counterSnap = await transaction.get(counterRef);
-    const current = counterSnap.exists()
-      ? counterSnap.data().value || 891
-      : 891;
-    const next = current + 1;
-    transaction.set(
-      counterRef,
-      { value: next, updatedAt: serverTimestamp() },
-      { merge: true },
-    );
-    return next;
-  });
-
-  return `${prefix}-${year}-${String(nextNumber).padStart(4, "0")}`;
-};
-const peekNextJobCardNumber = async (userId, documentType) => {
-  const db = getFirestore();
-  const year = new Date().getFullYear();
-  const collectionName = documentType === "quote" ? "quotations" : "invoices";
-  const prefix = documentType === "quote" ? "QT" : "JC";
-  const counterRef = doc(db, "users", userId, "counters", collectionName);
-  const current = await initializeCounterIfNeeded(
-    db,
-    userId,
-    collectionName,
-    counterRef,
-  );
-  return `${prefix}-${year}-${String(current + 1).padStart(4, "0")}`;
-};
-
-const functions = getFunctions();
-
-const MechanicsDashboard = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeView, setActiveView] = useState("home");
-  const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const handleQuickCreate = ({ view, action }) => {
-    if (action === "newInvoice") handleNewInvoice();
-    if (action === "newQuote") handleNewQuote();
-    if (action === "newCustomer") handleAddNewCustomer();
-    if (view) setActiveView(view);
-  };
-  const FREE_STAMP_LIMIT = 5;
-  const [showStampModal, setShowStampModal] = useState(false);
-  const [stampConfig, setStampConfig] = useState(null);
-  const [stampUnlocked, setStampUnlocked] = useState(false);
-  const [stampUsageCount, setStampUsageCount] = useState(0);
-  const [showStampPaywall, setShowStampPaywall] = useState(false);
-  const mobileNavPad = "pb-24 lg:pb-6";
-  const [notifications, setNotifications] = useState([]);
-  const [activeTab, setActiveTab] = useState("JobCard");
-  const [showJobCard, setShowJobCard] = useState(false);
-  const { user, authUser } = useAuth();
-  const [technicianName, setTechnicianName] = useState("");
-  const [bayNumber, setBayNumber] = useState("");
-  const [estimatedHours, setEstimatedHours] = useState("");
-  const [faultDescription, setFaultDescription] = useState("");
-  const [diagnosisNotes, setDiagnosisNotes] = useState("");
-  const [workPerformed, setWorkPerformed] = useState("");
-  const [customerApproved, setCustomerApproved] = useState(false);
-  const [partsChecklist, setPartsChecklist] = useState([]);
-  const [jobCardNumber, setJobCardNumber] = useState("");
-  const [jobCardId, setJobCardId] = useState(null);
-  const [isDirty, setIsDirty] = useState(false);
-  const [savedJobCards, setSavedJobCards] = useState([]);
-  const [showJobCardsList, setShowJobCardsList] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showCustomersList, setShowCustomersList] = useState(false);
-  const [currentJobCardId, setCurrentJobCardId] = useState(null);
-  const [savedCustomers, setSavedCustomers] = useState([]);
-  const [showCustomersListModal, setShowCustomersListModal] = useState(false);
-  const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [customers, setCustomers] = useState([]);
-  const [activeTemplate, setActiveTemplate] = useState("classic");
-  const [selectedTemplate, setSelectedTemplate] = useState("professional");
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [inputMode, setInputMode] = useState("manual");
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
-  const [isClientsOpen, setIsClientsOpen] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [isSavingPDF, setIsSavingPDF] = useState(false);
-  const [savedDocId, setSavedDocId] = useState(null);
-  const [savedDocType, setSavedDocType] = useState(null);
-  const { can, isAdmin } = usePermissions();
-  const [showUserManagement, setShowUserManagement] = useState(false);
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
-    useState(null);
-  const [useAI, setUseAI] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [vatRate, setVatRate] = useState(0);
-  const [isTablet, setIsTablet] = useState(false);
-  const [invoices, setInvoices] = useState([]);
-  const [stats, setStats] = useState({
-    totalInvoices: 0,
-    totalQuotes: 0,
-    totalInvoiced: 0,
-    totalClients: 0,
-    pendingPayments: 0,
-    loading: true,
-  });
-  const [pdfViewer, setPdfViewer] = useState(null);
-  const [aiWindowOpen, setAiWindowOpen] = useState(false);
-  const [aiDocType, setAiDocType] = useState("invoice");
-  const [showAIWindow, setShowAIWindow] = useState(false);
-  const [poNumber, setPoNumber] = useState("");
-  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
-  const [deliveryDate, setDeliveryDate] = useState("");
-  const [supplierName, setSupplierName] = useState("");
-  const [supplierContact, setSupplierContact] = useState("");
-  const [supplierEmail, setSupplierEmail] = useState("");
-  const [supplierPhone, setSupplierPhone] = useState("");
-  const [supplierAddress, setSupplierAddress] = useState("");
-  const [deliveryName, setDeliveryName] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [poItems, setPoItems] = useState([
-    { description: "", qty: 1, unit: "ea", unitPrice: 0, amount: 0 },
-  ]);
-  const [notes, setNotes] = useState("");
-  const [paymentTerms, setPaymentTerms] = useState("30 Days");
-  const [shippingMethod, setShippingMethod] = useState("");
-  const [stampSettings, setStampSettings] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState({
-    totalPaid: 0,
-    balanceDue: 0,
-    status: "pending",
-  });
-  const [documentType, setDocumentType] = useState("invoice");
-  const DOC_CONFIG = {
-    invoice: { prefix: "Inv", folder: "invoices" },
-    quote: { prefix: "QT", folder: "quotes" },
-    purchase_order: { prefix: "PO", folder: "purchase_orders" },
-    sick_note: { prefix: "SN", folder: "sick_notes" },
-    jobcard: { prefix: "JC", folder: "jobcards" },
-    waybill: { prefix: "WB", folder: "waybills" },
-  };
-  const location = useLocation();
-  useEffect(() => {
-    if (location.state?.activeView) setActiveView(location.state.activeView);
-  }, [location.state]);
-  const [newPoItem, setNewPoItem] = useState({
-    description: "",
-    qty: 1,
-    unit: "ea",
-    unitPrice: 0,
-  });
-
-  const handleAddPoItem = () => {
-    if (!newPoItem.description || !newPoItem.qty) return;
-    const unitPrice = Number(newPoItem.unitPrice) || 0;
-    const qty = Number(newPoItem.qty);
-    setPoItems((prev) => [
-      ...prev.filter((i) => i.description),
-      {
-        description: newPoItem.description,
-        qty,
-        unit: newPoItem.unit,
-        unitPrice,
-        amount: unitPrice * qty,
-      },
-    ]);
-    setNewPoItem({ description: "", qty: 1, unit: "ea", unitPrice: 0 });
-  };
-  const dirtySet = (setter) => (val) => {
-    setter(val);
-    setIsDirty(true);
-  };
-  const handleSavePO = async () => {
-    if (!user?.uid) return;
-    try {
-      const db = getFirestore();
-      const poData = {
-        poNumber,
-        poDate,
-        deliveryDate,
-        supplierName,
-        supplierContact,
-        supplierEmail,
-        supplierPhone,
-        supplierAddress,
-        deliveryName,
-        deliveryAddress,
-        items: poItems.filter((i) => i.description),
-        totals: { subtotal: poSubtotal, vat: poVat, total: poTotal },
-        notes,
-        paymentTerms,
-        shippingMethod,
-        status: "pending",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-
-      await setDoc(
-        doc(db, "users", user.uid, "purchaseOrders", poNumber),
-        poData,
-        { merge: true },
-      );
-
-      alert("Purchase Order saved successfully!");
-    } catch (error) {
-      alert("Failed to save Purchase Order");
-    }
-  };
-  const poSubtotal = poItems.reduce(
-    (sum, item) => sum + Number(item.amount),
-    0,
-  );
-  const poVat = poSubtotal * 0.15;
-  const poTotal = poSubtotal + poVat;
-  const handleAIDataExtracted = (extractedData) => {
-    if (extractedData.customer.name)
-      setCustomerName(extractedData.customer.name);
-    if (extractedData.customer.email)
-      setCustomerEmail(extractedData.customer.email);
-    if (extractedData.customer.phone)
-      setCustomerPhone(extractedData.customer.phone);
-    if (extractedData.customer.address)
-      setCustomerAddress(extractedData.customer.address);
-    if (extractedData.customer.merchant_code)
-      setCustomerId(extractedData.customer.merchant_code);
-    if (extractedData.billTo.name) setBillName(extractedData.billTo.name);
-    if (extractedData.billTo.email) setBillEmail(extractedData.billTo.email);
-    if (extractedData.billTo.phone) setBillPhone(extractedData.billTo.phone);
-    if (extractedData.billTo.address)
-      setBillAddress(extractedData.billTo.address);
-    if (extractedData.vehicle.make) setVehicleMake(extractedData.vehicle.make);
-    if (extractedData.vehicle.model)
-      setVehicleModel(extractedData.vehicle.model);
-    if (extractedData.vehicle.year) setVehicleYear(extractedData.vehicle.year);
-    if (extractedData.vehicle.registration)
-      setVehicleReg(extractedData.vehicle.registration);
-    if (extractedData.vehicle.vin) setVehicleVin(extractedData.vehicle.vin);
-    if (extractedData.vehicle.mileage)
-      setVehicleMileage(extractedData.vehicle.mileage);
-    if (extractedData.vehicle.preAuth)
-      setPreAuth(extractedData.vehicle.preAuth);
-    if (extractedData.vehicle.authCode)
-      setAuthCode(extractedData.vehicle.authCode);
-    if (extractedData.items?.length > 0) setItems(extractedData.items);
-    alert("✅ Data extracted and populated successfully!");
-  };
-
-  const handleNext = () => {
-    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
-  };
-  const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
-
-  useEffect(() => {
-    if (!user?.uid) return;
-    const loadJobCardNumber = async () => {
-      const nextJobCard = await peekNextJobCardNumber(user.uid, documentType);
-      setJobCardNumber(nextJobCard);
-    };
-    loadJobCardNumber();
-    loadSavedJobCards();
-  }, [user, documentType]);
-
-  useEffect(() => {
-    if (user?.uid) fetchBusinessStats();
-  }, [user]);
-
-  const fetchBusinessStats = async () => {
-    if (!user?.uid) return;
-    try {
-      const db = getFirestore();
-      const invoicesSnap = await getDocs(
-        collection(db, "users", user.uid, "invoices"),
-      );
-      let totalInvoiced = 0,
-        pendingPayments = 0,
-        invoiceCount = 0;
-      const invoicesList = [];
-      invoicesSnap.forEach((doc) => {
-        const d = doc.data();
-        invoiceCount++;
-        const amount = parseFloat(d.totals?.total || d.total || 0);
-        totalInvoiced += amount;
-        if (["pending", "unpaid", "partially_paid"].includes(d.status))
-          pendingPayments += parseFloat(
-            d.totals?.due || d.totals?.total || d.total || 0,
-          );
-        invoicesList.push({ id: doc.id, ...d });
-      });
-      invoicesList.sort((a, b) => {
-        const t = (x) => {
-          const v =
-            x.dates?.invoiceDate ||
-            x.dates?.quoteDate ||
-            x.createdAt?.toDate?.() ||
-            new Date(0);
-          return typeof v === "string"
-            ? new Date(v).getTime()
-            : v.getTime?.() || 0;
-        };
-        return t(b) - t(a);
-      });
-      setInvoices(invoicesList);
-      let quoteCount = 0;
-      try {
-        const qSnap = await getDocs(
-          collection(db, "users", user.uid, "quotations"),
-        );
-        quoteCount = qSnap.docs.length;
-      } catch (_) {}
-      let clientCount = 0;
-      try {
-        const cSnap = await getDocs(
-          collection(db, "users", user.uid, "clients"),
-        );
-        clientCount = cSnap.docs.length;
-        setSavedCustomers(cSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      } catch (_) {}
-      setStats({
-        totalInvoices: invoiceCount,
-        totalQuotes: quoteCount,
-        totalInvoiced,
-        totalClients: clientCount,
-        pendingPayments,
-        loading: false,
-      });
-    } catch (e) {
-      setStats((p) => ({ ...p, loading: false }));
-    }
-  };
-  useEffect(() => {
-    if (!user?.uid) return;
-    const checkStampAccess = async () => {
-      try {
-        const db = getFirestore();
-        const snap = await getDoc(
-          doc(db, "users", user.uid, "settings", "features"),
-        );
-        if (snap.exists()) {
-          const data = snap.data();
-          setStampUnlocked(data.stampSignatureUnlocked === true);
-          setStampUsageCount(data.stampUsageCount || 0);
-        }
-      } catch (err) {
-        console.error("Error checking stamp access:", err);
-      }
-    };
-    checkStampAccess();
-  }, [user]);
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 768);
-      setIsTablet(width >= 768 && width < 1024);
-      setSidebarOpen(width >= 1024);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const loadCustomers = async () => {
-    try {
-      const q = query(
-        collection(db, "users", user.uid, "clients"),
-        orderBy("createdAt", "desc"),
-      );
-      const querySnapshot = await getDocs(q);
-      const customersData = [];
-      querySnapshot.forEach((doc) =>
-        customersData.push({ id: doc.id, ...doc.data() }),
-      );
-      setCustomers(customersData);
-    } catch (error) {
-      console.error("Error loading customers:", error);
-    }
-  };
-  const handleStampButtonClick = () => {
-    if (stampUnlocked || stampUsageCount < FREE_STAMP_LIMIT) {
-      setShowStampModal(true);
-    } else {
-      setShowStampPaywall(true);
-    }
-  };
-  const handleProcessPayment = async () => {
-    if (!jobCardId || !user?.uid) {
-      alert("Please save the invoice before processing payment");
-      return;
-    }
-    try {
-      const collectionName =
-        documentType === "quote" ? "quotations" : "invoices";
-      const invoiceDoc = await getDoc(
-        doc(db, "users", user.uid, collectionName, jobCardId),
-      );
-      if (invoiceDoc.exists()) {
-        setSelectedInvoiceForPayment({ id: jobCardId, ...invoiceDoc.data() });
-        setShowPaymentModal(true);
-      } else {
-        alert("Invoice not found. Please save the invoice first.");
-      }
-    } catch (error) {
-      alert("Failed to load invoice for payment");
-    }
-  };
-  const handleUnlockStamp = async () => {
-    const auth = getAuth();
-    const token = await auth.currentUser.getIdToken();
-    const res = await fetch(`${WORKER_URL}/purchase-feature`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ feature: "stamp_signature" }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-
-    setStampUnlocked(true);
-    setShowStampPaywall(false);
-    setShowStampModal(true);
-  };
-  const loadPaymentStatus = async () => {
-    if (!user?.uid || !jobCardId) {
-      setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
-      return;
-    }
-    try {
-      const collectionName =
-        documentType === "quote" ? "quotations" : "invoices";
-      const invoiceDoc = await getDoc(
-        doc(db, "users", user.uid, collectionName, jobCardId),
-      );
-      if (invoiceDoc.exists()) {
-        const data = invoiceDoc.data();
-        setPaymentStatus({
-          totalPaid: data.totals?.paid || 0,
-          balanceDue: data.totals?.due || data.totals?.total || 0,
-          status: data.status || "pending",
-        });
-      } else {
-        setPaymentStatus({
-          totalPaid: 0,
-          balanceDue: total,
-          status: "pending",
-        });
-      }
-    } catch (error) {
-      setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
-    }
-  };
-
-  const handlePaymentComplete = () => {
-    loadSavedJobCards();
-    loadPaymentStatus();
-    setShowPaymentModal(false);
-  };
-
-  const loadSavedJobCards = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    const collectionName = documentType === "quote" ? "quotations" : "invoices";
-    const jobCardsRef = collection(db, "users", user.uid, collectionName);
-    const q = query(jobCardsRef, orderBy("createdAt", "desc"), limit(50));
-    const snapshot = await getDocs(q);
-
-    const cards = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-    cards.sort((a, b) => {
-      const getTime = (card) => {
-        const t = card.updatedAt || card.createdAt;
-        if (!t) return 0;
-        if (t.toDate) return t.toDate().getTime();
-        if (t.seconds) return t.seconds * 1000;
-        return new Date(t).getTime();
-      };
-      return getTime(b) - getTime(a);
-    });
-
-    setSavedJobCards(cards);
-  };
-  const handleAddNewCustomer = () => {
-    setSelectedCustomer(null);
-    setShowCustomerModal(true);
-  };
-  const handleDeleteJobCard = async (e, cardId) => {
-    e.stopPropagation(); // prevent row click from loading the card
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this record? This cannot be undone.",
-      )
-    )
-      return;
-    try {
-      const db = getFirestore();
-      const collectionName =
-        documentType === "quote" ? "quotations" : "invoices";
-      await deleteDoc(doc(db, "users", user.uid, collectionName, cardId));
-      setSavedJobCards((prev) => prev.filter((c) => c.id !== cardId));
-      setInvoices((prev) => prev.filter((inv) => inv.id !== cardId));
-      // if the deleted card is currently open, reset the form
-      if (jobCardId === cardId) handleNewJobCard();
-    } catch (error) {
-      alert("Failed to delete record: " + error.message);
-    }
-  };
-  const handleEditCustomer = (customer) => {
-    setSelectedCustomer(customer);
-    setShowCustomerModal(true);
-  };
-
-  const loadCustomer = (customer) => {
-    setCustomerName(customer.name || "");
-    setCustomerEmail(customer.email || "");
-    setCustomerPhone(customer.phone || "");
-    setCustomerAddress(customer.address || "");
-    setCustomerId(customer.merchant_code || "");
-    setBillName(customer.name || "");
-    setBillEmail(customer.email || "");
-    setBillPhone(customer.phone || "");
-    setBillAddress(customer.address || "");
-    setIsDirty(true);
-  };
-
-  const handleCustomerSaved = () => {
-    loadCustomers();
-  };
-
-  useEffect(() => {
-    loadCustomers();
-  }, []);
-  useEffect(() => {
-    loadPaymentStatus();
-  }, [jobCardId, user?.uid, documentType]);
-
-  const loadJobCard = (jobCard) => {
-    setJobCardId(jobCard.id);
-    setJobCardNumber(jobCard.jobCardNumber || "");
-    setDocumentType(jobCard.documentType || "invoice");
-    setCustomerName(jobCard.customer?.name || "");
-    setCustomerEmail(jobCard.customer?.email || "");
-    setCustomerPhone(jobCard.customer?.phone || "");
-    setCustomerAddress(jobCard.customer?.address || "");
-    setCustomerId(jobCard.customer?.merchant_code || "");
-    setBillName(jobCard.billTo?.name || "");
-    setBillEmail(jobCard.billTo?.email || "");
-    setBillPhone(jobCard.billTo?.phone || "");
-    setBillAddress(jobCard.billTo?.address || "");
-    setVehicleMake(jobCard.vehicle?.make || "");
-    setVehicleModel(jobCard.vehicle?.model || "");
-    setVehicleYear(jobCard.vehicle?.year || "");
-    setVehicleReg(jobCard.vehicle?.registration || "");
-    setVehicleVin(jobCard.vehicle?.vin || "");
-    setPreAuth(jobCard.vehicle?.preAuth || "");
-    setAuthCode(jobCard.vehicle?.authCode || "");
-    setVehicleMileage(jobCard.vehicle?.mileage || "");
-    setItems(jobCard.items || []);
-    setShowJobCardsList(false);
-    setPaymentStatus({
-      totalPaid: jobCard.totals?.paid || 0,
-      balanceDue: jobCard.totals?.due || jobCard.totals?.total || 0,
-      status: jobCard.status || "pending",
-    });
-    setIsDirty(false);
-    setActiveView("invoice");
-  };
-
-  const loadSavedCustomers = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    const customersRef = collection(db, "users", user.uid, "clients");
-    const q = query(customersRef, orderBy("createdAt", "desc"), limit(50));
-    const snapshot = await getDocs(q);
-    setSavedCustomers(
-      snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((c) => !c._placeholder),
-    );
-  };
-
-  const loadJobCardForExport = async () => {
-    if (!user?.uid || !jobCardId) return null;
-    const db = getFirestore();
-    const collectionName = documentType === "quote" ? "quotations" : "invoices";
-    const snap = await getDoc(
-      doc(db, "users", user.uid, collectionName, jobCardId),
-    );
-    return snap.exists() ? snap.data() : null;
-  };
-
-  const handleSavePDF = async () => {
-    setIsSavingPDF(true);
-    try {
-      // ── 1. Grab the already-rendered, already-styled print area ──────────
-      const printArea = document.getElementById("print-area");
-      if (!printArea) throw new Error("Print area not found");
-
-      // Temporarily make it visible for html2canvas (but off-screen)
-      const prevStyle = printArea.getAttribute("style") || "";
-      printArea.style.cssText = `
-      display: block !important;
-      position: fixed;
-      top: 0;
-      left: -9999px;
-      width: 794px;
-      min-height: 1123px;
-      background: white;
-      z-index: 9999;
-      visibility: visible;
-    `;
-      // Remove the Tailwind hidden class temporarily
-      printArea.classList.remove("hidden");
-
-      // Give browser a frame to paint
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // ── 2. Fix CORS for logo images ───────────────────────────────────────
-      const images = printArea.querySelectorAll("img");
-      await Promise.all(
-        Array.from(images).map(
-          (img) =>
-            new Promise((resolve) => {
-              if (!img.src || img.src.startsWith("data:")) {
-                resolve();
-                return;
-              }
-              fetch(img.src, { mode: "cors" })
-                .then((r) => r.blob())
-                .then((blob) => {
-                  const reader = new FileReader();
-                  reader.onload = (e) => {
-                    img.src = e.target.result;
-                    resolve();
-                  };
-                  reader.onerror = resolve;
-                  reader.readAsDataURL(blob);
-                })
-                .catch(resolve);
-            }),
-        ),
-      );
-
-      const canvas = await html2canvas(printArea, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        width: 794,
-        windowWidth: 794,
-      });
-
-      printArea.classList.add("hidden");
-      printArea.setAttribute("style", prevStyle);
-
-      // ── 5. Build PDF ──────────────────────────────────────────────────────
-      const prefix =
-        activeView === "purchase-orders"
-          ? "PO"
-          : documentType === "quote"
-            ? "Quote"
-            : "Invoice";
-
-      const number =
-        activeView === "purchase-orders"
-          ? poNumber || "draft"
-          : jobCardNumber || "draft";
-
-      const fileName = `${prefix}-${number}.pdf`;
-
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = (canvas.height * pageWidth) / canvas.width;
-      pdf.addImage(
-        canvas.toDataURL("image/jpeg", 0.95),
-        "JPEG",
-        0,
-        0,
-        pageWidth,
-        pageHeight,
-      );
-      const pdfBlob = pdf.output("blob");
-
-      // ── 6. Upload to R2 ───────────────────────────────────────────────────
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        alert("You must be logged in to save.");
-        return;
-      }
-
-      const token = await currentUser.getIdToken();
-      const uploadRes = await fetch(`${WORKER_URL}/upload-pdf`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/pdf",
-          "X-File-Name": fileName,
-        },
-        body: pdfBlob,
-      });
-
-      if (!uploadRes.ok)
-        throw new Error(`Upload failed: ${await uploadRes.text()}`);
-
-      const { publicUrl, key } = await uploadRes.json();
-
-      // ── 7. Save to Firestore ──────────────────────────────────────────────
-      const docType =
-        activeView === "purchase-orders"
-          ? "purchase_order"
-          : documentType === "quote"
-            ? "quote"
-            : "invoice";
-
-      const folder = DOC_CONFIG[docType]?.folder ?? docType;
-      const firestoreDb = getFirestore();
-      if (!jobCardId || isDirty) {
-        setIsDirty(false);
-      } else {
-        if (jobCardId) {
-          await setDoc(doc(firestoreDb, "users", user.uid, folder, number), {
-            fileName,
-            downloadUrl: publicUrl,
-            r2Key: key,
-            docType,
-            docNumber: number,
-            generatedAt: serverTimestamp(),
-            customerName,
-            vehicleReg,
-            total,
-          });
-        }
-      }
-
-      const collectionName =
-        activeView === "purchase-orders"
-          ? "purchaseOrders"
-          : documentType === "quote"
-            ? "quotations"
-            : "invoices";
-
-      // ── Ensure the invoice doc exists before patching downloadUrl ─────────
-      let activeJobCardId = jobCardId;
-
-      if (!activeJobCardId && activeView !== "purchase-orders") {
-        // ✅ use the job card number as the ID
-        await setDoc(
-          doc(firestoreDb, "users", user.uid, collectionName, jobCardNumber),
-          buildJobCardPayload(jobCardNumber),
-        );
-        activeJobCardId = jobCardNumber;
-        setJobCardId(jobCardNumber);
-        loadSavedJobCards();
-      }
-
-      // Patch downloadUrl so the Recent list shows the View/Save buttons
-      if (activeJobCardId) {
-        await updateDoc(
-          doc(firestoreDb, "users", user.uid, collectionName, activeJobCardId),
-          { downloadUrl: publicUrl },
-        );
-        setInvoices((prev) =>
-          prev.map((inv) =>
-            inv.id === activeJobCardId
-              ? { ...inv, downloadUrl: publicUrl }
-              : inv,
-          ),
-        );
-      }
-
-      alert("✅ Invoice saved as PDF successfully!");
-    } catch (err) {
-      console.error("PDF save error:", err);
-      alert("Failed to save PDF: " + err.message);
-    } finally {
-      setIsSavingPDF(false);
-    }
-  };
-  const handleAddItem = () => {
-    if (!newItem.description || !newItem.qty) return;
-    const rate = Number(newItem.rate) || 0;
-    const qty = Number(newItem.qty);
-    setItems((prev) => [
-      ...prev,
-      {
-        description: newItem.description,
-        type: newItem.type || "Labor",
-        rate,
-        qty,
-        amount: rate * qty,
-      },
-    ]);
-    setNewItem({ description: "", rate: "", qty: "", type: "Labor" });
-  };
-  const downloadPDF = async (url, fileName) => {
-    try {
-      const res = await fetch(url, { mode: "cors" });
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = fileName || "document.pdf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      console.error("Download failed:", err);
-      alert("Download failed: " + err.message);
-    }
-  };
-  const handleRemoveItem = (index) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  };
-  const handleUpdateItem = (index, field, value) => {
-    setItems((prev) =>
-      prev.map((item, i) => {
-        if (i !== index) return item;
-        const updated = { ...item, [field]: value };
-        // Recalculate amount whenever rate or qty changes
-        if (field === "rate" || field === "qty") {
-          updated.amount = Number(updated.rate) * Number(updated.qty);
-        }
-        return updated;
-      }),
-    );
-  };
-  // State
-  const [customerName, setCustomerName] = useState("John Smith");
-  const [merchant_code, setCustomerId] = useState("V*R-9890");
-  const [customerEmail, setCustomerEmail] = useState("john.smith@example.com");
-  const [customerPhone, setCustomerPhone] = useState("082 123 4567");
-  const [customerAddress, setCustomerAddress] = useState(
-    "123 Main Street, Pretoria, 0001",
-  );
-  const [billName, setBillName] = useState("John Smith");
-  const [billEmail, setBillEmail] = useState("john.smith@example.com");
-  const [billPhone, setBillPhone] = useState("082 123 4567");
-  const [billAddress, setBillAddress] = useState(
-    "123 Main Street, Pretoria, 0001",
-  );
-  const [vehicleMake, setVehicleMake] = useState("Toyota");
-  const [vehicleModel, setVehicleModel] = useState("Hilux");
-  const [vehicleYear, setVehicleYear] = useState("2020");
-  const [vehicleReg, setVehicleReg] = useState("ABC 123 GP");
-  const [vehicleVin, setVehicleVin] = useState("1HGBH41JXMN109186");
-  const [vehicleMileage, setVehicleMileage] = useState("45000");
-  const [preAuth, setPreAuth] = useState("AUTH123");
-  const [authCode, setAuthCode] = useState("456789");
-
-  const [businessInfo, setBusinessInfo] = useState({
-    businessName: "V8 POWERED AUTO SERVICE",
-    addressLine1: "9-10 CNR THIRD & ARKWRIGHT AVENUE",
-    addressLine2: "WYNBERG",
-    city: "SANDTON",
-    postalCode: "2090",
-    primaryPhone: "082 514 4509",
-    secondaryPhone: "084 583 9929",
-    logoUrl: "",
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user?.uid) loadBusinessInfo();
-  }, [user]);
-
-  useEffect(() => {
-    const fetchBusinessInfo = async () => {
-      if (!user?.uid) return;
-      try {
-        const db = getFirestore();
-        const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) setBusinessInfo(docSnap.data());
-      } catch (error) {
-        console.error("Error fetching business info:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBusinessInfo();
-  }, [user]);
-
-  const loadBusinessInfo = async () => {
-    if (!user?.uid) return;
-    try {
-      const db = getFirestore();
-      const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setBusinessInfo(data);
-        if (data.stampSettings) setStampSettings(data.stampSettings);
-        if (data.logoUrl) {
-          const b64 = await toBase64(data.logoUrl);
-          setLogoBase64(b64);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading business info:", error);
-    }
-  };
-  const toBase64 = (url) =>
-    fetch(url, { mode: "cors" })
-      .then((r) => r.blob())
-      .then(
-        (blob) =>
-          new Promise((res, rej) => {
-            const reader = new FileReader();
-            reader.onload = () => res(reader.result);
-            reader.onerror = rej;
-            reader.readAsDataURL(blob);
-          }),
-      )
-      .catch(() => url); // fall back to original URL if CORS fails
-
-  const [logoBase64, setLogoBase64] = useState("");
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !user?.uid || !authUser) return;
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
-      return;
-    }
-    try {
-      setBusinessInfo((prev) => ({ ...prev, uploading: true }));
-      const logoUrl = await uploadLogoToR2(file, authUser);
-      const b64 = await toBase64(logoUrl);
-      setBusinessInfo((prev) => ({ ...prev, logoUrl, uploading: false }));
-      const db = getFirestore();
-      await setDoc(
-        doc(db, "users", user.uid, "settings", "businessInfo"),
-        { logoUrl, updatedAt: new Date().toISOString() },
-        { merge: true },
-      );
-      alert("Logo uploaded successfully!");
-      setLogoBase64(b64);
-    } catch (error) {
-      alert("Failed to upload logo: " + error.message);
-      setBusinessInfo((prev) => ({ ...prev, uploading: false }));
-    }
-  };
-
-  const handleSaveBusinessInfo = async () => {
-    if (!user?.uid) return;
-    try {
-      const db = getFirestore();
-      await setDoc(doc(db, "users", user.uid, "settings", "businessInfo"), {
-        ...businessInfo,
-        stampSettings,
-      });
-      alert("Business information saved successfully!");
-      setShowSettings(false);
-    } catch (error) {
-      alert("Failed to save business information");
-    }
-  };
-
-  const printStyles = `@media print { 
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
-  html,body { margin:0!important;padding:0!important;width:210mm!important;background:white!important; } 
-  body * { visibility:hidden!important; } 
-  #print-area,#print-area * { visibility:visible!important; } 
-  #print-area { display:block!important;position:absolute!important;left:0!important;top:0!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:white!important; } 
-  #jobcard-printable { padding: 40px 0 !important; box-sizing: border-box !important; width: 210mm !important; }
-  #jobcard-printable * { box-sizing: border-box !important; }
-  @page { size:A4 portrait; margin: 40px 0 !important; } 
-}`;
-  const handlePrint = () => {
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = printStyles;
-    document.head.appendChild(styleSheet);
-
-    // Wait for styles to apply and DOM to repaint
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        window.print();
-      }, 300);
-    });
-
-    // Clean up stylesheet after printing is done
-    window.onafterprint = () => {
-      document.head.removeChild(styleSheet);
-      window.onafterprint = null;
-    };
-  };
-  const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState({
-    description: "",
-    rate: "",
-    qty: "",
-    type: "Labor",
-  });
-  const handleStampConfirm = async (cfg) => {
-    setStampConfig(cfg);
-    setShowStampModal(false);
-
-    if (stampUnlocked || !user?.uid) return; // unlimited once unlocked, nothing to count
-
-    setStampUsageCount((prev) => prev + 1); // optimistic UI update
-
-    try {
-      const db = getFirestore();
-      await setDoc(
-        doc(db, "users", user.uid, "settings", "features"),
-        { stampUsageCount: increment(1) }, // atomic server-side increment
-        { merge: true },
-      );
-    } catch (err) {
-      console.error("Failed to record stamp usage:", err);
-    }
-  };
-  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
-  const vat = subtotal * (vatRate / 100);
-  const total = subtotal + vat;
-
-  useEffect(() => {
-    if (!jobCardId)
-      setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
-  }, [total, jobCardId]);
-
-  const buildJobCardPayload = (numberToUse) => ({
-    jobCardNumber: numberToUse || jobCardNumber,
-    locked: true,
-    status: "pending",
-    documentType,
-    dates: { serviceDate: new Date().toISOString(), completedDate: null },
-    customer: {
-      name: customerName,
-      email: customerEmail,
-      phone: customerPhone,
-      address: customerAddress,
-      merchant_code,
-    },
-    billTo: {
-      name: billName,
-      email: billEmail,
-      phone: billPhone,
-      address: billAddress,
-    },
-    vehicle: {
-      make: vehicleMake,
-      model: vehicleModel,
-      year: vehicleYear,
-      registration: vehicleReg,
-      vin: vehicleVin,
-      mileage: vehicleMileage,
-      preAuth: preAuth,
-      authCode: authCode,
-    },
-    items,
-    vatRate,
-    totals: { subtotal, vat, total, paid: 0, due: total },
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    workshop: {
-      technicianName,
-      bayNumber,
-      estimatedHours,
-      faultDescription,
-      diagnosisNotes,
-      workPerformed,
-      partsChecklist,
-      customerApproved,
-    },
-  });
-
-  const handleSaveJobCard = async () => {
-    if (!user?.uid) return;
-    if (jobCardId && !isDirty) {
-      alert("No changes detected. Edit the invoice before saving again.");
-      return;
-    }
-    const db = getFirestore();
-    let numberToUse = jobCardNumber;
-
-    if (!jobCardId) {
-      numberToUse = await generateJobCardNumber(user.uid, documentType);
-      setJobCardNumber(numberToUse);
-    }
-
-    const jobCardData = buildJobCardPayload(numberToUse);
-    const collectionName = documentType === "quote" ? "quotations" : "invoices";
-
-    const docId = jobCardId || numberToUse;
-
-    await setDoc(
-      doc(db, "users", user.uid, collectionName, docId),
-      { ...jobCardData, updatedAt: serverTimestamp() },
-      { merge: true },
-    );
-
-    setJobCardId(docId);
-    setIsDirty(false);
-    alert(
-      `${documentType === "quote" ? "Quote" : "Job card"} saved — ${numberToUse}`,
-    );
-    loadSavedJobCards();
-    fetchBusinessStats();
-  };
-
-  const handleConvertToInvoice = async () => {
-    if (!user?.uid) return;
-    if (!jobCardId) {
-      alert("Please save the quote first before converting to invoice");
-      return;
-    }
-    if (!window.confirm("Convert this quote to an invoice?")) return;
-    try {
-      const db = getFirestore();
-      const newInvoiceNumber = await generateJobCardNumber(user.uid, "invoice");
-      const invoiceData = buildJobCardPayload(newInvoiceNumber);
-      invoiceData.documentType = "invoice";
-      invoiceData.jobCardNumber = newInvoiceNumber; // ← explicitly set
-      invoiceData.convertedFromQuote = jobCardId;
-      invoiceData.convertedFromQuoteNumber = jobCardNumber;
-      invoiceData.convertedAt = serverTimestamp();
-
-      await setDoc(
-        doc(db, "users", user.uid, "invoices", newInvoiceNumber),
-        invoiceData,
-      );
-
-      await updateDoc(doc(db, "users", user.uid, "quotations", jobCardId), {
-        convertedToInvoice: true,
-        convertedToInvoiceId: newInvoiceNumber,
-        convertedToInvoiceNumber: newInvoiceNumber,
-        convertedAt: serverTimestamp(),
-        status: "converted",
-      });
-
-      setDocumentType("invoice");
-      setJobCardId(newInvoiceNumber);
-      setJobCardNumber(newInvoiceNumber); // ← already there, confirm it's correct
-      setIsDirty(false); // ← add this so no stale dirty flag
-      alert(`Converted to Invoice ${newInvoiceNumber}`);
-      loadSavedJobCards();
-    } catch (error) {
-      alert("Failed to convert quote to invoice");
-    }
-  };
-
-  const handleNewQuote = () => {
-    setDocumentType("quote");
-    handleNewJobCard();
-  };
-  const handleNewInvoice = () => {
-    setDocumentType("invoice");
-    handleNewJobCard();
-  };
-
-  const handleNewJobCard = () => {
-    setJobCardId(null);
-    setIsDirty(false);
-    setJobCardNumber("");
-    setCustomerName("John Smith");
-    setCustomerId("CUST-2026-1234");
-    setCustomerEmail("john.smith@example.com");
-    setCustomerPhone("082 123 4567");
-    setCustomerAddress("123 Main Street, Pretoria, 0001");
-    setVehicleMake("Toyota");
-    setVehicleModel("Hilux");
-    setVehicleYear("2020");
-    setVehicleReg("ABC 123 GP");
-    setVehicleVin("1HGBH41JXMN109186");
-    setVehicleMileage("45000");
-    setItems([]);
-    setCurrentStep(1);
-    const loadNewNumber = async () => {
-      if (user?.uid) {
-        const n = await peekNextJobCardNumber(user.uid, documentType);
-        setJobCardNumber(n);
-      }
-    };
-    loadNewNumber();
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(getAuth());
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
-
-  // ── Design tokens ─────────────────────────────────────────────────────────
-  const inputCls =
-    "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
-  const labelCls =
-    "block text-xs font-semibold text-[#374151] uppercase tracking-wide mb-1.5";
-  const selectCls =
-    "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-md bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition-colors";
-
-  // ── Header action buttons ─────────────────────────────────────────────────
-  const headerActions = [
-    can("createQuote") &&
-      documentType === "quote" &&
-      jobCardId &&
-      activeView === "invoice" && {
-        label: "Convert to Invoice",
-        icon: FileText,
-        onClick: handleConvertToInvoice,
-        className:
-          "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-      },
-    isAdmin && {
-      label: "Team",
-      icon: Users,
-      onClick: () => setShowUserManagement(true),
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    {
-      label: "Preview",
-      icon: Eye,
-      onClick: () => setShowPreview(true),
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-
-    {
-      label: "Print",
-      icon: Printer,
-      onClick: handlePrint,
-      variant: "secondary",
-    },
-    activeView !== "purchase-orders" && {
-      label: "New",
-      icon: Plus,
-      onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    {
-      label: "Save",
-      icon: Save,
-      onClick: handleSaveJobCard,
-      className:
-        "flex items-center gap-1.5 px-3 py-1.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-    },
-    can("createInvoice") && {
-      label: isSavingPDF ? "Saving..." : "Save PDF",
-      icon: Download,
-      onClick: handleSavePDF,
-      disabled: isSavingPDF,
-      className: `flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-        isSavingPDF
-          ? "bg-[#64748b] cursor-not-allowed"
-          : "bg-[#0891b2] hover:bg-[#0e7490]"
-      }`,
-    },
-    can("createInvoice") || can("createQuote")
-      ? {
-          label:
-            activeView === "purchase-orders"
-              ? "Save P.O."
-              : documentType === "quote"
-                ? "Save Quote"
-                : "Save Invoice",
-          icon: Save,
-          onClick:
-            activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
-          className:
-            "flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
-        }
-      : null,
-  ].filter(Boolean);
-
-  const mobileDashboardActions = [
-    documentType === "quote" &&
-      jobCardId &&
-      activeView !== "purchase-orders" && {
-        label: "To Invoice",
-        icon: FileText,
-        onClick: handleConvertToInvoice,
-        className:
-          "flex items-center gap-1.5 px-3 py-2 bg-[#7c3aed] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
-      },
-    {
-      label:
-        activeView === "purchase-orders"
-          ? "Save P.O."
-          : documentType === "quote"
-            ? "Save Quote"
-            : "Save Invoice",
-      icon: Save,
-      onClick:
-        activeView === "purchase-orders" ? handleSavePO : handleSaveJobCard,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
-    },
-
-    {
-      label: "PDF",
-      icon: Download,
-      onClick: handleSavePDF,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-[#0891b2] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
-    },
-    {
-      label: "Print",
-      icon: Printer,
-      onClick: handlePrint,
-      className:
-        "flex items-center gap-1.5 px-3 py-2 bg-white border border-[#e2e8f0] text-[#374151] rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
-    },
-  ].filter(Boolean);
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
-  const formatCurrency = (n) => formatVisitorCurrency(n, "ZAR");
-
-  const statusBadge = (s) =>
-    s === "paid"
-      ? "bg-[#dcfce7] text-[#166534]"
-      : s === "partially_paid"
-        ? "bg-[#fef3c7] text-[#92400e]"
-        : s === "pending"
-          ? "bg-[#dbeafe] text-[#1e40af]"
-          : "bg-[#fef2f2] text-[#991b1b]";
-
-  // ── Stat card ─────────────────────────────────────────────────────────────
-  const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    iconBg,
-    iconColor,
-    subtitle,
-    loading: l,
-    trend,
-  }) => (
-    <div className="bg-white rounded-xl p-4 border border-[#e2e8f0] shadow-sm flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-3">
-        <div
-          className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconBg}`}
-        >
-          <Icon className={`w-4 h-4 ${iconColor}`} />
-        </div>
-        {trend !== undefined && (
-          <span
-            className={`flex items-center gap-0.5 text-xs font-semibold ${trend > 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
-          >
-            {trend > 0 ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
-            )}
-            {Math.abs(trend)}%
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-xs text-[#64748b] mb-0.5">{title}</p>
-        {l ? (
-          <div className="h-6 bg-[#f1f5f9] rounded animate-pulse" />
-        ) : (
-          <>
-            <p className="text-lg font-bold text-[#1e293b] truncate">{value}</p>
-            {subtitle && (
-              <p className="text-xs text-[#94a3b8] mt-0.5">{subtitle}</p>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-
-  // ── Step definitions ──────────────────────────────────────────────────────
-  const steps =
-    documentType === "jobcard"
-      ? [
-          { number: 1, title: "Invoice To", icon: Users },
-          { number: 2, title: "Bill To", icon: FileText },
-          { number: 3, title: "Vehicle", icon: Car },
-          { number: 4, title: "Workshop", icon: Wrench },
-          { number: 5, title: "Services", icon: Package },
-          { number: 6, title: "Sign-off", icon: CheckSquare },
-        ]
-      : activeView === "purchase-orders"
-        ? [
-            { number: 1, title: "Supplier", icon: Truck },
-            { number: 2, title: "Delivery", icon: MapPin },
-            { number: 3, title: "Items", icon: Package },
-            { number: 4, title: "Summary", icon: FileText },
-          ]
-        : [
-            { number: 1, title: "Invoice To", icon: Users },
-            { number: 2, title: "Bill To", icon: FileText },
-            { number: 3, title: "Vehicle", icon: Car },
-            { number: 4, title: "Services", icon: Wrench },
-            { number: 5, title: "Payment", icon: CreditCard },
-          ];
-  const totalSteps = steps.length;
-
-  const templateProps = {
-    templateId: selectedTemplate,
-    loading,
-    jobCardNumber,
-    customerName,
-    billName,
-    billEmail,
-    billPhone,
-    billAddress,
-    merchant_code,
-    customerCompany: "",
-    customerEmail,
-    customerPhone,
-    customerAddress,
-    vehicleReg,
-    vehicleMake,
-    vehicleModel,
-    vehicleYear,
-    vehicleVin,
-    vehicleMileage,
-    preAuth,
-    authCode,
-    items,
-    subtotal,
-    vat,
-    total,
-    merchantCode: merchant_code,
-    serviceType: "SERVICE",
-    documentType,
-    stampText: stampSettings.text,
-    stampColor: stampSettings.color,
-    showStampDate: stampSettings.showDate,
-    showStamp: stampSettings.enabled,
-    businessInfo: {
-      ...businessInfo,
-      logoUrl: logoBase64 || businessInfo.logoUrl,
-    },
-    stampConfig,
-    totalPaid: paymentStatus.totalPaid,
-    balanceDue: paymentStatus.balanceDue,
-    paymentStatusLabel: paymentStatus.status,
-  };
-  const jobCardTemplateProps = {
-    ...templateProps, // inherit all base template props
-    technicianName,
-    bayNumber,
-    estimatedHours,
-    faultDescription,
-    diagnosisNotes,
-    workPerformed,
-    partsChecklist,
-    customerApproved,
-    sourceQuoteNumber: "",
-  };
-  const poTemplateProps = {
-    templateId: selectedTemplate,
-    businessInfo,
-    poNumber,
-    poDate,
-    deliveryDate,
-    supplierName,
-    supplierContact,
-    supplierEmail,
-    supplierPhone,
-    supplierAddress,
-    deliveryName,
-    deliveryAddress,
-    items: poItems.filter((i) => i.description),
-    subtotal: poSubtotal,
-    vat: poVat,
-    total: poTotal,
-    notes,
-    paymentTerms,
-    shippingMethod,
-  };
-  // ── Home view ─────────────────────────────────────────────────────────────
-  const HomeViewLocal = () => (
-    <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-4">
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard
-          title="Invoices"
-          value={stats.totalInvoices}
-          icon={FileText}
-          iconBg="bg-[#eff6ff]"
-          iconColor="text-[#2563eb]"
-          subtitle="All time"
-          loading={stats.loading}
-          trend={12}
-        />
-        <StatCard
-          title="Quotes"
-          value={stats.totalQuotes}
-          icon={Receipt}
-          iconBg="bg-[#f0fdfa]"
-          iconColor="text-[#0d9488]"
-          subtitle="Generated"
-          loading={stats.loading}
-        />
-        <StatCard
-          title="Revenue"
-          value={formatCurrency(stats.totalInvoiced)}
-          icon={TrendingUp}
-          iconBg="bg-[#f0fdf4]"
-          iconColor="text-[#059669]"
-          subtitle="Total invoiced"
-          loading={stats.loading}
-          trend={8}
-        />
-        <StatCard
-          title="Clients"
-          value={stats.totalClients}
-          icon={Users}
-          iconBg="bg-[#fff7ed]"
-          iconColor="text-[#ea580c]"
-          subtitle="Active"
-          loading={stats.loading}
-        />
-      </div>
-
-      {/* Pending + Quick actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Pending payments */}
-        <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 bg-[#fff7ed] rounded-lg flex items-center justify-center flex-shrink-0">
-            <Receipt className="w-5 h-5 text-[#ea580c]" />
-          </div>
-          <div>
-            <p className="text-xs text-[#64748b] mb-0.5">Pending Payments</p>
-            {stats.loading ? (
-              <div className="h-6 bg-[#f1f5f9] rounded animate-pulse w-32" />
-            ) : (
-              <>
-                <p className="text-xl font-bold text-[#ea580c]">
-                  {formatCurrency(stats.pendingPayments)}
-                </p>
-                <p className="text-xs text-[#94a3b8]">Outstanding invoices</p>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
-          <p className="text-xs font-semibold text-[#94a3b8] uppercase tracking-widest mb-3">
-            Quick Actions
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2">
-            {[
-              {
-                label: "New Invoice",
-                icon: FileText,
-                onClick: () => {
-                  handleNewInvoice();
-                  setActiveView("invoice");
-                },
-                bg: "bg-[#eff6ff]",
-                hover: "hover:bg-[#dbeafe]",
-                border: "border-[#bfdbfe]",
-                iconBg: "bg-[#2563eb]",
-                text: "text-[#1e40af]",
-              },
-              {
-                label: "New Quote",
-                icon: Receipt,
-                onClick: () => {
-                  handleNewQuote();
-                  setActiveView("invoice");
-                },
-                bg: "bg-[#f0fdfa]",
-                hover: "hover:bg-[#ccfbf1]",
-                border: "border-[#99f6e4]",
-                iconBg: "bg-[#0d9488]",
-                text: "text-[#0f766e]",
-              },
-              {
-                label: "Customers",
-                icon: Users,
-                onClick: () => setShowCustomersListModal(true),
-                bg: "bg-[#f0fdf4]",
-                hover: "hover:bg-[#dcfce7]",
-                border: "border-[#bbf7d0]",
-                iconBg: "bg-[#059669]",
-                text: "text-[#166534]",
-              },
-              {
-                label: "Team",
-                icon: Users,
-                onClick: () => setShowUserManagement(true),
-                bg: "bg-[#faf5ff]",
-                hover: "hover:bg-[#ede9fe]",
-                border: "border-[#ddd6fe]",
-                iconBg: "bg-[#7c3aed]",
-                text: "text-[#5b21b6]",
-              },
-            ].map(
-              ({
-                label,
-                icon: Icon,
-                onClick,
-                bg,
-                hover,
-                border,
-                iconBg,
-                text,
-              }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  className={`flex-1 flex items-center justify-between px-3 py-2.5 ${bg} ${hover} border ${border} rounded-lg transition-all group`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-6 h-6 ${iconBg} rounded flex items-center justify-center flex-shrink-0`}
-                    >
-                      <Icon className="w-3 h-3 text-white" />
-                    </div>
-                    <span className={`text-xs font-semibold ${text}`}>
-                      {label}
-                    </span>
-                  </div>
-                  <ArrowRight
-                    className={`w-3 h-3 ${text} opacity-60 group-hover:translate-x-0.5 transition-transform`}
-                  />
-                </button>
-              ),
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent invoices */}
-      <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-          <h3 className="text-sm font-semibold text-[#1e293b]">
-            Recent Invoices
-          </h3>
-          <button
-            onClick={() => setShowJobCardsList(true)}
-            className="text-xs text-[#2563eb] hover:text-[#1d4ed8] font-medium"
-          >
-            View all
-          </button>
-        </div>
-        <div className="divide-y divide-[#f1f5f9]">
-          {stats.loading ? (
-            [1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-14 bg-[#f8fafc] animate-pulse m-3 rounded-lg"
-              />
-            ))
-          ) : invoices.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-10 h-10 mb-3 bg-[#f1f5f9] rounded-full flex items-center justify-center">
-                <FileText className="w-5 h-5 text-[#94a3b8]" />
-              </div>
-              <p className="text-sm font-medium text-[#374151] mb-1">
-                No invoices yet
-              </p>
-              <p className="text-xs text-[#94a3b8] mb-3">
-                Create your first invoice to get started
-              </p>
-              <button
-                onClick={() => {
-                  handleNewInvoice();
-                  setActiveView("invoice");
-                }}
-                className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg text-xs font-medium transition-colors"
-              >
-                Create Invoice
-              </button>
-            </div>
-          ) : (
-            invoices.slice(0, 8).map((invoice) => (
-              <div
-                key={invoice.id}
-                className="flex items-center justify-between px-5 py-3.5 hover:bg-[#f8fafc] cursor-pointer transition-colors"
-              >
-                {/* Left — click to load into editor */}
-                <div
-                  className="flex-1 min-w-0"
-                  onClick={() => loadJobCard(invoice)}
-                >
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-semibold text-[#1e293b] truncate">
-                      {invoice.jobCardNumber ||
-                        invoice.invoiceNumber ||
-                        invoice.id}
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-semibold flex-shrink-0 ${statusBadge(invoice.status)}`}
-                    >
-                      {invoice.status === "partially_paid"
-                        ? "Partial"
-                        : invoice.status || "Draft"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-[#64748b]">
-                    <span className="flex items-center gap-1 truncate">
-                      <Users className="w-3 h-3 flex-shrink-0" />
-                      {invoice.customer?.name || "No customer"}
-                    </span>
-                    <span className="flex items-center gap-1 truncate">
-                      <Car className="w-3 h-3 flex-shrink-0" />
-                      {[
-                        invoice.vehicle?.year,
-                        invoice.vehicle?.make,
-                        invoice.vehicle?.model,
-                      ]
-                        .filter(Boolean)
-                        .join(" ") || "No vehicle"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Right — amount + view button */}
-                <div className="flex items-center gap-3 ml-4 flex-shrink-0">
-                  <div className="text-right">
-                    <div className="text-sm font-bold text-[#1e293b]">
-                      {formatCurrency(invoice.totals?.total || 0)}
-                    </div>
-                    {invoice.totals?.due > 0 &&
-                      invoice.totals?.due < invoice.totals?.total && (
-                        <div className="text-xs text-[#d97706]">
-                          Due: {formatCurrency(invoice.totals.due)}
-                        </div>
-                      )}
-                  </div>
-
-                  {/* View PDF button — only shows if PDF was saved */}
-                  {invoice.downloadUrl ? (
-                    <div className="flex items-center gap-1.5">
-                      {/* View PDF */}
-                      <a
-                        href={invoice.downloadUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        title="View PDF"
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
-                      >
-                        <Eye className="w-3 h-3" />
-                        {!isMobile && <span>View</span>}
-                      </a>
-
-                      {/* Download PDF */}
-
-                      <a
-                        href={invoice.downloadUrl}
-                        download
-                        onClick={(e) => e.stopPropagation()}
-                        title="Download PDF"
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
-                      >
-                        <Download className="w-3 h-3" />
-                        {!isMobile && <span>Save</span>}
-                      </a>
-                    </div>
-                  ) : (
-                    /* No PDF yet — offer to generate one */
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        loadJobCard(invoice);
-                        handleSavePDF();
-                      }}
-                      title="Save as PDF"
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
-                    >
-                      <Download className="w-3 h-3" />
-                      {!isMobile && <span>PDF</span>}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  // ── RENDER ────────────────────────────────────────────────────────────────
+/* ─── Scroll helper ─────────────────────────────────────────────────────── */
+const scrollTo = (id) =>
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+/* ─── Mock Invoice UI ───────────────────────────────────────────────────── */
+function MockInvoice() {
   return (
-    <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
-      {/* Print area */}
+    <div
+      style={{
+        background: C.white,
+        borderRadius: 16,
+        boxShadow: "0 32px 80px rgba(13,27,42,0.22)",
+        overflow: "hidden",
+        fontFamily: "'Barlow', sans-serif",
+        border: `1px solid ${C.border}`,
+        maxWidth: 520,
+        width: "100%",
+      }}
+    >
+      {/* Chrome bar */}
       <div
-        id="print-area"
-        className="hidden print:block bg-white"
-        style={{ width: "210mm", minHeight: "297mm" }}
+        style={{
+          background: "#F1F5F9",
+          padding: "10px 16px",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
       >
-        {activeView === "purchase-orders" ? (
-          <div id="po-printable" style={{ position: "relative" }}>
-            <POTemplateRenderer {...poTemplateProps} />
-            <StampOverlay
-              stampConfig={stampConfig}
-              pageNumber={1}
-              businessInfo={businessInfo}
-            />
-          </div>
-        ) : (
-          <div id="invoice-printable" style={{ position: "relative" }}>
-            <TemplateRenderer {...templateProps} />
-            <AllPagesStampOverlay
-              stampConfig={stampConfig}
-              businessInfo={businessInfo}
-            />
-          </div>
-        )}
-        {documentType === "jobcard" && (
-          <div
-            id="jobcard-printable"
+        {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
+          <span
+            key={c}
             style={{
-              pageBreakBefore: "always",
-              breakBefore: "page",
-              padding: "40px 0",
-              boxSizing: "border-box",
-              width: "210mm",
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: c,
+              display: "inline-block",
             }}
-          >
-            <JobCardTemplate
-              jobCardNumber={jobCardNumber}
-              businessInfo={businessInfo}
-              customer={{
-                name: customerName,
-                email: customerEmail,
-                phone: customerPhone,
-                address: customerAddress,
-              }}
-              vehicle={{
-                make: vehicleMake,
-                model: vehicleModel,
-                year: vehicleYear,
-                registration: vehicleReg,
-                vin: vehicleVin,
-                mileage: vehicleMileage,
-              }}
-              technicianName={technicianName}
-              bayNumber={bayNumber}
-              estimatedHours={estimatedHours}
-              faultDescription={faultDescription}
-              diagnosisNotes={diagnosisNotes}
-              workPerformed={workPerformed}
-              items={items}
-              partsChecklist={partsChecklist}
-              customerApproved={customerApproved}
-              subtotal={subtotal}
-              vat={vat}
-              total={total}
-              logoBase64={logoBase64}
-              sourceQuoteNumber={""}
-            />
-          </div>
-        )}
-      </div>
-      {showAIWindow && (
-        <AIInvoiceWindow
-          user={user}
-          businessInfo={businessInfo}
-          documentType={documentType}
-          onExit={() => setShowAIWindow(false)}
-          onNavigateTo={(view) => {
-            setAiWindowOpen(false);
-            setActiveView(view);
-          }}
-          industry="mechanics"
-          TemplateRenderer={TemplateRenderer}
-        />
-      )}
-      <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
-        {/* Sidebar */}
-        <MechanicsSidebar
-          navigate={navigate}
-          user={user}
-          activeView={activeView}
-          setActiveView={setActiveView}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          showSettings={showSettings}
-          setShowSettings={setShowSettings}
-          handleNewInvoice={() => {
-            handleNewInvoice();
-            setActiveView("invoice");
-          }}
-          handleNewQuote={() => {
-            handleNewQuote();
-            setActiveView("invoice");
-          }}
-          handleNewJobCard={() => {
-            handleNewInvoice();
-            setActiveView("invoice");
-          }}
-          businessInfo={businessInfo}
-          savedJobCards={savedJobCards}
-          savedCustomers={savedCustomers}
-          documentType={documentType}
-          showJobCardsList={showJobCardsList}
-          setShowJobCardsList={setShowJobCardsList}
-          showCustomersListModal={showCustomersListModal}
-          setShowCustomersListModal={setShowCustomersListModal}
-          handleAddNewCustomer={handleAddNewCustomer}
-          handleLogout={handleLogout}
-          isMobile={isMobile}
-          logo={logo}
-          newRequestCount={0}
-          isAdmin={isAdmin}
-        />
-
-        {/* Main content */}
-        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          <AppHeader
-            actions={headerActions}
-            mobileActions={mobileDashboardActions}
-            onSettingsOpen={() => setShowSettings(true)}
-            onTeamOpen={() => setShowUserManagement(true)}
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            showConvertButton={
-              documentType === "quote" &&
-              !!jobCardId &&
-              activeView === "invoice"
-            }
-            onConvert={handleConvertToInvoice}
           />
-
-          {/* Modals */}
-          {showSettings && (
-            <BusinessSettingsModal onClose={() => setShowSettings(false)} />
-          )}
-          <CustomersListModal
-            showModal={showCustomersListModal}
-            setShowModal={setShowCustomersListModal}
-            customers={customers}
-            onLoadCustomer={loadCustomer}
-            onEditCustomer={handleEditCustomer}
-            onAddNewCustomer={handleAddNewCustomer}
-          />
-          <CustomerModal
-            showModal={showCustomerModal}
-            setShowModal={setShowCustomerModal}
-            existingCustomer={selectedCustomer}
-            onCustomerSaved={handleCustomerSaved}
-          />
-          {showUserManagement && (
-            <SubUserManagement onClose={() => setShowUserManagement(false)} />
-          )}
-          {showPaymentModal && selectedInvoiceForPayment && (
-            <PaymentProcessor
-              showModal={showPaymentModal}
-              setShowModal={setShowPaymentModal}
-              invoice={selectedInvoiceForPayment}
-              onPaymentComplete={handlePaymentComplete}
-              user={user}
-              businessInfo={businessInfo}
-            />
-          )}
-          {showStampModal && (
-            <StampSignatureModal
-              isOpen={showStampModal}
-              onClose={() => setShowStampModal(false)}
-              onConfirm={handleStampConfirm}
-              previewContent={
-                activeView === "purchase-orders" ? (
-                  <POTemplateRenderer {...poTemplateProps} />
-                ) : (
-                  <TemplateRenderer {...templateProps} />
-                )
-              }
-              businessInfo={businessInfo}
-              existingConfig={stampConfig}
-            />
-          )}
-          {/* All job cards modal */}
-          {showJobCardsList && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[#e2e8f0]">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                  <div>
-                    <h2 className="text-base font-semibold text-[#1e293b]">
-                      All {documentType === "quote" ? "Quotes" : "Invoices"}
-                    </h2>
-                    <p className="text-xs text-[#64748b] mt-0.5">
-                      {savedJobCards.length} records
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setShowJobCardsList(false)}
-                    className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  {savedJobCards.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <Receipt className="w-10 h-10 text-[#cbd5e1] mb-3" />
-                      <p className="text-sm text-[#94a3b8]">No records found</p>
-                    </div>
-                  ) : (
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
-                          {[
-                            "Number",
-                            "Client",
-                            "Vehicle",
-                            "Total",
-                            "Paid",
-                            "Status",
-                            "PDF",
-                            "Delete",
-                          ].map((h) => (
-                            <th
-                              key={h}
-                              className="px-5 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                            >
-                              {h}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {savedJobCards.map((card) => (
-                          <tr
-                            key={card.id}
-                            onClick={() => {
-                              loadJobCard(card);
-                              setShowJobCardsList(false);
-                            }}
-                            className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] cursor-pointer transition-colors"
-                          >
-                            <td className="px-5 py-3 text-sm font-semibold text-[#2563eb]">
-                              {card.jobCardNumber || "N/A"}
-                            </td>
-                            <td className="px-5 py-3 text-sm text-[#374151]">
-                              {card.customer?.name || "N/A"}
-                            </td>
-                            <td className="px-5 py-3 text-sm text-[#374151]">
-                              {[
-                                card.vehicle?.year,
-                                card.vehicle?.make,
-                                card.vehicle?.model,
-                              ]
-                                .filter(Boolean)
-                                .join(" ") || "N/A"}
-                            </td>
-                            <td className="px-5 py-3 text-sm font-semibold text-[#1e293b]">
-                              {formatCurrency(card.totals?.total || 0)}
-                            </td>
-                            <td className="px-5 py-3 text-sm text-[#059669] font-medium">
-                              {formatCurrency(card.totals?.paid || 0)}
-                            </td>
-                            <td
-                              className="px-5 py-3"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {card.documentType === "quote" && (
-                                <button
-                                  onClick={() => {
-                                    loadJobCard(card);
-                                    setDocumentType("jobcard"); // switch type
-                                    setActiveView("invoice"); // reuse the form
-                                  }}
-                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#fed7aa] bg-[#fff7ed] text-[#ea580c] hover:bg-[#ffedd5] text-xs font-semibold transition-all"
-                                >
-                                  <ClipboardList className="w-3 h-3" />
-                                  Job Card
-                                </button>
-                              )}
-                            </td>
-                            <td className="px-5 py-3">
-                              <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${statusBadge(card.status)}`}
-                              >
-                                {card.status === "partially_paid"
-                                  ? "Partial"
-                                  : card.status || "Pending"}
-                              </span>
-                            </td>
-                            <td
-                              className="px-5 py-3"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {card.downloadUrl ? (
-                                <div className="flex items-center gap-1.5">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setPdfViewer({
-                                        url: card.downloadUrl,
-                                        fileName:
-                                          (card.jobCardNumber || card.id) +
-                                          ".pdf",
-                                      });
-                                    }}
-                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#eff6ff] hover:border-[#bfdbfe] text-[#64748b] hover:text-[#2563eb] transition-all text-xs font-semibold"
-                                  >
-                                    <Eye className="w-3 h-3" /> View
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      downloadPDF(
-                                        card.downloadUrl,
-                                        (card.jobCardNumber || card.id) +
-                                          ".pdf",
-                                      );
-                                    }}
-                                    className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#64748b] hover:text-[#059669] transition-all text-xs font-semibold"
-                                  >
-                                    <Download className="w-3 h-3" /> Save
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => {
-                                    loadJobCard(card);
-                                    setShowJobCardsList(false);
-                                    handleSavePDF();
-                                  }}
-                                  title="Generate PDF"
-                                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-[#f8fafc] hover:bg-[#f0fdf4] hover:border-[#bbf7d0] text-[#94a3b8] hover:text-[#059669] transition-all text-xs font-semibold"
-                                >
-                                  <Download className="w-3 h-3" />
-                                  PDF
-                                </button>
-                              )}
-                            </td>
-                            <td
-                              className="px-5 py-3"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                onClick={(e) => handleDeleteJobCard(e, card.id)}
-                                title="Delete"
-                                className="flex items-center gap-1 px-2 py-1.5 rounded-lg border border-[#fee2e2] bg-[#fef2f2] hover:bg-[#fee2e2] text-[#dc2626] transition-all text-xs font-semibold"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── Invoice Preview Modal (fullscreen, for header Preview button) ── */}
-          {showPreview && (
-            <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
-              <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc] flex-shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 bg-[#0f172a] rounded-lg flex items-center justify-center">
-                      <Eye className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-sm font-semibold text-[#1e293b]">
-                        {documentType === "quote" ? "Quote" : "Invoice"} Preview
-                      </h2>
-                      <p className="text-xs text-[#64748b]">
-                        {jobCardNumber || "Draft"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handlePrint}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-medium rounded-lg transition-colors"
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                      Print
-                    </button>
-                    <button
-                      onClick={handleSavePDF}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-medium rounded-lg transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Save PDF
-                    </button>
-                    <button
-                      onClick={() => setShowPreview(false)}
-                      className="p-1.5 text-[#64748b] hover:text-[#1e293b] hover:bg-[#e2e8f0] rounded-lg transition-all"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
-                  <div
-                    className="mx-auto bg-white shadow-xl"
-                    style={{
-                      position: "relative",
-                      width: "210mm",
-                      minHeight: "297mm",
-                    }}
-                  >
-                    <TemplateRenderer {...templateProps} />
-                    <AllPagesStampOverlay
-                      stampConfig={stampConfig}
-                      businessInfo={businessInfo}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          {showStampPaywall && (
-            <StampPaywallModal
-              isOpen={showStampPaywall}
-              onClose={() => setShowStampPaywall(false)}
-              onUnlock={handleUnlockStamp}
-              price="R99"
-              title="You've used all 5 free stamps"
-              subtitle="Unlock unlimited stamping to keep going."
-            />
-          )}
-          {/* ── Views ──────────────────────────────────────────────────────── */}
-          {activeView === "home" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <DashboardQuickActions
-                onNewInvoice={() => {
-                  handleNewInvoice();
-                  setActiveView("invoice");
-                }}
-                onNewQuote={() => {
-                  handleNewQuote();
-                  setActiveView("invoice");
-                }}
-                onAddCustomer={handleAddNewCustomer}
-                goTo={setActiveView}
-                savedJobCardsCount={savedJobCards.length}
-                savedCustomersCount={savedCustomers.length}
-              />
-              <HomeView
-                user={user}
-                onNavigate={(view, docType) => {
-                  if (docType) setDocumentType(docType);
-                  setActiveView(view);
-                }}
-                onGoToDashboard={() => setActiveView("quote")}
-                onSidebarToggle={() => setSidebarOpen((p) => !p)}
-                sidebarOpen={sidebarOpen}
-              />
-            </div>
-          )}
-          {activeView === "financial-overview" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <FinancialOverview user={user} />
-            </div>
-          )}
-          {activeView === "parts-inventory" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <PartsInventory user={user} />
-            </div>
-          )}
-          {activeView === "history-view" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HistoryView user={user} />
-            </div>
-          )}
-          {activeView === "notes-view" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <NotesView user={user} />
-            </div>
-          )}
-          {activeView === "vehicles" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <Vehicles user={user} />
-            </div>
-          )}
-          {activeView === "templates" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <Templates user={user} />
-            </div>
-          )}
-          {activeView === "letterheads" && <LetterheadEditor user={user} />}
-          {activeView === "marketplace" && (
-            <div className="flex-1 overflow-y-auto p-6">
-              <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-            </div>
-          )}
-
-          {activeView === "incoming-requests" && (
-            <div className="flex-1 overflow-y-auto p-6">
-              <ServiceRequestsView user={user} businessInfo={businessInfo} />
-            </div>
-          )}
-          {activeView === "reports" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <ReportsView user={user} />
-            </div>
-          )}
-          {/* ── Invoice / Job Card Builder — split layout ──────────────────── */}
-          {(activeView === "invoice" || activeView === "purchase-orders") && (
-            <div className="flex-1 overflow-hidden flex min-h-0">
-              {/* ── LEFT: Form panel ───────────────────────────────────────── */}
-              <div
-                className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}
-              >
-                <div className="space-y-5">
-                  {/* Summary stat cards */}
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      {
-                        label: "Total Amount",
-                        value: `R${total.toFixed(2)}`,
-                        icon: Receipt,
-                        iconBg: "bg-[#eff6ff]",
-                        iconColor: "text-[#2563eb]",
-                        textColor: "text-[#1e293b]",
-                      },
-                      {
-                        label: "Paid",
-                        value: `R${paymentStatus.totalPaid.toFixed(2)}`,
-                        icon: CheckSquare,
-                        iconBg:
-                          paymentStatus.totalPaid > 0
-                            ? "bg-[#dcfce7]"
-                            : "bg-[#f1f5f9]",
-                        iconColor:
-                          paymentStatus.totalPaid > 0
-                            ? "text-[#059669]"
-                            : "text-[#94a3b8]",
-                        textColor:
-                          paymentStatus.totalPaid > 0
-                            ? "text-[#059669]"
-                            : "text-[#1e293b]",
-                      },
-                      {
-                        label: "Balance Due",
-                        value: `R${paymentStatus.balanceDue.toFixed(2)}`,
-                        icon: Wallet,
-                        iconBg:
-                          paymentStatus.balanceDue <= 0
-                            ? "bg-[#dcfce7]"
-                            : "bg-[#fef2f2]",
-                        iconColor:
-                          paymentStatus.balanceDue <= 0
-                            ? "text-[#059669]"
-                            : "text-[#dc2626]",
-                        textColor:
-                          paymentStatus.balanceDue <= 0
-                            ? "text-[#059669]"
-                            : "text-[#dc2626]",
-                      },
-                    ].map(
-                      ({
-                        label,
-                        value,
-                        icon: Icon,
-                        iconBg,
-                        iconColor,
-                        textColor,
-                      }) => (
-                        <div
-                          key={label}
-                          className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
-                              {label}
-                            </span>
-                            <div
-                              className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center`}
-                            >
-                              <Icon className={`w-4 h-4 ${iconColor}`} />
-                            </div>
-                          </div>
-                          <div className={`text-xl font-bold ${textColor}`}>
-                            {value}
-                          </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-
-                  {/* Payment status banner */}
-                  {jobCardId && (
-                    <div
-                      className={`px-5 py-3.5 rounded-xl border flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-[#f0fdf4] border-[#bbf7d0]" : paymentStatus.status === "partially_paid" ? "bg-[#fffbeb] border-[#fde68a]" : "bg-[#fff7ed] border-[#fed7aa]"}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${paymentStatus.status === "paid" ? "bg-[#dcfce7]" : paymentStatus.status === "partially_paid" ? "bg-[#fef3c7]" : "bg-[#ffedd5]"}`}
-                        >
-                          <CreditCard
-                            className={`w-4 h-4 ${paymentStatus.status === "paid" ? "text-[#059669]" : paymentStatus.status === "partially_paid" ? "text-[#d97706]" : "text-[#ea580c]"}`}
-                          />
-                        </div>
-                        <div
-                          className={`text-sm font-semibold ${paymentStatus.status === "paid" ? "text-[#166534]" : paymentStatus.status === "partially_paid" ? "text-[#92400e]" : "text-[#9a3412]"}`}
-                        >
-                          {paymentStatus.status === "paid"
-                            ? "Invoice Fully Paid"
-                            : paymentStatus.status === "partially_paid"
-                              ? `R${paymentStatus.totalPaid.toFixed(2)} paid · R${paymentStatus.balanceDue.toFixed(2)} remaining`
-                              : `Payment Pending — R${paymentStatus.balanceDue.toFixed(2)} due`}
-                        </div>
-                      </div>
-                      {paymentStatus.status !== "paid" && (
-                        <button
-                          onClick={handleProcessPayment}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#f8fafc] transition-colors shadow-sm"
-                        >
-                          <CreditCard className="w-4 h-4" />
-                          Record Payment
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Main card */}
-                  <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm overflow-hidden">
-                    {/* Input mode tabs */}
-                    <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc]">
-                      <button
-                        onClick={() => setShowAIWindow(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all ml-auto mr-3 my-auto
-    bg-gradient-to-r from-[#7c3aed] to-[#5b21b6]
-    text-white shadow-md shadow-[#7c3aed]/30
-    hover:shadow-lg hover:shadow-[#7c3aed]/40 hover:scale-[1.02]
-    active:scale-[0.98]"
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        AI Mode
-                      </button>
-                    </div>
-
-                    {inputMode === "manual" && (
-                      <>
-                        {/* Step indicator */}
-                        <div className="px-6 py-4 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                          <div className="flex items-center gap-0">
-                            {steps.map((step, idx) => (
-                              <React.Fragment key={step.number}>
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${currentStep === step.number ? "bg-[#2563eb] text-white" : currentStep > step.number ? "bg-[#dcfce7] text-[#059669] ring-1 ring-[#059669]" : "bg-[#e2e8f0] text-[#94a3b8]"}`}
-                                  >
-                                    {currentStep > step.number
-                                      ? "✓"
-                                      : step.number}
-                                  </div>
-                                  <span
-                                    className={`text-xs font-medium hidden sm:block ${currentStep === step.number ? "text-[#2563eb]" : currentStep > step.number ? "text-[#059669]" : "text-[#94a3b8]"}`}
-                                  >
-                                    {step.title}
-                                  </span>
-                                </div>
-                                {idx < steps.length - 1 && (
-                                  <div
-                                    className={`flex-1 h-px mx-2 ${currentStep > step.number ? "bg-[#059669]" : "bg-[#e2e8f0]"}`}
-                                  />
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Step content */}
-                        <div
-                          onInput={() => setIsDirty(true)}
-                          onChange={() => setIsDirty(true)}
-                        >
-                          {activeView === "purchase-orders" ? (
-                            <>
-                              {/* PO Step 1 – Supplier */}
-                              {currentStep === 1 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#eff6ff] rounded-lg flex items-center justify-center">
-                                      <Truck className="w-5 h-5 text-[#2563eb]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Supplier Details
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Vendor information for this purchase
-                                        order
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {[
-                                      {
-                                        label: "Supplier Name",
-                                        value: supplierName,
-                                        set: setSupplierName,
-                                        placeholder: "ABC Parts Supplier",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Contact Person",
-                                        value: supplierContact,
-                                        set: setSupplierContact,
-                                        placeholder: "John Doe",
-                                      },
-                                      {
-                                        label: "Email",
-                                        value: supplierEmail,
-                                        set: setSupplierEmail,
-                                        placeholder: "supplier@example.com",
-                                        type: "email",
-                                      },
-                                      {
-                                        label: "Phone",
-                                        value: supplierPhone,
-                                        set: setSupplierPhone,
-                                        placeholder: "011 123 4567",
-                                        type: "tel",
-                                      },
-                                    ].map(
-                                      ({
-                                        label,
-                                        value,
-                                        set,
-                                        placeholder,
-                                        type = "text",
-                                        required,
-                                      }) => (
-                                        <div key={label}>
-                                          <label className={labelCls}>
-                                            {label}{" "}
-                                            {required && (
-                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                                *
-                                              </span>
-                                            )}
-                                          </label>
-                                          <input
-                                            type={type}
-                                            value={value}
-                                            onChange={(e) =>
-                                              set(e.target.value)
-                                            }
-                                            placeholder={placeholder}
-                                            className={inputCls}
-                                          />
-                                        </div>
-                                      ),
-                                    )}
-                                    <div className="col-span-1 sm:col-span-2">
-                                      <label className={labelCls}>
-                                        Supplier Address
-                                      </label>
-                                      <input
-                                        type="text"
-                                        value={supplierAddress}
-                                        onChange={(e) =>
-                                          setSupplierAddress(e.target.value)
-                                        }
-                                        placeholder="Street address, City, Postal Code"
-                                        className={inputCls}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* PO Step 2 – Delivery */}
-                              {currentStep === 2 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
-                                      <MapPin className="w-5 h-5 text-[#059669]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Delivery Details
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Where and when to deliver
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {[
-                                      {
-                                        label: "Deliver To (Name)",
-                                        value: deliveryName,
-                                        set: setDeliveryName,
-                                        placeholder: "Workshop / Company name",
-                                      },
-                                      {
-                                        label: "P.O. Number",
-                                        value: poNumber,
-                                        set: setPoNumber,
-                                        placeholder: "PO-2026-0001",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "P.O. Date",
-                                        value: poDate,
-                                        set: setPoDate,
-                                        placeholder: "DD/MM/YYYY",
-                                        type: "date",
-                                      },
-                                      {
-                                        label: "Delivery Date",
-                                        value: deliveryDate,
-                                        set: setDeliveryDate,
-                                        placeholder: "DD/MM/YYYY",
-                                        type: "date",
-                                      },
-                                      {
-                                        label: "Payment Terms",
-                                        value: paymentTerms,
-                                        set: setPaymentTerms,
-                                        placeholder: "30 Days",
-                                      },
-                                      {
-                                        label: "Shipping Method",
-                                        value: shippingMethod,
-                                        set: setShippingMethod,
-                                        placeholder: "Courier / Collection",
-                                      },
-                                    ].map(
-                                      ({
-                                        label,
-                                        value,
-                                        set,
-                                        placeholder,
-                                        type = "text",
-                                        required,
-                                      }) => (
-                                        <div key={label}>
-                                          <label className={labelCls}>
-                                            {label}{" "}
-                                            {required && (
-                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                                *
-                                              </span>
-                                            )}
-                                          </label>
-                                          <input
-                                            type={type}
-                                            value={value}
-                                            onChange={(e) =>
-                                              set(e.target.value)
-                                            }
-                                            placeholder={placeholder}
-                                            className={inputCls}
-                                          />
-                                        </div>
-                                      ),
-                                    )}
-                                    <div className="col-span-1 sm:col-span-2">
-                                      <label className={labelCls}>
-                                        Delivery Address
-                                      </label>
-                                      <input
-                                        type="text"
-                                        value={deliveryAddress}
-                                        onChange={(e) =>
-                                          setDeliveryAddress(e.target.value)
-                                        }
-                                        placeholder="Delivery address"
-                                        className={inputCls}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="mt-4 p-3.5 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg">
-                                    <button
-                                      onClick={() => {
-                                        setDeliveryName(
-                                          businessInfo.businessName,
-                                        );
-                                        setDeliveryAddress(
-                                          businessInfo.addressLine1,
-                                        );
-                                      }}
-                                      className="flex items-center gap-2 text-[#2563eb] hover:text-[#1d4ed8] text-sm font-medium transition-colors"
-                                    >
-                                      <Building2 className="w-4 h-4" />
-                                      Use My Business Address
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* PO Step 3 – Items */}
-                              {currentStep === 3 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#f8fafc] rounded-lg flex items-center justify-center">
-                                      <Package className="w-5 h-5 text-[#475569]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Order Items
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Add parts and items to order
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  {/* Add PO item form */}
-                                  <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
-                                    <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
-                                      <Plus className="w-4 h-4 text-[#2563eb]" />{" "}
-                                      Add Item
-                                    </h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
-                                      <div className="sm:col-span-2">
-                                        <label className={labelCls}>
-                                          Description
-                                        </label>
-                                        <input
-                                          type="text"
-                                          placeholder="Part / item name"
-                                          value={newPoItem.description}
-                                          onChange={(e) =>
-                                            setNewPoItem({
-                                              ...newPoItem,
-                                              description: e.target.value,
-                                            })
-                                          }
-                                          className={inputCls}
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className={labelCls}>Qty</label>
-                                        <input
-                                          type="number"
-                                          placeholder="1"
-                                          value={newPoItem.qty}
-                                          onChange={(e) =>
-                                            setNewPoItem({
-                                              ...newPoItem,
-                                              qty: e.target.value,
-                                            })
-                                          }
-                                          className={inputCls}
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className={labelCls}>Unit</label>
-                                        <select
-                                          value={newPoItem.unit}
-                                          onChange={(e) =>
-                                            setNewPoItem({
-                                              ...newPoItem,
-                                              unit: e.target.value,
-                                            })
-                                          }
-                                          className={selectCls}
-                                        >
-                                          <option value="ea">ea</option>
-                                          <option value="set">set</option>
-                                          <option value="ltr">ltr</option>
-                                          <option value="kg">kg</option>
-                                          <option value="m">m</option>
-                                        </select>
-                                      </div>
-                                      <div>
-                                        <label className={labelCls}>
-                                          Unit Price
-                                        </label>
-                                        <input
-                                          type="number"
-                                          placeholder="0.00"
-                                          value={newPoItem.unitPrice}
-                                          onChange={(e) =>
-                                            setNewPoItem({
-                                              ...newPoItem,
-                                              unitPrice: e.target.value,
-                                            })
-                                          }
-                                          className={inputCls}
-                                        />
-                                      </div>
-                                    </div>
-                                    <button
-                                      onClick={handleAddPoItem}
-                                      className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
-                                    >
-                                      <Plus className="w-4 h-4" /> Add Item
-                                    </button>
-                                  </div>
-
-                                  {/* PO items table */}
-                                  {poItems.filter((i) => i.description).length >
-                                  0 ? (
-                                    <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
-                                      <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
-                                        <span className="text-sm font-semibold text-[#374151]">
-                                          Order Items
-                                        </span>
-                                        <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
-                                          {
-                                            poItems.filter((i) => i.description)
-                                              .length
-                                          }{" "}
-                                          items
-                                        </span>
-                                      </div>
-                                      <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                          <thead>
-                                            <tr className="border-b border-[#e2e8f0]">
-                                              {[
-                                                "Description",
-                                                "Qty",
-                                                "Unit",
-                                                "Unit Price",
-                                                "Amount",
-                                                "",
-                                              ].map((h) => (
-                                                <th
-                                                  key={h}
-                                                  className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                                                >
-                                                  {h}
-                                                </th>
-                                              ))}
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                            {items.map((item, index) => (
-                                              <tr
-                                                key={index}
-                                                className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
-                                              >
-                                                {/* Type */}
-                                                <td className="px-4 py-2">
-                                                  <select
-                                                    value={item.type}
-                                                    onChange={(e) =>
-                                                      handleUpdateItem(
-                                                        index,
-                                                        "type",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="text-xs font-semibold rounded px-2 py-1 border border-[#e2e8f0] focus:outline-none focus:ring-1 focus:ring-[#2563eb] cursor-pointer
-            bg-[#eff6ff] text-[#1d4ed8]"
-                                                    style={{
-                                                      background:
-                                                        item.type === "Labor"
-                                                          ? "#eff6ff"
-                                                          : "#f0fdf4",
-                                                      color:
-                                                        item.type === "Labor"
-                                                          ? "#1d4ed8"
-                                                          : "#166534",
-                                                    }}
-                                                  >
-                                                    <option value="Labor">
-                                                      Labor
-                                                    </option>
-                                                    <option value="Parts">
-                                                      Parts
-                                                    </option>
-                                                  </select>
-                                                </td>
-
-                                                {/* Description */}
-                                                <td className="px-4 py-2">
-                                                  <input
-                                                    type="text"
-                                                    value={item.description}
-                                                    onChange={(e) =>
-                                                      handleUpdateItem(
-                                                        index,
-                                                        "description",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full text-sm font-medium text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors min-w-[140px]"
-                                                  />
-                                                </td>
-
-                                                {/* Rate */}
-                                                <td className="px-4 py-2">
-                                                  <div className="flex items-center gap-0.5">
-                                                    <span className="text-xs text-[#94a3b8]">
-                                                      R
-                                                    </span>
-                                                    <input
-                                                      type="number"
-                                                      value={item.rate}
-                                                      onChange={(e) =>
-                                                        handleUpdateItem(
-                                                          index,
-                                                          "rate",
-                                                          Number(
-                                                            e.target.value,
-                                                          ),
-                                                        )
-                                                      }
-                                                      className="w-20 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
-                                                      min="0"
-                                                      step="0.01"
-                                                    />
-                                                  </div>
-                                                </td>
-
-                                                {/* Qty */}
-                                                <td className="px-4 py-2">
-                                                  <input
-                                                    type="number"
-                                                    value={item.qty}
-                                                    onChange={(e) =>
-                                                      handleUpdateItem(
-                                                        index,
-                                                        "qty",
-                                                        Number(e.target.value),
-                                                      )
-                                                    }
-                                                    className="w-14 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
-                                                    min="1"
-                                                    step="1"
-                                                  />
-                                                </td>
-
-                                                {/* Amount — auto-calculated, read-only */}
-                                                <td className="px-4 py-3 text-sm font-semibold text-[#1e293b] whitespace-nowrap">
-                                                  R
-                                                  {(
-                                                    Number(item.rate) *
-                                                    Number(item.qty)
-                                                  ).toFixed(2)}
-                                                </td>
-
-                                                {/* Delete */}
-                                                <td className="px-4 py-3">
-                                                  <button
-                                                    onClick={() =>
-                                                      handleRemoveItem(index)
-                                                    }
-                                                    className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
-                                                  >
-                                                    <X className="w-3.5 h-3.5" />
-                                                  </button>
-                                                </td>
-                                              </tr>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                      </div>
-                                      {/* PO Totals */}
-                                      <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-                                        <div className="flex flex-col items-end gap-1 text-sm">
-                                          <div className="flex justify-between w-44 text-[#64748b]">
-                                            <span>Subtotal</span>
-                                            <span className="font-medium text-[#374151]">
-                                              R{poSubtotal.toFixed(2)}
-                                            </span>
-                                          </div>
-                                          <div className="flex justify-between w-44 text-[#64748b]">
-                                            <span>VAT (15%)</span>
-                                            <span className="font-medium text-[#374151]">
-                                              R{poVat.toFixed(2)}
-                                            </span>
-                                          </div>
-                                          <div className="flex justify-between w-44 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
-                                            <span>Total</span>
-                                            <span className="text-[#2563eb]">
-                                              R{poTotal.toFixed(2)}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
-                                      <Package className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
-                                      <p className="text-sm font-medium text-[#94a3b8]">
-                                        No items added yet
-                                      </p>
-                                      <p className="text-xs text-[#cbd5e1] mt-1">
-                                        Use the form above to add order items
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* PO Step 4 – Summary */}
-                              {currentStep === 4 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
-                                      <FileText className="w-5 h-5 text-[#7c3aed]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Order Summary
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Review and add notes
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
-                                    <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                                      <span className="text-sm font-semibold text-[#374151]">
-                                        Order Overview
-                                      </span>
-                                    </div>
-                                    <div className="divide-y divide-[#f1f5f9]">
-                                      {[
-                                        ["P.O. Number", poNumber || "Not set"],
-                                        ["Supplier", supplierName || "Not set"],
-                                        [
-                                          "Delivery Date",
-                                          deliveryDate || "TBD",
-                                        ],
-                                        ["Payment Terms", paymentTerms],
-                                        [
-                                          "Items",
-                                          `${poItems.filter((i) => i.description).length} items`,
-                                        ],
-                                        [
-                                          "Order Total",
-                                          `R${poTotal.toFixed(2)}`,
-                                        ],
-                                      ].map(([k, v]) => (
-                                        <div
-                                          key={k}
-                                          className="flex items-center justify-between px-5 py-3 text-sm"
-                                        >
-                                          <span className="text-[#64748b]">
-                                            {k}
-                                          </span>
-                                          <span
-                                            className={`font-semibold ${k === "Order Total" ? "text-[#2563eb]" : "text-[#1e293b]"}`}
-                                          >
-                                            {v}
-                                          </span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  <div>
-                                    <label className={labelCls}>
-                                      Notes / Special Instructions
-                                    </label>
-                                    <textarea
-                                      value={notes}
-                                      onChange={(e) => setNotes(e.target.value)}
-                                      placeholder="Any special delivery instructions or notes..."
-                                      rows={4}
-                                      className={`${inputCls} resize-none`}
-                                    />
-                                  </div>
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              {/* Step 1 – Invoice To */}
-                              {currentStep === 1 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#eff6ff] rounded-lg flex items-center justify-center">
-                                      <Users className="w-5 h-5 text-[#2563eb]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Invoice To
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Client details for this job card
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {[
-                                      {
-                                        label: "Customer Name",
-                                        value: customerName,
-                                        set: setCustomerName,
-                                        placeholder: "Enter customer name",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Customer ID",
-                                        value: merchant_code,
-                                        set: setCustomerId,
-                                        placeholder: "Customer ID",
-                                      },
-                                      {
-                                        label: "Email",
-                                        value: customerEmail,
-                                        set: setCustomerEmail,
-                                        type: "email",
-                                        placeholder: "email@example.com",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Phone",
-                                        value: customerPhone,
-                                        set: setCustomerPhone,
-                                        type: "tel",
-                                        placeholder: "082 123 4567",
-                                        required: true,
-                                      },
-                                    ].map(
-                                      ({
-                                        label,
-                                        value,
-                                        set,
-                                        placeholder,
-                                        type = "text",
-                                        required,
-                                      }) => (
-                                        <div key={label}>
-                                          <label className={labelCls}>
-                                            {label}{" "}
-                                            {required && (
-                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                                *
-                                              </span>
-                                            )}
-                                          </label>
-                                          <input
-                                            type={type}
-                                            value={value}
-                                            onChange={(e) =>
-                                              set(e.target.value)
-                                            }
-                                            placeholder={placeholder}
-                                            className={inputCls}
-                                          />
-                                        </div>
-                                      ),
-                                    )}
-                                    <div className="col-span-1 sm:col-span-2">
-                                      <label className={labelCls}>
-                                        Address{" "}
-                                        <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                          *
-                                        </span>
-                                      </label>
-                                      <input
-                                        type="text"
-                                        value={customerAddress}
-                                        onChange={(e) =>
-                                          setCustomerAddress(e.target.value)
-                                        }
-                                        placeholder="Street address, City, Postal Code"
-                                        className={inputCls}
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Step 2 – Bill To */}
-                              {currentStep === 2 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
-                                      <FileText className="w-5 h-5 text-[#059669]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Bill To
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Billing contact (may differ from client)
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {[
-                                      {
-                                        label: "Billing Name",
-                                        value: billName,
-                                        set: setBillName,
-                                        placeholder: "Billing contact name",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Email",
-                                        value: billEmail,
-                                        set: setBillEmail,
-                                        placeholder: "billing@example.com",
-                                        type: "email",
-                                      },
-                                      {
-                                        label: "Phone",
-                                        value: billPhone,
-                                        set: setBillPhone,
-                                        placeholder: "082 123 4567",
-                                        type: "tel",
-                                      },
-                                    ].map(
-                                      ({
-                                        label,
-                                        value,
-                                        set,
-                                        placeholder,
-                                        type = "text",
-                                        required,
-                                      }) => (
-                                        <div key={label}>
-                                          <label className={labelCls}>
-                                            {label}{" "}
-                                            {required && (
-                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                                *
-                                              </span>
-                                            )}
-                                          </label>
-                                          <input
-                                            type={type}
-                                            value={value}
-                                            onChange={(e) =>
-                                              set(e.target.value)
-                                            }
-                                            placeholder={placeholder}
-                                            className={inputCls}
-                                          />
-                                        </div>
-                                      ),
-                                    )}
-                                    <div className="col-span-1 sm:col-span-2">
-                                      <label className={labelCls}>
-                                        Billing Address
-                                      </label>
-                                      <input
-                                        type="text"
-                                        value={billAddress}
-                                        onChange={(e) =>
-                                          setBillAddress(e.target.value)
-                                        }
-                                        placeholder="Billing address if different"
-                                        className={inputCls}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="mt-4 p-3.5 bg-[#eff6ff] border border-[#bfdbfe] rounded-lg">
-                                    <button
-                                      onClick={() => {
-                                        setBillName(customerName);
-                                        setBillEmail(customerEmail);
-                                        setBillPhone(customerPhone);
-                                        setBillAddress(customerAddress);
-                                      }}
-                                      className="flex items-center gap-2 text-[#2563eb] hover:text-[#1d4ed8] text-sm font-medium transition-colors"
-                                    >
-                                      <Users className="w-4 h-4" />
-                                      Copy from Client Information
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Step 3 – Vehicle */}
-                              {currentStep === 3 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#f0f9ff] rounded-lg flex items-center justify-center">
-                                      <Car className="w-5 h-5 text-[#0284c7]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Vehicle Information
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Enter vehicle details and authorization
-                                        codes
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {[
-                                      {
-                                        label: "Make",
-                                        value: vehicleMake,
-                                        set: setVehicleMake,
-                                        placeholder: "Toyota",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Model",
-                                        value: vehicleModel,
-                                        set: setVehicleModel,
-                                        placeholder: "Hilux",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Year",
-                                        value: vehicleYear,
-                                        set: setVehicleYear,
-                                        placeholder: "2020",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Registration",
-                                        value: vehicleReg,
-                                        set: setVehicleReg,
-                                        placeholder: "ABC 123 GP",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "VIN",
-                                        value: vehicleVin,
-                                        set: setVehicleVin,
-                                        placeholder: "1HGBH41JXMN109186",
-                                      },
-                                      {
-                                        label: "Mileage (km)",
-                                        value: vehicleMileage,
-                                        set: setVehicleMileage,
-                                        placeholder: "45000",
-                                        required: true,
-                                      },
-                                      {
-                                        label: "Pre Auth",
-                                        value: preAuth,
-                                        set: setPreAuth,
-                                        placeholder: "AUTH123",
-                                      },
-                                      {
-                                        label: "Auth Code",
-                                        value: authCode,
-                                        set: setAuthCode,
-                                        placeholder: "456789",
-                                      },
-                                    ].map(
-                                      ({
-                                        label,
-                                        value,
-                                        set,
-                                        placeholder,
-                                        required,
-                                      }) => (
-                                        <div key={label}>
-                                          <label className={labelCls}>
-                                            {label}{" "}
-                                            {required && (
-                                              <span className="text-[#dc2626] normal-case tracking-normal font-normal">
-                                                *
-                                              </span>
-                                            )}
-                                          </label>
-                                          <input
-                                            type="text"
-                                            value={value}
-                                            onChange={(e) =>
-                                              set(e.target.value)
-                                            }
-                                            placeholder={placeholder}
-                                            className={inputCls}
-                                          />
-                                        </div>
-                                      ),
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Step 4 – Services & Parts */}
-                              {currentStep === 4 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#f8fafc] rounded-lg flex items-center justify-center">
-                                      <Wrench className="w-5 h-5 text-[#475569]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Services & Parts
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Add services and parts to the invoice
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  {/* Add item form */}
-                                  <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
-                                    <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
-                                      <Plus className="w-4 h-4 text-[#2563eb]" />
-                                      Add New Item
-                                    </h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                                      <div>
-                                        <label className={labelCls}>Type</label>
-                                        <select
-                                          value={newItem.type}
-                                          onChange={(e) =>
-                                            setNewItem({
-                                              ...newItem,
-                                              type: e.target.value,
-                                            })
-                                          }
-                                          className={selectCls}
-                                        >
-                                          <option value="Labor">Labor</option>
-                                          <option value="Parts">Parts</option>
-                                        </select>
-                                      </div>
-                                      <div className="sm:col-span-2">
-                                        <label className={labelCls}>
-                                          Description
-                                        </label>
-                                        <input
-                                          type="text"
-                                          placeholder="Work description"
-                                          value={newItem.description}
-                                          onChange={(e) =>
-                                            setNewItem({
-                                              ...newItem,
-                                              description: e.target.value,
-                                            })
-                                          }
-                                          className={inputCls}
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className={labelCls}>
-                                          Rate (R)
-                                        </label>
-                                        <input
-                                          type="number"
-                                          placeholder="0.00"
-                                          value={newItem.rate}
-                                          onChange={(e) =>
-                                            setNewItem({
-                                              ...newItem,
-                                              rate: e.target.value,
-                                            })
-                                          }
-                                          className={inputCls}
-                                        />
-                                      </div>
-                                      <div>
-                                        <label className={labelCls}>Qty</label>
-                                        <input
-                                          type="number"
-                                          placeholder="1"
-                                          value={newItem.qty}
-                                          onChange={(e) =>
-                                            setNewItem({
-                                              ...newItem,
-                                              qty: e.target.value,
-                                            })
-                                          }
-                                          className={inputCls}
-                                        />
-                                      </div>
-                                    </div>
-                                    <button
-                                      onClick={handleAddItem}
-                                      className="mt-3 flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-md transition-colors"
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                      Add Item
-                                    </button>
-                                  </div>
-
-                                  {/* Items table */}
-                                  {items.length > 0 ? (
-                                    <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
-                                      <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
-                                        <span className="text-sm font-semibold text-[#374151]">
-                                          Line Items
-                                        </span>
-                                        <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
-                                          {items.length} items
-                                        </span>
-                                      </div>
-                                      <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                          <thead>
-                                            <tr className="border-b border-[#e2e8f0]">
-                                              {[
-                                                "Type",
-                                                "Description",
-                                                "Rate",
-                                                "Qty",
-                                                "Amount",
-                                                "",
-                                              ].map((h) => (
-                                                <th
-                                                  key={h}
-                                                  className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wide"
-                                                >
-                                                  {h}
-                                                </th>
-                                              ))}
-                                            </tr>
-                                          </thead>
-                                          <tbody>
-                                            {items.map((item, index) => (
-                                              <tr
-                                                key={index}
-                                                className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
-                                              >
-                                                {/* Type */}
-                                                <td className="px-4 py-2">
-                                                  <select
-                                                    value={item.type}
-                                                    onChange={(e) =>
-                                                      handleUpdateItem(
-                                                        index,
-                                                        "type",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="text-xs font-semibold rounded px-2 py-1 border border-[#e2e8f0] focus:outline-none focus:ring-1 focus:ring-[#2563eb] cursor-pointer
-            bg-[#eff6ff] text-[#1d4ed8]"
-                                                    style={{
-                                                      background:
-                                                        item.type === "Labor"
-                                                          ? "#eff6ff"
-                                                          : "#f0fdf4",
-                                                      color:
-                                                        item.type === "Labor"
-                                                          ? "#1d4ed8"
-                                                          : "#166534",
-                                                    }}
-                                                  >
-                                                    <option value="Labor">
-                                                      Labor
-                                                    </option>
-                                                    <option value="Parts">
-                                                      Parts
-                                                    </option>
-                                                  </select>
-                                                </td>
-
-                                                {/* Description */}
-                                                <td className="px-4 py-2">
-                                                  <input
-                                                    type="text"
-                                                    value={item.description}
-                                                    onChange={(e) =>
-                                                      handleUpdateItem(
-                                                        index,
-                                                        "description",
-                                                        e.target.value,
-                                                      )
-                                                    }
-                                                    className="w-full text-sm font-medium text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors min-w-[140px]"
-                                                  />
-                                                </td>
-
-                                                {/* Rate */}
-                                                <td className="px-4 py-2">
-                                                  <div className="flex items-center gap-0.5">
-                                                    <span className="text-xs text-[#94a3b8]">
-                                                      R
-                                                    </span>
-                                                    <input
-                                                      type="number"
-                                                      value={item.rate}
-                                                      onChange={(e) =>
-                                                        handleUpdateItem(
-                                                          index,
-                                                          "rate",
-                                                          Number(
-                                                            e.target.value,
-                                                          ),
-                                                        )
-                                                      }
-                                                      className="w-20 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
-                                                      min="0"
-                                                      step="0.01"
-                                                    />
-                                                  </div>
-                                                </td>
-
-                                                {/* Qty */}
-                                                <td className="px-4 py-2">
-                                                  <input
-                                                    type="number"
-                                                    value={item.qty}
-                                                    onChange={(e) =>
-                                                      handleUpdateItem(
-                                                        index,
-                                                        "qty",
-                                                        Number(e.target.value),
-                                                      )
-                                                    }
-                                                    className="w-14 text-sm text-[#374151] bg-transparent border border-transparent hover:border-[#e2e8f0] focus:border-[#2563eb] focus:outline-none focus:ring-1 focus:ring-[#2563eb] rounded px-2 py-1 transition-colors"
-                                                    min="1"
-                                                    step="1"
-                                                  />
-                                                </td>
-
-                                                {/* Amount — auto-calculated, read-only */}
-                                                <td className="px-4 py-3 text-sm font-semibold text-[#1e293b] whitespace-nowrap">
-                                                  R
-                                                  {(
-                                                    Number(item.rate) *
-                                                    Number(item.qty)
-                                                  ).toFixed(2)}
-                                                </td>
-
-                                                {/* Delete */}
-                                                <td className="px-4 py-3">
-                                                  <button
-                                                    onClick={() =>
-                                                      handleRemoveItem(index)
-                                                    }
-                                                    className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-all"
-                                                  >
-                                                    <X className="w-3.5 h-3.5" />
-                                                  </button>
-                                                </td>
-                                              </tr>
-                                            ))}
-                                          </tbody>
-                                        </table>
-                                      </div>
-                                      {/* Totals footer */}
-                                      {/* Totals footer */}
-                                      <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-                                        <div className="flex flex-col items-end gap-1 text-sm">
-                                          <div className="flex justify-between w-52 text-[#64748b]">
-                                            <span>Subtotal</span>
-                                            <span className="font-medium text-[#374151]">
-                                              R{subtotal.toFixed(2)}
-                                            </span>
-                                          </div>
-                                          <div className="flex items-center justify-between w-52 text-[#64748b]">
-                                            <label className="flex items-center gap-1.5">
-                                              <span>VAT</span>
-                                              <div className="flex items-center border border-[#d1d5db] rounded-md overflow-hidden bg-white">
-                                                <input
-                                                  type="number"
-                                                  min="0"
-                                                  max="100"
-                                                  step="0.5"
-                                                  value={vatRate}
-                                                  onChange={(e) =>
-                                                    setVatRate(
-                                                      Number(e.target.value),
-                                                    )
-                                                  }
-                                                  className="w-12 px-1.5 py-0.5 text-xs text-center text-[#1e293b] focus:outline-none focus:ring-1 focus:ring-[#2563eb]"
-                                                />
-                                                <span className="px-1.5 text-xs text-[#64748b] bg-[#f1f5f9] border-l border-[#d1d5db]">
-                                                  %
-                                                </span>
-                                              </div>
-                                            </label>
-                                            <span className="font-medium text-[#374151]">
-                                              R{vat.toFixed(2)}
-                                            </span>
-                                          </div>
-                                          <div className="flex justify-between w-52 pt-2 border-t border-[#e2e8f0] font-semibold text-[#1e293b]">
-                                            <span>Total</span>
-                                            <span className="text-[#2563eb]">
-                                              R{total.toFixed(2)}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl py-12 text-center">
-                                      <Wrench className="w-8 h-8 text-[#cbd5e1] mx-auto mb-3" />
-                                      <p className="text-sm font-medium text-[#94a3b8]">
-                                        No items added yet
-                                      </p>
-                                      <p className="text-xs text-[#cbd5e1] mt-1">
-                                        Use the form above to add services or
-                                        parts
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                              {currentStep === 5 &&
-                                documentType === "jobcard" && (
-                                  <div>
-                                    <div className="flex items-center gap-3 mb-5">
-                                      <div className="w-9 h-9 bg-[#f0fdf4] rounded-lg flex items-center justify-center">
-                                        <CheckSquare className="w-5 h-5 text-[#059669]" />
-                                      </div>
-                                      <div>
-                                        <h2 className="text-base font-semibold text-[#1e293b]">
-                                          Customer Sign-off
-                                        </h2>
-                                        <p className="text-xs text-[#64748b]">
-                                          Confirm work authorisation and
-                                          completion
-                                        </p>
-                                      </div>
-                                    </div>
-
-                                    {/* Parts checklist — auto-generated from line items */}
-                                    <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-4 mb-5">
-                                      <p className="text-sm font-semibold text-[#374151] mb-3">
-                                        Parts & Services Checklist
-                                      </p>
-                                      {items.map((item, i) => (
-                                        <label
-                                          key={i}
-                                          className="flex items-center gap-3 py-2 border-b border-[#f1f5f9] cursor-pointer"
-                                        >
-                                          <input
-                                            type="checkbox"
-                                            checked={partsChecklist[i] ?? false}
-                                            onChange={(e) => {
-                                              const updated = [
-                                                ...partsChecklist,
-                                              ];
-                                              updated[i] = e.target.checked;
-                                              setPartsChecklist(updated);
-                                            }}
-                                            className="w-4 h-4 accent-[#059669]"
-                                          />
-                                          <span className="text-sm text-[#374151] flex-1">
-                                            {item.description}
-                                          </span>
-                                          <span className="text-xs text-[#64748b]">
-                                            {item.type} — R
-                                            {item.amount?.toFixed(2)}
-                                          </span>
-                                        </label>
-                                      ))}
-                                    </div>
-
-                                    {/* Approval toggle */}
-                                    <div
-                                      className={`flex items-center justify-between p-4 rounded-xl border ${
-                                        customerApproved
-                                          ? "bg-[#f0fdf4] border-[#bbf7d0]"
-                                          : "bg-[#fff7ed] border-[#fed7aa]"
-                                      }`}
-                                    >
-                                      <div>
-                                        <p className="text-sm font-semibold text-[#1e293b]">
-                                          Customer Authorisation
-                                        </p>
-                                        <p className="text-xs text-[#64748b] mt-0.5">
-                                          {customerApproved
-                                            ? "Customer has approved all work"
-                                            : "Pending customer approval"}
-                                        </p>
-                                      </div>
-                                      <button
-                                        onClick={() =>
-                                          setCustomerApproved((p) => !p)
-                                        }
-                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                                          customerApproved
-                                            ? "bg-[#059669] text-white hover:bg-[#047857]"
-                                            : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc]"
-                                        }`}
-                                      >
-                                        {customerApproved
-                                          ? "✓ Approved"
-                                          : "Mark Approved"}
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                              {/* Step 5 – Payment */}
-                              {currentStep === 6 && (
-                                <div>
-                                  <div className="flex items-center gap-3 mb-5">
-                                    <div className="w-9 h-9 bg-[#faf5ff] rounded-lg flex items-center justify-center">
-                                      <CreditCard className="w-5 h-5 text-[#7c3aed]" />
-                                    </div>
-                                    <div>
-                                      <h2 className="text-base font-semibold text-[#1e293b]">
-                                        Payment Terms
-                                      </h2>
-                                      <p className="text-xs text-[#64748b]">
-                                        Review and process payment
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden shadow-sm mb-5">
-                                    <div className="px-5 py-3.5 border-b border-[#e2e8f0] bg-[#f8fafc]">
-                                      <span className="text-sm font-semibold text-[#374151]">
-                                        Payment Information
-                                      </span>
-                                    </div>
-                                    <div className="divide-y divide-[#f1f5f9]">
-                                      {[
-                                        ["Payment Method", "Cash / Card / EFT"],
-                                        ["Payment Terms", "Due on Completion"],
-                                        ["Warranty", "90 Days Parts & Labor"],
-                                        ["Total Due", `R${total.toFixed(2)}`],
-                                      ].map(([k, v]) => (
-                                        <div
-                                          key={k}
-                                          className="flex items-center justify-between px-5 py-3 text-sm"
-                                        >
-                                          <span className="text-[#64748b]">
-                                            {k}
-                                          </span>
-                                          <span
-                                            className={`font-semibold ${k === "Total Due" ? "text-[#2563eb]" : "text-[#1e293b]"}`}
-                                          >
-                                            {v}
-                                          </span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  {jobCardId && (
-                                    <button
-                                      onClick={handleProcessPayment}
-                                      className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-[#059669] hover:bg-[#047857] text-white rounded-xl font-medium transition-colors shadow-sm"
-                                    >
-                                      <CreditCard className="w-4 h-4" />
-                                      Process Payment
-                                    </button>
-                                  )}
-
-                                  {!jobCardId && (
-                                    <div className="flex items-center gap-2 px-4 py-3 bg-[#fff7ed] border border-[#fed7aa] rounded-lg text-sm text-[#9a3412]">
-                                      <Receipt className="w-4 h-4 flex-shrink-0" />
-                                      Save the invoice first to process payment
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-
-                        {/* Step nav bar */}
-                        <div className="px-6 py-4 bg-[#f8fafc] border-t border-[#e2e8f0] flex items-center justify-between">
-                          <button
-                            onClick={handlePrevious}
-                            disabled={currentStep === 1}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${currentStep === 1 ? "bg-[#f1f5f9] text-[#cbd5e1] cursor-not-allowed" : "bg-white border border-[#e2e8f0] text-[#374151] hover:bg-[#f8fafc] shadow-sm"}`}
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                            <span className="hidden sm:inline">Previous</span>
-                          </button>
-                          <div className="text-xs font-medium text-[#64748b] bg-white border border-[#e2e8f0] px-3 py-1.5 rounded-lg">
-                            Step {currentStep} of {totalSteps}
-                          </div>
-                          {currentStep < totalSteps ? (
-                            <button onClick={handleNext} className="...">
-                              <span className="hidden sm:inline">Next</span>
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={
-                                activeView === "purchase-orders"
-                                  ? handleSavePO
-                                  : handleSaveJobCard
-                              }
-                              className="flex items-center gap-1.5 px-4 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
-                            >
-                              <Save className="w-4 h-4" />
-                              {activeView === "purchase-orders"
-                                ? "Save P.O."
-                                : documentType === "quote"
-                                  ? "Save Quote"
-                                  : "Save Invoice"}
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* ── RIGHT: Live preview panel ──────────────────────────────── */}
-              <div className="hidden xl:flex w-[380px] flex-shrink-0 flex-col border-l border-[#e2e8f0] bg-[#e8eaed] overflow-hidden">
-                {/* Panel header */}
-                <div className="flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex-shrink-0">
-                  <TemplateSelector
-                    user={user}
-                    selectedTemplate={selectedTemplate}
-                    onTemplateChange={setSelectedTemplate}
-                  />
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={handlePrint}
-                      className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-xs font-medium rounded-lg hover:bg-[#f1f5f9] transition-colors"
-                    >
-                      <Printer className="w-3 h-3" />
-                      Print
-                    </button>
-                    <button
-                      onClick={handleSavePDF}
-                      disabled={isSavingPDF}
-                      className="flex items-center gap-1 px-2.5 py-1.5 bg-[#059669] text-white text-xs font-medium rounded-lg hover:bg-[#047857] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Download className="w-3 h-3" />
-                      {isSavingPDF ? "Saving..." : "PDF"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Scrollable preview canvas */}
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div
-                    className="bg-white shadow-lg rounded origin-top"
-                    style={{
-                      position: "relative",
-                      width: "210mm",
-                      minHeight: "297mm",
-                      transform: "scale(0.44)",
-                      transformOrigin: "top left",
-                      marginBottom: `calc((297mm * 0.44) - 297mm)`,
-                    }}
-                  >
-                    {documentType === "jobcard" ? (
-                      <JobCardTemplate {...jobCardTemplateProps} />
-                    ) : activeView === "purchase-orders" ? (
-                      <POTemplateRenderer {...poTemplateProps} />
-                    ) : (
-                      <TemplateRenderer {...templateProps} />
-                    )}
-                    <AllPagesStampOverlay
-                      stampConfig={stampConfig}
-                      businessInfo={businessInfo}
-                    />
-                  </div>
-                </div>
-
-                {/* ── Stamp button footer ── */}
-                <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-                  <button
-                    onClick={handleStampButtonClick}
-                    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-                  >
-                    <Stamp className="w-4 h-4" />
-                    Stamp &amp; Signature
-                    {!stampUnlocked && (
-                      <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-semibold">
-                        {stampUsageCount < FREE_STAMP_LIMIT
-                          ? `${FREE_STAMP_LIMIT - stampUsageCount} free left`
-                          : "PRO"}
-                      </span>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      {pdfViewer && (
+        ))}
         <div
           style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            background: "rgba(0,0,0,0.75)",
+            flex: 1,
+            background: C.white,
+            borderRadius: 6,
+            height: 22,
+            margin: "0 12px",
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
+            paddingLeft: 10,
           }}
-          onClick={() => setPdfViewer(null)}
         >
-          <div
-            style={{
-              width: "90vw",
-              maxWidth: 900,
-              height: "90vh",
-              background: "#fff",
-              borderRadius: 12,
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
+          <span style={{ fontSize: 11, color: C.muted }}>
+            solidflo.co.za/jobs/INV-2024
+          </span>
+        </div>
+      </div>
+
+      {/* Invoice header */}
+      <div
+        style={{
+          padding: "20px 24px 16px",
+          borderBottom: `2px solid ${C.orange}`,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <div>
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
-                padding: "12px 18px",
-                background: "#0f172a",
-                flexShrink: 0,
+                gap: 8,
+                marginBottom: 6,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    background: "#2563eb",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Eye
-                    className="w-3.5 h-3.5"
-                    style={{ color: "#fff", width: 14, height: 14 }}
-                  />
-                </div>
-                <div>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: "#fff",
-                    }}
-                  >
-                    {pdfViewer.fileName}
-                  </p>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 11,
-                      color: "rgba(255,255,255,0.45)",
-                    }}
-                  >
-                    PDF Preview
-                  </p>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {/* Download from viewer */}
-                <button
-                  onClick={() => downloadPDF(pdfViewer.url, pdfViewer.fileName)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "6px 14px",
-                    borderRadius: 7,
-                    background: "#059669",
-                    border: "none",
-                    color: "#fff",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  <Download style={{ width: 13, height: 13 }} />
-                  Download
-                </button>
-                <button
-                  onClick={() => setPdfViewer(null)}
-                  style={{
-                    background: "rgba(255,255,255,0.1)",
-                    border: "none",
-                    color: "#fff",
-                    cursor: "pointer",
-                    borderRadius: 7,
-                    width: 32,
-                    height: 32,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <X style={{ width: 16, height: 16 }} />
-                </button>
-              </div>
+              <span style={{ fontSize: 20 }}>🔧</span>
+              <span
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 18,
+                  color: C.ink,
+                }}
+              >
+                SolidFlo
+              </span>
             </div>
+            <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+              Mike's Motor Workshop
+            </p>
+            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+              Pretoria, South Africa
+            </p>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div
+              style={{
+                background: "#DCFCE7",
+                color: "#16A34A",
+                fontSize: 11,
+                fontWeight: 700,
+                padding: "3px 10px",
+                borderRadius: 99,
+                marginBottom: 6,
+              }}
+            >
+              PAID
+            </div>
+            <p
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 800,
+                fontSize: 20,
+                color: C.ink,
+                margin: 0,
+              }}
+            >
+              INV-0042
+            </p>
+            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>
+              Issued 28 Mar 2025
+            </p>
+          </div>
+        </div>
+      </div>
 
-            {/* PDF iframe canvas */}
-            <div style={{ flex: 1, background: "#e2e8f0", overflow: "hidden" }}>
-              <iframe
-                src={`${pdfViewer.url}#toolbar=0&navpanes=0&scrollbar=1`}
-                style={{ width: "100%", height: "100%", border: "none" }}
-                title="PDF Preview"
+      {/* Line items */}
+      <div style={{ padding: "0 24px" }}>
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
+        >
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+              {["Description", "Qty", "Unit Price", "Total"].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    padding: "10px 0 8px",
+                    color: C.muted,
+                    fontWeight: 600,
+                    textAlign: h === "Description" ? "left" : "right",
+                    fontSize: 11,
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              {
+                desc: "Labour – Full Service (2.5 hrs)",
+                qty: 1,
+                unit: "R650.00",
+                total: "R650.00",
+              },
+              {
+                desc: "Oil Filter (OEM)",
+                qty: 1,
+                unit: "R120.00",
+                total: "R120.00",
+              },
+              {
+                desc: "Engine Oil 5W-30 (5L)",
+                qty: 2,
+                unit: "R280.00",
+                total: "R560.00",
+              },
+              {
+                desc: "Brake Pads – Front Axle Set",
+                qty: 1,
+                unit: "R385.00",
+                total: "R385.00",
+              },
+            ].map((r, i) => (
+              <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
+                <td style={{ padding: "9px 0", color: C.text }}>{r.desc}</td>
+                <td
+                  style={{
+                    padding: "9px 0",
+                    textAlign: "right",
+                    color: C.muted,
+                  }}
+                >
+                  {r.qty}
+                </td>
+                <td
+                  style={{
+                    padding: "9px 0",
+                    textAlign: "right",
+                    color: C.muted,
+                  }}
+                >
+                  {r.unit}
+                </td>
+                <td
+                  style={{
+                    padding: "9px 0",
+                    textAlign: "right",
+                    fontWeight: 600,
+                    color: C.ink,
+                  }}
+                >
+                  {r.total}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Totals */}
+      <div
+        style={{
+          padding: "12px 24px 20px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 4,
+        }}
+      >
+        {[
+          ["Subtotal", "R1 715.00"],
+          ["VAT (15%)", "R257.25"],
+        ].map(([l, v]) => (
+          <div key={l} style={{ display: "flex", gap: 32, fontSize: 12 }}>
+            <span style={{ color: C.muted }}>{l}</span>
+            <span style={{ color: C.text, minWidth: 80, textAlign: "right" }}>
+              {v}
+            </span>
+          </div>
+        ))}
+        <div
+          style={{
+            display: "flex",
+            gap: 32,
+            background: C.ink,
+            borderRadius: 8,
+            padding: "6px 14px",
+            marginTop: 6,
+          }}
+        >
+          <span
+            style={{
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            Total Due
+          </span>
+          <span
+            style={{
+              color: C.white,
+              fontWeight: 800,
+              fontSize: 15,
+              minWidth: 80,
+              textAlign: "right",
+            }}
+          >
+            R1 972.25
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+/* ─── Navbar (restyled to match light hero) ──────────────────────────────── */
+function Navbar({ onLogin, onRegister }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  useEffect(() => {
+    const fn = () => { if (window.innerWidth > 768) setOpen(false); };
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const links = ["features", "pricing", "testimonials", "faq"];
+  const AMBER = "#C67C3A";
+  const AMBER_HOVER = "#A9652C";
+
+  const handleNavLink = (id) => {
+    scrollTo(id);
+    setOpen(false);
+  };
+
+  return (
+    <nav
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        background: HC.cream,
+        borderBottom: `1px solid ${HC.creamDark}`,
+        transition: "box-shadow .2s",
+        boxShadow: scrolled ? "0 4px 20px rgba(15,23,42,0.08)" : "none",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 60,
+        }}
+      >
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              background: "transparent",
+              width: 160,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+          </div>
+        </div>
+
+        {/* Desktop links */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => scrollTo(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: HC.textMid,
+                  fontSize: 14,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  textTransform: "capitalize",
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Desktop CTA */}
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button
+              onClick={onLogin}
+              style={{
+                background: "none",
+                border: `1px solid ${HC.creamDark}`,
+                borderRadius: 8,
+                padding: "7px 18px",
+                color: HC.textMid,
+                fontSize: 13,
+                fontFamily: "'Lato', sans-serif",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "border-color .15s, color .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = HC.navy;
+                e.currentTarget.style.color = HC.navy;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = HC.creamDark;
+                e.currentTarget.style.color = HC.textMid;
+              }}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={onRegister}
+              style={{
+                background: AMBER,
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 20px",
+                color: HC.white,
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                transition: "background .15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = AMBER_HOVER)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = AMBER)}
+            >
+              Start Free →
+            </button>
+          </div>
+        )}
+
+        {/* Hamburger button (mobile only) */}
+        {isMobile && (
+          <button
+            onClick={() => setOpen(!open)}
+            style={{
+              background: "none",
+              border: `1px solid ${HC.creamDark}`,
+              borderRadius: 8,
+              padding: "8px 10px",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              gap: 5,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-label="Toggle menu"
+          >
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  width: 22,
+                  height: 2,
+                  background: HC.navy,
+                  borderRadius: 2,
+                  transition: "transform .2s, opacity .2s",
+                  transformOrigin: "center",
+                  transform:
+                    open && i === 0 ? "translateY(7px) rotate(45deg)"
+                    : open && i === 1 ? "scaleX(0)"
+                    : open && i === 2 ? "translateY(-7px) rotate(-45deg)"
+                    : "none",
+                  opacity: open && i === 1 ? 0 : 1,
+                }}
               />
+            ))}
+          </button>
+        )}
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {isMobile && (
+        <div
+          style={{
+            maxHeight: open ? 400 : 0,
+            overflow: "hidden",
+            transition: "max-height .3s ease",
+            background: HC.creamMid,
+            borderTop: open ? `1px solid ${HC.creamDark}` : "none",
+          }}
+        >
+          <div style={{ padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 4 }}>
+            {links.map((s) => (
+              <button
+                key={s}
+                onClick={() => handleNavLink(s)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: HC.textMid,
+                  fontSize: 16,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  textTransform: "capitalize",
+                  padding: "12px 0",
+                  textAlign: "left",
+                  borderBottom: `1px solid ${HC.creamDark}`,
+                  transition: "color .2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = HC.navy)}
+                onMouseLeave={(e) => (e.target.style.color = HC.textMid)}
+              >
+                {s}
+              </button>
+            ))}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+              <button
+                onClick={() => { onLogin(); setOpen(false); }}
+                style={{
+                  background: "none",
+                  border: `1px solid ${HC.creamDark}`,
+                  borderRadius: 8,
+                  padding: "11px",
+                  color: HC.textMid,
+                  fontSize: 14,
+                  fontFamily: "'Lato', sans-serif",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { onRegister(); setOpen(false); }}
+                style={{
+                  background: AMBER,
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "12px",
+                  color: HC.white,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: "'Lato', sans-serif",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(198,124,58,0.35)",
+                }}
+              >
+                Start Free →
+              </button>
             </div>
           </div>
         </div>
       )}
-      <SolidFloAgent industry="mechanics" />
-    </div>
+    </nav>
   );
+}
+/* ─── Hero (auto workshop, restyled to match construction-style framed hero) ── */
+function Hero({ onRegister }) {
+  return (
+    <section
+      style={{
+        background: C.cream,
+        padding: "72px 24px 96px",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <style>{heroFontStyle}</style>
+
+      {/* Ambient glow, tinted with orange */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse 70% 60% at 15% 30%, rgba(99,102,241,.08) 0%, transparent 60%), radial-gradient(ellipse 60% 70% at 90% 15%, rgba(249,115,22,.10) 0%, transparent 55%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Framed "device" container */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          position: "relative",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 60,
+          flexWrap: "wrap",
+          border: "1px solid rgba(15,23,42,0.08)",
+          borderRadius: 32,
+          padding: "56px 56px",
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(6px)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.6) inset, 0 24px 60px rgba(15,23,42,0.10), 0 4px 16px rgba(15,23,42,0.06)",
+        }}
+      >
+        {/* Left */}
+        <div style={{ flex: "1 1 420px" }}>
+          {/* Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "rgba(249,115,22,0.1)",
+              border: "1px solid rgba(249,115,22,0.28)",
+              borderRadius: 99,
+              padding: "6px 14px",
+              marginBottom: 28,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: C.orange,
+                display: "inline-block",
+              }}
+            />
+            <span
+              style={{
+                color: C.orange,
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
+              }}
+            >
+              Built for Motor Mechanics &amp; Auto Workshops
+            </span>
+          </div>
+
+          <h1
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 700,
+              fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+              lineHeight: 1.1,
+              color: C.navy,
+              margin: "0 0 24px",
+            }}
+          >
+            Invoice your customers.
+            <br />
+            <em style={{ fontStyle: "italic", color: C.orange }}>Get paid faster.</em>
+            <br />
+            Run your workshop.
+          </h1>
+
+          <p
+            style={{
+              color: C.textMid,
+              fontSize: "clamp(1rem, 2vw, 1.2rem)",
+              lineHeight: 1.7,
+              margin: "0 0 40px",
+              fontFamily: "'Lato', sans-serif",
+              maxWidth: 480,
+            }}
+          >
+            SolidFlo is purpose-built for SA motor workshops. Create
+            professional job cards, track parts &amp; labour, and send VAT
+            invoices in under 60 seconds.
+          </p>
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
+            <button
+              onClick={onRegister}
+              style={{
+                height: 52,
+                padding: "0 32px",
+                background: C.orange,
+                border: "none",
+                borderRadius: 4,
+                color: C.white,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                transition: "transform .15s, box-shadow .15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+            >
+              Start Free — No Card Needed
+            </button>
+            <button
+              onClick={() => scrollTo("features")}
+              style={{
+                height: 52,
+                padding: "0 28px",
+                background: "transparent",
+                border: `1.5px solid ${C.creamDark}`,
+                borderRadius: 4,
+                color: C.navy,
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                fontFamily: "'Lato', sans-serif",
+                cursor: "pointer",
+                transition: "border-color .15s, background .15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = C.navy;
+                e.currentTarget.style.background = C.creamMid;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = C.creamDark;
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              See How It Works
+            </button>
+          </div>
+
+          {/* Trust row */}
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+            {[
+              "Free plan forever",
+              "VAT-compliant invoices",
+              "WhatsApp invoicing",
+              "SA-built & hosted",
+            ].map((t) => (
+              <span
+                key={t}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: C.textMuted,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  fontFamily: "'Lato', sans-serif",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 20 20" fill={C.orange}>
+                  <path
+                    fillRule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Invoice preview */}
+        <div style={{ flex: "1 1 340px", display: "flex", justifyContent: "center" }}>
+          <div style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                top: -18,
+                right: -18,
+                zIndex: 2,
+                background: "#16A34A",
+                color: C.white,
+                borderRadius: 10,
+                padding: "8px 14px",
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "'Lato', sans-serif",
+                boxShadow: "0 8px 20px rgba(22,163,74,0.35)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span>💰</span> Payment received!
+            </div>
+            <MockInvoice />
+           
+          </div>
+        </div>
+      </div>
+
+      {/* Trusted-by strip below the frame */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "40px auto 0",
+          display: "flex",
+          gap: 40,
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+        }}
+      >
+        <span
+          style={{
+            color: C.textMuted,
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontFamily: "'Lato', sans-serif",
+          }}
+        >
+          Trusted By African workshops
+        </span>
+        {[
+          "Cape Auto Repairs",
+          "Joburg Gearbox Clinic",
+          "Pretoria Panel Beat Pro",
+          "Durban Drive Centre",
+        ].map((b) => (
+          <span
+            key={b}
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 600,
+              fontSize: 15,
+              color: C.textMuted,
+            }}
+          >
+            {b}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+/* ─── How It Works ─────────────────────────────────────────────────────── */
+function HowItWorks() {
+  const steps = [
+    {
+      icon: "📋",
+      title: "Create a Job Card",
+      desc: "Log the vehicle, customer details, and the work required. Add parts from your inventory and set labour time.",
+    },
+    {
+      icon: "📩",
+      title: "Send the Invoice",
+      desc: "One tap sends a professional VAT invoice via email, SMS, or WhatsApp PDF — directly to your customer.",
+    },
+    {
+      icon: "💳",
+      title: "Get Paid Instantly",
+      desc: "Customers pay via EFT, card, or instant EFT. You get notified the moment money hits your account.",
+    },
+  ];
+
+  return (
+    <section style={{ background: C.white, padding: "80px 24px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
+          <p
+            style={{
+              color: C.orange,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
+            How It Works
+          </p>
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(30px,4vw,48px)",
+              color: C.ink,
+              margin: 0,
+              letterSpacing: -0.5,
+            }}
+          >
+            Invoice in 60 seconds, flat.
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: 24,
+          }}
+        >
+          {steps.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                background: i === 1 ? C.ink : C.surface,
+                borderRadius: 16,
+                padding: "36px 32px",
+                border: `1px solid ${i === 1 ? "transparent" : C.border}`,
+                position: "relative",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: 24,
+                  right: 24,
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 48,
+                  color:
+                    i === 1 ? "rgba(255,255,255,0.05)" : "rgba(13,27,42,0.06)",
+                  lineHeight: 1,
+                }}
+              >
+                0{i + 1}
+              </div>
+              <div style={{ fontSize: 32, marginBottom: 16 }}>{s.icon}</div>
+              <h3
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 22,
+                  color: i === 1 ? C.white : C.ink,
+                  margin: "0 0 10px",
+                }}
+              >
+                {s.title}
+              </h3>
+              <p
+                style={{
+                  color: i === 1 ? "rgba(255,255,255,0.55)" : C.muted,
+                  fontSize: 14,
+                  lineHeight: 1.7,
+                  margin: 0,
+                  fontFamily: "'Barlow', sans-serif",
+                }}
+              >
+                {s.desc}
+              </p>
+              {i === 1 && (
+                <div
+                  style={{
+                    marginTop: 20,
+                    display: "inline-block",
+                    background: C.orange,
+                    borderRadius: 6,
+                    padding: "5px 14px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: C.white,
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  Most Popular Step
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Features ─────────────────────────────────────────────────────────── */
+function Features() {
+  const features = [
+    {
+      icon: "📋",
+      title: "Digital Job Cards",
+      desc: "Replace paper job cards with digital ones. Log vehicle reg, mileage, customer, and full work breakdown — all in one place.",
+    },
+    {
+      icon: "🔩",
+      title: "Parts & Inventory",
+      desc: "Track your stock of parts, oils, and consumables. Auto-deduct parts used on each job card and get low-stock alerts.",
+    },
+    {
+      icon: "⏱️",
+      title: "Labour Time Billing",
+      desc: "Log technician hours per job. Bill at your set labour rate. Flat rate or time-and-materials — SolidFlo handles both.",
+    },
+    {
+      icon: "🧾",
+      title: "VAT-Compliant Invoices",
+      desc: "Every invoice is SARS-compliant with VAT registration number, correct tax lines, and audit-ready formatting.",
+    },
+    {
+      icon: "💬",
+      title: "WhatsApp Invoicing",
+      desc: "Send your invoice as a PDF directly on WhatsApp. Customers love it — and it gets read 4× faster than email.",
+    },
+    {
+      icon: "📊",
+      title: "Workshop Reports",
+      desc: "See your monthly revenue, outstanding balances, best-selling services, and technician productivity at a glance.",
+    },
+    {
+      icon: "🔔",
+      title: "Payment Reminders",
+      desc: "Automatically chase overdue invoices with polite, professional reminders — so you don't have to make awkward calls.",
+    },
+    {
+      icon: "🚗",
+      title: "Vehicle History",
+      desc: "Every customer's full service history in one place. See what was done on their car last time and spot recurring issues.",
+    },
+    {
+      icon: "💳",
+      title: "Multiple Payment Methods",
+      desc: "Accept EFT, card payments, and instant EFT via Peach Payments. Reconcile automatically — no manual matching.",
+    },
+  ];
+
+  return (
+    <section
+      id="features"
+      style={{ background: C.surface, padding: "80px 24px" }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
+          <p
+            style={{
+              color: C.orange,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
+            Features
+          </p>
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: C.ink,
+              margin: "0 0 12px",
+              letterSpacing: -0.5,
+            }}
+          >
+            Everything a workshop needs
+          </h2>
+          <p
+            style={{
+              color: C.muted,
+              fontSize: 15,
+              maxWidth: 520,
+              margin: "0 auto",
+              fontFamily: "'Barlow', sans-serif",
+            }}
+          >
+            No bloat. No accounting degree required. Just the tools your
+            mechanics actually use every day.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gap: 18,
+          }}
+        >
+          {features.map((f, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.white,
+                borderRadius: 14,
+                padding: "24px 22px",
+                border: `1px solid ${C.border}`,
+                transition: "box-shadow .2s, transform .2s",
+                cursor: "default",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 8px 32px rgba(13,27,42,0.1)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <div style={{ fontSize: 26, marginBottom: 12 }}>{f.icon}</div>
+              <h3
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 18,
+                  color: C.ink,
+                  margin: "0 0 6px",
+                }}
+              >
+                {f.title}
+              </h3>
+              <p
+                style={{
+                  color: C.muted,
+                  fontSize: 13,
+                  lineHeight: 1.65,
+                  margin: 0,
+                  fontFamily: "'Barlow', sans-serif",
+                }}
+              >
+                {f.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Pricing ───────────────────────────────────────────────────────────── */
+function Pricing({ onRegister }) {
+  const plans = [
+    {
+      name: "Starter",
+      price: "Free",
+      period: "forever",
+      desc: "Perfect for solo mechanics just starting out",
+      features: [
+        "5 invoices / month",
+        "1 technician",
+        "Digital job cards",
+        "Basic reports",
+        "Email support",
+      ],
+      cta: "Get Started Free",
+    },
+    {
+      name: "Workshop",
+      price: "R149",
+      period: "/month",
+      desc: "The sweet spot for growing workshops",
+      highlight: true,
+      features: [
+        "Unlimited invoices",
+        "Up to 5 technicians",
+        "Parts inventory tracking",
+        "WhatsApp invoicing",
+        "Payment reminders",
+        "VAT reports",
+        "Priority support",
+      ],
+      cta: "Start 14-Day Free Trial",
+    },
+    {
+      name: "Fleet",
+      price: "R399",
+      period: "/month",
+      desc: "Multi-bay workshops & dealer service centres",
+      features: [
+        "Everything in Workshop",
+        "Unlimited technicians",
+        "Multi-location support",
+        "API access",
+        "Branded customer portal",
+        "Dedicated account manager",
+      ],
+      cta: "Contact Sales",
+    },
+  ];
+
+  return (
+    <section id="pricing" style={{ background: C.white, padding: "80px 24px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
+          <p
+            style={{
+              color: C.orange,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
+            Pricing
+          </p>
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: C.ink,
+              margin: "0 0 12px",
+              letterSpacing: -0.5,
+            }}
+          >
+            Honest pricing. No surprises.
+          </h2>
+          <p
+            style={{
+              color: C.muted,
+              fontSize: 15,
+              fontFamily: "'Barlow', sans-serif",
+            }}
+          >
+            Start free. Upgrade when your workshop is ready to scale.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+            gap: 20,
+          }}
+        >
+          {plans.map((p, i) => (
+            <div
+              key={i}
+              style={{
+                borderRadius: 16,
+                padding: "32px 28px",
+                background: p.highlight ? C.ink : C.surface,
+                border: p.highlight
+                  ? `2px solid ${C.orange}`
+                  : `1px solid ${C.border}`,
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+              }}
+            >
+              {p.highlight && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -14,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: C.orange,
+                    color: C.white,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    padding: "5px 16px",
+                    borderRadius: 99,
+                    fontFamily: "'Barlow', sans-serif",
+                    letterSpacing: 0.5,
+                    boxShadow: "0 4px 12px rgba(249,115,22,0.4)",
+                  }}
+                >
+                  MOST POPULAR
+                </div>
+              )}
+
+              <div style={{ marginBottom: 20 }}>
+                <p
+                  style={{
+                    color: p.highlight ? "rgba(255,255,255,0.5)" : C.muted,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    margin: "0 0 6px",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {p.name}
+                </p>
+                <div
+                  style={{ display: "flex", alignItems: "baseline", gap: 4 }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 900,
+                      fontSize: 40,
+                      color: p.highlight ? C.white : C.ink,
+                    }}
+                  >
+                    {p.price}
+                  </span>
+                  <span
+                    style={{
+                      color: p.highlight ? "rgba(255,255,255,0.4)" : C.muted,
+                      fontSize: 14,
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {p.period}
+                  </span>
+                </div>
+                <p
+                  style={{
+                    color: p.highlight ? "rgba(255,255,255,0.4)" : C.muted,
+                    fontSize: 12,
+                    margin: "4px 0 0",
+                    fontFamily: "'Barlow', sans-serif",
+                  }}
+                >
+                  {p.desc}
+                </p>
+              </div>
+
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: "0 0 28px",
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                {p.features.map((f, j) => (
+                  <li
+                    key={j}
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 20 20"
+                      fill={C.orange}
+                      style={{ flexShrink: 0, marginTop: 2 }}
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span
+                      style={{
+                        color: p.highlight ? "rgba(255,255,255,0.75)" : C.text,
+                        fontSize: 13,
+                        fontFamily: "'Barlow', sans-serif",
+                      }}
+                    >
+                      {f}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={onRegister}
+                style={{
+                  background: p.highlight ? C.orange : C.ink,
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "12px",
+                  color: C.white,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  fontFamily: "'Barlow', sans-serif",
+                  cursor: "pointer",
+                  boxShadow: p.highlight
+                    ? "0 6px 20px rgba(249,115,22,0.35)"
+                    : "none",
+                }}
+              >
+                {p.cta}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Testimonials ──────────────────────────────────────────────────────── */
+function Testimonials() {
+  const testimonials = [
+    {
+      quote:
+        "I used to spend Sunday nights doing invoices. Now it takes me 5 minutes on Friday afternoon. SolidFlo changed how I run my shop.",
+      name: "Mike van der Merwe",
+      role: "Owner, MVdM Auto, Pretoria",
+      avatar: "MV",
+    },
+    {
+      quote:
+        "The WhatsApp invoice feature is a game-changer. My customers actually pay the same day because they see it immediately on their phone.",
+      name: "Thabo Khumalo",
+      role: "Head Technician, K&K Workshop, Soweto",
+      avatar: "TK",
+    },
+    {
+      quote:
+        "Finally software that understands how a motor workshop actually works. Job cards, parts, labour — it all just makes sense.",
+      name: "Sandra Botha",
+      role: "Workshop Manager, Coastal Auto, Durban",
+      avatar: "SB",
+    },
+  ];
+
+  return (
+    <section
+      id="testimonials"
+      style={{ background: C.surface, padding: "80px 24px" }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
+          <p
+            style={{
+              color: C.orange,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
+            Testimonials
+          </p>
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: C.ink,
+              margin: 0,
+              letterSpacing: -0.5,
+            }}
+          >
+            Loved by SA mechanics
+          </h2>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))",
+            gap: 20,
+          }}
+        >
+          {testimonials.map((t, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.white,
+                borderRadius: 16,
+                padding: "28px 24px",
+                border: `1px solid ${C.border}`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+              }}
+            >
+              <div style={{ display: "flex", gap: 2 }}>
+                {[...Array(5)].map((_, j) => (
+                  <span key={j} style={{ color: C.orange, fontSize: 16 }}>
+                    ★
+                  </span>
+                ))}
+              </div>
+              <p
+                style={{
+                  color: C.text,
+                  fontSize: 14,
+                  lineHeight: 1.75,
+                  fontFamily: "'Barlow', sans-serif",
+                  margin: 0,
+                  flex: 1,
+                }}
+              >
+                "{t.quote}"
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  paddingTop: 12,
+                  borderTop: `1px solid ${C.border}`,
+                }}
+              >
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    background: C.ink,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: C.white,
+                    flexShrink: 0,
+                  }}
+                >
+                  {t.avatar}
+                </div>
+                <div>
+                  <p
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 700,
+                      fontSize: 15,
+                      color: C.ink,
+                      margin: 0,
+                    }}
+                  >
+                    {t.name}
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: "'Barlow', sans-serif",
+                      fontSize: 12,
+                      color: C.muted,
+                      margin: 0,
+                    }}
+                  >
+                    {t.role}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats strip */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: 0,
+            background: C.ink,
+            borderRadius: 16,
+            marginTop: 48,
+            overflow: "hidden",
+          }}
+        >
+          {[
+            ["1 200+", "Active workshops"],
+            ["600+", "Invoiced monthly"],
+            ["4.9/5", "App store rating"],
+            ["< 60s", "Avg invoice time"],
+          ].map(([v, l], i) => (
+            <div
+              key={i}
+              style={{
+                padding: "28px 24px",
+                textAlign: "center",
+                borderRight:
+                  i < 3 ? "1px solid rgba(255,255,255,0.07)" : "none",
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 36,
+                  color: C.orange,
+                }}
+              >
+                {v}
+              </div>
+              <div
+                style={{
+                  fontFamily: "'Barlow', sans-serif",
+                  fontSize: 13,
+                  color: "rgba(255,255,255,0.45)",
+                  marginTop: 4,
+                }}
+              >
+                {l}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── FAQ ───────────────────────────────────────────────────────────────── */
+function FAQ() {
+  const [open, setOpen] = useState(null);
+  const faqs = [
+    {
+      q: "Is SolidFlo really free?",
+      a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Workshop or Fleet for unlimited invoicing.",
+    },
+    {
+      q: "Are invoices VAT-compliant for SARS?",
+      a: "Absolutely. Every invoice includes your VAT registration number, correct VAT line items, and the required SARS fields. You can also run a VAT Output report for your accountant.",
+    },
+    {
+      q: "Can I send invoices on WhatsApp?",
+      a: "Yes! Our Workshop and Fleet plans include one-tap WhatsApp invoicing. The invoice is sent as a PDF link directly to your customer's WhatsApp — no app download required on their side.",
+    },
+    {
+      q: "How do I handle parts on job cards?",
+      a: "Add your parts to your inventory once, set your cost price and sell price. When you add a part to a job card, it auto-fills the price and deducts from stock. You always know what's in your storeroom.",
+    },
+    {
+      q: "Can multiple technicians use the same account?",
+      a: "The Workshop plan supports up to 5 technicians. Each tech gets their own login and can view and update their assigned jobs. The Fleet plan supports unlimited techs across multiple bays or locations.",
+    },
+    {
+      q: "What payment methods can my customers use?",
+      a: "Customers can pay via EFT (with auto-reconciliation), card (Visa/Mastercard via Peach Payments), and instant EFT. You get notified the moment payment is made.",
+    },
+  ];
+
+  return (
+    <section id="faq" style={{ background: C.white, padding: "80px 24px" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <p
+            style={{
+              color: C.orange,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              fontFamily: "'Barlow', sans-serif",
+              marginBottom: 10,
+            }}
+          >
+            FAQ
+          </p>
+          <h2
+            style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
+              fontSize: "clamp(28px,4vw,46px)",
+              color: C.ink,
+              margin: 0,
+              letterSpacing: -0.5,
+            }}
+          >
+            Questions mechanics ask
+          </h2>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {faqs.map((faq, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.surface,
+                borderRadius: 12,
+                border: `1px solid ${open === i ? C.orange : C.border}`,
+                overflow: "hidden",
+                transition: "border-color .2s",
+              }}
+            >
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "18px 22px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  gap: 16,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 700,
+                    fontSize: 17,
+                    color: C.ink,
+                  }}
+                >
+                  {faq.q}
+                </span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={C.orange}
+                  strokeWidth="2.5"
+                  style={{
+                    flexShrink: 0,
+                    transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform .2s",
+                  }}
+                >
+                  <path d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {open === i && (
+                <div
+                  style={{
+                    padding: "0 22px 18px",
+                    borderTop: `1px solid ${C.border}`,
+                    paddingTop: 14,
+                  }}
+                >
+                  <p
+                    style={{
+                      color: C.muted,
+                      fontSize: 14,
+                      lineHeight: 1.7,
+                      margin: 0,
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                  >
+                    {faq.a}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── CTA Banner ────────────────────────────────────────────────────────── */
+function CTABanner({ onRegister }) {
+  return (
+    <section
+      style={{
+        background: `linear-gradient(135deg, ${C.ink} 0%, ${C.ink2} 100%)`,
+        padding: "80px 24px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          bottom: -60,
+          left: -60,
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          background: C.orange,
+          opacity: 0.06,
+          filter: "blur(80px)",
+        }}
+      />
+      <div
+        style={{
+          maxWidth: 680,
+          margin: "0 auto",
+          textAlign: "center",
+          position: "relative",
+        }}
+      >
+       <img src={google} alt="SolidFlo" />
+        <h2
+          style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: 900,
+            fontSize: "clamp(28px,4vw,52px)",
+            color: C.white,
+            margin: "0 0 16px",
+            letterSpacing: -0.5,
+          }}
+        >
+          Your workshop, running smarter.
+        </h2>
+        <p
+          style={{
+            color: "rgba(255,255,255,0.45)",
+            fontSize: 16,
+            margin: "0 0 36px",
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          Join 1 200+ African workshops that bill professionally and get
+          paid faster with SolidFlo.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            gap: 14,
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            onClick={onRegister}
+            style={{
+              background: C.orange,
+              border: "none",
+              borderRadius: 12,
+              padding: "16px 36px",
+              color: C.white,
+              fontSize: 16,
+              fontWeight: 800,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              cursor: "pointer",
+              letterSpacing: 0.5,
+              boxShadow: "0 8px 28px rgba(249,115,22,0.45)",
+            }}
+          >
+            START FOR FREE
+          </button>
+          <button
+            onClick={() => scrollTo("pricing")}
+            style={{
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: 12,
+              padding: "16px 28px",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: 15,
+              fontWeight: 600,
+              fontFamily: "'Barlow', sans-serif",
+              cursor: "pointer",
+            }}
+          >
+            See all plans →
+          </button>
+        </div>
+        <p
+          style={{
+            color: "rgba(255,255,255,0.2)",
+            fontSize: 12,
+            marginTop: 20,
+            fontFamily: "'Barlow', sans-serif",
+          }}
+        >
+          No credit card required · Free plan available forever · Cancel anytime
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function Footer({ onLogin, onRegister }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+
+  const cols = [
+    {
+      title: "Product",
+      links: [
+        "Features",
+        "Pricing",
+        "Cash Flow Dashboard",
+        "Client Portal",
+        "Reports",
+      ],
+    },
+    {
+      title: "Resources",
+      links: ["Help Centre", "Video Guides", "Blog", "API Docs", "Community"],
+    },
+    {
+      title: "Company",
+      links: [
+        "About SolidFlo",
+        "Contact Us",
+        "Privacy Policy",
+        "Terms of Service",
+        "Made in Africa",
+      ],
+    },
+  ];
+
+  return (
+    <footer
+      style={{
+        background: "#040e0b",
+        borderTop: "1px solid rgba(255,255,255,0.05)",
+        padding: isMobile ? "48px 20px 28px" : "56px 24px 32px",
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "2fr repeat(3, 1fr)",
+            gap: isMobile ? 36 : 40,
+            marginBottom: isMobile ? 36 : 48,
+          }}
+        >
+          {/* Brand */}
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 16,
+              }}
+            >
+              <div
+                style={{
+                  background: "transparent",
+                  width: 160,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                }}
+              >
+                <img src={logo} alt="" />
+              </div>
+            </div>
+            <p
+              style={{
+                color: "rgba(255,255,255,0.3)",
+                fontSize: 13,
+                lineHeight: 1.7,
+                fontFamily: "'Barlow', sans-serif",
+                marginBottom: 20,
+                maxWidth: isMobile ? "100%" : 220,
+              }}
+            >
+              Professional invoicing software built specifically for South
+              African accounting firms and practitioners.
+            </p>
+            <button
+              onClick={onRegister}
+              style={{
+                background: C.green,
+                border: "none",
+                borderRadius: 8,
+                padding: "10px 20px",
+                color: C.white,
+                fontSize: 13,
+                fontWeight: 700,
+                fontFamily: "'Barlow', sans-serif",
+                cursor: "pointer",
+              }}
+            >
+              Get started free
+            </button>
+          </div>
+
+          {/* Link columns — 2-up on mobile so they don't all stack to one long column */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "repeat(2, 1fr)"
+                : "repeat(3, 1fr)",
+              gap: isMobile ? "28px 16px" : 40,
+              gridColumn: isMobile ? "auto" : "span 3",
+            }}
+          >
+            {cols.map((col, i) => (
+              <div key={i}>
+                <p
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: "rgba(255,255,255,0.5)",
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    margin: "0 0 16px",
+                  }}
+                >
+                  {col.title}
+                </p>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {col.links.map((l) => (
+                    <a
+                      key={l}
+                      href="#"
+                      style={{
+                        color: "rgba(255,255,255,0.35)",
+                        fontSize: 13,
+                        fontFamily: "'Barlow', sans-serif",
+                        textDecoration: "none",
+                        transition: "color .15s",
+                      }}
+                      onMouseEnter={(e) => (e.target.style.color = C.white)}
+                      onMouseLeave={(e) =>
+                        (e.target.style.color = "rgba(255,255,255,0.35)")
+                      }
+                    >
+                      {l}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            paddingTop: 24,
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "space-between",
+            alignItems: isMobile ? "flex-start" : "center",
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
+          <p
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
+          >
+            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+          </p>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.2)",
+              fontSize: 12,
+              fontFamily: "'Barlow', sans-serif",
+              margin: 0,
+            }}
+          >
+            Proudly  African ·
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+/* ─── App ───────────────────────────────────────────────────────────────── */
+export default function SubdomainLandingPage() {
+  const navigate = useNavigate();
+  
+  const goLogin = () => navigate("/login");
+  const goRegister = () => {
+  localStorage.setItem("pendingDashboardId", "mechanics"); // use the real id
+  navigate("/register?industry=mechanics");
 };
 
-export default MechanicsDashboard;
+  return (
+    <>
+    <Helmet>
+  <title>Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo</title>
+  <meta
+    name="description"
+    content="Create digital job cards, track parts and labour, and send VAT-compliant invoices in under 60 seconds. Built for African motor mechanics and auto workshops. Free plan available, no credit card required."
+  />
+  <link rel="canonical" href="https://mechanics.solidflo.co.za/" />
+
+  {/* Open Graph */}
+  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
+  <meta
+    property="og:description"
+    content="Job cards, parts tracking, and VAT invoicing — built for African motor workshops."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mechanics.solidflo.co.za/" />
+  <meta property="og:image" content="https://mechanics.solidflo.co.za/og-image.jpg" />
+  <meta property="og:locale" content="en_ZA" />
+
+  {/* Twitter */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
+  <meta
+    name="twitter:description"
+    content="Job cards and VAT invoicing — built for African motor workshops."
+  />
+  <meta name="twitter:image" content="https://mechanics.solidflo.co.za/og-image.jpg" />
+
+  {/* Structured data: software */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SolidFlo for Motor Workshops",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://mechanics.solidflo.co.za/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1200"
+      }
+    })}
+  </script>
+
+  {/* Structured data: FAQ */}
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is SolidFlo really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Workshop or Fleet for unlimited invoicing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are invoices VAT-compliant for SARS?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. Every invoice includes your VAT registration number, correct VAT line items, and the required SARS fields. You can also run a VAT Output report for your accountant."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I send invoices on WhatsApp?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Our Workshop and Fleet plans include one-tap WhatsApp invoicing. The invoice is sent as a PDF link directly to your customer's WhatsApp — no app download required on their side."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I handle parts on job cards?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Add your parts to your inventory once, set your cost price and sell price. When you add a part to a job card, it auto-fills the price and deducts from stock. You always know what's in your storeroom."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can multiple technicians use the same account?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Workshop plan supports up to 5 technicians. Each tech gets their own login and can view and update their assigned jobs. The Fleet plan supports unlimited techs across multiple bays or locations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What payment methods can my customers use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Customers can pay via EFT (with auto-reconciliation), card (Visa/Mastercard via Peach Payments), and instant EFT. You get notified the moment payment is made."
+          }
+        }
+      ]
+    })}
+  </script>
+</Helmet>
+      <style>{fontStyle}</style>
+      <div style={{ minHeight: "100vh", fontFamily: "'Barlow', sans-serif" }}>
+        <Navbar onLogin={goLogin} onRegister={goRegister} />
+        <Hero onRegister={goRegister} />
+        <HowItWorks />
+        <Features />
+        <Pricing onRegister={goRegister} />
+        <Testimonials />
+        <FAQ />
+        <CTABanner onRegister={goRegister} />
+        <Footer onLogin={goLogin} onRegister={goRegister} />
+      </div>
+    </>
+  );
+}
