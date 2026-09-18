@@ -652,36 +652,17 @@ function SubdomainRoot() {
   
   return <Navigate to="/login" replace />;
 }
-function RedirectToSubdomainAuth({ mode }) {
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const industry =
-      params.get("industry") ||
-      localStorage.getItem("pendingDashboardId") ||
-      "mechanics"; // sensible default
 
-    const sub = DASHBOARD_ID_TO_PATH[industry] ? industry : "mechanics";
-    window.location.href = `https://${sub}.solidflo.co.za/${mode}?industry=${industry}`;
-  }, [mode]);
-
-  return <AppLoader />;
-}
 function MainDomainRoot() {
   const { user, loading } = useAuth();
-  const isStandalone = useIsStandalone();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) return;
     if (user && user.emailVerified) {
       navigate("/dashboard", { replace: true });
-      return;
     }
-    if (isStandalone) {
-      // Main domain has no login — redirect to your mechanics or default subdomain
-      window.location.href = "https://mechanics.solidflo.co.za/login";
-    }
-  }, [loading, user, navigate, isStandalone]);
+  }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
   return <LandingPage />;

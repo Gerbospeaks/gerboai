@@ -693,6 +693,7 @@ export default function HeroInvoiceOverlay() {
           font-family:Georgia,serif;font-weight:700;font-size:13px;
         }
         .hio-brand-name{
+         color:white;
           font-weight:700;font-size:13.5px;line-height:1.2;
           display:flex; align-items:center; gap:5px;
         }
@@ -730,7 +731,7 @@ export default function HeroInvoiceOverlay() {
 
         .hio-doctype{text-align:right;}
         .hio-doctype-label{
-          font-family:Georgia,serif;
+          font-family:Georgia,serif; color:var(--hio-accent);text-transform:uppercase;
           font-size:20px;font-weight:700;letter-spacing:0.04em;
         }
         .hio-doctype-no{font-size:10.5px;color:var(--hio-muted);margin-top:2px;}
@@ -749,8 +750,8 @@ export default function HeroInvoiceOverlay() {
           font-size:9.5px;font-weight:700;letter-spacing:0.08em;
           color:var(--hio-accent-strong);text-transform:uppercase;margin-bottom:4px;
         }
-        .hio-party-name{font-size:12.5px;font-weight:600;min-height:16px;}
-        .hio-party-detail{font-size:11px;color:var(--hio-muted);min-height:14px;}
+        .hio-party-name{font-size:12.5px;color:grey;font-weight:600;min-height:16px;}
+        .hio-party-detail{font-size:11px;color:white;min-height:14px;}
 
         .hio-table{margin-bottom:14px;}
         .hio-row{
@@ -770,8 +771,8 @@ export default function HeroInvoiceOverlay() {
         .hio-col-qty{text-align:center;}
         .hio-col-rate{text-align:right;}
         .hio-col-amt{text-align:right;}
-        .hio-desc{font-size:12px;line-height:1.3;}
-        .hio-num{font-size:12px;font-variant-numeric:tabular-nums;}
+        .hio-desc{font-size:12px;color:white;line-height:1.3;}
+        .hio-num{font-size:12px;color:white;font-variant-numeric:tabular-nums;}
         .hio-amount{font-weight:700;}
 
         .hio-cursor{
@@ -794,7 +795,7 @@ export default function HeroInvoiceOverlay() {
           font-size:12px;color:var(--hio-muted);
         }
         .hio-total-final{
-          font-size:14px;font-weight:700;color:var(--hio-ink);
+          font-size:14px;color:red;font-weight:700;
           margin-top:4px;padding-top:8px;
           border-top:1px dashed oklch(88% 0.01 95);
         }

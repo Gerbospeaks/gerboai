@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { dashboards } from "../config/dashboardConfig";
 import logo from "../assets/img/solidflo.png";
@@ -80,7 +80,7 @@ export default function Register() {
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-
+const [params] = useSearchParams();
   // ── Read the industry the user picked on the landing page ──────────────────
   const [dashboardId, setDashboardId] = useState("");
 
@@ -98,7 +98,11 @@ useEffect(() => {
   }
 }, []);
   const industryInfo = dashboards.find((d) => d.id === dashboardId);
-
+const industry =
+  params.get("industry") ||
+  localStorage.getItem("pendingDashboardId") ||
+  getSubdomainFromHost() ||   // still works if someone lands on a subdomain
+  null;
   const { register } = useAuth();
   const navigate = useNavigate();
 
