@@ -806,7 +806,13 @@ function Hero({ onRegister }) {
             >
               <span>💰</span> Payment received!
             </div>
-            <MockInvoice />
+           <MockInvoice
+  config={{
+    label: "Solar",
+    color: C.sunDark || C.sun,
+    accent: C.sun,
+  }}
+/>
           </div>
         </div>
       </div>
