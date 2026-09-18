@@ -26,6 +26,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsPage from "./pages/TermsPage";
 import AuthAction from "./pages/AuthAction";
+import HelpCenter from "./pages/HelpCenter";
 import DashboardRouter from "./components/DashboardRouter";
 import FinancialOverview from "./pages/FinancialOverview";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -90,6 +91,8 @@ import PestcontrolDashboard from "./pages/pest-control/PestcontrolDashboard";
 import PoolservicesDashboard from "./pages/pool-services/PoolservicesDashboard";
 import SolarDashboard from "./pages/solar-installation/SolarDashboard";
 import TowingDashboard from "./pages/towing/TowingDashboard";
+import Community from "./pages/Community";
+import Partners from "./pages/Partners";
 import WindowrepairDashboard from "./pages/window-repair/WindowrepairDashboard";
 import HVACDashboard from "./pages/hvac/HVACDashboard";
 import CarpentryDashboard from "./pages/carpentry/CarpentryDashboard";
@@ -121,6 +124,7 @@ const PUBLIC_ROUTES = new Set([
   "/login",
   "/register",
   "/auth-action",
+  "/help-center",
 ]);
 
 // ─── Full-page spinner shown while Firebase resolves auth state ───────────────
@@ -710,6 +714,8 @@ useEffect(() => {
               <Route path="/market" element={<SolidMarket />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsPage />} />
+              <Route path="/help-center" element={<HelpCenter />} />
+              <Route path="/community" element={<Community />} />
               <Route path="/auth-action" element={<AuthAction />} />
               <Route
                 path="/marketplace/:industry"
@@ -735,6 +741,9 @@ useEffect(() => {
               <Route path="/blogs" element={<BlogPostPage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsPage />} />
+              <Route path="/help-center" element={<HelpCenter />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/partners" element={<Partners />} />
               <Route path="/auth-action" element={<AuthAction />} />
 
               {/* Auth is subdomain-only — block direct access on main domain */}

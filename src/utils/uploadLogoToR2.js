@@ -15,7 +15,7 @@
 // 3. Swapped console.log debug spam for a single DEBUG flag so you can dial
 //    verbosity up/down without deleting log lines.
 
-const DEBUG = typeof __DEV__ !== "undefined" && __DEV__;
+const DEBUG = process.env.NODE_ENV === "development";
 
 const log = (...args) => {
   if (DEBUG) console.log(...args);
