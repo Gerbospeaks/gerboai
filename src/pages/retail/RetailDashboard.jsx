@@ -21,7 +21,7 @@ import {
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "../../firebase";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
-import logo from "../../assets/img/solidflo.png";
+import logo from "../../assets/img/solidlogo.png";
 import logotop from "../../assets/img/retail-logo-top.png";
 import {
   LayoutDashboard,
@@ -40,6 +40,7 @@ import {
   Download,
   Printer,
   Trash2,
+  Truck, Globe, Wallet, Building2,
   Edit,
   Save,
   LogOut,
@@ -66,7 +67,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
+import {
+  RetailSidebar, RetailHeader, OverviewHero,
+  PurchasesView, ExpensesView, BranchesView, OnlineOrdersView,
+  normalizeOrders, buildAlerts,
+} from "./RetailDashboardParts";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = (n = 0) =>
   "R " +
@@ -497,7 +502,8 @@ function POSModal({ products, onClose, onComplete }) {
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState("");
   const [payMethod, setPayMethod] = useState("Cash");
-
+const [customer, setCustomer] = useState("");
+const [orderType, setOrderType] = useState("In-store");
   const filtered = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -623,7 +629,18 @@ function POSModal({ products, onClose, onComplete }) {
                 <span>{fmt(total)}</span>
               </div>
             </div>
-
+<div className="grid grid-cols-2 gap-2 mb-3">
+  <div>
+    <label className="block text-xs font-medium text-gray-600 mb-1">Customer</label>
+    <input className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Walk-in" value={customer} onChange={(e) => setCustomer(e.target.value)} />
+  </div>
+  <div>
+    <label className="block text-xs font-medium text-gray-600 mb-1">Order type</label>
+    <select className="w-full border rounded-lg px-3 py-2 text-sm" value={orderType} onChange={(e) => setOrderType(e.target.value)}>
+      {["In-store", "Takeaway", "Delivery"].map((t) => <option key={t}>{t}</option>)}
+    </select>
+  </div>
+</div>
             <div className="mb-3">
               <label className="block text-xs font-medium text-gray-600 mb-1">
                 Payment method
@@ -648,12 +665,12 @@ function POSModal({ products, onClose, onComplete }) {
                 Clear
               </button>
               <button
-                onClick={() => {
-                  if (cart.length) {
-                    onComplete(cart, total, payMethod);
-                    setCart([]);
-                  }
-                }}
+               onClick={() => {
+  if (cart.length) {
+    onComplete(cart, total, payMethod, { customer, orderType });
+    setCart([]);
+  }
+}}
                 className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 flex items-center justify-center gap-1"
               >
                 <CheckCircle className="w-3 h-3" />
@@ -730,12 +747,9 @@ export default function RetailDashboard() {
     description: "",
     imageUrl: "",
   });
-  const [salesData] = useState(
-    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => ({
-      day: d,
-      sales: [12400, 8900, 15200, 11000, 18300, 22100, 9400][i],
-    })),
-  );
+const [posSales, setPosSales] = useState([]);
+const [onlineOrders, setOnlineOrders] = useState([]);
+const [lastSync, setLastSync] = useState(null);
 
   // ── Sync location state
   useEffect(() => {
@@ -813,7 +827,26 @@ export default function RetailDashboard() {
       console.error(e);
     }
   };
+const loadPosSales = async () => {
+  if (!user?.uid) return;
+  try {
+    const snap = await getDocs(query(collection(db, "users", user.uid, "pos_sales"), orderBy("createdAt", "desc"), limit(500)));
+    setPosSales(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  } catch (e) { console.error(e); }
+};
 
+const loadOnlineOrders = async () => {
+  if (!user?.uid) return;
+  try {
+    const snap = await getDocs(query(collection(db, "users", user.uid, "online_orders"), orderBy("createdAt", "desc"), limit(200)));
+    setOnlineOrders(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  } catch (e) { console.error(e); }
+};
+
+const refreshAll = async () => {
+  await Promise.all([loadInvoices(), loadProducts(), loadCustomers(), loadBizInfo(), loadPosSales(), loadOnlineOrders()]);
+  setLastSync(new Date());
+};
   // ── Invoice actions
   const handleSaveInvoice = async (formData) => {
     if (!user?.uid) return;
@@ -909,15 +942,19 @@ export default function RetailDashboard() {
   };
 
   // ── POS checkout
-  const handlePOSComplete = async (cartItems, total, payMethod) => {
+  const handlePOSComplete = async (cartItems, total, payMethod, extra = {}) => {
     if (!user?.uid) return;
     try {
-      await addDoc(collection(db, "users", user.uid, "pos_sales"), {
-        items: cartItems,
-        total,
-        payMethod,
-        createdAt: serverTimestamp(),
-      });
+     await addDoc(collection(db, "users", user.uid, "pos_sales"), {
+  orderNo: 1001 + posSales.length,
+  items: cartItems.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
+  total,
+  payMethod,
+  customer: extra.customer?.trim() || "Walk-in",
+  orderType: extra.orderType || "In-store",
+  status: "paid",
+  createdAt: serverTimestamp(),
+});
       // Decrement stock
       for (const item of cartItems) {
         const p = products.find((pr) => pr.id === item.id);
@@ -958,7 +995,8 @@ export default function RetailDashboard() {
     .filter((i) => i.status === "paid")
     .reduce((a, i) => a + (i.vat || 0), 0);
   const lowStockItems = products.filter((p) => p.stock <= (p.minStock || 5));
-
+const orders = normalizeOrders(posSales, onlineOrders);
+const alerts = buildAlerts({ products, invoices, onlineOrders });
   const filteredInvoices =
     invFilter === "all"
       ? invoices
@@ -971,6 +1009,10 @@ export default function RetailDashboard() {
     { id: "pos", label: "Point of Sale", icon: ShoppingBag },
     { id: "products", label: "Products", icon: Package },
     { id: "customers", label: "Customers", icon: Users },
+    { id: "purchases", label: "Purchases", icon: Truck },
+{ id: "online-orders", label: "Online Orders", icon: Globe },
+{ id: "expenses", label: "Expenses", icon: Wallet },
+{ id: "branches", label: "Branches", icon: Building2 },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "vat", label: "VAT Report", icon: Receipt },
     { id: "settings", label: "Store Settings", icon: Settings },
@@ -992,13 +1034,27 @@ export default function RetailDashboard() {
       console.error(e);
     }
   };
-
+const renderOverview = () => (
+  <div className="space-y-6">
+    <OverviewHero
+      orders={orders}
+      posSales={posSales}
+      customers={customers}
+      lowStockItems={lowStockItems}
+      onReorder={() => setActiveView("purchases")}
+    />
+    <div>
+      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Invoices</div>
+      {renderInvoiceSummary()}
+    </div>
+  </div>
+);
   // ─── Render views ──────────────────────────────────────────────────────────
-  const renderOverview = () => (
+  const renderInvoiceSummary = () => (
     <div className="space-y-6">
       {lowStockItems.length > 0 && (
         <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 text-sm text-yellow-800">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+          
           <span>
             <strong>Stock alert:</strong>{" "}
             {lowStockItems.map((p) => p.name).join(", ")} need restocking.
@@ -1047,53 +1103,7 @@ export default function RetailDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Sales chart */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="text-sm font-semibold text-gray-800 mb-4">
-            Weekly sales
-          </div>
-          <SparkBars data={salesData} valueKey="sales" labelKey="day" />
-        </div>
-
-        {/* Invoice breakdown */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-          <div className="text-sm font-semibold text-gray-800 mb-4">
-            Invoice status
-          </div>
-          <div className="space-y-3">
-            {[
-              { status: "paid", label: "Paid", color: "#16a34a" },
-              { status: "pending", label: "Pending", color: "#d97706" },
-              { status: "overdue", label: "Overdue", color: "#dc2626" },
-              { status: "draft", label: "Draft", color: "#9ca3af" },
-            ].map(({ status, label, color }) => {
-              const count = invoices.filter((i) => i.status === status).length;
-              const pct = invoices.length
-                ? Math.round((count / invoices.length) * 100)
-                : 0;
-              return (
-                <div key={status} className="flex items-center gap-3">
-                  <div
-                    className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: color }}
-                  />
-                  <span className="text-sm text-gray-600 w-16">{label}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-                    <div
-                      className="h-1.5 rounded-full"
-                      style={{ width: pct + "%", background: color }}
-                    />
-                  </div>
-                  <span className="text-xs text-gray-500 w-6 text-right">
-                    {count}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      
 
       {/* Recent invoices */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
@@ -1877,90 +1887,39 @@ export default function RetailDashboard() {
     analytics: renderAnalytics,
     vat: renderVAT,
     settings: renderSettings,
+    purchases: () => <PurchasesView user={user} />,
+"online-orders": () => <OnlineOrdersView user={user} onChanged={loadOnlineOrders} />,
+expenses: () => <ExpensesView user={user} />,
+branches: () => <BranchesView user={user} />,
   };
 
   // ─── JSX ──────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden print:block">
-      {/* Sidebar */}
-      <aside
-        className={`${sidebarOpen ? "w-56" : "w-0 overflow-hidden"} bg-white border-r border-gray-100 flex flex-col transition-all duration-200 flex-shrink-0 print:hidden`}
-      >
-        <div className="px-4 py-4 border-b flex items-center gap-2">
-          <img src={logo} alt="SolidFlo" className="h-8 object-contain" />
-        </div>
-        <nav className="flex-1 py-2 px-2 overflow-y-auto">
-          {navItems.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => handleNav(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm mb-0.5 transition-colors ${
-                activeView === id && id !== "pos"
-                  ? "bg-blue-50 text-blue-700 font-medium"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              {label}
-            </button>
-          ))}
-        </nav>
-        <div className="px-3 py-3 border-t">
-          <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50">
-            <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
-              {user?.displayName?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium text-gray-800 truncate">
-                {user?.displayName || user?.email}
-              </div>
-              <div className="text-[10px] text-gray-400">Retail Plan</div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-gray-700 flex-shrink-0"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </aside>
+   <RetailSidebar
+  navItems={navItems}
+  activeView={activeView}
+  sidebarOpen={sidebarOpen}
+  onNav={handleNav}
+  businessInfo={bizInfo}
+  alertCount={alerts.length}
+/>
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between flex-shrink-0 print:hidden">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <span className="font-semibold text-gray-800 capitalize">
-              {activeView}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setEditingInvoice(null);
-                setShowInvoiceModal(true);
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4" />
-              New Invoice
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </header>
-
+      <RetailHeader
+  activeView={activeView}
+  viewLabel={navItems.find((n) => n.id === activeView)?.label || ""}
+  user={user}
+  businessInfo={bizInfo}
+  onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+  lastSync={lastSync}
+  onSync={refreshAll}
+  alerts={alerts}
+  onOpenAlert={handleNav}
+  onNewInvoice={() => { setEditingInvoice(null); setShowInvoiceModal(true); }}
+  onLogout={handleLogout}
+/>
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-5">
           {(views[activeView] || (() => null))()}
@@ -2019,10 +1978,10 @@ export default function RetailDashboard() {
         <POSModal
           products={products}
           onClose={() => setShowPOS(false)}
-          onComplete={async (cart, total, method) => {
-            await handlePOSComplete(cart, total, method);
-            setShowPOS(false);
-          }}
+          onComplete={async (cart, total, method, extra) => {
+  await handlePOSComplete(cart, total, method, extra);
+  setShowPOS(false);
+}}
         />
       )}
 

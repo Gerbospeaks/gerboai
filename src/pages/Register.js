@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { dashboards } from "../config/dashboardConfig";
-import logo from "../assets/img/solidflo.png";
+import logo from "../assets/img/solidlogo.png";
 import slide1 from "../assets/img/slide1.avif";
 import slide2 from "../assets/img/slide2.avif";
 import slide3 from "../assets/img/slide3.jpg";
