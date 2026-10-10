@@ -572,7 +572,7 @@ function Navbar({ onLogin, onRegister }) {
     </nav>
   );
 }
-function Hero({ onRegister }) {
+function Hero({ config, onRegister }) {
   return (
     <section
       style={{
@@ -801,7 +801,7 @@ function Hero({ onRegister }) {
             >
               <span>💰</span> Payment received!
             </div>
-            <MockInvoice />
+           <MockInvoice config={config} />
           </div>
         </div>
       </div>
@@ -1400,9 +1400,8 @@ function Footer({ config, onLogin, onRegister }) {
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
                 {col.links.map((l) => (
-                  <a
-                    key={l}
-                    href="#"
+                  <a  href="#"
+                    key={l}                 
                     style={{
                       color: "rgba(255,255,255,0.35)",
                       fontSize: 13,

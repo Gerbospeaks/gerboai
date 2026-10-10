@@ -656,7 +656,13 @@ function SubdomainRoot() {
   
   return <Navigate to="/login" replace />;
 }
-
+class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    return this.state.hasError ? <p>Something went wrong. Please refresh.</p> : this.props.children;
+  }
+}
 function MainDomainRoot() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -679,6 +685,7 @@ useEffect(() => {
     if (subdomain) injectDynamicManifest(subdomain);
   }, []);
   return (
+    <ErrorBoundary>
     <Router>
       <CurrencyProvider>
       <AuthProvider>
@@ -779,6 +786,7 @@ useEffect(() => {
       </AuthProvider>
       </CurrencyProvider>
     </Router>
+    </ErrorBoundary>
   );
 }
 
