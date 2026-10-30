@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import React from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { getDashboardRoute } from "../utils/dashboardRoutes";
 import {
   sendPasswordResetEmail,
 } from "firebase/auth";
@@ -244,10 +245,12 @@ function LoginView() {
   try {
     const result = await login(email, password);
 
-    if (result.success) {
-      // AuthContext login() already verified email check + signed out if unverified
-      navigate("/dashboard"); // DashboardRouter handles the industry redirect
-    } else {
+   if (result.success) {
+  navigate(
+    result.isAdmin ? "/admin" : getDashboardRoute(result.dashboardId),
+    { replace: true },
+  );
+}else {
       setError(result.message);
     }
   } catch (err) {

@@ -1,13 +1,13 @@
 // DashboardRouter.jsx
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate  } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { DASHBOARD_ID_TO_PATH } from "../constants/dashboardPaths";
 
 function DashboardRouter() {
-  const { user, userDashboard, loading } = useAuth();
   const navigate = useNavigate();
-
+const [failed, setFailed] = useState(false);
+const { user, userDashboard, loading, logout } = useAuth();
   useEffect(() => {
     if (loading) return;
 

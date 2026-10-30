@@ -28,13 +28,6 @@ function ProtectedRoute({ children }) {
   if (!user.emailVerified) {
     return <Navigate to="/login" replace />;
   }
-
-  const subdomain = getSubdomain();
-  if (subdomain && userDashboard && subdomain !== userDashboard) {
-    window.location.href = `https://${userDashboard}.solidflo.co.za`;
-    return null;
-  }
-
   return children;
 }
 
