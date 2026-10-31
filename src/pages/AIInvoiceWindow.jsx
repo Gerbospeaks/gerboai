@@ -9,6 +9,8 @@ import {
   serverTimestamp,
   doc,
   getDoc,
+  setDoc,
+  runTransaction,
 } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import logo from "../assets/img/solidflo-logo.png";
@@ -17,51 +19,56 @@ import { callClaude, extractInvoiceData } from "../utils/api";
 import {
   Sparkles,
   Send,
-  RotateCcw,
-  User,
-  Search,
   Copy,
   Check,
   AlertCircle,
   Loader2,
   Database,
-  RefreshCw,
-  Printer,
   Download,
+  Save,
   FileText,
   ArrowLeft,
   PanelRightClose,
   PanelRight,
   Receipt,
   ShoppingCart,
-  ChevronRight,
-  ChevronLeft,
-  LayoutDashboard,
-  Users,
-  List,
-  BarChart2,
-  Layers,
-  Settings,
-  Lightbulb,
-  MessageSquare,
-  Eye,
+  Plus,
+  Search,
+  PanelLeft,
   Menu,
   X,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
-import CustomerModal from "./CustomerModal";
+
+/* ───────────────── Claude-style theme ───────────────── */
+const C = {
+  bg: "#1f1e1d",
+  sidebar: "#262624",
+  panel: "#2b2a28",
+  input: "#30302e",
+  hover: "rgba(255,255,255,.06)",
+  active: "rgba(255,255,255,.1)",
+  border: "rgba(255,255,255,.09)",
+  text: "#faf9f5",
+  muted: "#9c9a92",
+  faint: "#6f6d66",
+  accent: "#d97757",
+  serif: "'Tiempos Headline','Tiempos Text',Georgia,'Times New Roman',serif",
+  sans: "'DM Sans',-apple-system,'Segoe UI',system-ui,sans-serif",
+};
 
 const DOC_TYPES = [
-  { id: "invoice",        label: "New Invoice",        sublabel: "Bill a client",       icon: FileText,    color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
-  { id: "estimate",       label: "New Quote",          sublabel: "Send a quote",        icon: Receipt,     color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe" },
-  { id: "purchase_order", label: "New Purchase Order", sublabel: "Order from supplier", icon: ShoppingCart,color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
+  { id: "invoice", label: "New Invoice", short: "Invoice", icon: FileText },
+  { id: "estimate", label: "New Quote", short: "Quote", icon: Receipt },
+  {
+    id: "purchase_order",
+    label: "New Purchase Order",
+    short: "Purchase Order",
+    icon: ShoppingCart,
+  },
 ];
-const NAV_ITEMS = [
-  { id: "search",   label: "Search",   icon: Search  },
-  { id: "chats",    label: "Chats",    icon: MessageSquare },
-  { id: "invoices", label: "Invoices", icon: FileText },
-  { id: "quotes",   label: "Quotes",   icon: Receipt },
-  { id: "recents",  label: "Recents",  icon: List    },
-];
+
 const SUGGESTIONS = {
   invoice: [
     "Invoice my last client for bookkeeping — 8hrs at R650/hr",
@@ -78,6 +85,96 @@ const SUGGESTIONS = {
     "Order 3 laptops at R12,500 each from TechSupplies",
     "PO for cleaning supplies R3,200 total",
   ],
+};
+
+/* ───────────────── Data ───────────────── */
+// Same collections and field names the dashboard uses
+const DOC_COLLECTIONS = [
+  { col: "invoices", docType: "invoice" },
+  { col: "quotations", docType: "estimate" },
+  { col: "purchaseOrders", docType: "purchase_order" },
+];
+
+const colFor = (docType) =>
+  docType === "purchase_order"
+    ? "purchaseOrders"
+    : docType === "estimate"
+      ? "quotations"
+      : "invoices";
+
+const typeLabel = (docType) =>
+  docType === "estimate"
+    ? "Quote"
+    : docType === "purchase_order"
+      ? "PO"
+      : "Invoice";
+
+// Turn a dashboard-shaped document into one flat shape the AI window can use
+const normalizeDoc = (id, d, col, docType) => {
+  const isPO = col === "purchaseOrders";
+  const totals = d.totals || {};
+  return {
+    id,
+    _col: col,
+    docType,
+    clientId: d.clientId || null,
+    number: d.jobCardNumber || d.invoiceNumber || d.poNumber || id,
+    customerName:
+      (isPO ? d.supplierName : d.customer?.name) || d.customerName || "",
+    customerEmail: (isPO ? d.supplierEmail : d.customer?.email) || "",
+    customerPhone: (isPO ? d.supplierPhone : d.customer?.phone) || "",
+    customerAddress: (isPO ? d.supplierAddress : d.customer?.address) || "",
+    items: (d.items || []).map((it) => ({
+      ...it,
+      rate: it.rate ?? it.unitPrice ?? 0,
+      category: it.category || it.type || "Service",
+    })),
+    subtotal: totals.subtotal ?? d.subtotal ?? 0,
+    totalTax: totals.vat ?? d.totalTax ?? 0,
+    total: totals.total ?? d.total ?? 0,
+    paymentStatus: { status: d.status || "pending" },
+    dueDate: d.dueDate || d.dates?.dueDate || null,
+    createdAt: d.createdAt || null,
+  };
+};
+
+const tsSeconds = (t) =>
+  t?.seconds ? t.seconds : t?.toDate ? t.toDate().getTime() / 1000 : 0;
+
+// Mirrors the dashboard's counter logic so numbers never collide
+const generateDocNumber = async (uid, col) => {
+  const prefix =
+    col === "quotations" ? "QT" : col === "purchaseOrders" ? "PO" : "JC";
+  const base = col === "purchaseOrders" ? 0 : 891;
+  const counterRef = doc(db, "users", uid, "counters", col);
+
+  const counterSnap = await getDoc(counterRef);
+  if (!counterSnap.exists()) {
+    let max = base;
+    const snap = await getDocs(collection(db, "users", uid, col));
+    snap.forEach((d) => {
+      const data = d.data();
+      const m = (data.jobCardNumber || data.poNumber || "").match(/(\d+)$/);
+      if (m && Number(m[1]) > max) max = Number(m[1]);
+    });
+    await setDoc(
+      counterRef,
+      { value: max, updatedAt: serverTimestamp() },
+      { merge: true },
+    );
+  }
+
+  const next = await runTransaction(db, async (tx) => {
+    const snap = await tx.get(counterRef);
+    const current = snap.exists() ? snap.data().value || base : base;
+    tx.set(
+      counterRef,
+      { value: current + 1, updatedAt: serverTimestamp() },
+      { merge: true },
+    );
+    return current + 1;
+  });
+  return `${prefix}-${new Date().getFullYear()}-${String(next).padStart(4, "0")}`;
 };
 
 const loadAllUserData = async (uid) => {
@@ -121,19 +218,24 @@ const loadAllUserData = async (uid) => {
   } catch (e) {
     console.warn("clients:", e.message);
   }
-  try {
-    const snap = await getDocs(
-      query(
-        collection(db, "users", uid, "invoices"),
-        orderBy("createdAt", "desc"),
-      ),
-    );
-    result.recentInvoices = snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((i) => !i._placeholder);
-  } catch (e) {
-    console.warn("invoices:", e.message);
+  const all = [];
+  for (const { col, docType } of DOC_COLLECTIONS) {
+    try {
+      const snap = await getDocs(
+        query(collection(db, "users", uid, col), orderBy("createdAt", "desc")),
+      );
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        if (!data._placeholder)
+          all.push(normalizeDoc(d.id, data, col, docType));
+      });
+    } catch (e) {
+      console.warn(`${col}:`, e.message);
+    }
   }
+  result.recentInvoices = all.sort(
+    (a, b) => tsSeconds(b.createdAt) - tsSeconds(a.createdAt),
+  );
   return result;
 };
 
@@ -173,7 +275,7 @@ const buildPrompt = (userData, documentType, industry = "default") => {
         .slice(0, 8)
         .map(
           (v, i) =>
-            `${i + 1}. #${v.invoiceNumber || "N/A"} client:"${v.customer?.name || "—"}" items:${JSON.stringify((v.items || []).slice(0, 3).map((it) => ({ d: it.description, r: it.rate, q: it.qty })))}`,
+            `${i + 1}. ${typeLabel(v.docType)} #${v.number || "N/A"} client:"${v.customerName || "—"}" items:${JSON.stringify((v.items || []).slice(0, 3).map((it) => ({ d: it.description, r: it.rate, q: it.qty })))}`,
         )
         .join("\n")}`
     : "## RECENT INVOICES\nNone.";
@@ -247,278 +349,338 @@ const parseResponse = (text) => {
 
 const safeNum = (val) => Number(val) || 0;
 
-/* ── Message Bubble ── */
+const docDate = (d) =>
+  d.createdAt?.seconds
+    ? new Date(d.createdAt.seconds * 1000).toLocaleDateString("en-ZA")
+    : "";
+
+const docStatus = (d) => {
+  const paid = d.paymentStatus?.status === "paid";
+  const overdue =
+    d.dueDate &&
+    !paid &&
+    new Date(d.dueDate?.seconds ? d.dueDate.seconds * 1000 : d.dueDate) <
+      new Date();
+  return paid
+    ? { label: "Paid", color: "#4ade80" }
+    : overdue
+      ? { label: "Overdue", color: "#f87171" }
+      : { label: "Pending", color: "#fbbf24" };
+};
+
+/* ───────────────── Message ───────────────── */
 function Bubble({ msg }) {
   const [copied, setCopied] = useState(false);
   const isUser = msg.role === "user";
-  return (
-    <div
-      className={`flex gap-3 mb-5 ${isUser ? "flex-row-reverse" : "flex-row"}`}
-    >
+
+  if (isUser) {
+    return (
       <div
-        className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5 ${isUser ? "bg-[#1655e0]" : "bg-[#0f172a]"}`}
+        className="sf-msg"
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 22,
+        }}
       >
-        {isUser ? (
-          <User size={14} className="text-white" />
-        ) : (
-          <Sparkles size={14} className="text-white" />
-        )}
-      </div>
-      <div
-        className={`flex flex-col gap-1.5 ${isUser ? "items-end" : "items-start"}`}
-        style={{ maxWidth: "85%", width: "100%" }}
-      >
-        <span
-          className={`text-[10px] font-bold tracking-widest uppercase ${isUser ? "text-[#1655e0]" : "text-[#64748b]"}`}
-        >
-          {isUser ? "You" : "SolidFlo AI"}
-        </span>
         <div
-          className={`px-4 py-3 text-[13.5px] leading-relaxed ${isUser ? "bg-[#1655e0] text-white rounded-[18px_4px_18px_18px] shadow-lg shadow-[#1655e0]/20" : "bg-white text-[#1e293b] rounded-[4px_18px_18px_18px] border border-[#e5e7eb] shadow-sm"}`}
+          style={{
+            maxWidth: "80%",
+            background: C.input,
+            color: C.text,
+            padding: "10px 16px",
+            borderRadius: 16,
+            fontSize: 15,
+            lineHeight: 1.6,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          }}
         >
           {msg.content}
         </div>
-        {!isUser && (msg.appliedClient || msg.appliedItems) && (
-          <div className="flex items-center gap-2 flex-wrap">
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="sf-msg"
+      style={{ display: "flex", gap: 12, marginBottom: 26 }}
+    >
+      <div style={{ paddingTop: 3, flexShrink: 0 }}>
+        <Sparkles size={18} color={C.accent} />
+      </div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div
+          style={{
+            color: C.text,
+            fontSize: 15,
+            lineHeight: 1.7,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          }}
+        >
+          {msg.content}
+        </div>
+        {(msg.appliedClient || msg.appliedItems) && (
+          <div
+            style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}
+          >
             {msg.appliedClient && (
-              <span className="flex items-center gap-1 text-[11px] text-[#1d4ed8] font-semibold bg-[#eff6ff] border border-[#bfdbfe] px-2 py-0.5 rounded-full">
-                <Database size={10} /> Loaded: {msg.appliedClient}
+              <span style={chip("#93c5fd")}>
+                <Database size={11} /> Loaded: {msg.appliedClient}
               </span>
             )}
             {msg.appliedItems > 0 && (
-              <span className="flex items-center gap-1 text-[11px] text-green-700 font-semibold bg-[#f0fdf4] border border-[#bbf7d0] px-2 py-0.5 rounded-full">
-                <Check size={10} /> {msg.appliedItems} item
+              <span style={chip("#4ade80")}>
+                <Check size={11} /> {msg.appliedItems} item
                 {msg.appliedItems > 1 ? "s" : ""} added
               </span>
             )}
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(msg.content);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-              }}
-              className="text-[#cbd5e1] hover:text-[#64748b] transition-colors p-0.5"
-            >
-              {copied ? (
-                <Check size={12} className="text-green-500" />
-              ) : (
-                <Copy size={12} />
-              )}
-            </button>
           </div>
         )}
-        {!isUser && msg.clientSaved && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 12px",
-              borderRadius: 20,
-              background: "#f0fdf4",
-              border: "1px solid #bbf7d0",
-              fontSize: 11,
-              color: "#15803d",
-              fontWeight: 600,
-              marginTop: 2,
-            }}
-          >
-            <Check size={12} /> Client saved to your contacts!
+        <button
+          className="sf-icon"
+          onClick={() => {
+            navigator.clipboard.writeText(msg.content);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }}
+          style={{
+            marginTop: 8,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: C.faint,
+            padding: 4,
+            borderRadius: 6,
+            display: "flex",
+          }}
+          title="Copy"
+        >
+          {copied ? <Check size={14} color="#4ade80" /> : <Copy size={14} />}
+        </button>
+        {msg.clientSaved && (
+          <div style={{ ...chip("#4ade80"), marginTop: 6 }}>
+            <Check size={11} /> Client saved to your contacts!
           </div>
         )}
       </div>
     </div>
   );
 }
+
+const chip = (color) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 5,
+  fontSize: 11.5,
+  fontWeight: 600,
+  color,
+  padding: "3px 10px",
+  borderRadius: 20,
+  border: `1px solid ${color}40`,
+  background: `${color}14`,
+});
 
 function TypingDots() {
   return (
-    <div className="flex gap-3 mb-5">
-      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-[#0f172a]">
-        <img src={logo} alt="SolidFlo" style={{ width: 14, height: 14 }} />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <span className="text-[10px] font-bold tracking-widest uppercase text-[#64748b]">
-          SolidFlo AI
-        </span>
-        <div className="px-4 py-3 bg-white border border-[#e5e7eb] rounded-[4px_18px_18px_18px] shadow-sm inline-flex gap-1.5 items-center">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="w-2 h-2 rounded-full bg-[#94a3b8]"
-              style={{
-                animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
-              }}
-            />
-          ))}
-        </div>
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        marginBottom: 24,
+        alignItems: "center",
+      }}
+    >
+      <Sparkles
+        size={18}
+        color={C.accent}
+        style={{ animation: "sfPulse 1.4s ease-in-out infinite" }}
+      />
+      <div style={{ display: "flex", gap: 5 }}>
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: C.muted,
+              animation: `sfBounce 1.2s ease-in-out ${i * 0.18}s infinite`,
+            }}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-function DocSidebar({
-  activeType,
-  onChange,
+/* ───────────────── Sidebar (Claude style: New / nav / Recents) ───────────────── */
+function Sidebar({
   collapsed,
   onToggle,
-  businessInfo,
+  isMobile,
+  onClose,
+  documentType,
+  onChangeType,
+  onNew,
+  onExit,
+  docs,
+  selectedDoc,
+  onSelectDoc,
   user,
+  businessInfo,
   onLogout,
-  userData,
-  activeNav,
-  onNavSelect,
 }) {
+  const [showAll, setShowAll] = useState(false);
+  const [q, setQ] = useState("");
+  const narrow = collapsed && !isMobile;
+
+  const filtered = docs.filter(
+    (d) =>
+      !q ||
+      [d.customerName, d.number].some((f) =>
+        f?.toString().toLowerCase().includes(q.toLowerCase()),
+      ),
+  );
+  const list = showAll ? filtered : filtered.slice(0, 6);
+
+  const row = (active) => ({
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: narrow ? "9px 0" : "8px 10px",
+    justifyContent: narrow ? "center" : "flex-start",
+    borderRadius: 8,
+    border: "none",
+    background: active ? C.active : "transparent",
+    color: C.text,
+    cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 500,
+    fontFamily: "inherit",
+    textAlign: "left",
+  });
+
+  const initial = (user?.name || user?.email || "?")[0].toUpperCase();
+
   return (
-    <div style={{
-      width: collapsed ? 64 : 220,
-      flexShrink: 0,
-      background: "#0f172a",
-      display: "flex",
-      flexDirection: "column",
-      borderRight: "1px solid rgba(255,255,255,.07)",
-      transition: "width .25s ease",
-      overflow: "hidden",
-    }}>
-      {/* ── Header ── */}
-      <div style={{
-        height: 52,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: collapsed ? "center" : "space-between",
-        padding: collapsed ? 0 : "0 14px",
-        borderBottom: "1px solid rgba(255,255,255,.07)",
+    <div
+      style={{
+        width: isMobile ? 290 : narrow ? 56 : 264,
         flexShrink: 0,
-      }}>
-        {!collapsed && (
+        background: C.sidebar,
+        borderRight: `1px solid ${C.border}`,
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        transition: "width .22s ease",
+        overflow: "hidden",
+      }}
+    >
+      {/* header */}
+      <div
+        style={{
+          height: 54,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: narrow ? "center" : "space-between",
+          padding: narrow ? 0 : "0 12px",
+          flexShrink: 0,
+        }}
+      >
+        {!narrow && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src={logo} alt="SolidFlo" style={{ width: 18, height: 18 }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>SolidFlo</span>
+            <img src={logo} alt="SolidFlo" style={{ width: 20, height: 20 }} />
+            <span
+              style={{
+                fontFamily: C.serif,
+                fontSize: 21,
+                fontWeight: 500,
+                color: C.text,
+              }}
+            >
+              SolidFlo
+            </span>
           </div>
         )}
-        <button onClick={onToggle} style={{
-          background: "rgba(255,255,255,.07)",
-          border: "1px solid rgba(255,255,255,.1)",
-          borderRadius: 7, color: "rgba(255,255,255,.6)",
-          cursor: "pointer", width: 28, height: 28,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
+        <button
+          className="sf-icon"
+          onClick={isMobile ? onClose : onToggle}
+          style={{
+            background: "none",
+            border: "none",
+            color: C.muted,
+            cursor: "pointer",
+            padding: 6,
+            borderRadius: 6,
+            display: "flex",
+          }}
+          title={isMobile ? "Close" : "Toggle sidebar"}
+        >
+          {isMobile ? <X size={18} /> : <PanelLeft size={18} />}
         </button>
       </div>
 
-      {/* ── Create New ── */}
-      <div style={{ padding: collapsed ? "12px 8px" : "12px 8px 4px" }}>
-        {!collapsed && (
-          <div style={{
-            fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,.3)",
-            letterSpacing: ".08em", textTransform: "uppercase",
-            marginBottom: 6, paddingLeft: 4,
-          }}>Create New</div>
-        )}
-        {DOC_TYPES.map((item) => {
-          const Icon = item.icon;
-          const active = activeType === item.id && !activeNav;
+      {/* primary actions */}
+      <div style={{ padding: "4px 8px" }}>
+        <button
+          className="sf-row"
+          onClick={onNew}
+          style={{ ...row(false), background: C.active }}
+          title="New"
+        >
+          <span
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              background: C.accent,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <Plus size={13} color="#fff" strokeWidth={3} />
+          </span>
+          {!narrow && "New chat"}
+        </button>
+
+        {DOC_TYPES.map((t) => {
+          const Icon = t.icon;
+          const active = documentType === t.id;
           return (
-            <button key={item.id} onClick={() => { onChange(item.id); onNavSelect(null); }}
-              title={collapsed ? item.label : undefined}
+            <button
+              key={t.id}
+              className="sf-row"
+              onClick={() => onChangeType(t.id)}
+              title={narrow ? t.label : undefined}
               style={{
-                width: "100%", display: "flex", alignItems: "center",
-                gap: 10, padding: collapsed ? "10px 0" : "8px 12px",
-                justifyContent: collapsed ? "center" : "flex-start",
-                borderRadius: 10, marginBottom: 2,
-                border: active ? `1px solid ${item.color}40` : "1px solid transparent",
-                background: active ? `${item.color}20` : "transparent",
-                cursor: "pointer", transition: "all .15s", position: "relative",
+                ...row(false),
+                color: active ? C.text : C.muted,
+                marginTop: 2,
               }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,.05)"; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
             >
-              {collapsed && active && (
-                <div style={{
-                  position: "absolute", left: 4, width: 3, height: 20,
-                  borderRadius: 2, background: item.color,
-                }} />
-              )}
-              <div style={{
-                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                background: active ? item.color : "rgba(255,255,255,.08)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "background .15s",
-              }}>
-                <Icon size={15} color={active ? "#fff" : "rgba(255,255,255,.5)"} />
-              </div>
-              {!collapsed && (
-                <div style={{ textAlign: "left", minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: active ? "#fff" : "rgba(255,255,255,.65)", whiteSpace: "nowrap" }}>
-                    {item.label}
-                  </div>
-                  <div style={{ fontSize: 10, color: active ? "rgba(255,255,255,.5)" : "rgba(255,255,255,.3)", whiteSpace: "nowrap" }}>
-                    {item.sublabel}
-                  </div>
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      <div style={{ height: 1, background: "rgba(255,255,255,.06)", margin: "6px 0" }} />
-
-      {/* ── Navigation ── */}
-      <div style={{ padding: collapsed ? "4px 8px" : "4px 8px", flex: 1 }}>
-        {!collapsed && (
-          <div style={{
-            fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,.3)",
-            letterSpacing: ".08em", textTransform: "uppercase",
-            marginBottom: 6, paddingLeft: 4,
-          }}>Library</div>
-        )}
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const active = activeNav === item.id;
-
-          // Badge counts
-          const badge = item.id === "invoices"
-            ? userData?.recentInvoices?.filter(i => i.documentType === "invoice" || !i.documentType).length || null
-            : item.id === "quotations"
-            ? userData?.recentInvoices?.filter(i => i.documentType === "estimate").length || null
-            : item.id === "recents"
-            ? Math.min(userData?.recentInvoices?.length || 0, 5) || null
-            : null;
-
-          return (
-            <button key={item.id} onClick={() => onNavSelect(item.id)}
-              title={collapsed ? item.label : undefined}
-              style={{
-                width: "100%", display: "flex", alignItems: "center",
-                gap: 10, padding: collapsed ? "10px 0" : "8px 12px",
-                justifyContent: collapsed ? "center" : "flex-start",
-                borderRadius: 10, marginBottom: 2,
-                border: active ? "1px solid rgba(22,85,224,.4)" : "1px solid transparent",
-                background: active ? "rgba(22,85,224,.2)" : "transparent",
-                cursor: "pointer", transition: "all .15s",
-              }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,.05)"; }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
-            >
-              <div style={{
-                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                background: active ? "rgba(22,85,224,.4)" : "rgba(255,255,255,.08)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <Icon size={15} color={active ? "#93c5fd" : "rgba(255,255,255,.5)"} />
-              </div>
-              {!collapsed && (
+              <Icon
+                size={17}
+                color={active ? C.accent : C.muted}
+                style={{ flexShrink: 0 }}
+              />
+              {!narrow && (
                 <>
-                  <div style={{ flex: 1, fontSize: 12, fontWeight: 700, color: active ? "#fff" : "rgba(255,255,255,.65)", textAlign: "left" }}>
-                    {item.label}
-                  </div>
-                  {badge && (
-                    <div style={{
-                      padding: "2px 7px", borderRadius: 10, fontSize: 10,
-                      fontWeight: 700, background: "rgba(22,85,224,.25)", color: "#93c5fd",
-                    }}>{badge}</div>
+                  <span style={{ flex: 1 }}>{t.label}</span>
+                  {active && (
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: C.accent,
+                      }}
+                    />
                   )}
                 </>
               )}
@@ -527,504 +689,270 @@ function DocSidebar({
         })}
       </div>
 
-      <div style={{ height: 1, background: "rgba(255,255,255,.06)", margin: "4px 0" }} />
+      {/* recents */}
+      {!narrow ? (
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+            padding: "16px 8px 0",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "0 10px 6px",
+              fontSize: 12,
+              fontWeight: 600,
+              color: C.muted,
+            }}
+          >
+            Recents <ChevronDown size={12} />
+          </div>
 
-      {/* ── User ── */}
-      {!collapsed && (
-        <div style={{ padding: "10px 14px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                background: "linear-gradient(135deg,#1655e0,#7c3aed)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 11, fontWeight: 700, color: "#fff",
-              }}>
-                {(user?.name || user?.email || "?")[0].toUpperCase()}
+          {showAll && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                margin: "0 4px 8px",
+                padding: "6px 10px",
+                borderRadius: 8,
+                background: C.input,
+              }}
+            >
+              <Search size={13} color={C.muted} />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search recents…"
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  background: "none",
+                  color: C.text,
+                  fontSize: 13,
+                  fontFamily: "inherit",
+                }}
+              />
+            </div>
+          )}
+
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+            {list.length === 0 ? (
+              <div
+                style={{ padding: "8px 10px", fontSize: 13, color: C.faint }}
+              >
+                Nothing yet — create your first document.
               </div>
-              <div style={{ minWidth: 0 }}>
-                {businessInfo?.businessName && (
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.8)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 120 }}>
-                    {businessInfo.businessName}
-                  </div>
-                )}
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.35)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 120 }}>
+            ) : (
+              list.map((d, i) => {
+                const st = docStatus(d);
+                const active = selectedDoc?.id === d.id;
+                const tLabel = typeLabel(d.docType);
+                return (
+                  <button
+                    key={d.id || i}
+                    className="sf-row"
+                    onClick={() => onSelectDoc(d)}
+                    style={{
+                      ...row(active),
+                      padding: "7px 10px",
+                      fontWeight: 400,
+                      gap: 8,
+                      display: "flex",
+                    }}
+                    title={`${tLabel} #${d.number || ""}`}
+                  >
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        color: active ? C.text : "rgba(250,249,245,.85)",
+                      }}
+                    >
+                      {d.customerName || "Unknown client"}
+                      <span style={{ color: C.faint }}>
+                        {" "}
+                        · {tLabel} {d.number ? `#${d.number}` : ""}
+                      </span>
+                    </span>
+                    <span
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        background: st.color,
+                        flexShrink: 0,
+                      }}
+                      title={st.label}
+                    />
+                  </button>
+                );
+              })
+            )}
+            {filtered.length > 6 && (
+              <button
+                className="sf-row"
+                onClick={() => setShowAll((s) => !s)}
+                style={{
+                  ...row(false),
+                  color: C.muted,
+                  padding: "7px 10px",
+                  fontWeight: 400,
+                }}
+              >
+                {showAll ? "Show less" : "View all"}
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div style={{ flex: 1 }} />
+      )}
+
+      {/* footer */}
+      <div
+        style={{
+          borderTop: `1px solid ${C.border}`,
+          padding: narrow ? "10px 0" : "10px 8px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 4,
+        }}
+      >
+        <button
+          className="sf-row"
+          onClick={onExit}
+          style={{ ...row(false), color: C.muted }}
+          title="Back to dashboard"
+        >
+          <ArrowLeft size={17} style={{ flexShrink: 0 }} />
+          {!narrow && "Back to dashboard"}
+        </button>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: narrow ? 0 : "4px 10px",
+            justifyContent: narrow ? "center" : "flex-start",
+          }}
+        >
+          <div
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: "50%",
+              background: "#c8c6bd",
+              color: "#1f1e1d",
+              fontWeight: 700,
+              fontSize: 13,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {initial}
+          </div>
+          {!narrow && (
+            <>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: C.text,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {businessInfo?.businessName || user?.name || "Account"}
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: C.muted,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {user?.email}
                 </div>
               </div>
-            </div>
-            <button onClick={onLogout} title="Sign out" style={{
-              background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)",
-              borderRadius: 7, cursor: "pointer", width: 28, height: 28, flexShrink: 0,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: "rgba(255,255,255,.4)", transition: "all .15s",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(232,68,42,.2)"; e.currentTarget.style.color = "#f87171"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.06)"; e.currentTarget.style.color = "rgba(255,255,255,.4)"; }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-function DocListPanel({ activeNav, userData, searchQuery, setSearchQuery, onSelectDoc, selectedDoc }) {
-  const allDocs = userData?.recentInvoices || [];
-
-  const filtered = allDocs.filter(doc => {
-    const matchNav =
-      activeNav === "invoices" ? (doc.documentType === "invoice" || !doc.documentType) :
-      activeNav === "quotes"   ? doc.documentType === "estimate" :
-      activeNav === "recents"  ? true :
-      activeNav === "chats"    ? true : true;
-
-    const matchSearch = !searchQuery || [
-      doc.customer?.name, doc.invoiceNumber, doc.total?.toString()
-    ].some(f => f?.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    return matchNav && matchSearch;
-  }).slice(0, activeNav === "recents" ? 10 : 50);
-
-  const title =
-    activeNav === "invoices" ? "Invoices" :
-    activeNav === "quotes"   ? "Quotes" :
-    activeNav === "recents"  ? "Recent Documents" :
-    activeNav === "search"   ? "Search" :
-    activeNav === "chats"    ? "Chats" : "Documents";
-
-  return (
-    <div style={{
-      width: 280, flexShrink: 0, borderRight: "1px solid rgba(255,255,255,.07)",
-      background: "#0f172a", display: "flex", flexDirection: "column", height: "100%",
-    }}>
-      {/* Header */}
-      <div style={{
-        height: 48, padding: "0 16px", borderBottom: "1px solid rgba(255,255,255,.07)",
-        display: "flex", alignItems: "center", gap: 8, flexShrink: 0,
-        background: "#0f172a",
-      }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: "#fff", flex: 1 }}>{title}</span>
-        <span style={{
-          fontSize: 11, fontWeight: 700, color: "#6b7280",
-          background: "#f1f5f9", padding: "2px 8px", borderRadius: 10,
-        }}>{filtered.length}</span>
-      </div>
-
-      {/* Search bar */}
-      <div style={{ padding: "10px 12px", borderBottom: "1px solid #e5e7eb", background: "rgba(255,255,255,.06)" }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 8,
-          background: "rgba(255,255,255,.06)", borderRadius: 10, padding: "7px 12px",
-          border: "1px solid rgba(255,255,255,.1)",
-        }}>
-          <Search size={13} color="#94a3b8" />
-          <input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder={`Search ${title.toLowerCase()}...`}
-            style={{
-              flex: 1, border: "none", background: "none", outline: "none",
-              fontSize: 13, color: "#fff", fontFamily: "inherit",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* List */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
-        {filtered.length === 0 ? (
-          <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center",
-            justifyContent: "center", height: 200, gap: 8,
-          }}>
-            <FileText size={28} color="#d1d5db" />
-            <p style={{ fontSize: 13, color: "#9ca3af" }}>No {title.toLowerCase()} yet</p>
-          </div>
-        ) : (
-          filtered.map((doc, i) => {
-            const isSelected = selectedDoc?.id === doc.id;
-            const isPaid = doc.paymentStatus?.status === "paid";
-            const isOverdue = doc.dueDate && !isPaid &&
-              new Date(doc.dueDate?.seconds ? doc.dueDate.seconds * 1000 : doc.dueDate) < new Date();
-
-            const statusColor = isPaid ? "#16a34a" : isOverdue ? "#dc2626" : "#d97706";
-            const statusBg = isPaid ? "#dcfce7" : isOverdue ? "#fef2f2" : "#fef9c3";
-            const statusLabel = isPaid ? "Paid" : isOverdue ? "Overdue" : "Pending";
-
-            const date = doc.createdAt?.seconds
-              ? new Date(doc.createdAt.seconds * 1000).toLocaleDateString("en-ZA")
-              : "—";
-
-            return (
-              <button key={doc.id || i} onClick={() => onSelectDoc(doc)}
+              <button
+                className="sf-icon"
+                onClick={onLogout}
+                title="Sign out"
                 style={{
-                  width: "100%", padding: "12px 16px", textAlign: "left",
-                  background: isSelected ? "rgba(22,85,224,.2)" : "transparent",
-                  border: "none", borderBottom: "1px solid rgba(255,255,255,.05)",
-                  borderLeft: isSelected ? "3px solid #2563eb" : "3px solid transparent",
-                  cursor: "pointer", transition: "all .12s",
+                  background: "none",
+                  border: "none",
+                  color: C.muted,
+                  cursor: "pointer",
+                  padding: 6,
+                  borderRadius: 6,
+                  display: "flex",
                 }}
-                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "#f8fafc"; }}
-                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
-                    {doc.customer?.name || "Unknown Client"}
-                  </div>
-                  <div style={{
-                    fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8,
-                    background: statusBg, color: statusColor,
-                  }}>{statusLabel}</div>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>
-                    #{doc.invoiceNumber || "—"} · {date}
-                  </div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>
-                    R{(doc.total || 0).toLocaleString("en-ZA", { minimumFractionDigits: 2 })}
-                  </div>
-                </div>
+                <LogOut size={16} />
               </button>
-            );
-          })
-        )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-/* ── Mobile Menu Drawer ── */
-function MobileMenuDrawer({
-  open,
-  onClose,
-  documentType,
-  onChange,
-  userData,
-  onNavigate,
-  onLogout,
-  user,
-  businessInfo,
-}) {
-  if (!open) return null;
-  return (
-    <>
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,.6)",
-          zIndex: 300,
-          backdropFilter: "blur(2px)",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          bottom: 64,
-          left: 0,
-          right: 0,
-          zIndex: 301,
-          background: "#0f172a",
-          borderRadius: "20px 20px 0 0",
-          padding: "20px 16px 8px",
-          maxHeight: "70vh",
-          overflowY: "auto",
-        }}
-      >
-        {/* Handle */}
-        <div
-          style={{
-            width: 36,
-            height: 4,
-            background: "rgba(255,255,255,.2)",
-            borderRadius: 2,
-            margin: "0 auto 20px",
-          }}
-        />
 
-        {/* Business info */}
-        {businessInfo?.businessName && (
-          <div
-            style={{
-              padding: "10px 12px",
-              background: "rgba(255,255,255,.05)",
-              borderRadius: 10,
-              marginBottom: 16,
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg,#1655e0,#7c3aed)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 13,
-                fontWeight: 700,
-                color: "#fff",
-                flexShrink: 0,
-              }}
-            >
-              {businessInfo.businessName[0]}
-            </div>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>
-                {businessInfo.businessName}
-              </div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,.4)" }}>
-                {user?.email}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Document type */}
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: "rgba(255,255,255,.3)",
-            letterSpacing: ".08em",
-            textTransform: "uppercase",
-            marginBottom: 8,
-            paddingLeft: 4,
-          }}
-        >
-          Document Type
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
-            marginBottom: 16,
-          }}
-        >
-          {DOC_TYPES.map((item) => {
-            const Icon = item.icon;
-            const active = documentType === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onChange(item.id);
-                  onClose();
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "12px 14px",
-                  borderRadius: 12,
-                  border: active
-                    ? `1px solid ${item.color}40`
-                    : "1px solid rgba(255,255,255,.06)",
-                  background: active
-                    ? `${item.color}20`
-                    : "rgba(255,255,255,.03)",
-                  cursor: "pointer",
-                }}
-              >
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 9,
-                    background: active ? item.color : "rgba(255,255,255,.08)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon
-                    size={16}
-                    color={active ? "#fff" : "rgba(255,255,255,.5)"}
-                  />
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: active ? "#fff" : "rgba(255,255,255,.7)",
-                      textAlign: "left",
-                    }}
-                  >
-                    {item.label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: "rgba(255,255,255,.35)",
-                      textAlign: "left",
-                    }}
-                  >
-                    {item.sublabel}
-                  </div>
-                </div>
-                {active && (
-                  <div
-                    style={{
-                      marginLeft: "auto",
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: item.color,
-                    }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Navigation */}
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: "rgba(255,255,255,.3)",
-            letterSpacing: ".08em",
-            textTransform: "uppercase",
-            marginBottom: 8,
-            paddingLeft: 4,
-          }}
-        >
-          Navigate
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 6,
-            marginBottom: 16,
-          }}
-        >
-          {[
-            { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-            { id: "clients", label: "Clients", icon: Users },
-            { id: "invoices", label: "Invoices", icon: List },
-            { id: "reports", label: "Reports", icon: BarChart2 },
-            { id: "templates", label: "Templates", icon: Layers },
-            { id: "settings", label: "Settings", icon: Settings },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onNavigate?.(item.id);
-                  onClose();
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid rgba(255,255,255,.06)",
-                  background: "rgba(255,255,255,.03)",
-                  cursor: "pointer",
-                }}
-              >
-                <Icon size={14} color="rgba(255,255,255,.45)" />
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: "rgba(255,255,255,.6)",
-                  }}
-                >
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Sign out */}
-        <button
-          onClick={() => {
-            onLogout();
-            onClose();
-          }}
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            padding: "12px",
-            borderRadius: 10,
-            border: "1px solid rgba(239,68,68,.3)",
-            background: "rgba(239,68,68,.08)",
-            cursor: "pointer",
-            color: "#f87171",
-            fontSize: 13,
-            fontWeight: 600,
-            marginBottom: 8,
-          }}
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Sign Out
-        </button>
-      </div>
-    </>
-  );
-}
-
-/* ── MAIN COMPONENT ── */
+/* ───────────────── MAIN ───────────────── */
 export default function AIInvoiceWindow({
   user,
   onExit,
   onNavigateTo,
   documentType: initDocType = "invoice",
   TemplateRenderer,
+  POTemplateRenderer,
   industry = "default",
 }) {
   const [userData, setUserData] = useState(null);
   const [extraData, setExtraData] = useState({});
   const [dataLoading, setDataLoading] = useState(true);
-  const [documentType, setDocumentType] = useState(initDocType);
+  // The dashboard calls quotes "quote"; this window uses "estimate"
+  const [documentType, setDocumentType] = useState(
+    initDocType === "quote"
+      ? "estimate"
+      : DOC_TYPES.some((d) => d.id === initDocType)
+        ? initDocType
+        : "invoice",
+  );
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [pendingNewClient, setPendingNewClient] = useState(null);
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [taxId, setTaxId] = useState("");
-  const [activeNav, setActiveNav] = useState(null);         
-const [selectedDoc, setSelectedDoc] = useState(null);     
-const [searchQuery, setSearchQuery] = useState(""); 
   const [billName, setBillName] = useState("");
   const [billEmail, setBillEmail] = useState("");
   const [billPhone, setBillPhone] = useState("");
   const [billAddress, setBillAddress] = useState("");
   const [items, setItems] = useState([]);
+  const [clientId, setClientId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [savedNumber, setSavedNumber] = useState(null);
+  const savedDocRef = useRef(null); // { id, number, col } once this draft has been saved
+  const [selectedDoc, setSelectedDoc] = useState(null);
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -1032,20 +960,17 @@ const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Mobile state
   const [isMobile, setIsMobile] = useState(false);
-  const [mobileTab, setMobileTab] = useState("chat"); // "chat" | "preview" | "menu"
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState("chat");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const bottomRef = useRef(null);
-  const chatRef = useRef(null);
   const inputRef = useRef(null);
   const historyRef = useRef([]);
   const msgCounter = useRef(0);
 
-  // Detect mobile
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 900);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -1064,7 +989,9 @@ const [searchQuery, setSearchQuery] = useState("");
   const subtotal = safeItems.reduce((s, i) => s + i.amount, 0);
   const totalTax = safeItems.reduce((s, i) => s + i.taxAmount, 0);
   const total = subtotal + totalTax;
-  const invoiceNumber = `DRAFT-${Date.now().toString(36).toUpperCase()}`;
+  const invoiceNumber = useRef(
+    `DRAFT-${Date.now().toString(36).toUpperCase()}`,
+  ).current;
 
   const loadData = useCallback(async () => {
     if (!user?.uid) return;
@@ -1076,9 +1003,26 @@ const [searchQuery, setSearchQuery] = useState("");
     }
   }, [user?.uid]);
 
+  // Silent refresh (no full-screen loader) used after saving
+  const refreshData = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      setUserData(await loadAllUserData(user.uid));
+    } catch (e) {
+      console.warn("refresh:", e.message);
+    }
+  }, [user?.uid]);
+
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const WELCOME = {
+    id: "welcome",
+    role: "assistant",
+    content:
+      "Hi! I'm SolidFlo AI. Choose a document type then describe what you need. When you mention a saved client I'll load their details from your database instantly.",
+  };
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -1098,22 +1042,17 @@ const [searchQuery, setSearchQuery] = useState("");
             content: m.rawContent || m.content,
           }));
         } else {
-          setMessages([
-            {
-              id: "welcome",
-              role: "assistant",
-              content:
-                "Hi! I'm SolidFlo AI. Choose a document type then describe what you need. When you mention a saved client I'll load their details from your database instantly.",
-            },
-          ]);
+          setMessages([WELCOME]);
         }
       } catch (e) {
         console.error(e);
+        setMessages([WELCOME]);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
-  useEffect(() => {
+  const resetDoc = useCallback(() => {
     setCustomerName("");
     setCustomerEmail("");
     setCustomerPhone("");
@@ -1124,7 +1063,15 @@ const [searchQuery, setSearchQuery] = useState("");
     setBillPhone("");
     setBillAddress("");
     setItems([]);
-  }, [documentType]);
+    setExtraData({});
+    setClientId(null);
+    setSavedNumber(null);
+    savedDocRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    resetDoc();
+  }, [documentType, resetDoc]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1143,6 +1090,7 @@ const [searchQuery, setSearchQuery] = useState("");
   };
 
   const applyClientFromDB = useCallback((client) => {
+    setClientId(client.id || null);
     setCustomerName(client.name || "");
     setCustomerEmail(client.email || "");
     setCustomerPhone(client.phone || "");
@@ -1178,18 +1126,19 @@ const [searchQuery, setSearchQuery] = useState("");
   }, []);
 
   const send = async (override) => {
-    const firebaseUser = getAuth().currentUser;
-const userToken = firebaseUser ? await firebaseUser.getIdToken() : null;
-
-if (!userToken) {
-  setError("Session expired. Please sign in again.");
-  return;
-}
-    const trimmed = (override || input).trim();
+    const trimmed = (typeof override === "string" ? override : input).trim();
     if (!trimmed || loading) return;
+
+    const firebaseUser = getAuth().currentUser;
+    const userToken = firebaseUser ? await firebaseUser.getIdToken() : null;
+    if (!userToken) {
+      setError("Session expired. Please sign in again.");
+      return;
+    }
+
     setInput("");
     setError("");
-    // Switch to chat tab on mobile when sending
+    setSelectedDoc(null);
     if (isMobile) setMobileTab("chat");
 
     const userMsg = {
@@ -1216,58 +1165,66 @@ if (!userToken) {
 
       const isRepeat =
         /repeat|same as last|last invoice|previous invoice/i.test(trimmed);
-      if (isRepeat && userData?.recentInvoices?.length) {
-        const last = userData.recentInvoices[0];
-        if (last.customer) {
-          setCustomerName(last.customer.name || "");
-          setCustomerEmail(last.customer.email || "");
-          setCustomerPhone(last.customer.phone || "");
-          setCustomerAddress(last.customer.address || "");
-          setTaxId(last.customer.tax_id || "");
-          setBillName(last.customer.name || "");
-          setBillEmail(last.customer.email || "");
-          setBillPhone(last.customer.phone || "");
-          setBillAddress(last.customer.address || "");
-          if (!appliedClient) appliedClient = last.customer.name;
+      const lastDoc =
+        userData?.recentInvoices?.find((d) => d.docType === documentType) ||
+        null;
+      if (isRepeat && lastDoc) {
+        if (lastDoc.customerName) {
+          setClientId(lastDoc.clientId || null);
+          setCustomerName(lastDoc.customerName);
+          setCustomerEmail(lastDoc.customerEmail);
+          setCustomerPhone(lastDoc.customerPhone);
+          setCustomerAddress(lastDoc.customerAddress);
+          setBillName(lastDoc.customerName);
+          setBillEmail(lastDoc.customerEmail);
+          setBillPhone(lastDoc.customerPhone);
+          setBillAddress(lastDoc.customerAddress);
+          if (!appliedClient) appliedClient = lastDoc.customerName;
         }
-        if (last.items?.length) applyItems(last.items);
+        if (lastDoc.items?.length) applyItems(lastDoc.items);
       }
 
-     // Run both in parallel — chat reply + structured extraction
-const [rawText, extractedDirect] = await Promise.all([
-  // 1. Existing chat flow (for the conversational reply)
-  callClaude({
-    system: buildPrompt(userData, documentType, industry),
-    messages: historyRef.current,
-  }),
-extractInvoiceData(trimmed),
-]);
+      // chat reply + structured extraction in parallel
+      const [rawText, extractedDirect] = await Promise.all([
+        callClaude({
+          system: buildPrompt(userData, documentType, industry),
+          messages: historyRef.current,
+        }),
+        extractInvoiceData(trimmed),
+      ]);
 
-const { reply, data: extracted } = parseResponse(rawText);
+      const { reply, data: extracted } = parseResponse(rawText);
 
-// Merge extracted data — direct extraction takes priority for items/client
-if (extractedDirect?.line_items?.length) {
-  applyItems(extractedDirect.line_items.map(i => ({
-    description: i.description,
-    rate: i.rate,
-    qty: i.quantity,
-    amount: i.amount,
-    taxRate: 15,
-    category: "Service",
-  })));
-}
-if (extractedDirect?.client_name && !extracted?.matchedClientId) {
-  setCustomerName(extractedDirect.client_name);
-  setCustomerEmail(extractedDirect.client_email || "");
-  setCustomerPhone(extractedDirect.client_phone || "");
-  setCustomerAddress(extractedDirect.client_address || "");
-}
-     
+      if (extractedDirect?.line_items?.length) {
+        applyItems(
+          extractedDirect.line_items.map((i) => ({
+            description: i.description,
+            rate: i.rate,
+            qty: i.quantity,
+            amount: i.amount,
+            taxRate: 15,
+            category: "Service",
+          })),
+        );
+      }
+      if (
+        extractedDirect?.client_name &&
+        !extracted?.matchedClientId &&
+        !mentionedClient &&
+        !isRepeat
+      ) {
+        setClientId(null);
+        setCustomerName(extractedDirect.client_name);
+        setCustomerEmail(extractedDirect.client_email || "");
+        setCustomerPhone(extractedDirect.client_phone || "");
+        setCustomerAddress(extractedDirect.client_address || "");
+      }
+
       let appliedItems = 0;
 
       if (extracted) {
         const config = getIndustryConfig(industry);
-        Object.keys(config.extraFields).forEach((key) => {
+        Object.keys(config.extraFields || {}).forEach((key) => {
           if (extracted[key])
             setExtraData((prev) => ({ ...prev, [key]: extracted[key] }));
         });
@@ -1282,17 +1239,26 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         }
         if (extracted.items?.length && !isRepeat)
           appliedItems = applyItems(extracted.items);
-        if (extracted.clientNotInDB?.name && !mentionedClient) {
-          setPendingNewClient(extracted.clientNotInDB);
-          setShowCustomerModal(true);
-        }
+        // New client: fill the document now; Save adds them to your clients automatically
         if (
-          extracted.repeatLastInvoice &&
-          userData?.recentInvoices?.length &&
-          !isRepeat
+          extracted.clientNotInDB?.name &&
+          !mentionedClient &&
+          !extracted.matchedClientId
         ) {
-          const last = userData.recentInvoices[0];
-          if (last.items?.length) appliedItems = applyItems(last.items);
+          const nc = extracted.clientNotInDB;
+          setClientId(null);
+          setCustomerName(nc.name || "");
+          setCustomerEmail(nc.email || "");
+          setCustomerPhone(nc.phone || "");
+          setCustomerAddress(nc.address || "");
+          setBillName(nc.name || "");
+          setBillEmail(nc.email || "");
+          setBillPhone(nc.phone || "");
+          setBillAddress(nc.address || "");
+          appliedClient = nc.name;
+        }
+        if (extracted.repeatLastInvoice && lastDoc && !isRepeat) {
+          if (lastDoc.items?.length) appliedItems = applyItems(lastDoc.items);
         }
       }
 
@@ -1317,6 +1283,147 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
     }
   };
 
+  // Find the saved client for this document, or create one (never duplicates by name)
+  const ensureClient = async () => {
+    if (clientId) return { id: clientId, created: false };
+    const name = customerName.trim();
+    const found = userData?.clients?.find(
+      (c) => c.name?.trim().toLowerCase() === name.toLowerCase(),
+    );
+    if (found) {
+      setClientId(found.id);
+      return { id: found.id, created: false };
+    }
+    const ref = await addDoc(collection(db, "users", user.uid, "clients"), {
+      name,
+      email: customerEmail || "",
+      phone: customerPhone || "",
+      address: customerAddress || "",
+      tax_id: taxId || "",
+      merchant_code: "",
+      source: "ai-invoice",
+      createdAt: serverTimestamp(),
+    });
+    setClientId(ref.id);
+    return { id: ref.id, created: true };
+  };
+
+  const saveDocument = async () => {
+    if (!user?.uid || saving || (!customerName.trim() && !safeItems.length))
+      return;
+    setSaving(true);
+    setError("");
+    try {
+      const isPO = documentType === "purchase_order";
+      const col = colFor(documentType);
+      const existing = savedDocRef.current;
+      const number =
+        existing?.number || (await generateDocNumber(user.uid, col));
+      const docId = existing?.id || number;
+
+      let cid = null;
+      let clientCreated = false;
+      if (!isPO && customerName.trim()) {
+        const res = await ensureClient();
+        cid = res.id;
+        clientCreated = res.created;
+      }
+
+      const base = existing ? {} : { createdAt: serverTimestamp() };
+      let payload;
+
+      if (isPO) {
+        payload = {
+          ...base,
+          poNumber: number,
+          poDate: new Date().toLocaleDateString("en-ZA"),
+          deliveryDate: "",
+          supplierName: customerName,
+          supplierContact: "",
+          supplierEmail: customerEmail,
+          supplierPhone: customerPhone,
+          supplierAddress: customerAddress,
+          deliveryName: "",
+          deliveryAddress: "",
+          items: safeItems.map((i) => ({
+            description: i.description,
+            qty: i.qty,
+            unit: "ea",
+            unitPrice: i.rate,
+            amount: i.amount,
+          })),
+          totals: { subtotal, vat: totalTax, total },
+          notes: "",
+          paymentTerms: "30 Days",
+          shippingMethod: "",
+          status: "pending",
+          source: "ai",
+          updatedAt: serverTimestamp(),
+        };
+      } else {
+        payload = {
+          ...base,
+          jobCardNumber: number,
+          locked: true,
+          status: "pending",
+          documentType: documentType === "estimate" ? "quote" : "invoice",
+          clientId: cid,
+          dates: { serviceDate: new Date().toISOString(), completedDate: null },
+          customer: {
+            name: customerName,
+            email: customerEmail,
+            phone: customerPhone,
+            address: customerAddress,
+            merchant_code: "",
+          },
+          billTo: {
+            name: billName || customerName,
+            email: billEmail || customerEmail,
+            phone: billPhone || customerPhone,
+            address: billAddress || customerAddress,
+          },
+          items: safeItems.map((i) => ({
+            description: i.description,
+            type: i.category === "Parts" ? "Parts" : "Labor",
+            category: i.category,
+            rate: i.rate,
+            qty: i.qty,
+            amount: i.amount,
+            taxRate: i.taxRate,
+          })),
+          vatRate: safeItems[0]?.taxRate || 0,
+          totals: { subtotal, vat: totalTax, total, paid: 0, due: total },
+          source: "ai",
+          updatedAt: serverTimestamp(),
+        };
+      }
+
+      await setDoc(doc(db, "users", user.uid, col, docId), payload, {
+        merge: true,
+      });
+
+      savedDocRef.current = { id: docId, number, col };
+      setSavedNumber(number);
+
+      const aiMsg = {
+        id: `sv-${Date.now()}`,
+        role: "assistant",
+        content: `Saved ${typeLabel(documentType).toLowerCase()} ${number}${
+          clientCreated ? ` and added ${customerName} to your clients` : ""
+        }. You'll find it under Recents.`,
+        clientSaved: clientCreated,
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+      await saveMsg(aiMsg);
+      await refreshData();
+    } catch (e) {
+      console.error("saveDocument:", e);
+      setError(e.message || "Could not save. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleKey = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -1332,10 +1439,44 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
     setTimeout(() => document.head.removeChild(s), 1000);
   };
 
+  const startNew = () => {
+    setMessages([WELCOME]);
+    historyRef.current = [];
+    setSelectedDoc(null);
+    setError("");
+    resetDoc();
+    setDrawerOpen(false);
+    if (isMobile) setMobileTab("chat");
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const changeType = (type) => {
+    setDocumentType(type);
+    setSelectedDoc(null);
+    setDrawerOpen(false);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `sys-${Date.now()}`,
+        role: "assistant",
+        content: `Switched to ${DOC_TYPES.find((d) => d.id === type)?.label}. What would you like to create?`,
+      },
+    ]);
+  };
+
+  const openDoc = (d) => {
+    setSelectedDoc(d);
+    setPreviewOpen(true);
+    setDrawerOpen(false);
+    if (isMobile) setMobileTab("preview");
+  };
+
   const hasContent = customerName || safeItems.length > 0;
   const activeDt = DOC_TYPES.find((d) => d.id === documentType) || DOC_TYPES[0];
   const bizInfo = userData?.businessInfo;
   const suggestions = SUGGESTIONS[documentType] || SUGGESTIONS.invoice;
+  const firstName = (user?.name || user?.displayName || "").split(" ")[0];
+  const isEmpty = messages.every((m) => m.id === "welcome") && !loading;
 
   const templateProps = {
     templateId: userData?.activeTemplate || "professional",
@@ -1369,297 +1510,282 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
           position: "fixed",
           inset: 0,
           zIndex: 200,
-          background: "#0f172a",
+          background: C.bg,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 16,
-          fontFamily: "'DM Sans','Lato',sans-serif",
+          gap: 14,
+          fontFamily: C.sans,
         }}
       >
+        <Sparkles
+          size={30}
+          color={C.accent}
+          style={{ animation: "sfPulse 1.4s ease-in-out infinite" }}
+        />
+        <div style={{ fontFamily: C.serif, fontSize: 24, color: C.text }}>
+          SolidFlo AI
+        </div>
         <div
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            background: "linear-gradient(135deg,#1655e0,#7c3aed)",
+            fontSize: 13,
+            color: C.muted,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            gap: 8,
           }}
         >
-          <Sparkles size={22} color="#fff" />
+          <Loader2
+            size={14}
+            style={{ animation: "sfSpin 1s linear infinite" }}
+          />
+          Loading your template, clients and business data…
         </div>
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#fff",
-              marginBottom: 6,
-            }}
-          >
-            SolidFlo AI
-          </div>
-          <div
-            style={{
-              fontSize: 13,
-              color: "rgba(255,255,255,.4)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <Loader2
-              size={14}
-              color="rgba(255,255,255,.4)"
-              style={{ animation: "spin 1s linear infinite" }}
-            />
-            Loading your template, clients and business data…
-          </div>
-        </div>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <style>{`@keyframes sfSpin{to{transform:rotate(360deg)}}@keyframes sfPulse{0%,100%{opacity:.5}50%{opacity:1}}`}</style>
       </div>
     );
 
-  /* ── Chat Panel ── */
-  const ChatPanel =  (
+  /* ── Composer (Claude-style rounded input box) ── */
+  const composer = (
+    <div style={{ width: "100%", maxWidth: 720, margin: "0 auto" }}>
+      <div
+        style={{
+          background: C.input,
+          border: `1px solid ${C.border}`,
+          borderRadius: 20,
+          padding: "14px 14px 10px 18px",
+          boxShadow: "0 4px 24px rgba(0,0,0,.25)",
+        }}
+      >
+        <textarea
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder={
+            userData?.clients?.length
+              ? `e.g. "Invoice ${userData.clients[0]?.name} for 5hrs at R750/hr"`
+              : "Describe your document in plain English…"
+          }
+          rows={2}
+          style={{
+            width: "100%",
+            background: "none",
+            border: "none",
+            outline: "none",
+            resize: "none",
+            color: C.text,
+            fontSize: 15.5,
+            fontFamily: "inherit",
+            lineHeight: 1.6,
+            maxHeight: 160,
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 4,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              color: C.muted,
+              fontSize: 12.5,
+            }}
+          >
+            <activeDt.icon size={14} color={C.accent} /> {activeDt.short}
+            {userData?.clients?.length > 0 && (
+              <span style={{ color: C.faint }}>
+                · {userData.clients.length} clients loaded
+              </span>
+            )}
+          </div>
+          <button
+            className="sf-send"
+            onClick={() => send()}
+            disabled={!input.trim() || loading}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              background: C.accent,
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            title="Send"
+          >
+            {loading ? (
+              <Loader2
+                size={16}
+                color="#fff"
+                style={{ animation: "sfSpin 1s linear infinite" }}
+              />
+            ) : (
+              <Send size={16} color="#fff" />
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── Chat column ── */
+  const chatColumn = (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        background: "#0f172a",
+        minWidth: 0,
+        background: C.bg,
       }}
     >
-      {/* Desktop top bar — hidden on mobile (mobile uses bottom nav) */}
-      {!isMobile && (
-        <div
-          style={{
-            height: 48,
-            background: "#0f172a",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 14px",
-            flexShrink: 0,
-            borderBottom: "1px solid rgba(255,255,255,.07)",
-          }}
-        >
-          <button
-            onClick={onExit}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "5px 12px",
-              borderRadius: 8,
-              background: "rgba(255,255,255,.08)",
-              border: "1px solid rgba(255,255,255,.12)",
-              color: "rgba(255,255,255,.7)",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            <ArrowLeft size={13} /> Back
-          </button>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {hasContent && !previewOpen && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: 11,
-                  color: "#4ade80",
-                  fontWeight: 600,
-                }}
-              >
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#22c55e",
-                    display: "inline-block",
-                  }}
-                />{" "}
-                Live
-              </div>
-            )}
-            <button
-              onClick={() => setPreviewOpen((o) => !o)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "5px 12px",
-                borderRadius: 8,
-                background: previewOpen ? "rgba(22,85,224,.3)" : "#1655e0",
-                border: `1px solid ${previewOpen ? "rgba(22,85,224,.5)" : "#1655e0"}`,
-                color: "#fff",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              {previewOpen ? (
-                <>
-                  <PanelRightClose size={13} /> Hide
-                </>
-              ) : (
-                <>
-                  <PanelRight size={13} /> Show Template
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => {
-                if (window.confirm("Clear conversation?")) {
-                  setMessages([]);
-                  historyRef.current = [];
-                }
-              }}
-              style={{
-                background: "none",
-                border: "1px solid #e2e8f0",
-                borderRadius: 7,
-                color: "#94a3b8",
-                cursor: "pointer",
-                padding: "5px 8px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <RotateCcw size={12} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile top bar */}
-      {isMobile && (
-        <div
-          style={{
-            height: 52,
-            background: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 14px",
-            flexShrink: 0,
-            borderBottom: "1px solid #e5e7eb",
-          }}
-        >
-          <button
-            onClick={onExit}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-              padding: "6px 12px",
-              borderRadius: 8,
-              background: "rgba(22,85,224,.1)",
-              border: "none",
-              color: "#1655e0",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 700,
-            }}
-          >
-            <ArrowLeft size={14} /> Back
-          </button>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
-              SolidFlo AI
-            </div>
-            <div
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "#22c55e",
-              }}
-            />
-          </div>
-          <button
-            onClick={() => {
-              if (window.confirm("Clear conversation?")) {
-                setMessages([]);
-                historyRef.current = [];
-              }
-            }}
-            style={{
-              background: "none",
-              border: "1px solid #e2e8f0",
-              borderRadius: 7,
-              color: "#94a3b8",
-              cursor: "pointer",
-              padding: "6px 8px",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <RotateCcw size={13} />
-          </button>
-        </div>
-      )}
-
-      {/* Messages */}
+      {/* top bar */}
       <div
-        ref={chatRef}
         style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: isMobile ? "16px 14px 8px" : "20px 18px 8px",
-          scrollbarWidth: "thin",
-          background: "#0f172a",
-          scrollbarColor: "#858585 transparent",
+          height: 54,
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 14px",
         }}
       >
-        {messages.length <= 1 && (
-          <div style={{ marginBottom: 24 }}>
-            {userData?.clients?.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <div
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}
+        >
+          {isMobile && (
+            <button
+              className="sf-icon"
+              onClick={() => setDrawerOpen(true)}
+              style={iconBtn}
+            >
+              <Menu size={20} />
+            </button>
+          )}
+          <span style={{ fontSize: 14, color: C.muted, whiteSpace: "nowrap" }}>
+            {activeDt.short} ·{" "}
+            <span style={{ color: C.text }}>SolidFlo AI</span>
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {isMobile ? (
+            <div
+              style={{
+                display: "flex",
+                background: C.input,
+                borderRadius: 10,
+                padding: 3,
+              }}
+            >
+              {["chat", "preview"].map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setMobileTab(t)}
                   style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: "#64748b",
-                    letterSpacing: ".07em",
-                    textTransform: "uppercase",
-                    marginBottom: 8,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
+                    padding: "5px 12px",
+                    borderRadius: 8,
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    fontFamily: "inherit",
+                    background: mobileTab === t ? C.active : "transparent",
+                    color: mobileTab === t ? C.text : C.muted,
+                    textTransform: "capitalize",
                   }}
                 >
-                  <Database size={11} color="#1655e0" /> Your saved clients
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {userData.clients.slice(0, isMobile ? 4 : 5).map((c) => (
+                  {t}
+                  {t === "preview" && hasContent && (
+                    <span style={{ marginLeft: 5, color: "#4ade80" }}>•</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <button
+              className="sf-row"
+              onClick={() => setPreviewOpen((o) => !o)}
+              style={pillBtn}
+            >
+              {previewOpen ? (
+                <PanelRightClose size={15} />
+              ) : (
+                <PanelRight size={15} />
+              )}
+              {previewOpen ? "Hide preview" : "Show preview"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {isEmpty ? (
+        /* ── Claude-style empty state ── */
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 18px 60px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              marginBottom: 26,
+            }}
+          >
+            <Sparkles size={isMobile ? 26 : 32} color={C.accent} />
+            <h1
+              style={{
+                margin: 0,
+                fontFamily: C.serif,
+                fontWeight: 400,
+                fontSize: isMobile ? 28 : 38,
+                color: C.text,
+                letterSpacing: "-.01em",
+                textAlign: "center",
+              }}
+            >
+              {firstName
+                ? `Ready to bill, ${firstName}?`
+                : "What are we billing today?"}
+            </h1>
+          </div>
+          {composer}
+
+          {error && <ErrorBox error={error} />}
+
+          <div style={{ width: "100%", maxWidth: 720, marginTop: 26 }}>
+            {userData?.clients?.length > 0 && (
+              <div style={{ marginBottom: 18 }}>
+                <div style={sectionLabel}>Your saved clients</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {userData.clients.slice(0, isMobile ? 4 : 6).map((c) => (
                     <button
                       key={c.id}
-                      className="ai-sug"
+                      className="sf-chip"
                       onClick={() => {
                         applyClientFromDB(c);
                         send(
                           `${documentType === "purchase_order" ? "Purchase order from" : documentType === "estimate" ? "Quote for" : "Invoice"} ${c.name} for `,
                         );
                       }}
-                      style={{
-                        padding: "5px 12px",
-                        borderRadius: 20,
-                        background: "rgba(255,255,255,.05)",
-                        border: "1px solid #e5e7eb",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        color: "rgba(255,255,255,.8)",
-                        fontFamily: "inherit",
-                        transition: "all .15s",
-                      }}
+                      style={chipBtn}
                     >
                       {c.name}
                     </button>
@@ -1667,650 +1793,402 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
                 </div>
               </div>
             )}
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: "#64748b",
-                letterSpacing: ".07em",
-                textTransform: "uppercase",
-                marginBottom: 8,
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <Lightbulb size={11} color="#f59e0b" /> Try one of these
-            </div>
+            <div style={sectionLabel}>Try one of these</div>
             {suggestions.map((s, i) => (
               <button
                 key={i}
-                className="ai-sug"
+                className="sf-chip"
                 onClick={() => send(s)}
                 style={{
+                  ...chipBtn,
                   display: "block",
                   width: "100%",
                   textAlign: "left",
-                  padding: "9px 13px",
-                  marginBottom: 6,
-                  background: "#fff",
-                  border: "1px solid #e5e7eb",
+                  marginBottom: 8,
                   borderRadius: 12,
-                  cursor: "pointer",
-                  fontSize: isMobile ? 12 : 13,
-                  color: "#374151",
-                  fontFamily: "inherit",
-                  transition: "all .15s",
-                  lineHeight: 1.4,
                 }}
               >
                 {s}
               </button>
             ))}
           </div>
-        )}
-        {messages.map((msg, i) => (
-          <div key={msg.id || i} className="ai-msg">
-            <Bubble msg={msg} />
-          </div>
-        ))}
-        {loading && <TypingDots />}
-        {error && (
+        </div>
+      ) : (
+        <>
           <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 8,
-              padding: "10px 14px",
-              borderRadius: 12,
-              marginBottom: 16,
-              background: "#fef2f2",
-              border: "1px solid #fecaca",
-              color: "#dc2626",
-              fontSize: 12,
-            }}
-          >
-            <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />{" "}
-            {error}
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Input */}
-      <div
-        style={{
-          padding: isMobile ? "8px 12px 12px" : "10px 14px 14px",
-          background: "#0f172a",
-          borderTop: "1px solid rgba(255,255,255,.07)",
-          flexShrink: 0,
-        }}
-      >
-        {userData && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              marginBottom: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "#22c55e",
-                display: "inline-block",
-                flexShrink: 0,
-              }}
-            />
-            <span style={{ fontSize: 10, color: "#4ade80", fontWeight: 700 }}>
-              Loaded
-            </span>
-            {[
-              userData.clients.length && `${userData.clients.length} clients`,
-              userData.recentInvoices.length &&
-                `${userData.recentInvoices.length} invoices`,
-              !isMobile &&
-                userData.activeTemplate &&
-                `Template: ${userData.activeTemplate}`,
-            ]
-              .filter(Boolean)
-              .map((p, i) => (
-                <span
-                  key={i}
-                  style={{
-                    padding: "1px 7px",
-                    borderRadius: 10,
-                    background: "rgba(74,222,128,.1)",
-                    border: "1px solid rgba(74,222,128,.2)",
-                    fontSize: 10,
-                    color: "#4ade80",
-                    fontWeight: 600,
-                  }}
-                >
-                  {p}
-                </span>
-              ))}
-            <button
-              onClick={loadData}
-              style={{
-                marginLeft: "auto",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#15803d",
-                display: "flex",
-                alignItems: "center",
-                gap: 3,
-                fontSize: 10,
-              }}
-            >
-              <RefreshCw size={10} />
-            </button>
-          </div>
-        )}
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "flex-end",
-            background: "rgba(255,255,255,.06)",
-            border: "1.5px solid rgba(255,255,255,.12)",
-            borderRadius: 16,
-            padding: "9px 9px 9px 14px",
-            boxShadow: "0 1px 3px rgba(0,0,0,.05)",
-          }}
-        >
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder={
-              userData?.clients?.length
-                ? `e.g. "Invoice ${userData.clients[0]?.name} for 5hrs at R750/hr"`
-                : "Describe your invoice in plain English…"
-            }
-            rows={isMobile ? 1 : 2}
             style={{
               flex: 1,
-              background: "none",
-              border: "none",
-              outline: "none",
-              resize: "none",
-              fontSize: isMobile ? 14 : 13.5,
-              color: "#fff",
-              fontFamily: "inherit",
-              lineHeight: 1.6,
-              maxHeight: 110,
               overflowY: "auto",
+              padding: isMobile ? "10px 14px" : "10px 22px",
             }}
-          />
-          <button
-            className="ai-send"
-            onClick={() => send()}
-            disabled={!input.trim() || loading}
+          >
+            <div style={{ maxWidth: 720, margin: "0 auto", paddingTop: 10 }}>
+              {messages.map((msg, i) => (
+                <Bubble key={msg.id || i} msg={msg} />
+              ))}
+              {loading && <TypingDots />}
+              {error && <ErrorBox error={error} />}
+              <div ref={bottomRef} />
+            </div>
+          </div>
+          <div
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 12,
-              background: "#1655e0",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              padding: isMobile ? "6px 12px 12px" : "6px 22px 18px",
               flexShrink: 0,
-              transition: "background .15s",
             }}
           >
-            {loading ? (
-              <Loader2
-                size={16}
-                color="#fff"
-                style={{ animation: "spin 1s linear infinite" }}
-              />
-            ) : (
-              <Send size={16} color="#fff" />
-            )}
-          </button>
-        </div>
-        {!isMobile && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: 5,
-              padding: "0 2px",
-            }}
-          >
-            <span style={{ fontSize: 10, color: "#94a3b8" }}>
-              <kbd
-                style={{
-                  padding: "1px 5px",
-                  borderRadius: 4,
-                  background: "#f1f5f9",
-                  border: "1px solid #e2e8f0",
-                  fontSize: 10,
-                  color: "#64748b",
-                  fontFamily: "monospace",
-                }}
-              >
-                Enter
-              </kbd>{" "}
-              send ·{" "}
-              <kbd
-                style={{
-                  padding: "1px 5px",
-                  borderRadius: 4,
-                  background: "#f1f5f9",
-                  border: "1px solid #e2e8f0",
-                  fontSize: 10,
-                  color: "#64748b",
-                  fontFamily: "monospace",
-                }}
-              >
-                Shift+Enter
-              </kbd>{" "}
-              new line
-            </span>
-            <span
-              style={{
-                fontSize: 10,
-                color: "#e2e8f0",
-                fontFamily: "monospace",
-              }}
-            >
-              {user?.uid?.slice(0, 8)}…
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  /* ── Preview Panel ── */
-  const PreviewPanel =  (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        background: "#0f172a",
-      }}
-    >
-      <div
-        style={{
-          height: isMobile ? 52 : 48,
-          background: "#0f172a",
-          borderBottom: "1px solid #0f172a",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 16px",
-          gap: 12,
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            minWidth: 0,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <activeDt.icon size={15} color={activeDt.color} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
-              {activeDt.label} preview
-            </span>
-          </div>
-          {hasContent && (
+            {composer}
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                padding: "3px 9px",
-                borderRadius: 20,
-                background: "#dcfce7",
-                border: "1px solid #bbf7d0",
+                textAlign: "center",
+                fontSize: 11,
+                color: C.faint,
+                marginTop: 8,
               }}
             >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "#22c55e",
-                  display: "inline-block",
-                }}
-              />
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#166534" }}>
-                Live
-              </span>
+              SolidFlo AI can make mistakes. Check amounts before sending.
             </div>
-          )}
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            flexShrink: 0,
-          }}
-        >
-          <button
-            onClick={handlePrint}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 14px",
-              borderRadius: 8,
-              background: "rgba(255,255,255,.08)",
-              border: "1px solid rgba(255,255,255,.12)",
-              color: "rgba(255,255,255,.8)",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            <Download size={13} /> {isMobile ? "PDF" : "Download PDF"}
-          </button>
-          <button
-            onClick={() => {}}
-            disabled={!hasContent}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 16px",
-              borderRadius: 8,
-              background: hasContent ? "#1655e0" : "#94a3b8",
-              border: "none",
-              color: "#fff",
-              cursor: hasContent ? "pointer" : "not-allowed",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            <Send size={13} /> Send
-          </button>
-        </div>
-      </div>
-
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: isMobile ? "16px 12px" : "24px 20px",
-          display: "flex",
-          justifyContent: "center",
-          background: "#0f172a",
-        }}
-      >
-        {!hasContent ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              textAlign: "center",
-              gap: 16,
-              maxWidth: 320,
-            }}
-          >
-            <div
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: 16,
-                background: "#e5e7eb",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <activeDt.icon size={26} color="#d1d5db" />
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "#374151",
-                  marginBottom: 6,
-                }}
-              >
-                Your {activeDt.label.toLowerCase()} will appear here
-              </div>
-              <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.6 }}>
-                {isMobile
-                  ? "Tap Chat and describe what you need"
-                  : userData?.clients?.length
-                    ? `Type a client name — I'll load their details from your ${userData.clients.length} saved contacts instantly`
-                    : "Describe who you're billing and what for"}
-              </div>
-            </div>
-            {isMobile && (
-              <button
-                onClick={() => setMobileTab("chat")}
-                style={{
-                  padding: "10px 24px",
-                  borderRadius: 10,
-                  background: "#1655e0",
-                  border: "none",
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                Go to Chat
-              </button>
-            )}
           </div>
-        ) : (
-          <div
-            id="ai-print-area"
-            style={{
-              width: "100%",
-              maxWidth: 760,
-              background: "#fff",
-              borderRadius: 8,
-              boxShadow: "0 4px 24px rgba(0,0,0,.1)",
-              overflow: "hidden",
-              animation: "slideUp .3s ease",
-            }}
-          >
-            {TemplateRenderer ? (
-              <TemplateRenderer {...templateProps} />
-            ) : (
-              <div
-                style={{
-                  padding: 40,
-                  textAlign: "center",
-                  color: "#94a3b8",
-                  fontSize: 14,
-                }}
-              >
-                Pass TemplateRenderer as a prop from your dashboard
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {hasContent && (
-        <div
-          style={{
-            height: 38,
-            background: "#0f172a",
-            borderTop: "1px solid #e5e7eb",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "0 14px",
-            overflow: "hidden",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: "#9ca3af",
-              textTransform: "uppercase",
-              letterSpacing: ".06em",
-              whiteSpace: "nowrap",
-            }}
-          >
-            On template:
-          </span>
-          {[
-            customerName && { label: "Client", val: customerName },
-            safeItems.length && { label: "Items", val: `${safeItems.length}` },
-            total > 0 && { label: "Total", val: `R${total.toFixed(2)}` },
-          ]
-            .filter(Boolean)
-            .map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "2px 8px",
-                  background: "#fff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: 6,
-                  whiteSpace: "nowrap",
-                  flexShrink: 0,
-                }}
-              >
-                <span
-                  style={{ fontSize: 10, color: "#6b7280", fontWeight: 700 }}
-                >
-                  {item.label}:{" "}
-                </span>
-                <span
-                  style={{ fontSize: 10, color: "#1e293b", fontWeight: 600 }}
-                >
-                  {item.val}
-                </span>
-              </div>
-            ))}
-        </div>
+        </>
       )}
     </div>
   );
 
-  /* ── Mobile Bottom Nav ── */
-  const MobileBottomNav =  (
+  /* ── Preview (Claude artifact-style card) ── */
+  const showingSaved = !!selectedDoc;
+  const previewTitle = showingSaved
+    ? `${selectedDoc.customerName || "Document"} · #${selectedDoc.number || ""}`
+    : `${activeDt.label.replace("New ", "")} preview`;
+
+  const previewColumn = (
     <div
       style={{
-        height: 64,
-        background: "#fff",
-        borderTop: "1px solid #e5e7eb",
-        display: "flex",
-        alignItems: "stretch",
-        flexShrink: 0,
-        boxShadow: "0 -4px 16px rgba(0,0,0,.06)",
+        height: "100%",
+        padding: isMobile ? 0 : "10px 10px 10px 0",
+        background: C.bg,
+        minWidth: 0,
       }}
     >
-      {[
-        {
-          id: "chat",
-          label: "Chat",
-          icon: MessageSquare,
-          badge: loading ? "•" : null,
-        },
-        {
-          id: "preview",
-          label: "Preview",
-          icon: Eye,
-          badge: hasContent ? "•" : null,
-        },
-        { id: "menu", label: "Menu", icon: Menu },
-      ].map((tab) => {
-        const Icon = tab.icon;
-        const active =
-          mobileTab === tab.id || (tab.id === "menu" && mobileMenuOpen);
-        return (
-          <button
-            key={tab.id}
-            onClick={() => {
-              if (tab.id === "menu") {
-                setMobileMenuOpen((o) => !o);
-              } else {
-                setMobileTab(tab.id);
-                setMobileMenuOpen(false);
-              }
-            }}
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          background: C.panel,
+          border: isMobile ? "none" : `1px solid ${C.border}`,
+          borderRadius: isMobile ? 0 : 14,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            height: 50,
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            padding: "0 12px 0 16px",
+            borderBottom: `1px solid ${C.border}`,
+          }}
+        >
+          <div
             style={{
-              flex: 1,
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
-              gap: 4,
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              position: "relative",
-              transition: "all .15s",
+              gap: 10,
+              minWidth: 0,
             }}
           >
-            {/* Active indicator */}
-            {active && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: "25%",
-                  right: "25%",
-                  height: 2,
-                  background: "#1655e0",
-                  borderRadius: "0 0 2px 2px",
-                }}
-              />
-            )}
-            <div style={{ position: "relative" }}>
-              <Icon size={20} color={active ? "#1655e0" : "#94a3b8"} />
-              {tab.badge && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: -3,
-                    right: -3,
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background:
-                      tab.id === "chat" && loading ? "#f59e0b" : "#22c55e",
-                    border: "1.5px solid #fff",
-                  }}
-                />
-              )}
-            </div>
             <span
               style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: active ? "#1655e0" : "#94a3b8",
-                letterSpacing: ".02em",
+                fontSize: 14,
+                fontWeight: 600,
+                color: C.text,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
-              {tab.label}
+              {previewTitle}
             </span>
-          </button>
-        );
-      })}
+            {(hasContent || showingSaved) && (
+              <span style={chip("#4ade80")}>
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#4ade80",
+                  }}
+                />
+                {showingSaved ? "Saved" : "Live"}
+              </span>
+            )}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            {showingSaved && (
+              <button
+                className="sf-row"
+                onClick={() => setSelectedDoc(null)}
+                style={pillBtn}
+              >
+                <ArrowLeft size={14} /> Draft
+              </button>
+            )}
+            <button className="sf-row" onClick={handlePrint} style={pillBtn}>
+              <Download size={14} /> {isMobile ? "PDF" : "Download PDF"}
+            </button>
+            {!showingSaved && (
+              <button
+                onClick={saveDocument}
+                disabled={!hasContent || saving}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 14px",
+                  borderRadius: 8,
+                  background: hasContent ? C.accent : C.input,
+                  border: "none",
+                  color: hasContent ? "#fff" : C.faint,
+                  cursor: hasContent && !saving ? "pointer" : "not-allowed",
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  fontFamily: "inherit",
+                  opacity: saving ? 0.7 : 1,
+                }}
+              >
+                {saving ? (
+                  <Loader2
+                    size={13}
+                    style={{ animation: "sfSpin 1s linear infinite" }}
+                  />
+                ) : savedNumber ? (
+                  <Check size={13} />
+                ) : (
+                  <Save size={13} />
+                )}
+                {saving ? "Saving…" : savedNumber ? "Saved" : "Save"}
+              </button>
+            )}
+            {!isMobile && (
+              <button
+                className="sf-icon"
+                onClick={() => setPreviewOpen(false)}
+                style={iconBtn}
+                title="Close preview"
+              >
+                <X size={17} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: isMobile ? "14px 10px" : "22px 18px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: !hasContent && !showingSaved ? "center" : "flex-start",
+          }}
+        >
+          {!hasContent && !showingSaved ? (
+            <div style={{ textAlign: "center", maxWidth: 320 }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 16,
+                  background: C.input,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                }}
+              >
+                <activeDt.icon size={24} color={C.muted} />
+              </div>
+              <div
+                style={{
+                  fontFamily: C.serif,
+                  fontSize: 20,
+                  color: C.text,
+                  marginBottom: 6,
+                }}
+              >
+                Your {activeDt.short.toLowerCase()} will appear here
+              </div>
+              <div style={{ fontSize: 13.5, color: C.muted, lineHeight: 1.6 }}>
+                {userData?.clients?.length
+                  ? `Type a client name — I'll load their details from your ${userData.clients.length} saved contacts instantly.`
+                  : "Describe who you're billing and what for."}
+              </div>
+            </div>
+          ) : (
+            <div
+              id="ai-print-area"
+              style={{
+                width: "100%",
+                maxWidth: 760,
+                background: "#fff",
+                borderRadius: 8,
+                boxShadow: "0 8px 32px rgba(0,0,0,.4)",
+                overflow: "hidden",
+                animation: "sfSlide .3s ease",
+                alignSelf: "flex-start",
+              }}
+            >
+              {(() => {
+                const viewType = showingSaved
+                  ? selectedDoc.docType
+                  : documentType;
+                const Renderer =
+                  viewType === "purchase_order" && POTemplateRenderer
+                    ? POTemplateRenderer
+                    : TemplateRenderer;
+                if (!Renderer) return null;
+                if (!showingSaved) return <Renderer {...templateProps} />;
+                const sd = selectedDoc;
+                const sitems = sd.items.map((it) => {
+                  const rate = safeNum(it.rate);
+                  const qty = safeNum(it.qty) || 1;
+                  const amount = safeNum(it.amount) || rate * qty;
+                  const taxRate = safeNum(it.taxRate);
+                  const taxAmount = amount * (taxRate / 100);
+                  return {
+                    ...it,
+                    rate,
+                    qty,
+                    amount,
+                    taxRate,
+                    taxAmount,
+                    totalAmount: amount + taxAmount,
+                  };
+                });
+                return (
+                  <Renderer
+                    {...templateProps}
+                    customerName={sd.customerName}
+                    billName={sd.customerName}
+                    customerEmail={sd.customerEmail}
+                    billEmail={sd.customerEmail}
+                    customerPhone={sd.customerPhone}
+                    billPhone={sd.customerPhone}
+                    customerAddress={sd.customerAddress}
+                    billAddress={sd.customerAddress}
+                    items={sitems}
+                    subtotal={safeNum(sd.subtotal)}
+                    totalTax={safeNum(sd.totalTax)}
+                    total={safeNum(sd.total)}
+                    invoiceNumber={sd.number}
+                    documentType={sd.docType}
+                    paymentStatus={sd.paymentStatus}
+                    showStamp={sd.paymentStatus?.status === "paid"}
+                    stampText="PAID"
+                    stampColor="#16a34a"
+                  />
+                );
+              })() || (
+                <div
+                  style={{
+                    padding: 40,
+                    textAlign: "center",
+                    color: "#94a3b8",
+                    fontSize: 14,
+                  }}
+                >
+                  Pass TemplateRenderer as a prop from your dashboard
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {hasContent && !showingSaved && (
+          <div
+            style={{
+              height: 38,
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "0 14px",
+              borderTop: `1px solid ${C.border}`,
+              overflow: "hidden",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 10.5,
+                fontWeight: 700,
+                color: C.faint,
+                textTransform: "uppercase",
+                letterSpacing: ".06em",
+                whiteSpace: "nowrap",
+              }}
+            >
+              On template
+            </span>
+            {[
+              customerName && { label: "Client", val: customerName },
+              safeItems.length > 0 && {
+                label: "Items",
+                val: `${safeItems.length}`,
+              },
+              total > 0 && { label: "Total", val: `R${total.toFixed(2)}` },
+            ]
+              .filter(Boolean)
+              .map((it, i) => (
+                <span
+                  key={i}
+                  style={{
+                    padding: "2px 9px",
+                    background: C.input,
+                    borderRadius: 6,
+                    whiteSpace: "nowrap",
+                    fontSize: 11.5,
+                    color: C.text,
+                  }}
+                >
+                  <span style={{ color: C.muted }}>{it.label}: </span>
+                  {it.val}
+                </span>
+              ))}
+          </div>
+        )}
+      </div>
     </div>
+  );
+
+  const sidebar = (mobile) => (
+    <Sidebar
+      collapsed={sidebarCollapsed}
+      onToggle={() => setSidebarCollapsed((o) => !o)}
+      isMobile={mobile}
+      onClose={() => setDrawerOpen(false)}
+      documentType={documentType}
+      onChangeType={changeType}
+      onNew={startNew}
+      onExit={() => {
+        onExit?.();
+      }}
+      docs={userData?.recentInvoices || []}
+      selectedDoc={selectedDoc}
+      onSelectDoc={openDoc}
+      user={user}
+      businessInfo={bizInfo}
+      onLogout={() => signOut(getAuth())}
+    />
   );
 
   /* ── RENDER ── */
@@ -2321,196 +2199,146 @@ if (extractedDirect?.client_name && !extracted?.matchedClientId) {
         inset: 0,
         zIndex: 200,
         display: "flex",
-        flexDirection: "column",
-        background: "#f4f5f8",
-        fontFamily: "'DM Sans','Lato',sans-serif",
+        background: C.bg,
+        color: C.text,
+        fontFamily: C.sans,
       }}
     >
       <style>{`
-        @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        .ai-msg{animation:slideUp .22s ease}
-        .ai-send:hover:not(:disabled){background:#1245c0!important}
-        .ai-send:disabled{opacity:.45;cursor:not-allowed}
-        .ai-sug:hover{background:#eff6ff!important;border-color:#93c5fd!important;color:#1d4ed8!important}
+        @keyframes sfBounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+        @keyframes sfSpin{to{transform:rotate(360deg)}}
+        @keyframes sfPulse{0%,100%{opacity:.5}50%{opacity:1}}
+        @keyframes sfSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .sf-msg{animation:sfSlide .22s ease}
+        .sf-row:hover{background:${C.hover}!important}
+        .sf-icon:hover{background:${C.hover}!important;color:${C.text}!important}
+        .sf-chip:hover{background:${C.input}!important;border-color:rgba(255,255,255,.2)!important;color:${C.text}!important}
+        .sf-send:hover:not(:disabled){filter:brightness(1.1)}
+        .sf-send:disabled{opacity:.4;cursor:not-allowed!important}
+        textarea::placeholder,input::placeholder{color:${C.faint}}
+        *{scrollbar-width:thin;scrollbar-color:#4a4946 transparent}
       `}</style>
 
-      <CustomerModal
-        showModal={showCustomerModal}
-        setShowModal={setShowCustomerModal}
-        existingCustomer={null}
-        onCustomerSaved={() => {
-          loadData();
-          setShowCustomerModal(false);
-          setPendingNewClient(null);
-        }}
-      />
-
-      {/* ── MOBILE LAYOUT ── */}
       {isMobile ? (
         <>
-          <div style={{ flex: 1, overflow: "hidden", minHeight: 0 }}>
-            {mobileTab === "chat" && !mobileMenuOpen && ChatPanel}
-            {mobileTab === "preview" && !mobileMenuOpen && PreviewPanel}
+          <div style={{ flex: 1, minWidth: 0, height: "100%" }}>
+            {mobileTab === "chat" ? chatColumn : previewColumn}
           </div>
-          {MobileBottomNav}
-          <MobileMenuDrawer
-            open={mobileMenuOpen}
-            onClose={() => setMobileMenuOpen(false)}
-            documentType={documentType}
-            onChange={(type) => {
-              setDocumentType(type);
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: `sys-${Date.now()}`,
-                  role: "assistant",
-                  content: `Switched to ${DOC_TYPES.find((d) => d.id === type)?.label}. What would you like to create?`,
-                },
-              ]);
-            }}
-            userData={userData}
-            onNavigate={(id) => {
-              onExit();
-              onNavigateTo?.(id);
-            }}
-            onLogout={() => signOut(getAuth())}
-            user={user}
-            businessInfo={bizInfo}
-          />
+          {drawerOpen && (
+            <>
+              <div
+                onClick={() => setDrawerOpen(false)}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  background: "rgba(0,0,0,.6)",
+                  zIndex: 300,
+                }}
+              />
+              <div
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  zIndex: 301,
+                }}
+              >
+                {sidebar(true)}
+              </div>
+            </>
+          )}
         </>
       ) : (
-        /* ── DESKTOP LAYOUT ── */
-        <div
-          style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}
-        >
-         <DocSidebar
-    activeType={documentType}
-    onChange={(type) => {
-      setDocumentType(type);
-      setActiveNav(null);
-      setSelectedDoc(null);
-      setMessages(prev => [...prev, {
-        id: `sys-${Date.now()}`, role: "assistant",
-        content: `Switched to ${DOC_TYPES.find(d => d.id === type)?.label}. What would you like to create?`,
-      }]);
-    }}
-    collapsed={sidebarCollapsed}
-    onToggle={() => setSidebarCollapsed(o => !o)}
-    businessInfo={bizInfo}
-    user={user}
-    onLogout={() => signOut(getAuth())}
-    userData={userData}
-    activeNav={activeNav}
-    onNavSelect={(id) => {
-      setActiveNav(id);
-      setSelectedDoc(null);
-      // Search and Chats don't show the list panel, just stay in chat
-      if (id === "search" || id === "chats") {
-        setActiveNav(null);
-        inputRef.current?.focus();
-      }
-    }}
-  />
-{activeNav && ["invoices", "quotes", "recents"].includes(activeNav) && (
-    <DocListPanel
-      activeNav={activeNav}
-      userData={userData}
-      searchQuery={searchQuery}
-      setSearchQuery={setSearchQuery}
-      onSelectDoc={(doc) => {
-        setSelectedDoc(doc);
-        setPreviewOpen(true);
-      }}
-      selectedDoc={selectedDoc}
-    />
-  )}
-          {/* Chat */}
-          {!selectedDoc && (
-    <div style={{
-      width: previewOpen ? "42%" : "100%",
-      minWidth: 320,
-      display: "flex",
-      flexDirection: "column",
-      borderRight: previewOpen ? "1px solid #e5e7eb" : "none",
-      transition: "width .3s ease",
-      flexShrink: 0,
-      overflow: "hidden",
-    }}>
-      {ChatPanel}
-    </div>
-  )}
-
-          {/* Preview */}
-          {(previewOpen || selectedDoc) && (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
-      {selectedDoc ? (
-        // ── Selected doc from list ──
-        <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "#e2e8f0" }}>
-          {/* Toolbar */}
-          <div style={{
-            height: isMobile ? 52 : 48, background: "#0f172a", borderBottom: "1px solid rgba(255,255,255,.07)",
-            display: "flex", alignItems: "center", padding: "0 16px", gap: 12, flexShrink: 0,
-          }}>
-            <button onClick={() => setSelectedDoc(null)} style={{
-              display: "flex", alignItems: "center", gap: 6, padding: "5px 12px",
-              borderRadius: 8, background: "#fff", border: "1px solid #e2e8f0",
-              color: "#374151", cursor: "pointer", fontSize: 12, fontWeight: 600,
-            }}>
-              <ArrowLeft size={13} /> Back to chat
-            </button>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", flex: 1 }}>
-              {selectedDoc.customer?.name} · #{selectedDoc.invoiceNumber}
-            </span>
-            <button onClick={handlePrint} style={{
-              display: "flex", alignItems: "center", gap: 6, padding: "6px 14px",
-              borderRadius: 8, background: "#fff", border: "1px solid #e2e8f0",
-              color: "#374151", cursor: "pointer", fontSize: 12, fontWeight: 600,
-            }}>
-              <Download size={13} /> Download PDF
-            </button>
+        <>
+          {sidebar(false)}
+          <div
+            style={{
+              flex: previewOpen ? "0 0 46%" : 1,
+              minWidth: 340,
+              height: "100%",
+              transition: "flex-basis .25s ease",
+            }}
+          >
+            {chatColumn}
           </div>
-          {/* Render selected doc */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "24px 20px", display: "flex", justifyContent: "center" }}>
-            <div style={{
-              width: "100%", maxWidth: 760, background: "#fff",
-              borderRadius: 8, boxShadow: "0 4px 24px rgba(0,0,0,.1)", overflow: "hidden",
-            }}>
-              {TemplateRenderer ? (
-                <TemplateRenderer
-                  {...templateProps}
-                  // Override with selected doc's data
-                  customerName={selectedDoc.customer?.name || ""}
-                  customerEmail={selectedDoc.customer?.email || ""}
-                  customerPhone={selectedDoc.customer?.phone || ""}
-                  customerAddress={selectedDoc.customer?.address || ""}
-                  items={selectedDoc.items || []}
-                  subtotal={selectedDoc.subtotal || 0}
-                  totalTax={selectedDoc.totalTax || 0}
-                  total={selectedDoc.total || 0}
-                  invoiceNumber={selectedDoc.invoiceNumber || ""}
-                  documentType={selectedDoc.documentType || "invoice"}
-                  paymentStatus={selectedDoc.paymentStatus || { status: "pending" }}
-                  showStamp={selectedDoc.paymentStatus?.status === "paid"}
-                  stampText="PAID"
-                  stampColor="#16a34a"
-                />
-              ) : (
-                <div style={{ padding: 40, textAlign: "center", color: "#94a3b8" }}>
-                  No template renderer provided
-                </div>
-              )}
+          {previewOpen && (
+            <div style={{ flex: 1, minWidth: 0, height: "100%" }}>
+              {previewColumn}
             </div>
-          </div>
-        </div>
-      ) : (
-        PreviewPanel
+          )}
+        </>
       )}
     </div>
-  )}
-        </div>
-      )}
+  );
+}
+
+/* ── small shared bits ── */
+const iconBtn = {
+  background: "none",
+  border: "none",
+  color: C.muted,
+  cursor: "pointer",
+  padding: 6,
+  borderRadius: 8,
+  display: "flex",
+  alignItems: "center",
+};
+
+const pillBtn = {
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  padding: "6px 12px",
+  borderRadius: 8,
+  background: "transparent",
+  border: `1px solid ${C.border}`,
+  color: C.text,
+  cursor: "pointer",
+  fontSize: 12.5,
+  fontWeight: 600,
+  fontFamily: "inherit",
+};
+
+const chipBtn = {
+  padding: "8px 14px",
+  borderRadius: 20,
+  background: "transparent",
+  border: `1px solid ${C.border}`,
+  color: C.muted,
+  cursor: "pointer",
+  fontSize: 13.5,
+  fontFamily: "inherit",
+  lineHeight: 1.4,
+  transition: "all .15s",
+};
+
+const sectionLabel = {
+  fontSize: 12,
+  fontWeight: 600,
+  color: C.muted,
+  marginBottom: 8,
+  paddingLeft: 2,
+};
+
+function ErrorBox({ error }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 8,
+        padding: "10px 14px",
+        borderRadius: 12,
+        margin: "14px auto 0",
+        maxWidth: 720,
+        background: "rgba(248,113,113,.1)",
+        border: "1px solid rgba(248,113,113,.3)",
+        color: "#fca5a5",
+        fontSize: 13,
+      }}
+    >
+      <AlertCircle size={15} style={{ flexShrink: 0, marginTop: 1 }} /> {error}
     </div>
   );
 }
