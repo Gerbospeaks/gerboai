@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { Check, Eye, X } from "lucide-react";
 import SignatureStamp from "../SignatureStamp";
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
 import { PayNowButton } from "../../components/PayNowButton";
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
+
 const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
@@ -64,6 +65,22 @@ const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
   );
 };
 
+
+
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
 // Main Template Selector Component
 const TemplateSelector = ({ selectedTemplate, onSelectTemplate }) => {
   const [previewTemplate, setPreviewTemplate] = useState(null);
@@ -255,8 +272,10 @@ export const TemplateRenderer = ({
   stampColor = "#22c55e",
   showStampDate = true,
   showStamp = false,
+  currency,
   paymentStatus,
 }) => {
+  const code = useInvoiceCurrency(currency);
   // Professional Template
   const ProfessionalTemplate = () => (
     <div className="bg-white p-12 relative">

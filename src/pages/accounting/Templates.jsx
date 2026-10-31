@@ -1,3 +1,4 @@
+import { useCurrency, resolveCurrency, formatMoney, convert } from "../../contexts/CurrencyContext";
 import React, { useState } from 'react';
 import {
   FileText, ShoppingCart, Check, Eye, Sparkles,
@@ -128,7 +129,12 @@ function PaymentModal({ template, onClose, onSuccess }) {
 
   const fmtCard   = (v) => { const c = v.replace(/\s/g,''); return (c.match(/.{1,4}/g)||[]).join(' '); };
   const fmtExpiry = (v) => { let d = v.replace(/\D/g,''); if (d.length >= 2) d = d.slice(0,2)+'/'+d.slice(2,4); return d.slice(0,5); };
+const { currencyCode } = useCurrency();
+const chargeCurrency = resolveCurrency(currencyCode);
 
+// Template prices are stored in ZAR; show them in the charge currency
+const money = (zar) =>
+  formatMoney(convert(zar, "ZAR", chargeCurrency), chargeCurrency);
   const submit = async () => {
     const raw = form.cardNumber.replace(/\s/g,'');
     if (raw.length !== 16)            return setError('Enter a valid 16-digit card number');
@@ -171,7 +177,7 @@ function PaymentModal({ template, onClose, onSuccess }) {
             </div>
             <div className="flex justify-between pt-3 border-t border-[#bfdbfe]">
               <span className="text-sm text-[#64748b]">One-time payment · lifetime access</span>
-              <span className="text-xl font-bold text-[#2563eb]">R{template.price}</span>
+              <span className="text-xl font-bold text-[#2563eb]">{money(template.price)}</span>
             </div>
           </div>
 
@@ -226,7 +232,7 @@ function PaymentModal({ template, onClose, onSuccess }) {
             className="w-full mt-5 py-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-xl font-bold text-base shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
             {loading
               ? <><Loader2 className="w-5 h-5 animate-spin" /> Processing payment…</>
-              : <><Lock className="w-5 h-5" /> Pay R{template.price}</>}
+              : <><Lock className="w-5 h-5" /> Pay {money(template.price)}</>}
           </button>
           <p className="text-xs text-center text-[#9ca3af] mt-3">By completing this purchase you agree to our terms of service</p>
         </div>
@@ -239,6 +245,12 @@ function PaymentModal({ template, onClose, onSuccess }) {
 function PreviewModal({ template, onClose, isOwned, onPurchase, onActivate, isActive }) {
   const Icon       = template.icon;
   const SvgPreview = template.SvgPreview;
+  const { currencyCode } = useCurrency();
+const chargeCurrency = resolveCurrency(currencyCode);
+
+// Template prices are stored in ZAR; show them in the charge currency
+const money = (zar) =>
+  formatMoney(convert(zar, "ZAR", chargeCurrency), chargeCurrency);
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -268,7 +280,7 @@ function PreviewModal({ template, onClose, isOwned, onPurchase, onActivate, isAc
           ) : (
             <button onClick={() => { onPurchase(template); onClose(); }}
               className="flex-1 py-3 bg-[#2563eb] text-white rounded-xl font-semibold hover:bg-[#1d4ed8] transition-all flex items-center justify-center gap-2">
-              <ShoppingCart className="w-4 h-4" /> Buy — R{template.price}
+              <ShoppingCart className="w-4 h-4" /> Buy — {money(template.price)}
             </button>
           )}
         </div>
@@ -281,6 +293,12 @@ function PreviewModal({ template, onClose, isOwned, onPurchase, onActivate, isAc
 function TemplateCard({ template, isOwned, isActive, onPurchase, onActivate, onPreview }) {
   const Icon       = template.icon;
   const SvgPreview = template.SvgPreview;
+  const { currencyCode } = useCurrency();
+const chargeCurrency = resolveCurrency(currencyCode);
+
+// Template prices are stored in ZAR; show them in the charge currency
+const money = (zar) =>
+  formatMoney(convert(zar, "ZAR", chargeCurrency), chargeCurrency);
   return (
     <div className={`bg-white rounded-xl border-2 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
       ${isActive ? 'border-[#2563eb] shadow-lg shadow-[#2563eb]/10' : 'border-[#e2e8f0] hover:border-[#93c5fd]'}`}>
@@ -348,7 +366,7 @@ function TemplateCard({ template, isOwned, isActive, onPurchase, onActivate, onP
           <div>
             {template.price === 0
               ? <><div className="text-2xl font-bold text-green-600">Free</div><div className="text-xs text-[#9ca3af]">always included</div></>
-              : <><div className="text-2xl font-bold text-[#2563eb]">R{template.price}</div><div className="text-xs text-[#9ca3af]">one-time</div></>}
+              : <><div className="text-2xl font-bold text-[#2563eb]">{money(template.price)}</div><div className="text-xs text-[#9ca3af]">one-time</div></>}
           </div>
           <div className="flex gap-2">
             <button onClick={() => onPreview(template)}

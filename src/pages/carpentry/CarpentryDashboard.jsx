@@ -1101,6 +1101,7 @@ const bottomNavItems = [
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
           industry="carpentry"
+          quoteType="quote"
           onNavigateTo={(view) => {
             setActiveView(view);
           }}

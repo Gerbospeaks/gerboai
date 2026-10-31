@@ -1,5 +1,4 @@
-// components/AppHeader.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { getDashboardRoute } from "../utils/dashboardRoutes";
@@ -18,7 +17,6 @@ import {
   Users,
   Receipt,
   Briefcase,
-  Zap,
   CheckCircle2,
   Clock,
   AlertCircle,
@@ -685,7 +683,7 @@ const DEFAULT_CONFIG = {
     },
   ],
 };
-
+const NO_NOTIFS = [];
 const planMeta = {
   free: { label: "Free", cls: "zah-plan zah-plan-free" },
   pro: { label: "Pro", cls: "zah-plan zah-plan-pro" },
@@ -734,7 +732,7 @@ const AppHeader = ({
   showActions = true,
   onSettingsOpen,
   onTeamOpen,
-  notifications = [],
+  notifications = NO_NOTIFS,
   pageTitle = "",
   plan = "pro",
   showConvertButton = false, // ← add
@@ -748,21 +746,32 @@ const AppHeader = ({
   const [showSearch, setShowSearch] = useState(false);
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [localNotifs, setLocalNotifs] = useState(notifications);
   const [isMobile, setIsMobile] = useState(false);
 
-  const searchRef = useRef(null);
+
   const notifRef = useRef(null);
   const quickCreateRef = useRef(null);
   const userMenuRef = useRef(null);
 
-  const unreadCount = localNotifs.filter((n) => !n.read).length;
+ 
   const dashConfig = DASHBOARD_CONFIG[dashboardType] ?? DEFAULT_CONFIG;
 
   const getDropStyle = useDropStyle();
   const getNotifDropStyle = useDropStyle(300);
   const getUserMenuDropStyle = useDropStyle(240);
+const [readIds, setReadIds] = useState(() => new Set());
+const [dismissedIds, setDismissedIds] = useState(() => new Set());
 
+
+const localNotifs = useMemo(
+  () =>
+    notifications
+      .filter((n) => !dismissedIds.has(n.id))
+      .map((n) => (readIds.has(n.id) ? { ...n, read: true } : n)),
+  [notifications, readIds, dismissedIds]
+);
+  const searchRef = useRef(null);
+   const unreadCount = localNotifs.filter((n) => !n.read).length;
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
     check();
@@ -770,9 +779,6 @@ const AppHeader = ({
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  useEffect(() => {
-    setLocalNotifs(notifications);
-  }, [notifications]);
 
   useEffect(() => {
     const h = (e) => {
@@ -817,10 +823,10 @@ const AppHeader = ({
     }
   };
 
-  const markAllRead = () =>
-    setLocalNotifs((p) => p.map((n) => ({ ...n, read: true })));
-  const dismissNotif = (id) =>
-    setLocalNotifs((p) => p.filter((n) => n.id !== id));
+const markAllRead = () =>
+  setReadIds(new Set(notifications.map((n) => n.id)));
+const dismissNotif = (id) =>
+  setDismissedIds((p) => new Set(p).add(id));
 
   const getUserInitials = () => {
     if (user?.name)

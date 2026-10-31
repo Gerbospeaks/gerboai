@@ -925,11 +925,12 @@ export default function AIInvoiceWindow({
   TemplateRenderer,
   POTemplateRenderer,
   industry = "default",
+  quoteType = "quote",
 }) {
   const [userData, setUserData] = useState(null);
   const [extraData, setExtraData] = useState({});
   const [dataLoading, setDataLoading] = useState(true);
-  // The dashboard calls quotes "quote"; this window uses "estimate"
+  const templateDocType = (t) => (t === "estimate" ? quoteType : t);
   const [documentType, setDocumentType] = useState(
     initDocType === "quote"
       ? "estimate"
@@ -2036,18 +2037,20 @@ export default function AIInvoiceWindow({
             </div>
           ) : (
             <div
-              id="ai-print-area"
-              style={{
-                width: "100%",
-                maxWidth: 760,
-                background: "#fff",
-                borderRadius: 8,
-                boxShadow: "0 8px 32px rgba(0,0,0,.4)",
-                overflow: "hidden",
-                animation: "sfSlide .3s ease",
-                alignSelf: "flex-start",
-              }}
-            >
+  id="ai-print-area"
+  style={{
+    width: "100%",
+    maxWidth: 760,
+    background: "#fff",
+    color: "#1e293b",          // ← dark text for the paper
+    colorScheme: "light",      // ← keeps form controls/scrollbars light inside
+    borderRadius: 8,
+    boxShadow: "0 8px 32px rgba(0,0,0,.4)",
+    overflow: "hidden",
+    animation: "sfSlide .3s ease",
+    alignSelf: "flex-start",
+  }}
+>
               {(() => {
                 const viewType = showingSaved
                   ? selectedDoc.docType

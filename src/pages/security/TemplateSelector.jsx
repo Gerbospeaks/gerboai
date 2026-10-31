@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
+
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
 import {
   Check,
   Shield,
@@ -2109,6 +2111,24 @@ export const DiagnosticTemplate = ({
   );
 };
 
+
+
+
+
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
 // ═══════════════════════════════════════════════════════════════════════════
 // TEMPLATE SELECTOR
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2252,8 +2272,10 @@ export const TemplateRenderer = ({
   stampColor = C.gold,
   showStampDate = true,
   showStamp = false,
+  currency,
   ...props
 }) => {
+  const code = useInvoiceCurrency(currency);
   const tProps = {
     ...props,
     reportType,
@@ -2264,23 +2286,29 @@ export const TemplateRenderer = ({
     businessInfo,
     companyInfo,
   };
+  let content;
   switch (templateId) {
     case "default":
-      return <DefaultTemplate {...tProps} />;
+      return content = <DefaultTemplate {...tProps} />;
     case "classic":
-      return <ClassicTemplate {...tProps} />;
+      return content = <ClassicTemplate {...tProps} />;
     case "modern":
-      return <ModernTemplate {...tProps} />;
+      return content = <ModernTemplate {...tProps} />;
     case "elegant":
     case "premium":
-      return <ElegantTemplate {...tProps} />;
+      return content = <ElegantTemplate {...tProps} />;
     case "speed":
-      return <SpeedTemplate {...tProps} />;
+      return content = <SpeedTemplate {...tProps} />;
     case "diagnostic":
-      return <DiagnosticTemplate {...tProps} />;
+      return content = <DiagnosticTemplate {...tProps} />;
     default:
-      return <DefaultTemplate {...tProps} />;
+      return content = <DefaultTemplate {...tProps} />;
   }
+  return (
+    <InvoiceCurrencyContext.Provider value={code}>
+      {content}
+    </InvoiceCurrencyContext.Provider>
+  );
 };
 
 export default TemplateSelector;

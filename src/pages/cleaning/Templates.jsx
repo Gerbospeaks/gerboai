@@ -1,5 +1,7 @@
+import { useCurrency, resolveCurrency, formatMoney, convert } from "../../contexts/CurrencyContext";
 import React, { useState } from "react";
-import {
+
+import { 
   FileText,
   ShoppingCart,
   Check,
@@ -137,7 +139,12 @@ const Templates = () => {
     expiryDate: "",
     cvv: "",
   });
+const { currencyCode } = useCurrency();
+const chargeCurrency = resolveCurrency(currencyCode);
 
+// Template prices are stored in ZAR; show them in the charge currency
+const money = (zar) =>
+  formatMoney(convert(zar, "ZAR", chargeCurrency), chargeCurrency);
   const handlePurchase = async (templateId) => {
     const template = TEMPLATES[templateId];
 
@@ -409,7 +416,7 @@ const Templates = () => {
                       {template.isPremium ? (
                         <div>
                           <div className="text-3xl font-bold text-blue-600">
-                            R{template.price}
+                            {money(template.price)}
                           </div>
                           <div className="text-xs text-gray-500">one-time</div>
                         </div>
@@ -656,7 +663,7 @@ const Templates = () => {
                       One-time payment
                     </span>
                     <span className="text-2xl font-bold text-blue-600">
-                      R{TEMPLATES[showPayment].price}
+                      {money(TEMPLATES[showPayment].price)}
                     </span>
                   </div>
                 </div>
@@ -752,7 +759,7 @@ const Templates = () => {
                   ) : (
                     <>
                       <Lock className="w-5 h-5" />
-                      Pay R{TEMPLATES[showPayment].price}
+                      Pay {money(TEMPLATES[showPayment].price)}
                     </>
                   )}
                 </button>

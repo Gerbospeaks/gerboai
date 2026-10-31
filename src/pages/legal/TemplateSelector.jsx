@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from "react";
+import { useState, createContext, useContext } from "react";
 import { FileText, Check } from "lucide-react";
 import SignatureStamp from "../SignatureStamp";
-import { PayNowButton } from "../../components/PayNowButton";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-  serverTimestamp,
-} from "firebase/firestore";
 
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
+
+
+
+
+
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
+
 export const TemplateSelector = ({
   user,
   selectedTemplate,
@@ -269,7 +281,7 @@ export const DefaultTemplate = ({
                 <td className="px-2 py-2">{item.description}</td>
                 <td className="text-center px-2 py-2">{item.qty}</td>
                 <td className="text-right px-2 py-2">
-                  R {item.rate.toFixed(2)}
+                  <Money value={item.rate} />
                 </td>
                 <td className="text-right px-2 py-2">
                   R {item.amount.toFixed(2)}
@@ -458,7 +470,7 @@ export const ClassicTemplate = (props) => {
             <tr key={i} className="border-b">
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
               <td className="text-right px-2 py-2">
                 R {item.amount.toFixed(2)}
               </td>
@@ -619,7 +631,7 @@ export const CorporateTemplate = (props) => {
                 <td className="px-4 py-3">{item.description}</td>
                 <td className="text-center px-4 py-3">{item.qty}</td>
                 <td className="text-right px-4 py-3">
-                  R {item.rate.toFixed(2)}
+                  <Money value={item.rate} />
                 </td>
                 <td className="text-right px-4 py-3 font-semibold">
                   R {item.amount.toFixed(2)}
@@ -774,7 +786,7 @@ export const ModernTemplate = (props) => {
             <tr key={i} className="border-b hover:bg-gray-50">
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
               <td className="text-right px-4 py-3 font-semibold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -843,8 +855,10 @@ export const TemplateRenderer = ({
   stampColor = "#d32f2f",
   showStampDate = true,
   showStamp = false,
+  currency,
   ...props
 }) => {
+  const code = useInvoiceCurrency(currency);
   const templateProps = {
     ...props,
     documentType,
@@ -853,15 +867,21 @@ export const TemplateRenderer = ({
     showStampDate,
     showStamp,
   };
+  let content;
   switch (templateId) {
     case "default":
-      return <DefaultTemplate {...templateProps} />;
+      return content = <DefaultTemplate {...templateProps} />;
     case "classic":
-      return <ClassicTemplate {...templateProps} />;
+      return content = <ClassicTemplate {...templateProps} />;
     case "modern":
-      return <ModernTemplate {...templateProps} />;
+      return content = <ModernTemplate {...templateProps} />;
     default:
-      return <DefaultTemplate {...templateProps} />;
+      return content = <DefaultTemplate {...templateProps} />;
   }
+  return (
+    <InvoiceCurrencyContext.Provider value={code}>
+      {content}
+    </InvoiceCurrencyContext.Provider>
+  );
 };
 export default TemplateSelector;

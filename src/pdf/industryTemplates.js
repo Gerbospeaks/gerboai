@@ -20,7 +20,7 @@ const INDUSTRY_TEMPLATE_MAP = {
   landscaping:          () => import('../pages/landscaping/TemplateSelector'),
   logistics:            () => import('../pages/logistics/TemplateSelector'),
   photography:          () => import('../pages/photography/TemplateSelector'),
-  realestate:           () => import('../pages/realestate/TemplateSelector'),
+  realestate:           () => import('../pages/realEstate/TemplateSelector'),
   flooring:             () => import('../pages/flooring/TemplateSelector'),
   hvac:                 () => import('../pages/hvac/TemplateSelector'),
   accounting:           () => import('../pages/accounting/TemplateSelector'),
@@ -35,7 +35,8 @@ const INDUSTRY_TEMPLATE_MAP = {
   technology:           () => import('../pages/technology/TemplateSelector'),
   upholstery:           () => import('../pages/upholstery/TemplateSelector'),
   virtualservice:   () => import('../pages/virtual-services/TemplateSelector'),
-  appliancerepair:   () => import('../pages/appliance-repair/TemplateSelector'),
+  appliancerepair:   () => import('../pages/window-repair/TemplateSelector'),
+
 };
 
 /**

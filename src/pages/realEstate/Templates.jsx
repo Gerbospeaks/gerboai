@@ -1,4 +1,6 @@
+import { useCurrency, resolveCurrency, formatMoney, convert } from "../../contexts/CurrencyContext";
 import React, { useState, useEffect } from "react";
+
 import {
   FileText,
   ShoppingCart,
@@ -11,7 +13,7 @@ import {
   Crown,
   Gauge,
 } from "lucide-react";
-import {
+import  {
   getFirestore,
   doc,
   getDoc,
@@ -132,7 +134,12 @@ const Templates = ({ user }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showPreview, setShowPreview] = useState(null);
   const [loading, setLoading] = useState(true);
+const { currencyCode } = useCurrency();
+const chargeCurrency = resolveCurrency(currencyCode);
 
+// Template prices are stored in ZAR; show them in the charge currency
+const money = (zar) =>
+  formatMoney(convert(zar, "ZAR", chargeCurrency), chargeCurrency);
   useEffect(() => {
     loadPurchasedTemplates();
   }, [user]);
@@ -399,7 +406,7 @@ const Templates = ({ user }) => {
                     {template.isPremium ? (
                       <div>
                         <div className="text-3xl font-bold text-orange-600">
-                          R{template.price}
+                          {money(template.price)}
                         </div>
                         <div className="text-xs text-gray-500">one-time</div>
                       </div>

@@ -7,7 +7,7 @@ import { useIndustryPicker } from "../hooks/useIndustryPicker";
 import CookieConsent from "../components/CookieConsent";
 import { css } from "./landingPageStyles";
 import google from "../assets/google-play.png";
-import appStore from "../assets/app-store.png"; 
+import appStore from "../assets/app-store.png";
 import {
   Zap,
   TrendingUp,
@@ -17,6 +17,9 @@ import {
   ChevronRight,
   Menu,
   X,
+  Sparkles,
+  MessageSquare,
+  Repeat,
 } from "lucide-react";
 import logo from "../assets/img/solidflo.png";
 import instagram from "../assets/images/instagram.png";
@@ -42,7 +45,51 @@ const FEATURES = [
     desc: "Templates for 26 industries, from mechanics and electricians to healthcare and education — one platform.",
   },
 ];
+const AI_DEMOS = [
+  {
+    prompt: "Invoice Thabo for 5hrs bookkeeping at R650/hr",
+    client: "Thabo Mokoena",
+    note: "Client details loaded from your contacts",
+    lines: [{ d: "Bookkeeping", q: 5, r: 650 }],
+  },
+  {
+    prompt: "Quote for annual financial statements, R9,500 flat",
+    client: "New client",
+    note: "Saved to your clients when you hit Save",
+    lines: [{ d: "Annual financial statements", q: 1, r: 9500 }],
+  },
+  {
+    prompt: "Repeat last invoice",
+    client: "Sipho Dlamini",
+    note: "Copied from your most recent invoice",
+    lines: [{ d: "Monthly retainer", q: 1, r: 5500 }],
+  },
+];
 
+const AI_STEPS = [
+  {
+    icon: <MessageSquare size={20} />,
+    title: "Say what you did",
+    desc: "Type it the way you'd text a friend: who, what, and how much. No forms, no rows.",
+  },
+  {
+    icon: <Sparkles size={20} />,
+    title: "Watch it build",
+    desc: "SolidFlo AI fills in the client, line items and VAT on a live preview as you type.",
+  },
+  {
+    icon: <Repeat size={20} />,
+    title: "Save and send",
+    desc: "Check the numbers, save it, and download the PDF. Repeat clients take one line.",
+  },
+];
+
+const fmtR = (n) =>
+  "R" +
+  n.toLocaleString("en-ZA", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 const MARKET = [
   {
     emoji: "🔧",
@@ -201,6 +248,7 @@ const FUNNEL = [
 
 const NAV = [
   { id: "features", label: "Features", type: "scroll" },
+  { id: "ai-invoicing", label: "AI Invoicing", type: "scroll" },
   { id: "pricing", label: "Pricing", type: "scroll" },
   { id: "marketplace", label: "Marketplace", type: "modal" },
   { id: "customers", label: "Customers", type: "modal" },
@@ -243,7 +291,80 @@ const Modal = ({ title, subtitle, onClose, wide, children }) => {
     </div>
   );
 };
+const AIDemo = () => {
+  const [idx, setIdx] = useState(0);
+  const [typed, setTyped] = useState(0);
+  const demo = AI_DEMOS[idx];
+  const done = typed >= demo.prompt.length;
 
+  useEffect(() => {
+    if (!done) {
+      const t = setTimeout(() => setTyped((n) => n + 1), 38);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => {
+      setIdx((i) => (i + 1) % AI_DEMOS.length);
+      setTyped(0);
+    }, 3800);
+    return () => clearTimeout(t);
+  }, [typed, done]);
+
+  const subtotal = demo.lines.reduce((s, l) => s + l.q * l.r, 0);
+  const vat = subtotal * 0.15;
+
+  return (
+    <div
+      className="ai-demo"
+      aria-label="Example of SolidFlo AI creating an invoice"
+    >
+      <div className="ai-chat">
+        <div className="ai-chat-label">
+          <Sparkles size={14} /> SolidFlo AI
+        </div>
+        <div className="ai-bubble">
+          {demo.prompt.slice(0, typed)}
+          {!done && <span className="ai-caret" />}
+        </div>
+        {done && (
+          <div className="ai-reply">
+            Done. I've filled in your document.
+            <span className="ai-chip">{demo.note}</span>
+          </div>
+        )}
+      </div>
+
+      <div className={`ai-paper${done ? " on" : ""}`}>
+        <div className="ai-paper-head">
+          <strong>{idx === 1 ? "QUOTE" : "INVOICE"}</strong>
+          <span>{demo.client}</span>
+        </div>
+        {demo.lines.map((l) => (
+          <div key={l.d} className="ai-row">
+            <span>
+              {l.d}{" "}
+              <small>
+                {l.q} × {fmtR(l.r)}
+              </small>
+            </span>
+            <span>{fmtR(l.q * l.r)}</span>
+          </div>
+        ))}
+        <div className="ai-row muted">
+          <span>Subtotal</span>
+          <span>{fmtR(subtotal)}</span>
+        </div>
+        <div className="ai-row muted">
+          <span>VAT (15%)</span>
+          <span>{fmtR(vat)}</span>
+        </div>
+        <div className="ai-row total">
+          <span>Total</span>
+          <span>{fmtR(subtotal + vat)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 const LandingPage = () => {
   const { isOpen, intent, open, close } = useIndustryPicker();
@@ -254,7 +375,7 @@ const LandingPage = () => {
     loading: currencyLoading,
     formatCurrency: formatVisitorCurrency,
   } = useAppCurrency();
-
+  const showUSD = ["ZWG", "ZWL"].includes(currencyCode);
   const footerRef = useRef(null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -271,6 +392,7 @@ const LandingPage = () => {
   const localPrice = (usd) => {
     if (currencyLoading) return null;
     if (usd === 0) return "Free";
+    if (showUSD) return `$${usd}`;
     return formatVisitorCurrency(usd, "USD", { fractionDigits: 0 });
   };
 
@@ -655,7 +777,46 @@ const LandingPage = () => {
               </div>
             </div>
           </section>
+          {/* ── AI Invoicing ── */}
+          <section id="ai-invoicing" className="lp-section">
+            <div className="lp-section-inner">
+              <div className="lp-section-head center">
+                <h2>Invoice in 10 seconds. Just say what you did.</h2>
+                <p>
+                  No forms and no typing line by line. Describe the job in one
+                  sentence and SolidFlo AI builds the invoice, quote or purchase
+                  order for you.
+                </p>
+              </div>
 
+              <div className="ai-layout">
+                <AIDemo />
+                <div className="ai-points">
+                  {AI_STEPS.map((s, i) => (
+                    <div
+                      key={s.title}
+                      id={`ai-step-${i}`}
+                      data-anim
+                      className={`lp-card${visible[`ai-step-${i}`] ? " visible" : ""}`}
+                      style={{ transitionDelay: `${i * 80}ms` }}
+                    >
+                      <div className="lp-card-icon">{s.icon}</div>
+                      <h3>{s.title}</h3>
+                      <p>{s.desc}</p>
+                    </div>
+                  ))}
+                  <div className="lp-cta-btns">
+                    <button
+                      className="lp-btn lp-btn-dark lp-btn-lg"
+                      onClick={() => open("register")}
+                    >
+                      Try AI invoicing free <ArrowRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
           {/* ── Pricing ── */}
           <section id="pricing" className="lp-section">
             <div className="lp-section-inner">
@@ -667,7 +828,8 @@ const LandingPage = () => {
                 </p>
                 {!currencyLoading && (
                   <span className="lp-currency-badge">
-                    Prices shown in <strong>{currencyCode}</strong>
+                    Prices shown in{" "}
+                    <strong>{showUSD ? "USD" : currencyCode}</strong>
                     {countryName ? ` · ${countryName}` : ""}
                   </span>
                 )}
@@ -693,6 +855,7 @@ const LandingPage = () => {
                       {plan.usdPrice > 0 ? `/ ${plan.period}` : plan.period}
                       {!currencyLoading &&
                         plan.usdPrice > 0 &&
+                        !showUSD &&
                         currencyCode !== "USD" &&
                         ` · ≈ $${plan.usdPrice} USD`}
                     </div>

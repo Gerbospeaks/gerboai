@@ -772,6 +772,7 @@ const bottomNavItems = [
           documentType={documentType}
           onExit={() => setShowAIWindow(false)}
           industry="accounting"
+          quoteType="Estimate"
           onNavigateTo={(view) => {
             setAiWindowOpen(false);
             setActiveView(view);

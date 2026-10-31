@@ -36,6 +36,68 @@ export const css = `
     letter-spacing: -.02em;
     line-height: 1.08;
   }
+      /* ── AI invoicing ── */
+  .ai-layout {
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center;
+  }
+  .ai-points { display: flex; flex-direction: column; gap: 14px; }
+  .ai-points .lp-card { min-height: 0; padding: 24px 26px; }
+  .ai-points .lp-card-icon { margin-bottom: 0; }
+  .ai-points .lp-card h3 { font-size: 21px; margin: 16px 0 8px; }
+  .ai-points .lp-card p { font-size: 14.5px; }
+  .ai-points .lp-cta-btns { justify-content: flex-start; margin-top: 6px; }
+
+  .ai-demo {
+    background: var(--base-deep); border: 1px solid var(--line);
+    border-radius: var(--r-xl); padding: 24px;
+    display: grid; gap: 18px; min-height: 440px; align-content: start;
+  }
+  .ai-chat-label {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+    color: var(--accent); font-size: 13px; font-weight: 600;
+  }
+  .ai-bubble {
+    background: var(--panel); color: var(--ink); border-radius: 14px;
+    padding: 12px 16px; font-size: 15px; line-height: 1.5; min-height: 48px;
+  }
+  .ai-caret {
+    display: inline-block; width: 2px; height: 1em; margin-left: 2px;
+    background: var(--accent); vertical-align: text-bottom;
+    animation: ai-blink 1s steps(1) infinite;
+  }
+  .ai-reply {
+    color: var(--ink-mid); font-size: 14px; margin-top: 12px; line-height: 1.8;
+    animation: lp-fade .4s ease both;
+  }
+  .ai-chip {
+    display: inline-block; margin-left: 8px; padding: 2px 10px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 600; color: var(--signal);
+    border: 1px solid rgba(11,138,94,.4); background: rgba(11,138,94,.12);
+  }
+  .ai-paper {
+    background: #fff; color: #1e293b; border-radius: var(--r-md); padding: 20px;
+    opacity: .35; transform: translateY(6px);
+    transition: opacity .45s ease, transform .45s ease;
+  }
+  .ai-paper.on { opacity: 1; transform: none; }
+  .ai-paper-head {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding-bottom: 10px; margin-bottom: 8px; font-size: 14px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .ai-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px; }
+  .ai-row span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .ai-row small { color: #64748b; margin-left: 6px; }
+  .ai-row.muted { color: #64748b; }
+  .ai-row.total {
+    margin-top: 6px; padding-top: 10px; font-weight: 700;
+    border-top: 1px solid #e2e8f0;
+  }
+  @keyframes ai-blink { 50% { opacity: 0; } }
+
+  @media (max-width: 1100px) {
+    .lp-nav-ctas .lp-btn-light { display: none; }
+  }
   .lp a:focus-visible, .lp button:focus-visible, .lp summary:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--r-sm);
   }
@@ -427,6 +489,7 @@ export const css = `
   /* ── Responsive ── */
   @media (max-width: 960px) {
     .lp-cards, .lp-plans, .lp-market-grid { grid-template-columns: 1fr; }
+    .ai-layout { grid-template-columns: 1fr; }
     .lp-metrics { grid-template-columns: 1fr 1fr; }
     .lp-footer-grid { grid-template-columns: 1fr 1fr; }
     .lp-card { min-height: 0; }

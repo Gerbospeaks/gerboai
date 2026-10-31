@@ -42,7 +42,11 @@ const KEY_ROWS = [
 ];
 
 function vibrate() {
-  if (typeof navigator !== "undefined" && navigator.vibrate) {
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.vibrate &&
+    navigator.userActivation?.hasBeenActive
+  ) {
     try {
       navigator.vibrate(4);
     } catch {
@@ -318,7 +322,8 @@ function Keyboard({ activeKeys, idle, onKeyRef, surfaceRef, children }) {
     </div>
   );
 }
-
+const Cursor = ({ show, reduced }) =>
+  show && !reduced ? <span className="hio-cursor">|</span> : null;
 export default function HeroInvoiceOverlay() {
   const sequence = useMemo(buildSequence, []);
   const totalSteps = sequence.length;
@@ -432,8 +437,7 @@ export default function HeroInvoiceOverlay() {
     return { subtotal, vat, total: subtotal + vat };
   }, [qtyNum, rateNum]);
 
-  const Cursor = ({ show }) =>
-    show && !reducedMotion ? <span className="hio-cursor">|</span> : null;
+ <Cursor show={currentFieldKey === "clientName"} reduced={reducedMotion} />
 
   const fingerStyle = {
     transform: `translate(${fingertip.x - 13}px, ${fingertip.y - 13}px)`,

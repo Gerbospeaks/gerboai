@@ -23,7 +23,7 @@ const DASHBOARD_LIST = [
   { id: 'hvac',               label: 'HVAC',               icon: '❄️', path: () => import('../../pages/hvac/HVACDashboard') },
   { id: 'accounting',         label: 'Accounting',         icon: '📊', path: () => import('../../pages/accounting/AccountingDashboard') },
   { id: 'painting',           label: 'Painting',           icon: '🎨', path: () => import('../../pages/painting/PaintingDashboard') },
-  { id: 'pestcontrol',       label: 'Pest Control',       icon: '🐛', path: () => import('../../pages/pest-contrrol/PestcontrolDashboard') },
+  { id: 'pestcontrol',       label: 'Pest Control',       icon: '🐛', path: () => import('../../pages/pest-control/PestcontrolDashboard') },
   { id: 'poolservices',      label: 'Pool Services',      icon: '🏊', path: () => import('../../pages/pool-services/PoolservicesDashboard') },
   { id: 'solarinstallation', label: 'Solar Installation', icon: '☀️', path: () => import('../../pages/solar-installation/SolarDashboard') },
   { id: 'towing',             label: 'Towing',             icon: '🚗', path: () => import('../../pages/towing/TowingDashboard') },
@@ -32,9 +32,7 @@ const DASHBOARD_LIST = [
   { id: 'windowrepair',      label: 'Window Repair',      icon: '🪟', path: () => import('../../pages/window-repair/WindowrepairDashboard') },
   { id: 'technology',             label: 'Technology',             icon: '💻', path: () => import('../../pages/technology/TechnologyDashboard') },
   { id: 'upholstery',            label: 'Upholstery',            icon: '🪑', path: () => import('../../pages/upholstery/UpholsteryDashboard') },
-  { id: 'virtualservice',          label: 'Virtual Services',          icon: '🖥️', path: () => import('../../pages/virtual-services/VirtualServicesDashboard') },
-  { id: 'appliancerepair',             label: 'Appliance Repair',             icon: '�', path: () => import('../../pages/appliance-repair/ApplianceRepairDashboard') },
-
+  { id: 'virtualservice',          label: 'Virtual Services',          icon: '🖥️', path: () => import('../../pages/virtual-services/VirtualDashboard') },
 ];
 
 // ─── Viewport presets ─────────────────────────────────────────────────────────

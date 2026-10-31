@@ -1,25 +1,4 @@
-// src/contexts/CurrencyContext.js
-//
-// App-wide currency detection based on the visitor's location.
-//
-// Different parts of SolidFlo author amounts in different currencies:
-//   - business invoices / quotes / dashboard totals are entered in ZAR
-//     (the local business's own currency)
-//   - the SolidFlo subscription pricing plans are authored in USD
-// This context detects the *visitor's* local currency (via IP
-// geolocation) and lets any component convert a "known" amount from
-// whatever currency it's authored in into the visitor's local currency
-// for display.
-//
-// IMPORTANT: this only changes how numbers are *displayed*. It never
-// changes what is stored in the database. For anything that represents
-// a fixed legal/financial obligation already issued in ZAR — an actual
-// invoice, quote or receipt total that a client owes — prefer
-// formatBaseCurrency() (always shows the real issued currency) so a
-// document doesn't appear to change amount depending on who later views
-// it. Use formatCurrency() for informational displays (dashboard stats,
-// the public pricing page, previews) where showing the visitor's local
-// equivalent is genuinely helpful.
+
 
 import React, {
   createContext,
@@ -29,13 +8,14 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-
-const DEFAULT_CURRENCY = "ZAR"; // what most business records are entered in
-const RATE_PIVOT = "USD"; // currency the exchange-rate API is queried against
+const DEFAULT_CURRENCY = "ZAR"; 
+const USD_OVERRIDE = new Set(["ZWG", "ZWL"]);
+const normalizeCurrency = (code) =>
+  USD_OVERRIDE.has(String(code || "").toUpperCase()) ? "USD" : code;
+const RATE_PIVOT = "USD"; 
 const GEO_CACHE_KEY = "sf_geo_currency_v1";
 const RATES_CACHE_KEY = "sf_exchange_rates_v1";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
 const readCache = (key) => {
   try {
     const raw = localStorage.getItem(key);
@@ -50,6 +30,51 @@ const readCache = (key) => {
   }
 };
 
+
+const SUPPORTED_CURRENCIES = new Set([
+  "USD", "EUR", "GBP", "ZAR", "AUD", "CAD", "NZD", "CHF",
+  "KES", "NGN", "GHS", "BWP", "ZMW", "INR", "AED",
+]);
+
+// Approximate USD-pivot rates, used only if the live rate API fails.
+// Adjust these to current values.
+const FALLBACK_RATES = {
+  USD: 1, ZAR: 18.5, EUR: 0.92, GBP: 0.79, AUD: 1.5, CAD: 1.37,
+  NZD: 1.65, CHF: 0.88, KES: 129, NGN: 1500, GHS: 15, BWP: 13.6,
+  ZMW: 26, INR: 83, AED: 3.67,
+};
+
+export const resolveCurrency = (code) => {
+  const c = String(code || "").toUpperCase();
+  return SUPPORTED_CURRENCIES.has(c) ? c : "USD";
+};
+
+export const formatMoney = (amount, code, digits = 2) => {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "narrowSymbol",
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(Number(amount) || 0);
+  } catch {
+    return `${code} ${(Number(amount) || 0).toFixed(digits)}`;
+  }
+};
+
+// Module-level copy of the live rates so convert() can be a plain function.
+// The provider updates it; components re-render because they use useCurrency().
+let liveRates = { ...FALLBACK_RATES };
+
+export const convert = (amount, from = "ZAR", to = "USD") => {
+  const value = Number(amount) || 0;
+  if (from === to) return value;
+  const f = liveRates[from];
+  const t = liveRates[to];
+  if (!f || !t) return value;
+  return value * (t / f);
+};
 const writeCache = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify({ value, timestamp: Date.now() }));
@@ -89,11 +114,11 @@ const fetchExchangeRates = async () => {
     const res = await fetch(`https://open.er-api.com/v6/latest/${RATE_PIVOT}`);
     if (!res.ok) throw new Error("rate lookup failed");
     const data = await res.json();
-    const rates = { ...(data.rates || {}), [RATE_PIVOT]: 1 };
+    const rates = { ...FALLBACK_RATES, ...(data.rates || {}), [RATE_PIVOT]: 1 };
     writeCache(RATES_CACHE_KEY, rates);
     return rates;
   } catch {
-    return { [RATE_PIVOT]: 1 };
+    return { ...FALLBACK_RATES };
   }
 };
 
@@ -114,9 +139,10 @@ export function CurrencyProvider({ children }) {
       const [geo, rateTable] = await Promise.all([fetchGeoInfo(), fetchExchangeRates()]);
       if (cancelled) return;
 
-      setCurrencyCode(geo.currencyCode || DEFAULT_CURRENCY);
+      setCurrencyCode(normalizeCurrency(geo.currencyCode) || DEFAULT_CURRENCY);
       setCountryName(geo.countryName);
       setCountryCode(geo.countryCode);
+      liveRates = rateTable;
       setRates(rateTable);
       setLoading(false);
       setReady(true);
@@ -132,6 +158,7 @@ export function CurrencyProvider({ children }) {
   const convert = useCallback(
     (amount, fromCurrency = DEFAULT_CURRENCY) => {
       const value = Number(amount) || 0;
+    
       const fromRate = rates[fromCurrency];
       const toRate = rates[currencyCode];
       if (!fromRate || !toRate) return value; // rates unavailable — no-op
@@ -139,10 +166,18 @@ export function CurrencyProvider({ children }) {
     },
     [rates, currencyCode]
   );
+const convertTo = useCallback(
+  (amount, from = DEFAULT_CURRENCY, to = currencyCode) => {
+    const value = Number(amount) || 0;
+    if (from === to) return value;
+    const fromRate = rates[from];
+    const toRate = rates[to];
+    if (!fromRate || !toRate) return null;
+    return value * (toRate / fromRate);
+  },
+  [rates, currencyCode]
+);
 
-  // Converts + formats `amount` (denominated in `fromCurrency`, default
-  // ZAR) into the visitor's local currency, e.g. formatCurrency(220) on a
-  // US visitor might render "$12".
   const formatCurrency = useCallback(
     (amount, fromCurrency = DEFAULT_CURRENCY, { fractionDigits } = {}) => {
       const converted = convert(amount, fromCurrency);
@@ -150,6 +185,7 @@ export function CurrencyProvider({ children }) {
         return new Intl.NumberFormat(undefined, {
           style: "currency",
           currency: currencyCode,
+          currencyDisplay: "narrowSymbol",
           minimumFractionDigits: fractionDigits ?? 2,
           maximumFractionDigits: fractionDigits ?? 2,
         }).format(converted);
@@ -188,10 +224,11 @@ export function CurrencyProvider({ children }) {
       loading,
       ready,
       convert,
+      convertTo,
       formatCurrency,
       formatBaseCurrency,
     }),
-    [currencyCode, countryName, countryCode, rates, loading, ready, convert, formatCurrency, formatBaseCurrency]
+    [currencyCode, countryName, countryCode, rates, loading, ready, convert, convertTo, formatCurrency, formatBaseCurrency]
   );
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;

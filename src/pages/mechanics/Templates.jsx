@@ -1,3 +1,4 @@
+import { useCurrency, resolveCurrency, formatMoney, convert } from "../../contexts/CurrencyContext";
 import React, { useState, useEffect } from "react";
 import {
   FileText,
@@ -14,6 +15,8 @@ import {
   Lock,
   Loader2,
 } from "lucide-react";
+
+
 import {
   getFirestore,
   doc,
@@ -23,7 +26,6 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { TEMPLATE_THUMBNAILS } from "./TemplateThumbnails";
-
 // ─── Template definitions ────────────────────────────────────────────────────
 const TEMPLATES = {
   classic: {
@@ -173,6 +175,12 @@ const Templates = ({ user }) => {
     expiryDate: "",
     cvv: "",
   });
+const { currencyCode } = useCurrency();
+const chargeCurrency = resolveCurrency(currencyCode);
+
+// Template prices are stored in ZAR; show them in the charge currency
+const money = (zar) =>
+  formatMoney(convert(zar, "ZAR", chargeCurrency), chargeCurrency);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -324,7 +332,7 @@ const Templates = ({ user }) => {
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div className="text-3xl font-bold text-green-600">
-              R{totalValue}
+              {money(totalValue)}
             </div>
             <div className="text-sm text-gray-500 mt-1">
               Total Value Unlocked
@@ -408,7 +416,7 @@ const Templates = ({ user }) => {
                       {template.isPremium ? (
                         <>
                           <div className="text-2xl font-bold text-gray-900">
-                            R{template.price}
+                            {money(template.price)}
                           </div>
                           <div className="text-xs text-gray-400">one-time</div>
                         </>
@@ -588,7 +596,7 @@ const Templates = ({ user }) => {
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-xl font-bold text-blue-600">
-                    R{TEMPLATES[showPayment].price}
+                    {money(TEMPLATES[showPayment].price)}
                   </p>
                   <p className="text-xs text-gray-400">once-off</p>
                 </div>
@@ -679,8 +687,7 @@ const Templates = ({ user }) => {
                 By completing this purchase you agree to our terms of service.
               </p>
             </div>
-          </div>
-        </div>
+          </div>        </div>
       )}
     </div>
   );

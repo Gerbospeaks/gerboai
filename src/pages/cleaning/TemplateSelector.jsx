@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { FileText, Check } from "lucide-react";
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext"; 
 
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
 
 const SignatureStamp = ({ text, color, showDate, rotation, size }) => (
   <div
@@ -26,6 +26,20 @@ const SignatureStamp = ({ text, color, showDate, rotation, size }) => (
   </div>
 );
 
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
 // ── Template Selector dropdown ─────────────────────────────────────────────────
 export const TemplateSelector = ({
   selectedTemplate,
@@ -295,11 +309,11 @@ export const ProfessionalTemplate = ({
                   {item.category || "Service"}
                 </span>
               </td>
-              <td className="text-right px-2 py-2">R {sf(item.rate)}</td>
+              <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
               <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {sf(item.taxAmount)}</td>
+              <td className="text-right px-2 py-2"><Money value={item.taxAmount} /></td>
               <td className="text-right px-2 py-2 font-bold">
-                R {sf(item.totalAmount)}
+                <Money value={item.totalAmount} />
               </td>
             </tr>
           ))}
@@ -322,15 +336,15 @@ export const ProfessionalTemplate = ({
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span>R {sf(subtotal)}</span>
+          <span><Money value={subtotal} /></span>
         </div>
         <div className="flex justify-between py-1">
           <span>VAT (15%):</span>
-          <span>R {sf(totalTax)}</span>
+          <span><Money value={totalTax} /></span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-50 text-gray-800 px-2">
           <span>TOTAL:</span>
-          <span>R {sf(total)}</span>
+          <span><Money value={total} /></span>
         </div>
       </div>
     </div>
@@ -520,11 +534,11 @@ export const ClassicTemplate = ({
                 {item.category || "Service"}
               </span>
             </td>
-            <td className="text-right px-2 py-2">R {sf(item.rate)}</td>
+            <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
             <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {sf(item.taxAmount)}</td>
+            <td className="text-right px-2 py-2"><Money value={item.taxAmount} /></td>
             <td className="text-right px-2 py-2 font-bold">
-              R {sf(item.totalAmount)}
+              <Money value={item.totalAmount} />
             </td>
           </tr>
         ))}
@@ -535,15 +549,15 @@ export const ClassicTemplate = ({
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span>R {sf(subtotal)}</span>
+          <span><Money value={subtotal} /></span>
         </div>
         <div className="flex justify-between py-1">
           <span>VAT (15%):</span>
-          <span>R {sf(totalTax)}</span>
+          <span><Money value={totalTax} /></span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-50 px-2">
           <span>TOTAL:</span>
-          <span>R {sf(total)}</span>
+          <span><Money value={total} /></span>
         </div>
       </div>
     </div>
@@ -730,11 +744,11 @@ export const ModernTemplate = ({
                 {item.category || "Service"}
               </span>
             </td>
-            <td className="text-right px-4 py-3">R {sf(item.rate)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {sf(item.taxAmount)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.taxAmount} /></td>
             <td className="text-right px-4 py-3 font-semibold">
-              R {sf(item.totalAmount)}
+              <Money value={item.totalAmount} />
             </td>
           </tr>
         ))}
@@ -745,15 +759,15 @@ export const ModernTemplate = ({
       <div className="w-80 space-y-2">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
-          <span>R {sf(subtotal)}</span>
+          <span><Money value={subtotal} /></span>
         </div>
         <div className="flex justify-between py-2 text-gray-600">
           <span>VAT (15%):</span>
-          <span>R {sf(totalTax)}</span>
+          <span><Money value={totalTax} /></span>
         </div>
         <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-white px-4 rounded-lg">
           <span>TOTAL:</span>
-          <span>R {sf(total)}</span>
+          <span><Money value={total} /></span>
         </div>
       </div>
     </div>
@@ -911,10 +925,10 @@ export const ElegantTemplate = ({
                   {item.category || "Service"}
                 </span>
               </td>
-              <td className="text-right py-3">R {sf(item.rate)}</td>
+              <td className="text-right py-3"><Money value={item.rate} /></td>
               <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3">R {sf(item.taxAmount)}</td>
-              <td className="text-right py-3">R {sf(item.totalAmount)}</td>
+              <td className="text-right py-3"><Money value={item.taxAmount} /></td>
+              <td className="text-right py-3"><Money value={item.totalAmount} /></td>
             </tr>
           ))}
         </tbody>
@@ -924,15 +938,15 @@ export const ElegantTemplate = ({
         <div className="w-64">
           <div className="flex justify-between py-2">
             <span>Subtotal:</span>
-            <span>R {sf(subtotal)}</span>
+            <span><Money value={subtotal} /></span>
           </div>
           <div className="flex justify-between py-2">
             <span>VAT (15%):</span>
-            <span>R {sf(totalTax)}</span>
+            <span><Money value={totalTax} /></span>
           </div>
           <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-white px-4">
             <span>TOTAL:</span>
-            <span>R {sf(total)}</span>
+            <span><Money value={total} /></span>
           </div>
         </div>
       </div>
@@ -1114,11 +1128,11 @@ export const ResidentialTemplate = ({
                   {item.category || "Service"}
                 </span>
               </td>
-              <td className="text-right px-4 py-3">R {sf(item.rate)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {sf(item.taxAmount)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.taxAmount} /></td>
               <td className="text-right px-4 py-3 font-bold">
-                R {sf(item.totalAmount)}
+                <Money value={item.totalAmount} />
               </td>
             </tr>
           ))}
@@ -1129,15 +1143,15 @@ export const ResidentialTemplate = ({
         <div className="w-80">
           <div className="flex justify-between py-2 text-gray-600">
             <span>Subtotal:</span>
-            <span>R {sf(subtotal)}</span>
+            <span><Money value={subtotal} /></span>
           </div>
           <div className="flex justify-between py-2 text-gray-600">
             <span>VAT (15%):</span>
-            <span>R {sf(totalTax)}</span>
+            <span><Money value={totalTax} /></span>
           </div>
           <div className="flex justify-between py-3 text-xl font-black bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 rounded-lg">
             <span>TOTAL:</span>
-            <span>R {sf(total)}</span>
+            <span><Money value={total} /></span>
           </div>
         </div>
       </div>
@@ -1344,11 +1358,11 @@ export const CommercialTemplate = ({
                   {item.category || "Service"}
                 </span>
               </td>
-              <td className="text-right px-4 py-3">R {sf(item.rate)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {sf(item.taxAmount)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.taxAmount} /></td>
               <td className="text-right px-4 py-3 font-semibold">
-                R {sf(item.totalAmount)}
+                <Money value={item.totalAmount} />
               </td>
             </tr>
           ))}
@@ -1360,15 +1374,15 @@ export const CommercialTemplate = ({
       <div className="w-80 border-2 border-indigo-600 p-4 rounded">
         <div className="flex justify-between py-2">
           <span>Subtotal:</span>
-          <span>R {sf(subtotal)}</span>
+          <span><Money value={subtotal} /></span>
         </div>
         <div className="flex justify-between py-2">
           <span>VAT (15%):</span>
-          <span>R {sf(totalTax)}</span>
+          <span><Money value={totalTax} /></span>
         </div>
         <div className="flex justify-between py-3 text-xl font-bold bg-indigo-600 text-white px-4 rounded">
           <span>TOTAL DUE:</span>
-          <span>R {sf(total)}</span>
+          <span><Money value={total} /></span>
         </div>
       </div>
     </div>
@@ -1410,13 +1424,14 @@ export const TemplateRenderer = ({
   stampColor = "#d32f2f",
   showStampDate = true,
   showStamp = false,
-  // normalise both naming conventions
   invoiceNumber,
   jobCardNumber,
   totalTax,
   vat,
+  currency,
   ...rest
 }) => {
+  const code = useInvoiceCurrency(currency);
   const resolvedProps = {
     ...rest,
     documentType,
@@ -1427,22 +1442,27 @@ export const TemplateRenderer = ({
     invoiceNumber: invoiceNumber || jobCardNumber || "",
     totalTax: totalTax ?? vat ?? 0,
   };
-
+ let content;
   switch (templateId) {
     case "classic":
-      return <ClassicTemplate {...resolvedProps} />;
+      return content = <ClassicTemplate {...resolvedProps} />;
     case "modern":
-      return <ModernTemplate {...resolvedProps} />;
+      return content = <ModernTemplate {...resolvedProps} />;
     case "elegant":
-      return <ElegantTemplate {...resolvedProps} />;
+      return content = <ElegantTemplate {...resolvedProps} />;
     case "residential":
-      return <ResidentialTemplate {...resolvedProps} />;
+      return content = <ResidentialTemplate {...resolvedProps} />;
     case "commercial":
-      return <CommercialTemplate {...resolvedProps} />;
+      return content = <CommercialTemplate {...resolvedProps} />;
     case "professional":
     default:
-      return <ProfessionalTemplate {...resolvedProps} />;
+      return content = <ProfessionalTemplate {...resolvedProps} />;
   }
+  return (
+    <InvoiceCurrencyContext.Provider value={code}>
+      {content}
+    </InvoiceCurrencyContext.Provider>
+  );
 };
 
 export default TemplateSelector;

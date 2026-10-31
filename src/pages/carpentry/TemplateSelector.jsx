@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { FileText, Check } from "lucide-react";
 import SignatureStamp from "../SignatureStamp";
+
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
 import { PayNowButton } from "../../components/PayNowButton";
 import {
   getFirestore,
@@ -10,7 +12,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
+
 const calculateDueDate = (terms) => {
   let daysToAdd = 30; // default
 
@@ -31,6 +33,24 @@ const calculateDueDate = (terms) => {
   ).toLocaleDateString("en-ZA");
 };
 
+
+
+
+
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
 // Template Selector Dropdown Component
 export const TemplateSelector = ({
   user,
@@ -325,7 +345,7 @@ export const ProfessionalTemplate = ({
                 {item.workCategory || item.type || "Custom Work"}
               </td>
               <td className="text-center px-3 py-3">{item.qty}</td>
-              <td className="text-right px-3 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-3 py-3"><Money value={item.rate} /></td>
               <td className="text-right px-3 py-3 font-semibold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -533,7 +553,7 @@ export const ModernTemplate = (props) => (
               {item.workCategory || item.type || "Custom"}
             </td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
             <td className="text-right px-4 py-3 font-semibold">
               R {item.amount.toFixed(2)}
             </td>
@@ -677,7 +697,7 @@ export const CorporateTemplate = (props) => (
                 {item.workCategory || item.type || "Custom"}
               </td>
               <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right py-3"><Money value={item.rate} /></td>
               <td className="text-right py-3">R {item.amount.toFixed(2)}</td>
             </tr>
           ))}
@@ -849,7 +869,7 @@ export const ContemporaryTemplate = (props) => (
                 {item.workCategory || item.type || "Custom"}
               </td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
               <td className="text-right px-4 py-3 font-bold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -1052,7 +1072,7 @@ export const DetailedTemplate = (props) => (
                 {item.workCategory || item.type || "Custom"}
               </td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
               <td className="text-right px-4 py-3 font-semibold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -1154,8 +1174,10 @@ export const TemplateRenderer = ({
   paymentMethod = "Bank Transfer/EFT",
   paymentTerms = "50% Deposit, Balance on Completion",
   serviceGuarantee = "12 Months Craftsmanship Warranty",
+  currency,
   ...props
 }) => {
+  const code = useInvoiceCurrency(currency);
   const templateProps = {
     ...props,
     documentType,
@@ -1167,33 +1189,38 @@ export const TemplateRenderer = ({
     paymentTerms,
     serviceGuarantee,
   };
-
+let content;
   switch (templateId) {
     case "default":
-      return <DefaultTemplate {...templateProps} />;
+      return content = <DefaultTemplate {...templateProps} />;
     case "professional":
-      return <ProfessionalTemplate {...templateProps} />;
+      return content = <ProfessionalTemplate {...templateProps} />;
     case "modern":
-      return <ModernTemplate {...templateProps} />;
+      return content = <ModernTemplate {...templateProps} />;
     case "corporate":
     case "premium":
-      return <CorporateTemplate {...templateProps} />;
+      return content = <CorporateTemplate {...templateProps} />;
     case "contemporary":
-      return <ContemporaryTemplate {...templateProps} />;
+      return content = <ContemporaryTemplate {...templateProps} />;
     case "detailed":
-      return <DetailedTemplate {...templateProps} />;
+      return content = <DetailedTemplate {...templateProps} />;
     // Legacy template names for backwards compatibility
     case "classic":
-      return <ClassicTemplate {...templateProps} />;
+      return content = <ClassicTemplate {...templateProps} />;
     case "industrial":
-      return <IndustrialTemplate {...templateProps} />;
+      return content = <IndustrialTemplate {...templateProps} />;
     case "residential":
-      return <ResidentialTemplate {...templateProps} />;
+      return content = <ResidentialTemplate {...templateProps} />;
     case "commercial":
-      return <CommercialTemplate {...templateProps} />;
+      return content = <CommercialTemplate {...templateProps} />;
     default:
-      return <ProfessionalTemplate {...templateProps} />;
+      return content = <ProfessionalTemplate {...templateProps} />;
   }
+  return (
+    <InvoiceCurrencyContext.Provider value={code}>
+      {content}
+    </InvoiceCurrencyContext.Provider>
+  );
 };
 
 export default TemplateSelector;

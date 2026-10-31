@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { FileText, Check } from "lucide-react";
 
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
 import SignatureStamp from "./SignatureStamp";
 import {
   getFirestore,
@@ -10,7 +11,25 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
+
+
+
+
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
+
 export const TemplateSelector = ({
   user,
   selectedTemplate,
@@ -350,7 +369,7 @@ export const DefaultTemplate = ({
             <tr key={index} className="border-b">
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
               <td className="text-right px-2 py-2">
                 R {item.amount.toFixed(2)}
               </td>
@@ -567,7 +586,7 @@ export const ClassicTemplate = (props) => (
           <tr key={i} className="border-b">
             <td className="px-2 py-2">{item.description}</td>
             <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
             <td className="text-right px-2 py-2">R {item.amount.toFixed(2)}</td>
           </tr>
         ))}
@@ -769,7 +788,7 @@ export const ModernTemplate = (props) => (
           <tr key={i} className="border-b hover:bg-gray-50">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
             <td className="text-right px-4 py-3 font-semibold">
               R {item.amount.toFixed(2)}
             </td>
@@ -947,7 +966,7 @@ export const ElegantTemplate = (props) => (
             <tr key={i} className="border-b border-gray-200">
               <td className="py-3">{item.description}</td>
               <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right py-3"><Money value={item.rate} /></td>
               <td className="text-right py-3">R {item.amount.toFixed(2)}</td>
             </tr>
           ))}
@@ -1131,7 +1150,7 @@ export const SpeedTemplate = (props) => (
           <tr key={i} className="border-b border-gray-800">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
             <td className="text-right px-4 py-3 font-bold">
               R {item.amount.toFixed(2)}
             </td>
@@ -1347,7 +1366,7 @@ export const DiagnosticTemplate = (props) => (
             <tr key={i} className="border-b">
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
               <td className="text-right px-4 py-3 font-semibold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -1439,8 +1458,10 @@ export const TemplateRenderer = ({
   towType,
   vehicleCondition,
   incidentType,
+  currency,
   ...props
 }) => {
+  const code = useInvoiceCurrency(currency);
   const templateProps = {
     ...props,
     documentType,
@@ -1455,24 +1476,29 @@ export const TemplateRenderer = ({
     vehicleCondition,
     incidentType,
   };
-
+ let content;
   switch (templateId) {
     case "default":
-      return <DefaultTemplate {...templateProps} />;
+      return content = <DefaultTemplate {...templateProps} />;
     case "classic":
-      return <ClassicTemplate {...templateProps} />;
+      return content = <ClassicTemplate {...templateProps} />;
     case "modern":
-      return <ModernTemplate {...templateProps} />;
+      return content = <ModernTemplate {...templateProps} />;
     case "elegant":
     case "premium":
-      return <ElegantTemplate {...templateProps} />;
+      return content = <ElegantTemplate {...templateProps} />;
     case "speed":
-      return <SpeedTemplate {...templateProps} />;
+      return content = <SpeedTemplate {...templateProps} />;
     case "diagnostic":
-      return <DiagnosticTemplate {...templateProps} />;
+      return content = <DiagnosticTemplate {...templateProps} />;
     default:
-      return <DefaultTemplate {...templateProps} />;
+      return content = <DefaultTemplate {...templateProps} />;
   }
+  return (
+    <InvoiceCurrencyContext.Provider value={code}>
+      {content}
+    </InvoiceCurrencyContext.Provider>
+  );
 };
 
 export default TemplateSelector;

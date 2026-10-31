@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+
+import { useCurrency, resolveCurrency, formatMoney, convert } from "../../contexts/CurrencyContext";
 import {
   Star,
   ShoppingCart,

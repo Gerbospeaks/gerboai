@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { FileText, Check } from "lucide-react";
 import SignatureStamp from "../SignatureStamp";
 import { PayNowButton } from "../../components/PayNowButton";
+
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   doc,
@@ -10,7 +12,25 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
+
+
+
+
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
+
 export const TemplateSelector = ({
   user,
   selectedTemplate,
@@ -298,7 +318,7 @@ export const DefaultHotelTemplate = ({
             <tr key={index} className="border-b">
               <td className="px-2 py-2">{item.description}</td>
               <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
               <td className="text-right px-2 py-2">
                 R {item.amount.toFixed(2)}
               </td>
@@ -466,7 +486,7 @@ export const ClassicHotelTemplate = (props) => (
           <tr key={i} className="border-b border-amber-200">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
             <td className="text-right px-4 py-3">R {item.amount.toFixed(2)}</td>
           </tr>
         ))}
@@ -603,7 +623,7 @@ export const ModernHotelTemplate = (props) => (
           <tr key={i} className="border-b hover:bg-gray-50">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
             <td className="text-right px-4 py-3 font-semibold">
               R {item.amount.toFixed(2)}
             </td>
@@ -734,7 +754,7 @@ export const LuxuryHotelTemplate = (props) => (
             <tr key={i} className="border-b border-amber-200">
               <td className="py-3 px-4">{item.description}</td>
               <td className="text-center py-3 px-4">{item.qty}</td>
-              <td className="text-right py-3 px-4">R {item.rate.toFixed(2)}</td>
+              <td className="text-right py-3 px-4"><Money value={item.rate} /></td>
               <td className="text-right py-3 px-4 font-semibold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -886,7 +906,7 @@ export const BusinessHotelTemplate = (props) => (
           <tr key={i} className="border-b border-gray-200">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
             <td className="text-right px-4 py-3 font-semibold">
               R {item.amount.toFixed(2)}
             </td>
@@ -1030,7 +1050,7 @@ export const ElegantHotelTemplate = (props) => (
             <tr key={i} className="border-b border-teal-200">
               <td className="py-3">{item.description}</td>
               <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right py-3"><Money value={item.rate} /></td>
               <td className="text-right py-3 font-semibold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -1191,7 +1211,7 @@ export const PremiumHotelTemplate = (props) => (
             <tr key={i} className="border-b border-slate-200">
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3">R {item.rate.toFixed(2)}</td>
+              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
               <td className="text-right px-4 py-3 font-semibold">
                 R {item.amount.toFixed(2)}
               </td>
@@ -1267,8 +1287,10 @@ export const TemplateRenderer = ({
   stampColor = "#2e7d32",
   showStampDate = true,
   showStamp = false,
+  currency,
   ...props
 }) => {
+  const code = useInvoiceCurrency(currency);
   const templateProps = {
     ...props,
     documentType,
@@ -1277,25 +1299,30 @@ export const TemplateRenderer = ({
     showStampDate,
     showStamp,
   };
-
+let content;
   switch (templateId) {
     case "default":
-      return <DefaultHotelTemplate {...templateProps} />;
+      return content = <DefaultHotelTemplate {...templateProps} />;
     case "classic":
-      return <ClassicHotelTemplate {...templateProps} />;
+      return content = <ClassicHotelTemplate {...templateProps} />;
     case "modern":
-      return <ModernHotelTemplate {...templateProps} />;
+      return content = <ModernHotelTemplate {...templateProps} />;
     case "elegant":
-      return <ElegantHotelTemplate {...templateProps} />;
+      return content = <ElegantHotelTemplate {...templateProps} />;
     case "premium":
-      return <PremiumHotelTemplate {...templateProps} />;
+      return content = <PremiumHotelTemplate {...templateProps} />;
     case "luxury":
-      return <LuxuryHotelTemplate {...templateProps} />;
+      return content = <LuxuryHotelTemplate {...templateProps} />;
     case "business":
-      return <BusinessHotelTemplate {...templateProps} />;
+      return content = <BusinessHotelTemplate {...templateProps} />;
     default:
-      return <DefaultHotelTemplate {...templateProps} />;
+      return content = <DefaultHotelTemplate {...templateProps} />;
   }
+ return (
+    <InvoiceCurrencyContext.Provider value={code}>
+      {content}
+    </InvoiceCurrencyContext.Provider>
+  ); 
 };
 
 export default TemplateSelector;

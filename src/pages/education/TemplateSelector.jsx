@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { FileText, Check } from "lucide-react";
 
-const sf = (val, decimals = 2) => (Number(val) || 0).toFixed(decimals);
+import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
+
 const getGradeFromMark = (mark) => {
   const m = Number(mark);
   if (m >= 80) return { code: "7", label: "Outstanding", color: "#15803d" };
@@ -28,6 +29,24 @@ const AttendanceRate = ({ present, total }) => {
   return ((present / total) * 100).toFixed(1);
 };
 
+
+
+
+
+
+const InvoiceCurrencyContext = createContext(null);
+
+const useInvoiceCurrency = (override) => {
+  const { currencyCode } = useCurrency();
+  return resolveCurrency(override || currencyCode);
+};
+
+// Drop-in replacement for `<Money value={x} />`
+const Money = ({ value }) => {
+  const fromCtx = useContext(InvoiceCurrencyContext);
+  const fallback = useInvoiceCurrency();
+  return <>{formatMoney(value, fromCtx || fallback)}</>;
+};
 
 export const TemplateSelector = ({ user, selectedTemplate, onTemplateChange }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -2714,19 +2733,26 @@ export const ColorfulTemplate = (props) => {
 };
 
 // ── Template Renderer ─────────────────────────────────────────────────────────
-export const TemplateRenderer = ({ templateId, documentType = "reportCard", ...props }) => {
+export const TemplateRenderer = ({ templateId, documentType = "reportCard", currency, ...props }) => {
+ const code = useInvoiceCurrency(currency);
+  let content;
   switch (templateId) {
     case "classic":
-      return <ClassicTemplate {...props} />;
+      return content = <ClassicTemplate {...props} />;
     case "modern":
-      return <ModernTemplate {...props} />;
+      return content = <ModernTemplate {...props} />;
     case "professional":
-      return <ProfessionalTemplate {...props} />;
+      return content = <ProfessionalTemplate {...props} />;
     case "colorful":
-      return <ColorfulTemplate {...props} />;
+      return content = <ColorfulTemplate {...props} />;
     default:
-      return <ClassicTemplate {...props} />;
+      return content = <ClassicTemplate {...props} />;
   }
+  return (
+    <InvoiceCurrencyContext.Provider value={code}>
+      {content}
+    </InvoiceCurrencyContext.Provider>
+  );
 };
 
 export default TemplateSelector;

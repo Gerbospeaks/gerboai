@@ -1,6 +1,7 @@
+import { useCurrency, resolveCurrency, formatMoney, convert } from "../../contexts/CurrencyContext";
 import React, { useState, useEffect } from "react";
+
 import {
-  FileText,
   ShoppingCart,
   Check,
   Eye,
@@ -11,7 +12,7 @@ import {
   Activity,
   Shield,
 } from "lucide-react";
-import {
+import  {
   getFirestore,
   doc,
   getDoc,
@@ -282,7 +283,12 @@ const Templates = ({ user }) => {
     cvv: "",
     cardName: "",
   });
+const { currencyCode } = useCurrency();
+const chargeCurrency = resolveCurrency(currencyCode);
 
+// Template prices are stored in ZAR; show them in the charge currency
+const money = (zar) =>
+  formatMoney(convert(zar, "ZAR", chargeCurrency), chargeCurrency);
   useEffect(() => {
     loadPurchasedTemplates();
   }, [user]);
@@ -619,7 +625,7 @@ const Templates = ({ user }) => {
                     {template.isPremium ? (
                       <div>
                         <div className="text-3xl font-bold text-blue-600">
-                          R{template.price}
+                          {money(template.price)}
                         </div>
                         <div className="text-xs text-gray-500">one-time</div>
                       </div>
@@ -803,7 +809,7 @@ const Templates = ({ user }) => {
               <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4 text-center">
                 <div className="text-sm text-gray-600 mb-1">Total Amount</div>
                 <div className="text-4xl font-bold text-blue-600">
-                  R{TEMPLATES[showPayment].price}
+                  {money(TEMPLATES[showPayment].price)}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
                   One-time payment • Lifetime access
@@ -926,7 +932,7 @@ const Templates = ({ user }) => {
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5" />
-                    Pay R{TEMPLATES[showPayment].price}
+                    Pay {money(TEMPLATES[showPayment].price)}
                   </>
                 )}
               </button>

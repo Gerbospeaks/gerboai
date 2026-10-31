@@ -145,8 +145,32 @@ function BankAccountsTab({ user, clientBase, clientName }) {
   });
 
   const db = getFirestore();
-  const col = () => collection(db, ...clientBase, "bankAccounts");
-  const ref = (id) => doc(db, ...clientBase, "bankAccounts", id);
+  const [usersCollection, userId, clientsCollection, scopedClientId] = clientBase;
+  const col = useCallback(
+    () =>
+      collection(
+        db,
+        usersCollection,
+        userId,
+        clientsCollection,
+        scopedClientId,
+        "bankAccounts",
+      ),
+    [db, usersCollection, userId, clientsCollection, scopedClientId],
+  );
+  const ref = useCallback(
+    (id) =>
+      doc(
+        db,
+        usersCollection,
+        userId,
+        clientsCollection,
+        scopedClientId,
+        "bankAccounts",
+        id,
+      ),
+    [db, usersCollection, userId, clientsCollection, scopedClientId],
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -156,7 +180,7 @@ function BankAccountsTab({ user, clientBase, clientName }) {
     } finally {
       setLoading(false);
     }
-  }, [clientBase.join(",")]);
+  }, [col]);
 
   useEffect(() => {
     load();
