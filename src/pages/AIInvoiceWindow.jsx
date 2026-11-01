@@ -604,7 +604,7 @@ function Sidebar({
       >
         {!narrow && (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src={logo} alt="SolidFlo" style={{ width: 20, height: 20 }} />
+           
             <span
               style={{
                 fontFamily: C.serif,
@@ -613,7 +613,7 @@ function Sidebar({
                 color: C.text,
               }}
             >
-              SolidFlo
+              Solidflo
             </span>
           </div>
         )}
