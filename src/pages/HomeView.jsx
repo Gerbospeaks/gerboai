@@ -56,32 +56,31 @@ const css = `
     overflow: hidden;
   }
   .zh-ai-btn {
-    width: 100%; margin-bottom: 10px; padding: 10px 12px;
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    background: linear-gradient(90deg, #7c3aed, #5b21b6); color: #fff;
-    border: none; border-radius: 3px; cursor: pointer;
-    box-shadow: 0 2px 8px rgba(124,58,237,.3);
-    transition: transform .15s, box-shadow .15s;
-  }
-  .zh-ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,58,237,.4); }
+  background: linear-gradient(90deg, #c8f03c, #a3d928);
+  color: #0f172a;
+  box-shadow: 0 2px 8px rgba(163,217,40,.3);
+}
+.zh-ai-btn:hover { box-shadow: 0 4px 14px rgba(163,217,40,.45); }
+
+.zh-ai-banner {
+  background: linear-gradient(90deg, #c8f03c, #a3d928);
+  color: #0f172a;
+}
+.zh-ai-banner-btns button {
+  background: rgba(15,23,42,.1);
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,.25);
+}
+.zh-ai-banner-btns button:hover { background: rgba(15,23,42,.2); }
   .zh-ai-btn-left { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; }
   .zh-ai-btn-sub { font-size: 10.5px; opacity: .75; }
 
-  .zh-ai-banner {
-    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
-    padding: 14px 16px; border-radius: 4px; color: #fff;
-    background: linear-gradient(90deg, #7c3aed, #5b21b6);
-  }
+ 
   .zh-ai-banner-title { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 700; }
   .zh-ai-banner-sub { font-size: 12px; opacity: .8; margin-top: 3px; }
   .zh-ai-banner-btns { display: flex; gap: 6px; }
-  .zh-ai-banner-btns button {
-    height: 30px; padding: 0 14px; border-radius: 3px; cursor: pointer;
-    background: rgba(255,255,255,.15); color: #fff; font-size: 12px; font-weight: 700;
-    border: 1px solid rgba(255,255,255,.3); font-family: 'Lato', sans-serif;
-    transition: background .15s;
-  }
-  .zh-ai-banner-btns button:hover { background: rgba(255,255,255,.28); }
+  
+ 
   .zh-topbar {
     background: ${Z.navy};
     height: 52px; flex-shrink: 0;
