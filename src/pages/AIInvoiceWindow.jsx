@@ -38,9 +38,13 @@ import {
   Menu,
   X,
   LogOut,
-  ChevronDown,
+  ChevronDown, 
+  Trash2, 
+  UserPlus, 
+  Settings
 } from "lucide-react";
-
+import BusinessSettingsModal from "./BusinessSettingsModal";
+import CustomerModal from "./CustomerModal";
 /* ───────────────── Claude-style theme ───────────────── */
 const C = {
   bg: "#1f1e1d",
@@ -532,6 +536,8 @@ function Sidebar({
   user,
   businessInfo,
   onLogout,
+  onAddCustomer,
+  onOpenSettings,
 }) {
   const [showAll, setShowAll] = useState(false);
   const [q, setQ] = useState("");
@@ -831,6 +837,24 @@ function Sidebar({
         }}
       >
         <button
+  className="sf-row"
+  onClick={onAddCustomer}
+  style={{ ...row(false), color: C.muted }}
+  title="Add customer"
+>
+  <UserPlus size={17} style={{ flexShrink: 0 }} />
+  {!narrow && "Add customer"}
+</button>
+<button
+  className="sf-row"
+  onClick={onOpenSettings}
+  style={{ ...row(false), color: C.muted }}
+  title="Business settings"
+>
+  <Settings size={17} style={{ flexShrink: 0 }} />
+  {!narrow && "Business settings"}
+</button>
+        <button
           className="sf-row"
           onClick={onExit}
           style={{ ...row(false), color: C.muted }}
@@ -931,6 +955,10 @@ export default function AIInvoiceWindow({
   const [extraData, setExtraData] = useState({});
   const [dataLoading, setDataLoading] = useState(true);
   const templateDocType = (t) => (t === "estimate" ? quoteType : t);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+const [showSettings, setShowSettings] = useState(false);
+const [customerPrefill, setCustomerPrefill] = useState(null);
+const dismissedRef = useRef(new Set()); 
   const [documentType, setDocumentType] = useState(
     initDocType === "quote"
       ? "estimate"
@@ -1004,15 +1032,17 @@ export default function AIInvoiceWindow({
     }
   }, [user?.uid]);
 
-  // Silent refresh (no full-screen loader) used after saving
-  const refreshData = useCallback(async () => {
-    if (!user?.uid) return;
-    try {
-      setUserData(await loadAllUserData(user.uid));
-    } catch (e) {
-      console.warn("refresh:", e.message);
-    }
-  }, [user?.uid]);
+ const refreshData = useCallback(async () => {
+  if (!user?.uid) return null;
+  try {
+    const data = await loadAllUserData(user.uid);
+    setUserData(data);
+    return data;
+  } catch (e) {
+    console.warn("refresh:", e.message);
+    return null;
+  }
+}, [user?.uid]);
 
   useEffect(() => {
     loadData();
@@ -1262,7 +1292,29 @@ export default function AIInvoiceWindow({
           if (lastDoc.items?.length) appliedItems = applyItems(lastDoc.items);
         }
       }
-
+     
+let newClient = null;
+if (
+  documentType !== "purchase_order" &&
+  !mentionedClient &&
+  !isRepeat &&
+  !extracted?.matchedClientId
+) {
+  if (extracted?.clientNotInDB?.name) {
+    newClient = extracted.clientNotInDB;
+  } else if (extractedDirect?.client_name) {
+    newClient = {
+      name: extractedDirect.client_name,
+      email: extractedDirect.client_email || "",
+      phone: extractedDirect.client_phone || "",
+      address: extractedDirect.client_address || "",
+    };
+  }
+}
+const alreadySaved = newClient && userData?.clients?.some(
+  (c) => c.name?.trim().toLowerCase() === newClient.name.trim().toLowerCase(),
+);
+if (alreadySaved) newClient = null;
       const aiMsg = {
         id: `a-${++msgCounter.current}`,
         role: "assistant",
@@ -1270,6 +1322,7 @@ export default function AIInvoiceWindow({
         rawContent: rawText,
         appliedClient,
         appliedItems: appliedItems || null,
+        newClientName: newClient?.name || null,
       };
       setMessages((prev) => [...prev, aiMsg]);
       historyRef.current = [
@@ -2191,6 +2244,8 @@ export default function AIInvoiceWindow({
       user={user}
       businessInfo={bizInfo}
       onLogout={() => signOut(getAuth())}
+      onAddCustomer={() => { setDrawerOpen(false); setShowCustomerModal(true); }}
+  onOpenSettings={() => { setDrawerOpen(false); setShowSettings(true); }}
     />
   );
 
@@ -2272,6 +2327,23 @@ export default function AIInvoiceWindow({
           )}
         </>
       )}
+    {/* Own stacking context so the modals sit above this window (z-index 200) */}
+<div style={{ position: "relative", zIndex: 400 }}>
+  {showSettings && (
+    <BusinessSettingsModal
+      onClose={() => {
+        setShowSettings(false);
+        refreshData(); // pick up new business name, VAT number, logo
+      }}
+    />
+  )}
+  <CustomerModal
+    showModal={showCustomerModal}
+    setShowModal={setShowCustomerModal}
+    existingCustomer={null}
+    onCustomerSaved={() => refreshData()} // new client is matchable in chat straight away
+  />
+</div>
     </div>
   );
 }

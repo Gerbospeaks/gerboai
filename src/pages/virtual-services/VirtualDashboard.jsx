@@ -920,6 +920,10 @@ const VirtualDashboardInner = () => {
                     if (docType) setDocumentType(docType);
                     setActiveView(view);
                   }}
+                  onOpenAI={(type) => {
+    setDocumentType(type);   // so the AI window opens on the right tab
+    setShowAIWindow(true);
+  }}
                   onGoToDashboard={() => setActiveView("quote")}
                   onSidebarToggle={() => setSidebarOpen((p) => !p)}
                   sidebarOpen={sidebarOpen}

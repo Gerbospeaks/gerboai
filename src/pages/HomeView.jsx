@@ -19,6 +19,7 @@ import {
   Menu,
   Eye,
   Download,
+  Sparkles,
 } from "lucide-react";
 
 /* ─── Zoho design tokens ─────────────────────────────────────────────────── */
@@ -54,7 +55,33 @@ const css = `
     background: ${Z.bg};
     overflow: hidden;
   }
+  .zh-ai-btn {
+    width: 100%; margin-bottom: 10px; padding: 10px 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: linear-gradient(90deg, #7c3aed, #5b21b6); color: #fff;
+    border: none; border-radius: 3px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(124,58,237,.3);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .zh-ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,58,237,.4); }
+  .zh-ai-btn-left { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; }
+  .zh-ai-btn-sub { font-size: 10.5px; opacity: .75; }
 
+  .zh-ai-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    padding: 14px 16px; border-radius: 4px; color: #fff;
+    background: linear-gradient(90deg, #7c3aed, #5b21b6);
+  }
+  .zh-ai-banner-title { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 700; }
+  .zh-ai-banner-sub { font-size: 12px; opacity: .8; margin-top: 3px; }
+  .zh-ai-banner-btns { display: flex; gap: 6px; }
+  .zh-ai-banner-btns button {
+    height: 30px; padding: 0 14px; border-radius: 3px; cursor: pointer;
+    background: rgba(255,255,255,.15); color: #fff; font-size: 12px; font-weight: 700;
+    border: 1px solid rgba(255,255,255,.3); font-family: 'Lato', sans-serif;
+    transition: background .15s;
+  }
+  .zh-ai-banner-btns button:hover { background: rgba(255,255,255,.28); }
   .zh-topbar {
     background: ${Z.navy};
     height: 52px; flex-shrink: 0;
@@ -428,9 +455,11 @@ export default function Home({
   sidebarOpen,
   onViewInvoices,
   onViewGuests,
+  onOpenAI,
 }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const handleAI = (type = "invoice") => onOpenAI?.(type);
   const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
   const fmtCurrency = (n) => formatVisitorCurrency(n, "ZAR");
   const [pdfViewer, setPdfViewer] = useState(null);
@@ -572,6 +601,23 @@ export default function Home({
       <div className="zh-shell border">
         {/* ── Scrollable body ── */}
         <div className="zh-body">
+          {onOpenAI && (
+  <div className="zh-ai-banner">
+    <div>
+      <div className="zh-ai-banner-title">
+        <Sparkles size={15} /> Invoice in 10 seconds
+      </div>
+      <div className="zh-ai-banner-sub">
+        Just say what you did, e.g. "Invoice Thabo for 5hrs at R650/hr".
+      </div>
+    </div>
+    <div className="zh-ai-banner-btns">
+      <button onClick={() => handleAI("invoice")}>Invoice</button>
+      <button onClick={() => handleAI("quote")}>Quote</button>
+      <button onClick={() => handleAI("purchase_order")}>PO</button>
+    </div>
+  </div>
+)}
           {/* KPIs */}
           <div className="zh-section">Overview</div>
           <div className="zh-kpi-grid">
@@ -657,7 +703,34 @@ export default function Home({
                 <span className="zh-panel-head-title">Quick Actions</span>
                 <ArrowRight size={13} color={Z.textMuted} />
               </div>
-              <div className="zh-panel-body"></div>
+              <div className="zh-panel-body">
+  {onOpenAI && (
+    <button className="zh-ai-btn" onClick={() => handleAI("invoice")}>
+      <span className="zh-ai-btn-left">
+        <Sparkles size={15} /> Create with AI
+      </span>
+      <span className="zh-ai-btn-sub">Describe it in one sentence</span>
+    </button>
+  )}
+
+  <div className="zh-actions-list">
+    {(actions || []).map((a, i) => {
+      const p = actionPalette[i % actionPalette.length];
+      const Icon = a.icon || FileText;
+      return (
+        <button key={a.label || i} className="zh-action-btn" onClick={a.onClick}>
+          <span className="zh-action-btn-left">
+            <span className="zh-action-icon" style={{ background: p.iconBg }}>
+              <Icon size={13} color={p.iconColor} />
+            </span>
+            <span className="zh-action-label">{a.label}</span>
+          </span>
+          <ArrowRight size={13} className="zh-action-arrow" />
+        </button>
+      );
+    })}
+  </div>
+</div>
             </div>
           </div>
 
