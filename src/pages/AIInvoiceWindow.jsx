@@ -373,7 +373,7 @@ const docStatus = (d) => {
 };
 
 /* ───────────────── Message ───────────────── */
-function Bubble({ msg }) {
+function Bubble({ msg, onAddClient }) {
   const [copied, setCopied] = useState(false);
   const isUser = msg.role === "user";
 
@@ -469,6 +469,11 @@ function Bubble({ msg }) {
             <Check size={11} /> Client saved to your contacts!
           </div>
         )}
+        {msg.newClientName && onAddClient && (
+  <button className="sf-chip" onClick={() => onAddClient(msg.newClientName)} style={{ ...chipBtn, marginTop: 8 }}>
+    + Add {msg.newClientName} as a client
+  </button>
+)}
       </div>
     </div>
   );
@@ -1330,6 +1335,10 @@ if (alreadySaved) newClient = null;
         { role: "assistant", content: rawText },
       ];
       await saveMsg({ ...aiMsg, showSavePrompt: false });
+      if (newClient && !dismissedRef.current.has(newClient.name.trim().toLowerCase())) {
+  setCustomerPrefill(newClient);
+  setShowCustomerModal(true);
+}
     } catch (e) {
       setError(e.message || "Something went wrong. Check your connection.");
     } finally {
@@ -1420,7 +1429,7 @@ if (alreadySaved) newClient = null;
           jobCardNumber: number,
           locked: true,
           status: "pending",
-          documentType: documentType === "estimate" ? "quote" : "invoice",
+          documentType: documentType === "estimate" ? quoteType : "invoice",
           clientId: cid,
           dates: { serviceDate: new Date().toISOString(), completedDate: null },
           customer: {
@@ -1550,7 +1559,7 @@ if (alreadySaved) newClient = null;
     subtotal: safeNum(subtotal),
     totalTax: safeNum(totalTax),
     total: safeNum(total),
-    documentType,
+    documentType: templateDocType(documentType),
     showStamp: false,
     paymentStatus: { status: "pending" },
     extraData,
@@ -1878,7 +1887,11 @@ if (alreadySaved) newClient = null;
           >
             <div style={{ maxWidth: 720, margin: "0 auto", paddingTop: 10 }}>
               {messages.map((msg, i) => (
-                <Bubble key={msg.id || i} msg={msg} />
+                <Bubble key={msg.id || i} msg={msg}
+  onAddClient={(name) => {
+    setCustomerPrefill({ name, email: customerEmail, phone: customerPhone, address: customerAddress });
+    setShowCustomerModal(true);
+  }} />
               ))}
               {loading && <TypingDots />}
               {error && <ErrorBox error={error} />}
@@ -2147,7 +2160,7 @@ if (alreadySaved) newClient = null;
                     totalTax={safeNum(sd.totalTax)}
                     total={safeNum(sd.total)}
                     invoiceNumber={sd.number}
-                    documentType={sd.docType}
+                    documentType={templateDocType(sd.docType)}
                     paymentStatus={sd.paymentStatus}
                     showStamp={sd.paymentStatus?.status === "paid"}
                     stampText="PAID"
@@ -2249,7 +2262,24 @@ if (alreadySaved) newClient = null;
     />
   );
 
-  /* ── RENDER ── */
+const handleCustomerSaved = async () => {
+  const data = await refreshData();
+  if (!customerPrefill || !data) return;
+  const wanted = customerPrefill.name?.trim().toLowerCase();
+  // Match by name; if the user edited the name in the modal, fall back to the newest client
+  const saved =
+    data.clients.find((c) => c.name?.trim().toLowerCase() === wanted) ||
+    data.clients[0];
+  if (saved) applyClientFromDB(saved); // fills the preview with the saved details and id
+};
+
+const setCustomerModalOpen = (open) => {
+  setShowCustomerModal(open);
+  if (!open && customerPrefill) {
+    dismissedRef.current.add(customerPrefill.name.trim().toLowerCase());
+    setCustomerPrefill(null);
+  }
+};
   return (
     <div
       style={{
@@ -2337,12 +2367,12 @@ if (alreadySaved) newClient = null;
       }}
     />
   )}
-  <CustomerModal
-    showModal={showCustomerModal}
-    setShowModal={setShowCustomerModal}
-    existingCustomer={null}
-    onCustomerSaved={() => refreshData()} // new client is matchable in chat straight away
-  />
+ <CustomerModal
+  showModal={showCustomerModal}
+  setShowModal={setCustomerModalOpen}
+  existingCustomer={customerPrefill}
+  onCustomerSaved={handleCustomerSaved}
+/>
 </div>
     </div>
   );
