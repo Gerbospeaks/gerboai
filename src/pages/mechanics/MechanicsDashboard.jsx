@@ -173,6 +173,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const [customerApproved, setCustomerApproved] = useState(false);
   const [partsChecklist, setPartsChecklist] = useState([]);
   const [jobCardNumber, setJobCardNumber] = useState("");
+  const [issueDate, setIssueDate] = useState(new Date().toISOString());
   const [jobCardId, setJobCardId] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
   const [savedJobCards, setSavedJobCards] = useState([]);
@@ -660,6 +661,16 @@ const handleUnlockStamp = async () => {
     setVehicleMileage(jobCard.vehicle?.mileage || "");
     setItems(jobCard.items || []);
     setShowJobCardsList(false);
+    const savedDate =
+    jobCard.dates?.invoiceDate ||
+    jobCard.dates?.quoteDate ||
+    jobCard.dates?.serviceDate ||
+    (jobCard.createdAt?.toDate ? jobCard.createdAt.toDate().toISOString() : null) ||
+    (jobCard.createdAt?.seconds
+      ? new Date(jobCard.createdAt.seconds * 1000).toISOString()
+      : null) ||
+    new Date().toISOString();
+  setIssueDate(savedDate);
     setPaymentStatus({
       totalPaid: jobCard.totals?.paid || 0,
       balanceDue: jobCard.totals?.due || jobCard.totals?.total || 0,
@@ -1150,6 +1161,12 @@ const handleStampConfirm = async (cfg) => {
       phone: billPhone,
       address: billAddress,
     },
+    dates: {
+  serviceDate: issueDate,
+  invoiceDate: documentType === "invoice" ? issueDate : null,
+  quoteDate: documentType === "quote" ? issueDate : null,
+  completedDate: null,
+},
     vehicle: {
       make: vehicleMake,
       model: vehicleModel,
@@ -1267,6 +1284,7 @@ const handleStampConfirm = async (cfg) => {
     setJobCardNumber("");
     setCustomerName("John Smith");
     setCustomerId("CUST-2026-1234");
+    setIssueDate(new Date().toISOString());
     setCustomerEmail("john.smith@example.com");
     setCustomerPhone("082 123 4567");
     setCustomerAddress("123 Main Street, Pretoria, 0001");
@@ -1524,6 +1542,7 @@ const handleStampConfirm = async (cfg) => {
     vehicleYear,
     vehicleVin,
     vehicleMileage,
+    issueDate,
     preAuth,
     authCode,
     items,
