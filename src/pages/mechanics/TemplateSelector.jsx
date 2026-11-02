@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { FileText, Check, Loader2, ChevronDown } from "lucide-react";
-import { PayNowButton } from "../../components/PayNowButton";
+
 
 import {
   useCurrency,
@@ -374,14 +374,7 @@ export const DefaultTemplate = ({
           </div>
         </div>
         <div className="text-right">
-          {documentType !== "quote" && (
-            <PayNowButton
-              invoiceId={jobCardNumber}
-              amount={total}
-              paymentUrl={paymentUrl}
-              color="#111827"
-            />
-          )}
+        
           <div className="text-3xl font-bold mb-4">
             {documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -588,14 +581,7 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          {props.documentType !== "quote" && (
-            <PayNowButton
-              invoiceId={props.jobCardNumber}
-              amount={props.total}
-              paymentUrl={props.paymentUrl}
-              color="#111827"
-            />
-          )}
+         
           <div className="text-3xl font-bold mb-4">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -740,14 +726,7 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          {props.documentType !== "quote" && (
-            <PayNowButton
-              invoiceId={props.jobCardNumber}
-              amount={props.total}
-              paymentUrl={props.paymentUrl}
-              color="#3b82f6"
-            />
-          )}
+          
           <div className="text-5xl font-bold text-blue-500 mb-4">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -888,14 +867,7 @@ export const ElegantTemplate = (props) => (
         <div className="text-sm text-gray-600">
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
         </div>
-        {props.documentType !== "quote" && (
-          <PayNowButton
-            invoiceId={props.jobCardNumber}
-            amount={props.total}
-            paymentUrl={props.paymentUrl}
-            color="#7e22ce"
-          />
-        )}
+        
         <div className="text-2xl font-serif text-purple-700 mt-4">
           {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
         </div>
@@ -1033,14 +1005,7 @@ export const SpeedTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          {props.documentType !== "quote" && (
-            <PayNowButton
-              invoiceId={props.jobCardNumber}
-              amount={props.total}
-              paymentUrl={props.paymentUrl}
-              color="#dc2626"
-            />
-          )}
+         
           <div className="text-5xl font-black text-red-600 mb-4 italic">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -1170,14 +1135,7 @@ export const DiagnosticTemplate = (props) => (
           <div className="text-sm text-gray-600">{props.businessInfo.city}</div>
         </div>
         <div className="text-right">
-          {props.documentType !== "quote" && (
-            <PayNowButton
-              invoiceId={props.jobCardNumber}
-              amount={props.total}
-              paymentUrl={props.paymentUrl}
-              color="#16a34a"
-            />
-          )}
+         
           <div className="text-4xl font-bold text-green-600 mb-4">
             {props.documentType === "quote"
               ? "SERVICE QUOTE"
