@@ -1,9 +1,12 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { FileText, Check, Loader2, ChevronDown } from "lucide-react";
-import SignatureStamp from "./SignatureStamp";
 import { PayNowButton } from "../../components/PayNowButton";
 
-import { useCurrency, resolveCurrency, formatMoney } from "../../contexts/CurrencyContext";
+import {
+  useCurrency,
+  resolveCurrency,
+  formatMoney,
+} from "../../contexts/CurrencyContext";
 import {
   getFirestore,
   doc,
@@ -11,8 +14,6 @@ import {
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
-
-
 
 const TEMPLATE_NAMES = {
   default: "Default (Original)",
@@ -24,12 +25,7 @@ const TEMPLATE_NAMES = {
   diagnostic: "Diagnostic Specialist",
 };
 
-
-
-
-
-
-
+// ─── Currency ────────────────────────────────────────────────────────────────
 const InvoiceCurrencyContext = createContext(null);
 
 const useInvoiceCurrency = (override) => {
@@ -43,6 +39,60 @@ const Money = ({ value }) => {
   const fallback = useInvoiceCurrency();
   return <>{formatMoney(value, fromCtx || fallback)}</>;
 };
+
+// ─── Shared helpers ──────────────────────────────────────────────────────────
+
+// Uses the document's own date when supplied (issueDate), so reprinting an
+// old invoice no longer shows today's date.
+const formatDocDate = (issueDate, locale) => {
+  const d = issueDate ? new Date(issueDate) : new Date();
+  const safe = Number.isNaN(d.getTime()) ? new Date() : d;
+  return safe.toLocaleDateString(locale);
+};
+
+// Pass vatRate (e.g. 15) to show "VAT (15%)"; otherwise just "VAT".
+const vatLabel = (rate) =>
+  rate !== undefined && rate !== null && rate !== "" ? `VAT (${rate}%)` : "VAT";
+
+// Bank details block. Renders NOTHING if the business hasn't set an account
+// number, so we never print someone else's account on an invoice.
+const BankDetails = ({
+  info,
+  title = "PAYMENT INFORMATION",
+  boxClass,
+  titleClass,
+  bodyClass = "text-xs space-y-1 text-gray-700",
+  labelClass = "font-semibold",
+}) => {
+  if (!info?.accountNumber) return null;
+  return (
+    <div className={boxClass}>
+      <div className={titleClass}>{title}</div>
+      <div className={bodyClass}>
+        {info.bankName && (
+          <div>
+            <span className={labelClass}>Bank Name:</span> {info.bankName}
+          </div>
+        )}
+        <div>
+          <span className={labelClass}>Account Holder:</span>{" "}
+          {info.businessName}
+        </div>
+        <div>
+          <span className={labelClass}>Account Number:</span>{" "}
+          {info.accountNumber}
+        </div>
+        {info.branchCode && (
+          <div>
+            <span className={labelClass}>Branch Code:</span> {info.branchCode}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── Template selector ───────────────────────────────────────────────────────
 export const TemplateSelector = ({
   user,
   selectedTemplate,
@@ -78,11 +128,12 @@ export const TemplateSelector = ({
             onTemplateChange(data.active);
           }
         } else {
-          // First-time user — seed the doc
+          // First-time user — seed ONLY the active choice.
+          // `purchased` must be written server-side (Cloud Function / webhook),
+          // never from the client, or users can unlock paid templates.
           await setDoc(
             doc(db, "users", user.uid, "settings", "templates"),
             {
-              purchased: ["classic"],
               active: "classic",
               createdAt: serverTimestamp(),
             },
@@ -200,43 +251,63 @@ export const TemplateSelector = ({
     </div>
   );
 };
-const PaymentBanner = ({ totalPaid, balanceDue, paymentStatusLabel, total }) => {
+
+// ─── Payment banner ──────────────────────────────────────────────────────────
+const PaymentBanner = ({ totalPaid, balanceDue, paymentStatusLabel }) => {
   if (!totalPaid || totalPaid <= 0) return null;
   const isPaid = paymentStatusLabel === "paid";
   const isPartial = paymentStatusLabel === "partially_paid";
   if (!isPaid && !isPartial) return null;
   return (
-    <div style={{
-      margin: "8px 10mm",
-      padding: "10px 14px",
-      border: `2px solid ${isPaid ? "#059669" : "#d97706"}`,
-      borderRadius: 6,
-      background: isPaid ? "#f0fdf4" : "#fffbeb",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    }}>
+    <div
+      style={{
+        margin: "8px 10mm",
+        padding: "10px 14px",
+        border: `2px solid ${isPaid ? "#059669" : "#d97706"}`,
+        borderRadius: 6,
+        background: isPaid ? "#f0fdf4" : "#fffbeb",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
       <div>
-        <div style={{ fontWeight: "bold", fontSize: 12,
-          color: isPaid ? "#166534" : "#92400e" }}>
+        <div
+          style={{
+            fontWeight: "bold",
+            fontSize: 12,
+            color: isPaid ? "#166534" : "#92400e",
+          }}
+        >
           {isPaid ? "✓ PAID IN FULL" : "⚠ PARTIAL PAYMENT RECEIVED"}
         </div>
         {isPartial && (
           <div style={{ fontSize: 11, color: "#92400e", marginTop: 2 }}>
-            Paid: <Money value={totalPaid} /> — Balance due: <Money value={balanceDue} />
+            Paid: <Money value={totalPaid} /> — Balance due:{" "}
+            <Money value={balanceDue} />
           </div>
         )}
       </div>
-      <div style={{ textAlign: "right", fontSize: 11,
-        color: isPaid ? "#166634" : "#92400e" }}>
-        {isPaid
-    ? <Money value={totalPaid} />
-    : <><Money value={balanceDue} /> outstanding</>}
+      <div
+        style={{
+          textAlign: "right",
+          fontSize: 11,
+          color: isPaid ? "#166534" : "#92400e",
+        }}
+      >
+        {isPaid ? (
+          <Money value={totalPaid} />
+        ) : (
+          <>
+            <Money value={balanceDue} /> outstanding
+          </>
+        )}
       </div>
     </div>
   );
 };
-// ─── Template components (unchanged — kept in same file) ──────────────────────
+
+// ─── Template components ─────────────────────────────────────────────────────
 
 export const DefaultTemplate = ({
   businessInfo,
@@ -254,6 +325,7 @@ export const DefaultTemplate = ({
   vehicleMake,
   vehicleModel,
   vehicleYear,
+  engineNo,
   vehicleVin,
   authCode,
   preAuth,
@@ -262,15 +334,14 @@ export const DefaultTemplate = ({
   items,
   subtotal,
   vat,
+  vatRate,
   total,
+  issueDate,
+  paymentUrl,
   documentType = "invoice",
-  showStamp = false,
-  stampText = "APPROVED",
-  stampColor = "#d32f2f",
-  showStampDate = true,
-  totalPaid,        
-  balanceDue,       
-  paymentStatusLabel, 
+  totalPaid,
+  balanceDue,
+  paymentStatusLabel,
 }) => (
   <div className="bg-white" style={{ padding: "5mm 10mm" }}>
     <div className="border-b-2 border-black pb-4 mb-4">
@@ -303,7 +374,14 @@ export const DefaultTemplate = ({
           </div>
         </div>
         <div className="text-right">
-         
+          {documentType !== "quote" && (
+            <PayNowButton
+              invoiceId={jobCardNumber}
+              amount={total}
+              paymentUrl={paymentUrl}
+              color="#111827"
+            />
+          )}
           <div className="text-3xl font-bold mb-4">
             {documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -316,7 +394,7 @@ export const DefaultTemplate = ({
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">DATE</span>
-              <span>{new Date().toLocaleDateString("en-ZA")}</span>
+              <span>{formatDocDate(issueDate, "en-ZA")}</span>
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">MERCHANT CODE</span>
@@ -377,7 +455,9 @@ export const DefaultTemplate = ({
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Engine No:</span>
-            <span>{vehicleYear}</span>
+            {/* Falls back to vehicleYear so existing callers keep working;
+                pass a real `engineNo` prop going forward. */}
+            <span>{engineNo ?? vehicleYear}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">VIN Number:</span>
@@ -416,7 +496,9 @@ export const DefaultTemplate = ({
                 {item.description}
               </td>
               <td className="text-center px-2 py-2">{item.qty}</td>
-              <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
+              <td className="text-right px-2 py-2">
+                <Money value={item.rate} />
+              </td>
               <td className="text-right px-2 py-2">
                 <Money value={item.amount} />
               </td>
@@ -424,26 +506,32 @@ export const DefaultTemplate = ({
           ))}
         </tbody>
       </table>
-      <PaymentBanner 
-      totalPaid={totalPaid} 
-      balanceDue={balanceDue} 
-      paymentStatusLabel={paymentStatusLabel} 
-      total={total} />
+      <PaymentBanner
+        totalPaid={totalPaid}
+        balanceDue={balanceDue}
+        paymentStatusLabel={paymentStatusLabel}
+      />
     </div>
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span><Money value={subtotal} /></span>
+          <span>
+            <Money value={subtotal} />
+          </span>
         </div>
         <div className="flex justify-between py-1">
-          <span>VAT:</span>
-          <span><Money value={vat} /></span>
+          <span>{vatLabel(vatRate)}:</span>
+          <span>
+            <Money value={vat} />
+          </span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-50 text-black px-2">
           <span>TOTAL:</span>
-          <span><Money value={total} /></span>
+          <span>
+            <Money value={total} />
+          </span>
         </div>
       </div>
     </div>
@@ -463,29 +551,13 @@ export const DefaultTemplate = ({
       </div>
     </div>
 
-    <div className="bg-red-50 border border-red-200 p-3 mb-4">
-      <div className="text-red-600 font-bold text-xs mb-2">BANKING DETAILS</div>
-      <div className="text-xs space-y-1">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {businessInfo.accountNumber || "23251412201"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
-
-   
+    <BankDetails
+      info={businessInfo}
+      title="BANKING DETAILS"
+      boxClass="bg-red-50 border border-red-200 p-3 mb-4"
+      titleClass="text-red-600 font-bold text-xs mb-2"
+      bodyClass="text-xs space-y-1"
+    />
 
     <div className="text-center text-xs text-red-600 italic">
       {documentType === "quote"
@@ -516,7 +588,14 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-        
+          {props.documentType !== "quote" && (
+            <PayNowButton
+              invoiceId={props.jobCardNumber}
+              amount={props.total}
+              paymentUrl={props.paymentUrl}
+              color="#111827"
+            />
+          )}
           <div className="text-3xl font-bold mb-4">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -529,7 +608,7 @@ export const ClassicTemplate = (props) => (
             </div>
             <div className="flex justify-between gap-8">
               <span className="font-semibold">DATE</span>
-              <span>{new Date().toLocaleDateString()}</span>
+              <span>{formatDocDate(props.issueDate)}</span>
             </div>
           </div>
         </div>
@@ -588,58 +667,49 @@ export const ClassicTemplate = (props) => (
           <tr key={i} className="border-b">
             <td className="px-2 py-2">{item.description}</td>
             <td className="text-center px-2 py-2">{item.qty}</td>
-            <td className="text-right px-2 py-2"><Money value={item.rate} /></td>
-            <td className="text-right px-2 py-2"><Money value={item.amount} /></td>
+            <td className="text-right px-2 py-2">
+              <Money value={item.rate} />
+            </td>
+            <td className="text-right px-2 py-2">
+              <Money value={item.amount} />
+            </td>
           </tr>
         ))}
       </tbody>
     </table>
-<PaymentBanner
-  totalPaid={props.totalPaid}
-  balanceDue={props.balanceDue}
-  paymentStatusLabel={props.paymentStatusLabel}
-  total={props.total}
-/>
+    <PaymentBanner
+      totalPaid={props.totalPaid}
+      balanceDue={props.balanceDue}
+      paymentStatusLabel={props.paymentStatusLabel}
+    />
     <div className="flex justify-end">
       <div className="w-64 text-xs">
         <div className="flex justify-between py-1">
           <span>Subtotal:</span>
-          <span><Money value={props.subtotal} /></span>
+          <span>
+            <Money value={props.subtotal} />
+          </span>
         </div>
         <div className="flex justify-between py-1">
-          <span>VAT (15%):</span>
-          <span><Money value={props.vat} /></span>
+          <span>{vatLabel(props.vatRate)}:</span>
+          <span>
+            <Money value={props.vat} />
+          </span>
         </div>
         <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
           <span>TOTAL:</span>
-          <span><Money value={props.total} /></span>
+          <span>
+            <Money value={props.total} />
+          </span>
         </div>
       </div>
     </div>
 
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded mt-6">
-      <div className="text-blue-800 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "23251412201"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
+    <BankDetails
+      info={props.businessInfo}
+      boxClass="bg-blue-50 border border-blue-200 p-4 mb-4 rounded mt-6"
+      titleClass="text-blue-800 font-bold text-sm mb-2"
+    />
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
@@ -671,13 +741,13 @@ export const ModernTemplate = (props) => (
         </div>
         <div className="text-right">
           {props.documentType !== "quote" && (
-  <PayNowButton
-    invoiceId={props.jobCardNumber}
-    amount={props.total}
-    paymentUrl={props.paymentUrl}
-    color="#3b82f6"
-  />
-)}
+            <PayNowButton
+              invoiceId={props.jobCardNumber}
+              amount={props.total}
+              paymentUrl={props.paymentUrl}
+              color="#3b82f6"
+            />
+          )}
           <div className="text-5xl font-bold text-blue-500 mb-4">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
@@ -690,7 +760,7 @@ export const ModernTemplate = (props) => (
             </div>
             <div className="text-sm">
               <span className="font-semibold">Date:</span>{" "}
-              {new Date().toLocaleDateString()}
+              {formatDocDate(props.issueDate)}
             </div>
           </div>
         </div>
@@ -752,7 +822,9 @@ export const ModernTemplate = (props) => (
           <tr key={i} className="border-b hover:bg-gray-50">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
+            <td className="text-right px-4 py-3">
+              <Money value={item.rate} />
+            </td>
             <td className="text-right px-4 py-3 font-semibold">
               <Money value={item.amount} />
             </td>
@@ -760,52 +832,39 @@ export const ModernTemplate = (props) => (
         ))}
       </tbody>
     </table>
-<PaymentBanner
-  totalPaid={props.totalPaid}
-  balanceDue={props.balanceDue}
-  paymentStatusLabel={props.paymentStatusLabel}
-  total={props.total}
-/>
+    <PaymentBanner
+      totalPaid={props.totalPaid}
+      balanceDue={props.balanceDue}
+      paymentStatusLabel={props.paymentStatusLabel}
+    />
     <div className="flex justify-end">
       <div className="w-80 space-y-2">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
-          <span><Money value={props.subtotal} /></span>
+          <span>
+            <Money value={props.subtotal} />
+          </span>
         </div>
         <div className="flex justify-between py-2 text-gray-600">
-          <span>VAT (15%):</span>
-          <span><Money value={props.vat} /></span>
+          <span>{vatLabel(props.vatRate)}:</span>
+          <span>
+            <Money value={props.vat} />
+          </span>
         </div>
         <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-white px-4 rounded-lg">
           <span>TOTAL:</span>
-          <span><Money value={props.total} /></span>
+          <span>
+            <Money value={props.total} />
+          </span>
         </div>
       </div>
     </div>
 
-    <div className="bg-blue-50 border border-blue-200 p-4 mb-4 rounded mt-6">
-      <div className="text-blue-800 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "23251412201"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
+    <BankDetails
+      info={props.businessInfo}
+      boxClass="bg-blue-50 border border-blue-200 p-4 mb-4 rounded mt-6"
+      titleClass="text-blue-800 font-bold text-sm mb-2"
+    />
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3 mt-4">
       {props.documentType === "quote"
@@ -830,17 +889,20 @@ export const ElegantTemplate = (props) => (
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
         </div>
         {props.documentType !== "quote" && (
-  <PayNowButton
-    invoiceId={props.jobCardNumber}
-    amount={props.total}
-    paymentUrl={props.paymentUrl}
-    color="#7e22ce"
-  />
-)}
+          <PayNowButton
+            invoiceId={props.jobCardNumber}
+            amount={props.total}
+            paymentUrl={props.paymentUrl}
+            color="#7e22ce"
+          />
+        )}
         <div className="text-2xl font-serif text-purple-700 mt-4">
           {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
         </div>
         <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
+        <div className="text-xs text-gray-400 mt-1">
+          {formatDocDate(props.issueDate)}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-6">
@@ -892,65 +954,55 @@ export const ElegantTemplate = (props) => (
             <tr key={i} className="border-b border-gray-200">
               <td className="py-3">{item.description}</td>
               <td className="text-center py-3">{item.qty}</td>
-              <td className="text-right py-3"><Money value={item.rate} /></td>
-              <td className="text-right py-3"><Money value={item.amount} /></td>
+              <td className="text-right py-3">
+                <Money value={item.rate} />
+              </td>
+              <td className="text-right py-3">
+                <Money value={item.amount} />
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-<PaymentBanner
-  totalPaid={props.totalPaid}
-  balanceDue={props.balanceDue}
-  paymentStatusLabel={props.paymentStatusLabel}
-  total={props.total}
-/>
+      <PaymentBanner
+        totalPaid={props.totalPaid}
+        balanceDue={props.balanceDue}
+        paymentStatusLabel={props.paymentStatusLabel}
+      />
       <div className="flex justify-end">
         <div className="w-64">
           <div className="flex justify-between py-2">
             <span>Subtotal:</span>
-            <span><Money value={props.subtotal} /></span>
+            <span>
+              <Money value={props.subtotal} />
+            </span>
           </div>
           <div className="flex justify-between py-2">
-            <span>VAT:</span>
-            <span><Money value={props.vat} /></span>
+            <span>{vatLabel(props.vatRate)}:</span>
+            <span>
+              <Money value={props.vat} />
+            </span>
           </div>
           <div className="flex justify-between py-3 font-bold text-lg bg-purple-900 text-white px-4">
             <span>TOTAL:</span>
-            <span><Money value={props.total} /></span>
+            <span>
+              <Money value={props.total} />
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="bg-purple-50 border border-purple-200 p-4 mb-4 rounded mt-6">
-        <div className="text-purple-800 font-bold text-sm mb-2">
-          PAYMENT INFORMATION
-        </div>
-        <div className="text-xs space-y-1 text-gray-700">
-          <div>
-            <span className="font-semibold">Bank Name:</span>{" "}
-            {props.businessInfo.bankName || "First National Bank"}
-          </div>
-          <div>
-            <span className="font-semibold">Account Holder:</span>{" "}
-            {props.businessInfo.businessName}
-          </div>
-          <div>
-            <span className="font-semibold">Account Number:</span>{" "}
-            {props.businessInfo.accountNumber || "23251412201"}
-          </div>
-          <div>
-            <span className="font-semibold">Branch Code:</span>{" "}
-            {props.businessInfo.branchCode || "250655"}
-          </div>
-        </div>
-      </div>
+      <BankDetails
+        info={props.businessInfo}
+        boxClass="bg-purple-50 border border-purple-200 p-4 mb-4 rounded mt-6"
+        titleClass="text-purple-800 font-bold text-sm mb-2"
+      />
 
       <div className="mt-8 flex justify-between items-center">
         <div className="text-sm text-gray-500">
           <p className="font-semibold">Terms:</p>
           <p>Payment due within 30 days</p>
         </div>
-       
       </div>
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
         {props.documentType === "quote"
@@ -982,19 +1034,19 @@ export const SpeedTemplate = (props) => (
         </div>
         <div className="text-right">
           {props.documentType !== "quote" && (
-  <PayNowButton
-    invoiceId={props.jobCardNumber}
-    amount={props.total}
-    paymentUrl={props.paymentUrl}
-    color="#dc2626"
-  />
-)}
+            <PayNowButton
+              invoiceId={props.jobCardNumber}
+              amount={props.total}
+              paymentUrl={props.paymentUrl}
+              color="#dc2626"
+            />
+          )}
           <div className="text-5xl font-black text-red-600 mb-4 italic">
             {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
           </div>
           <div className="bg-red-600 p-4 rounded space-y-1">
             <div className="text-sm font-bold">#{props.jobCardNumber}</div>
-            <div className="text-sm">{new Date().toLocaleDateString()}</div>
+            <div className="text-sm">{formatDocDate(props.issueDate)}</div>
           </div>
         </div>
       </div>
@@ -1040,7 +1092,9 @@ export const SpeedTemplate = (props) => (
           <tr key={i} className="border-b border-gray-800">
             <td className="px-4 py-3">{item.description}</td>
             <td className="text-center px-4 py-3">{item.qty}</td>
-            <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
+            <td className="text-right px-4 py-3">
+              <Money value={item.rate} />
+            </td>
             <td className="text-right px-4 py-3 font-bold">
               <Money value={item.amount} />
             </td>
@@ -1048,59 +1102,47 @@ export const SpeedTemplate = (props) => (
         ))}
       </tbody>
     </table>
-<PaymentBanner
-  totalPaid={props.totalPaid}
-  balanceDue={props.balanceDue}
-  paymentStatusLabel={props.paymentStatusLabel}
-  total={props.total}
-/>
+    <PaymentBanner
+      totalPaid={props.totalPaid}
+      balanceDue={props.balanceDue}
+      paymentStatusLabel={props.paymentStatusLabel}
+    />
     <div className="flex justify-end">
       <div className="w-80">
         <div className="flex justify-between py-2 text-gray-400">
           <span>Subtotal:</span>
-          <span><Money value={props.subtotal} /></span>
+          <span>
+            <Money value={props.subtotal} />
+          </span>
         </div>
         <div className="flex justify-between py-2 text-gray-400">
-          <span>VAT:</span>
-          <span><Money value={props.vat} /></span>
+          <span>{vatLabel(props.vatRate)}:</span>
+          <span>
+            <Money value={props.vat} />
+          </span>
         </div>
         <div className="flex justify-between py-3 text-xl font-black bg-red-600 px-4 rounded">
           <span>TOTAL:</span>
-          <span><Money value={props.total} /></span>
+          <span>
+            <Money value={props.total} />
+          </span>
         </div>
       </div>
     </div>
 
-    <div className="bg-gray-900 border border-red-600 p-4 mb-4 rounded mt-6">
-      <div className="text-red-600 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-400">
-        <div>
-          <span className="font-semibold text-gray-300">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold text-gray-300">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold text-gray-300">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "23251412201"}
-        </div>
-        <div>
-          <span className="font-semibold text-gray-300">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
-     
+    <BankDetails
+      info={props.businessInfo}
+      boxClass="bg-gray-900 border border-red-600 p-4 mb-4 rounded mt-6"
+      titleClass="text-red-600 font-bold text-sm mb-2"
+      bodyClass="text-xs space-y-1 text-gray-400"
+      labelClass="font-semibold text-gray-300"
+    />
+
     <div className="mt-8 flex justify-between items-center">
       <div className="text-sm text-gray-500">
         <p className="font-semibold">Terms:</p>
         <p>Payment due within 30 days</p>
       </div>
-     
     </div>
     <div className="text-center text-xs text-gray-500 italic border-t border-gray-800 pt-3">
       {props.documentType === "quote"
@@ -1129,13 +1171,13 @@ export const DiagnosticTemplate = (props) => (
         </div>
         <div className="text-right">
           {props.documentType !== "quote" && (
-  <PayNowButton
-    invoiceId={props.jobCardNumber}
-    amount={props.total}
-    paymentUrl={props.paymentUrl}
-    color="#16a34a"
-  />
-)}
+            <PayNowButton
+              invoiceId={props.jobCardNumber}
+              amount={props.total}
+              paymentUrl={props.paymentUrl}
+              color="#16a34a"
+            />
+          )}
           <div className="text-4xl font-bold text-green-600 mb-4">
             {props.documentType === "quote"
               ? "SERVICE QUOTE"
@@ -1150,7 +1192,7 @@ export const DiagnosticTemplate = (props) => (
             </div>
             <div className="text-sm">
               <span className="font-bold">Date:</span>{" "}
-              {new Date().toLocaleDateString()}
+              {formatDocDate(props.issueDate)}
             </div>
           </div>
         </div>
@@ -1229,7 +1271,9 @@ export const DiagnosticTemplate = (props) => (
             <tr key={i} className="border-b">
               <td className="px-4 py-3">{item.description}</td>
               <td className="text-center px-4 py-3">{item.qty}</td>
-              <td className="text-right px-4 py-3"><Money value={item.rate} /></td>
+              <td className="text-right px-4 py-3">
+                <Money value={item.rate} />
+              </td>
               <td className="text-right px-4 py-3 font-semibold">
                 <Money value={item.amount} />
               </td>
@@ -1238,62 +1282,48 @@ export const DiagnosticTemplate = (props) => (
         </tbody>
       </table>
       <PaymentBanner
-  totalPaid={props.totalPaid}
-  balanceDue={props.balanceDue}
-  paymentStatusLabel={props.paymentStatusLabel}
-  total={props.total}
-/>
+        totalPaid={props.totalPaid}
+        balanceDue={props.balanceDue}
+        paymentStatusLabel={props.paymentStatusLabel}
+      />
     </div>
 
     <div className="flex justify-end">
       <div className="w-80 border-2 border-green-600 p-4 rounded">
         <div className="flex justify-between py-2">
           <span>Subtotal:</span>
-          <span><Money value={props.subtotal} /></span>
+          <span>
+            <Money value={props.subtotal} />
+          </span>
         </div>
         <div className="flex justify-between py-2">
-          <span>VAT (15%):</span>
-          <span><Money value={props.vat} /></span>
+          <span>{vatLabel(props.vatRate)}:</span>
+          <span>
+            <Money value={props.vat} />
+          </span>
         </div>
         <div className="flex justify-between py-3 text-xl font-bold bg-green-600 text-white px-4 rounded">
           <span>
             {props.documentType === "quote" ? "QUOTE TOTAL:" : "TOTAL DUE:"}
           </span>
-          <span><Money value={props.total} /></span>
+          <span>
+            <Money value={props.total} />
+          </span>
         </div>
       </div>
     </div>
 
-    <div className="bg-green-50 border border-green-200 p-4 mb-4 rounded mt-6">
-      <div className="text-green-800 font-bold text-sm mb-2">
-        PAYMENT INFORMATION
-      </div>
-      <div className="text-xs space-y-1 text-gray-700">
-        <div>
-          <span className="font-semibold">Bank Name:</span>{" "}
-          {props.businessInfo.bankName || "First National Bank"}
-        </div>
-        <div>
-          <span className="font-semibold">Account Holder:</span>{" "}
-          {props.businessInfo.businessName}
-        </div>
-        <div>
-          <span className="font-semibold">Account Number:</span>{" "}
-          {props.businessInfo.accountNumber || "23251412201"}
-        </div>
-        <div>
-          <span className="font-semibold">Branch Code:</span>{" "}
-          {props.businessInfo.branchCode || "250655"}
-        </div>
-      </div>
-    </div>
+    <BankDetails
+      info={props.businessInfo}
+      boxClass="bg-green-50 border border-green-200 p-4 mb-4 rounded mt-6"
+      titleClass="text-green-800 font-bold text-sm mb-2"
+    />
 
     <div className="mt-8 flex justify-between items-center">
       <div className="text-sm text-gray-500">
         <p className="font-semibold">Terms:</p>
         <p>Payment due within 30 days</p>
       </div>
-     
     </div>
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
@@ -1303,7 +1333,7 @@ export const DiagnosticTemplate = (props) => (
   </div>
 );
 
-// ─── Template Renderer ────────────────────────────────────────────────────────
+// ─── Template Renderer ───────────────────────────────────────────────────────
 export const TemplateRenderer = ({
   templateId,
   documentType = "invoice",
@@ -1311,8 +1341,8 @@ export const TemplateRenderer = ({
   stampColor = "#d32f2f",
   showStampDate = false,
   showStamp = false,
-  invoiceId,         
-  paymentUrl, 
+  invoiceId,
+  paymentUrl,
   total,
   currency,
   ...props
@@ -1329,25 +1359,31 @@ export const TemplateRenderer = ({
     paymentUrl,
     total,
   };
+
   let content;
   switch (templateId) {
-    case "default":
-      return content = <DefaultTemplate {...templateProps} />;
     case "classic":
-      return content = <ClassicTemplate {...templateProps} />;
+      content = <ClassicTemplate {...templateProps} />;
+      break;
     case "modern":
-      return content = <ModernTemplate {...templateProps} />;
+      content = <ModernTemplate {...templateProps} />;
+      break;
     case "elegant":
     case "premium":
-      return content = <ElegantTemplate {...templateProps} />;
+      content = <ElegantTemplate {...templateProps} />;
+      break;
     case "speed":
-      return content = <SpeedTemplate {...templateProps} />;
+      content = <SpeedTemplate {...templateProps} />;
+      break;
     case "diagnostic":
-      return content = <DiagnosticTemplate {...templateProps} />;
+      content = <DiagnosticTemplate {...templateProps} />;
+      break;
+    case "default":
     default:
-      return content = <DefaultTemplate {...templateProps} />;
-
+      content = <DefaultTemplate {...templateProps} />;
   }
+
+  // Provider now actually wraps the template, so the `currency` prop works.
   return (
     <InvoiceCurrencyContext.Provider value={code}>
       {content}
