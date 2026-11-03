@@ -26,275 +26,362 @@ import {
 
 // ── Tab config ────────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "projects", label: "Active Projects", icon: Hammer },
+  { id: "projects", label: "Active Jobs", icon: Hammer },
   { id: "work-orders", label: "Work Orders", icon: ClipboardList },
-  { id: "materials", label: "Materials List", icon: Package },
+  { id: "materials", label: "Fabric & Materials", icon: Package },
 ];
+
+// -- Upholstery & furniture production stages ----------------------------------
+const PROJECT_STAGES = [
+  "Quote & Measure",
+  "Fabric Selection",
+  "Strip & Assess",
+  "Frame Repair / Build",
+  "Padding & Foam",
+  "Cutting & Sewing",
+  "Upholstering",
+  "Finishing & QC",
+  "Ready for Delivery / Collection",
+  "On Showroom Floor"
+];
+
+const STAGE_DESC = {
+  "Quote & Measure": "Enquiry, site visit or showroom visit, measurements, quote and deposit.",
+  "Fabric Selection": "Client chooses fabric, leather or colour; swatches approved and material ordered.",
+  "Strip & Assess": "Remove old covering and check the frame, springs, webbing and foam.",
+  "Frame Repair / Build": "Repair joints and timber, or build the new frame from scratch.",
+  "Padding & Foam": "Webbing, springs, foam, dacron wrap and cushion inserts.",
+  "Cutting & Sewing": "Patterns, fabric cutting, sewing covers, piping and cushion covers.",
+  "Upholstering": "Stretch, staple and fit covers; buttoning, tufting and trims.",
+  "Finishing & QC": "Legs, studs, dust cover, final inspection and photos.",
+  "Ready for Delivery / Collection": "Wrapped, balance invoiced, delivery or collection booked.",
+  "On Showroom Floor": "Finished piece tagged, priced and displayed for sale."
+};
+
+const ORDER_TYPES = [
+  "Customer Job (Re-cover / Repair)",
+  "Custom Order (Made to Order)",
+  "Stock Build (Made for Showroom)"
+];
+
+const stageIndex = (phase) => PROJECT_STAGES.indexOf(phase);
+const stageOptions = (current) =>
+  current && !PROJECT_STAGES.includes(current)
+    ? [current, ...PROJECT_STAGES]
+    : PROJECT_STAGES;
 
 // ── Seed data ─────────────────────────────────────────────────────────────────
 const PROJECT_SEED = [
   {
-    name: "Smith Kitchen Cabinetry",
+    name: "Smith Lounge Suite Re-cover",
     client: "John Smith",
-    type: "Kitchen Cabinetry",
-    wood: "Oak",
-    finish: "Varnish",
+    type: "Sofa / Couch Reupholstery",
+    orderType: "Customer Job (Re-cover / Repair)",
+    wood: "Velvet",
+    finish: "High-Density Foam",
     status: "active",
     progress: 65,
-    budget: 48500,
-    spent: 31525,
-    start: "2025-02-10",
-    end: "2025-03-25",
+    budget: 28500,
+    spent: 18525,
+    start: "2026-10-12",
+    end: "2026-11-20",
     crew: "Pieter, Johan, Sipho",
-    phase: "Phase 2 — Door fitting",
+    phase: "Upholstering"
   },
   {
-    name: "Riverside Office Fit-out",
+    name: "Riverside Restaurant Booths",
     client: "Riverside Properties",
-    type: "Custom Furniture",
-    wood: "MDF/Melamine",
-    finish: "Paint",
+    type: "Restaurant Booths & Banquettes",
+    orderType: "Custom Order (Made to Order)",
+    wood: "Vinyl (Commercial)",
+    finish: "High-Density Foam",
     status: "active",
     progress: 30,
-    budget: 125000,
-    spent: 37500,
-    start: "2025-02-24",
-    end: "2025-05-15",
+    budget: 96000,
+    spent: 28800,
+    start: "2026-10-26",
+    end: "2026-12-11",
     crew: "Andile, Johan",
-    phase: "Phase 1 — Shop drawings",
+    phase: "Frame Repair / Build"
   },
   {
-    name: "Ndlovu Bedroom Suite",
+    name: "Ndlovu King Headboard & Base",
     client: "Thabo Ndlovu",
-    type: "Bedroom Furniture",
-    wood: "Meranti",
-    finish: "Stain & Varnish",
+    type: "Headboard & Bed Base",
+    orderType: "Custom Order (Made to Order)",
+    wood: "Linen",
+    finish: "Foam & Dacron Wrap",
     status: "active",
     progress: 85,
-    budget: 32000,
-    spent: 27200,
-    start: "2025-01-15",
-    end: "2025-03-10",
+    budget: 14200,
+    spent: 11800,
+    start: "2026-10-05",
+    end: "2026-11-06",
     crew: "Sipho, Andile",
-    phase: "Phase 3 — Finishing",
+    phase: "Finishing & QC"
   },
   {
-    name: "Van der Berg Wardrobes",
+    name: "Showroom Chesterfield 3-Seater (x2)",
+    client: "Showroom Stock",
+    type: "Showroom Piece (Made for Sale)",
+    orderType: "Stock Build (Made for Showroom)",
+    wood: "Leather (Genuine)",
+    finish: "Feather & Down",
+    status: "active",
+    progress: 40,
+    budget: 44000,
+    spent: 17600,
+    start: "2026-10-19",
+    end: "2026-11-27",
+    crew: "Andile, Johan",
+    phase: "Cutting & Sewing"
+  },
+  {
+    name: "Van der Berg Dining Chairs (x8)",
     client: "Carel van der Berg",
-    type: "Built-in Wardrobes",
-    wood: "Pine",
-    finish: "Paint",
+    type: "Dining Chair Recovering",
+    orderType: "Customer Job (Re-cover / Repair)",
+    wood: "Microfibre / Suede",
+    finish: "High-Density Foam",
     status: "on-hold",
     progress: 20,
-    budget: 18500,
-    spent: 3700,
-    start: "2025-03-01",
-    end: "2025-04-30",
+    budget: 9600,
+    spent: 1920,
+    start: "2026-11-09",
+    end: "2026-11-27",
     crew: "TBD",
-    phase: "Phase 1 — Planning",
+    phase: "Fabric Selection"
   },
   {
-    name: "Patel Custom Shelving",
+    name: "Patel Storage Ottoman",
     client: "Raj Patel",
-    type: "Custom Shelving",
-    wood: "Oak",
-    finish: "Oil Finish",
+    type: "Ottoman / Pouf / Bench",
+    orderType: "Custom Order (Made to Order)",
+    wood: "Cotton / Canvas",
+    finish: "Hollow Fibre",
     status: "planning",
     progress: 0,
-    budget: 9800,
+    budget: 4800,
     spent: 0,
-    start: "2025-04-01",
-    end: "2025-04-20",
+    start: "2026-11-23",
+    end: "2026-12-04",
     crew: "TBD",
-    phase: "Pre-production",
-  },
+    phase: "Quote & Measure"
+  }
 ];
 
 const WO_SEED = [
   {
     number: "WO-001",
-    projectName: "Smith Kitchen Cabinetry",
-    task: "Cut & machine cabinet carcasses",
+    projectName: "Smith Lounge Suite Re-cover",
+    task: "Strip old covering & assess frame",
     assignedTo: "Pieter, Johan",
     priority: "high",
     status: "completed",
-    phase: "Phase 1",
-    estHours: 16,
-    dueDate: "2025-02-20",
+    phase: "Strip & Assess",
+    estHours: 6,
+    dueDate: "2026-10-14"
   },
   {
     number: "WO-002",
-    projectName: "Smith Kitchen Cabinetry",
-    task: "Door panel routing & fitting",
+    projectName: "Smith Lounge Suite Re-cover",
+    task: "Fit velvet covers, staple & button back cushions",
     assignedTo: "Pieter",
     priority: "high",
     status: "in-progress",
-    phase: "Phase 2",
-    estHours: 8,
-    dueDate: "2025-03-05",
+    phase: "Upholstering",
+    estHours: 12,
+    dueDate: "2026-11-06"
   },
   {
     number: "WO-003",
-    projectName: "Riverside Office Fit-out",
-    task: "Site measure & template creation",
+    projectName: "Riverside Restaurant Booths",
+    task: "Site measure & booth templates",
     assignedTo: "Johan, Andile",
     priority: "medium",
     status: "completed",
-    phase: "Phase 1",
+    phase: "Quote & Measure",
     estHours: 4,
-    dueDate: "2025-02-28",
+    dueDate: "2026-10-28"
   },
   {
     number: "WO-004",
-    projectName: "Ndlovu Bedroom Suite",
-    task: "Final sanding & second varnish coat",
+    projectName: "Ndlovu King Headboard & Base",
+    task: "Final trim, piping check & quality inspection",
     assignedTo: "Sipho, Andile",
     priority: "high",
     status: "in-progress",
-    phase: "Phase 3",
-    estHours: 12,
-    dueDate: "2025-03-08",
+    phase: "Finishing & QC",
+    estHours: 6,
+    dueDate: "2026-11-05"
   },
   {
     number: "WO-005",
-    projectName: "Van der Berg Wardrobes",
-    task: "Site measure & drawing approval",
+    projectName: "Van der Berg Dining Chairs (x8)",
+    task: "Collect chairs & confirm fabric swatch",
     assignedTo: "Pieter",
     priority: "medium",
     status: "pending",
-    phase: "Phase 1",
+    phase: "Fabric Selection",
     estHours: 3,
-    dueDate: "2025-03-15",
+    dueDate: "2026-11-10"
   },
   {
     number: "WO-006",
-    projectName: "Riverside Office Fit-out",
-    task: "Produce shop drawings for client sign-off",
-    assignedTo: "Manager",
+    projectName: "Riverside Restaurant Booths",
+    task: "Rebuild booth frames & reinforce bases",
+    assignedTo: "Andile, Johan",
     priority: "medium",
     status: "pending",
-    phase: "Phase 1",
-    estHours: 6,
-    dueDate: "2025-03-10",
+    phase: "Frame Repair / Build",
+    estHours: 20,
+    dueDate: "2026-11-13"
   },
   {
     number: "WO-007",
-    projectName: "Smith Kitchen Cabinetry",
-    task: "Hardware installation — hinges & handles",
-    assignedTo: "Johan",
+    projectName: "Showroom Chesterfield 3-Seater (x2)",
+    task: "Cut leather panels & stitch buttoned back",
+    assignedTo: "Andile",
+    priority: "medium",
+    status: "in-progress",
+    phase: "Cutting & Sewing",
+    estHours: 18,
+    dueDate: "2026-11-12"
+  },
+  {
+    number: "WO-008",
+    projectName: "Showroom Chesterfield 3-Seater (x2)",
+    task: "Tag, price & photograph for showroom floor",
+    assignedTo: "Manager",
     priority: "low",
     status: "pending",
-    phase: "Phase 3",
-    estHours: 4,
-    dueDate: "2025-03-20",
-  },
+    phase: "On Showroom Floor",
+    estHours: 2,
+    dueDate: "2026-11-27"
+  }
 ];
 
 const MATERIAL_SEED = [
   {
-    projectName: "Smith Kitchen Cabinetry",
-    material: "Oak Planks 22mm",
-    needed: 45,
-    unit: "m",
-    inStock: 45,
-    status: "ok",
-  },
-  {
-    projectName: "Smith Kitchen Cabinetry",
-    material: "Euro Hinges 35mm",
-    needed: 24,
-    unit: "pair",
-    inStock: 85,
-    status: "ok",
-  },
-  {
-    projectName: "Smith Kitchen Cabinetry",
-    material: "Drawer Slides 500mm",
-    needed: 12,
-    unit: "pair",
-    inStock: 12,
-    status: "ok",
-  },
-  {
-    projectName: "Smith Kitchen Cabinetry",
-    material: "Bar Handles 160mm",
+    projectName: "Smith Lounge Suite Re-cover",
+    material: "Velvet Emerald 140cm",
     needed: 18,
-    unit: "pc",
-    inStock: 45,
-    status: "ok",
+    unit: "m",
+    inStock: 22,
+    status: "ok"
   },
   {
-    projectName: "Smith Kitchen Cabinetry",
-    material: "Varnish 5L",
-    needed: 3,
-    unit: "can",
-    inStock: 8,
-    status: "ok",
-  },
-  {
-    projectName: "Riverside Office Fit-out",
-    material: "MDF 18mm 1200x2400",
-    needed: 20,
+    projectName: "Smith Lounge Suite Re-cover",
+    material: "High-Density Foam 100mm",
+    needed: 4,
     unit: "sheet",
     inStock: 6,
-    status: "out",
+    status: "ok"
   },
   {
-    projectName: "Riverside Office Fit-out",
-    material: "Melamine Board White",
+    projectName: "Smith Lounge Suite Re-cover",
+    material: "Dacron Wadding",
+    needed: 10,
+    unit: "m",
+    inStock: 40,
+    status: "ok"
+  },
+  {
+    projectName: "Smith Lounge Suite Re-cover",
+    material: "Piping Cord 8mm",
+    needed: 30,
+    unit: "m",
+    inStock: 120,
+    status: "ok"
+  },
+  {
+    projectName: "Smith Lounge Suite Re-cover",
+    material: "Decorative Buttons 22mm",
+    needed: 24,
+    unit: "pc",
+    inStock: 18,
+    status: "low"
+  },
+  {
+    projectName: "Riverside Restaurant Booths",
+    material: "Commercial Vinyl Black 137cm",
+    needed: 60,
+    unit: "m",
+    inStock: 25,
+    status: "out"
+  },
+  {
+    projectName: "Riverside Restaurant Booths",
+    material: "High-Density Foam 50mm",
     needed: 12,
     unit: "sheet",
-    inStock: 15,
-    status: "ok",
+    inStock: 14,
+    status: "ok"
   },
   {
-    projectName: "Riverside Office Fit-out",
-    material: "Wood Screws 4x40mm",
-    needed: 400,
-    unit: "pc",
-    inStock: 2000,
-    status: "ok",
-  },
-  {
-    projectName: "Riverside Office Fit-out",
-    material: "Paint White 5L",
-    needed: 4,
-    unit: "can",
-    inStock: 2,
-    status: "low",
-  },
-  {
-    projectName: "Ndlovu Bedroom Suite",
-    material: "Dark Oak Stain 1L",
-    needed: 2,
-    unit: "can",
-    inStock: 3,
-    status: "ok",
-  },
-  {
-    projectName: "Ndlovu Bedroom Suite",
-    material: "Varnish 5L",
-    needed: 2,
-    unit: "can",
-    inStock: 8,
-    status: "ok",
-  },
-  {
-    projectName: "Ndlovu Bedroom Suite",
-    material: "Sandpaper 240 Grit",
-    needed: 20,
+    projectName: "Riverside Restaurant Booths",
+    material: "Plywood 18mm 1220x2440 (frames)",
+    needed: 10,
     unit: "sheet",
-    inStock: 45,
-    status: "ok",
+    inStock: 24,
+    status: "ok"
   },
   {
-    projectName: "Ndlovu Bedroom Suite",
-    material: "Wood Glue 5L",
-    needed: 2,
-    unit: "bottle",
-    inStock: 2,
-    status: "low",
+    projectName: "Riverside Restaurant Booths",
+    material: "Upholstery Staples 10mm",
+    needed: 6,
+    unit: "box",
+    inStock: 8,
+    status: "ok"
   },
+  {
+    projectName: "Ndlovu King Headboard & Base",
+    material: "Linen Natural 150cm",
+    needed: 9,
+    unit: "m",
+    inStock: 12,
+    status: "ok"
+  },
+  {
+    projectName: "Ndlovu King Headboard & Base",
+    material: "Dacron Wadding",
+    needed: 6,
+    unit: "m",
+    inStock: 40,
+    status: "ok"
+  },
+  {
+    projectName: "Ndlovu King Headboard & Base",
+    material: "Headboard Buttons 28mm",
+    needed: 40,
+    unit: "pc",
+    inStock: 40,
+    status: "low"
+  },
+  {
+    projectName: "Showroom Chesterfield 3-Seater (x2)",
+    material: "Leather Hide Chocolate",
+    needed: 14,
+    unit: "hide",
+    inStock: 10,
+    status: "out"
+  },
+  {
+    projectName: "Showroom Chesterfield 3-Seater (x2)",
+    material: "Feather & Down Fill",
+    needed: 6,
+    unit: "kg",
+    inStock: 8,
+    status: "ok"
+  },
+  {
+    projectName: "Showroom Chesterfield 3-Seater (x2)",
+    material: "Coil Springs 8-gauge",
+    needed: 36,
+    unit: "pc",
+    inStock: 120,
+    status: "ok"
+  }
 ];
 
 // ── Status configs ────────────────────────────────────────────────────────────
@@ -359,10 +446,10 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
 
   const WO_BLANK = {
     task: "",
-    projectName: "Smith Kitchen Cabinetry",
+    projectName: "Smith Lounge Suite Re-cover",
     assignedTo: "",
     priority: "medium",
-    phase: "Phase 1",
+    phase: "Quote & Measure",
     estHours: "",
     dueDate: "",
     status: "pending",
@@ -370,9 +457,10 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
   const PROJ_BLANK = {
     name: "",
     client: "",
-    type: "Kitchen Cabinetry",
-    wood: "Oak",
-    finish: "Varnish",
+    type: "Sofa / Couch Reupholstery",
+    orderType: ORDER_TYPES[0],
+    wood: "Velvet",
+    finish: "High-Density Foam",
     status: "planning",
     progress: 0,
     budget: "",
@@ -380,7 +468,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
     start: "",
     end: "",
     crew: "",
-    phase: "Pre-production",
+    phase: "Quote & Measure",
   };
 
   const [woForm, setWoForm] = useState(WO_BLANK);
@@ -528,6 +616,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
       name: projForm.name.trim(),
       client: projForm.client.trim(),
       type: projForm.type,
+      orderType: projForm.orderType || ORDER_TYPES[0],
       wood: projForm.wood,
       finish: projForm.finish,
       status: projForm.status,
@@ -598,9 +687,9 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-lg font-bold text-[#1e293b]">Projects</h1>
+          <h1 className="text-lg font-bold text-[#1e293b]">Jobs & Production</h1>
           <p className="text-xs text-[#64748b] mt-0.5">
-            Track jobs, work orders and materials
+            Track repairs, custom orders and showroom builds through every stage
           </p>
         </div>
         <div className="flex gap-2">
@@ -706,6 +795,11 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                           <span className="text-xs text-[#64748b]">
                             {p.type}
                           </span>
+                          {p.orderType && (
+                            <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-semibold bg-[#fff7ed] text-[#9a3412]">
+                              {p.orderType.split(" (")[0]}
+                            </span>
+                          )}
                         </div>
                         <h3 className="text-sm font-bold text-[#1e293b] truncate">
                           {p.name}
@@ -760,7 +854,36 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                         style={{ width: `${p.progress}%` }}
                       />
                     </div>
-                    <p className="text-xs text-[#64748b] mt-1.5">{p.phase}</p>
+                    <div className="mt-2">
+                      <p className="text-xs text-[#64748b]">
+                        <span className="font-semibold text-[#374151]">
+                          Stage:
+                        </span>{" "}
+                        {p.phase}
+                        {stageIndex(p.phase) >= 0 && (
+                          <span className="text-[#94a3b8]">
+                            {" "}
+                            · {stageIndex(p.phase) + 1} of {PROJECT_STAGES.length}
+                          </span>
+                        )}
+                      </p>
+                      {stageIndex(p.phase) >= 0 && (
+                        <>
+                          <div className="flex gap-0.5 mt-1.5">
+                            {PROJECT_STAGES.map((s, i) => (
+                              <div
+                                key={s}
+                                title={s}
+                                className={`h-1 flex-1 rounded-full ${i <= stageIndex(p.phase) ? "bg-[#b45309]" : "bg-[#e2e8f0]"}`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-[11px] text-[#94a3b8] mt-1.5">
+                            {STAGE_DESC[p.phase]}
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   <div className="px-5 py-3 flex items-center justify-between gap-2 text-sm">
@@ -872,7 +995,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                       "Project",
                       "Assigned",
                       "Priority",
-                      "Phase",
+                      "Stage",
                       "Hrs",
                       "Due",
                       "Status",
@@ -1104,7 +1227,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   onChange={(e) =>
                     setWoForm((f) => ({ ...f, task: e.target.value }))
                   }
-                  placeholder="e.g. Cut & machine cabinet carcasses"
+                  placeholder="e.g. Strip old fabric & foam from 3-seater"
                   className={inputCls}
                 />
               </div>
@@ -1123,7 +1246,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                 </select>
               </div>
               <div>
-                <label className={labelCls}>Phase</label>
+                <label className={labelCls}>Stage</label>
                 <select
                   value={woForm.phase}
                   onChange={(e) =>
@@ -1131,7 +1254,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   }
                   className={inputCls}
                 >
-                  {["Phase 1", "Phase 2", "Phase 3", "Final"].map((ph) => (
+                  {stageOptions(woForm.phase).map((ph) => (
                     <option key={ph}>{ph}</option>
                   ))}
                 </select>
@@ -1143,7 +1266,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   onChange={(e) =>
                     setWoForm((f) => ({ ...f, assignedTo: e.target.value }))
                   }
-                  placeholder="e.g. Pieter, Johan"
+                  placeholder="e.g. Pieter, Sipho"
                   className={inputCls}
                 />
               </div>
@@ -1240,9 +1363,27 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   onChange={(e) =>
                     setProjForm((f) => ({ ...f, name: e.target.value }))
                   }
-                  placeholder="e.g. Smith Kitchen Cabinetry"
+                  placeholder="e.g. Smith Lounge Suite Re-cover"
                   className={inputCls}
                 />
+              </div>
+              <div className="col-span-2">
+                <label className={labelCls}>Order Type</label>
+                <select
+                  value={projForm.orderType || ORDER_TYPES[0]}
+                  onChange={(e) =>
+                    setProjForm((f) => ({ ...f, orderType: e.target.value }))
+                  }
+                  className={inputCls}
+                >
+                  {ORDER_TYPES.map((o) => (
+                    <option key={o}>{o}</option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-[#94a3b8] mt-1">
+                  Customer jobs are re-covers and repairs, custom orders are made
+                  to order, stock builds are made to sell in the showroom.
+                </p>
               </div>
               <div>
                 <label className={labelCls}>Client</label>
@@ -1265,20 +1406,25 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   className={inputCls}
                 >
                   {[
-                    "Kitchen Cabinetry",
-                    "Bedroom Furniture",
-                    "Built-in Wardrobes",
-                    "Custom Shelving",
-                    "Custom Furniture",
-                    "Decking",
-                    "Flooring",
+                    "Sofa / Couch Reupholstery",
+                    "Dining Chair Recovering",
+                    "Headboard & Bed Base",
+                    "Cushions & Loose Covers",
+                    "Ottoman / Pouf / Bench",
+                    "Office & Commercial Seating",
+                    "Restaurant Booths & Banquettes",
+                    "Furniture Repair & Restoration",
+                    "Vehicle / Marine Trim",
+                    "Custom Furniture (Made to Order)",
+                    "Showroom Piece (Made for Sale)",
+                    "Retail Sale (Ready-Made)",
                   ].map((t) => (
                     <option key={t}>{t}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className={labelCls}>Wood</label>
+                <label className={labelCls}>Fabric / Covering</label>
                 <select
                   value={projForm.wood}
                   onChange={(e) =>
@@ -1287,21 +1433,23 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   className={inputCls}
                 >
                   {[
-                    "Oak",
-                    "Pine",
-                    "Meranti",
-                    "Sapele",
-                    "MDF",
-                    "Plywood",
-                    "Melamine",
-                    "MDF/Melamine",
+                    "Velvet",
+                    "Linen",
+                    "Cotton / Canvas",
+                    "Chenille",
+                    "Microfibre / Suede",
+                    "Leather (Genuine)",
+                    "Faux Leather / PU",
+                    "Vinyl (Commercial)",
+                    "Outdoor / Water-Resistant",
+                    "Customer's Own Fabric",
                   ].map((w) => (
                     <option key={w}>{w}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className={labelCls}>Finish</label>
+                <label className={labelCls}>Padding & Fill</label>
                 <select
                   value={projForm.finish}
                   onChange={(e) =>
@@ -1310,12 +1458,13 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   className={inputCls}
                 >
                   {[
-                    "Varnish",
-                    "Stain & Varnish",
-                    "Paint",
-                    "Oil Finish",
-                    "Lacquer",
-                    "Natural/Unfinished",
+                    "High-Density Foam",
+                    "Foam & Dacron Wrap",
+                    "Feather & Down",
+                    "Hollow Fibre",
+                    "Springs & Webbing Renewed",
+                    "Re-use Existing Fill",
+                    "Not Applicable (Retail Item)",
                   ].map((f) => (
                     <option key={f}>{f}</option>
                   ))}
@@ -1402,20 +1551,28 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   onChange={(e) =>
                     setProjForm((f) => ({ ...f, crew: e.target.value }))
                   }
-                  placeholder="e.g. Pieter, Johan"
+                  placeholder="e.g. Pieter, Sipho"
                   className={inputCls}
                 />
               </div>
               <div className="col-span-2">
-                <label className={labelCls}>Current Phase</label>
-                <input
+                <label className={labelCls}>Current Stage</label>
+                <select
                   value={projForm.phase}
                   onChange={(e) =>
                     setProjForm((f) => ({ ...f, phase: e.target.value }))
                   }
-                  placeholder="e.g. Phase 2 — Door fitting"
                   className={inputCls}
-                />
+                >
+                  {stageOptions(projForm.phase).map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+                {STAGE_DESC[projForm.phase] && (
+                  <p className="text-[11px] text-[#94a3b8] mt-1">
+                    {STAGE_DESC[projForm.phase]}
+                  </p>
+                )}
               </div>
             </div>
             <div className="px-6 py-4 border-t border-[#e2e8f0] flex items-center justify-between sticky bottom-0 bg-white">

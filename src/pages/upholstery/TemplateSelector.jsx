@@ -63,12 +63,12 @@ export const TemplateSelector = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const templateNames = {
-    default: "Classic Carpentry",
-    professional: "Professional Woodwork",
+    default: "Classic Upholstery",
+    professional: "Professional Upholstery",
     modern: "Modern Craftsman",
-    corporate: "Premium Joinery",
+    corporate: "Premium Interiors",
     premium: "Executive Furniture",
-    contemporary: "Contemporary Wood",
+    contemporary: "Contemporary Living",
     detailed: "Detailed Estimate",
   };
 
@@ -177,10 +177,10 @@ export const TemplateSelector = ({
   );
 };
 
-// Default/Classic Carpentry Template
+// Default/Classic Upholstery Template
 export const DefaultTemplate = (props) => <ProfessionalTemplate {...props} />;
 
-// Professional Woodwork Template (Default)
+// Professional Upholstery Template (Default)
 export const ProfessionalTemplate = ({
   businessInfo,
   loading,
@@ -207,7 +207,7 @@ export const ProfessionalTemplate = ({
   showStampDate = true,
   paymentMethod = "Bank Transfer/EFT",
   paymentTerms = "50% Deposit, Balance on Completion",
-  serviceGuarantee = "12 Months Craftsmanship Warranty",
+  serviceGuarantee = "12 Months Workmanship Warranty",
 }) => (
   <div className="bg-white p-6" style={{ padding: "5mm 10mm" }}>
     {/* Header Section */}
@@ -233,7 +233,7 @@ export const ProfessionalTemplate = ({
                 {businessInfo.businessName || businessInfo.companyName}
               </div>
               <div className="text-sm font-semibold text-gray-600">
-                Professional Carpentry Services
+                Upholstery & Furniture Specialists
               </div>
             </div>
           </div>
@@ -273,12 +273,12 @@ export const ProfessionalTemplate = ({
               </span>
             </div>
             <div className="flex justify-between gap-8">
-              <span className="font-semibold text-gray-600">Wood Type</span>
-              <span className="text-amber-900">{woodType || "Oak"}</span>
+              <span className="font-semibold text-gray-600">Fabric / Covering</span>
+              <span className="text-amber-900">{woodType || "-"}</span>
             </div>
             <div className="flex justify-between gap-8">
-              <span className="font-semibold text-gray-600">Finish</span>
-              <span className="text-amber-900">{finishType || "Varnish"}</span>
+              <span className="font-semibold text-gray-600">Padding & Fill</span>
+              <span className="text-amber-900">{finishType || "-"}</span>
             </div>
           </div>
         </div>
@@ -311,11 +311,11 @@ export const ProfessionalTemplate = ({
           <div className="mt-2">{projectAddress}</div>
           <div className="flex justify-between mt-2">
             <span className="font-semibold">Type:</span>
-            <span>{projectType || "Custom Carpentry"}</span>
+            <span>{projectType || "Custom Upholstery"}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold">Units:</span>
-            <span>{projectSize || "N/A"} pieces</span>
+            <span className="font-semibold">Fabric Required:</span>
+            <span>{projectSize ? `${projectSize} m` : "N/A"}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-semibold">Payment Terms:</span>
@@ -480,8 +480,8 @@ export const ModernTemplate = (props) => (
               {new Date().toLocaleDateString()}
             </div>
             <div className="text-sm">
-              <span className="font-semibold">Wood:</span>{" "}
-              {props.woodType || "Oak"}
+              <span className="font-semibold">Fabric:</span>{" "}
+              {props.woodType || "-"}
             </div>
           </div>
         </div>
@@ -513,23 +513,23 @@ export const ModernTemplate = (props) => (
           </div>
           <div>
             <span className="font-semibold">Type:</span>{" "}
-            {props.projectType || "Custom Carpentry"}
+            {props.projectType || "Custom Upholstery"}
           </div>
           <div>
             <span className="font-semibold">Location:</span>{" "}
             {props.projectAddress}
           </div>
           <div>
-            <span className="font-semibold">Units:</span>{" "}
-            {props.projectSize || "N/A"}
+            <span className="font-semibold">Fabric Required:</span>{" "}
+            {props.projectSize ? `${props.projectSize} m` : "N/A"}
           </div>
           <div>
-            <span className="font-semibold">Wood:</span>{" "}
-            {props.woodType || "Oak"}
+            <span className="font-semibold">Fabric:</span>{" "}
+            {props.woodType || "-"}
           </div>
           <div>
-            <span className="font-semibold">Finish:</span>{" "}
-            {props.finishType || "Varnish"}
+            <span className="font-semibold">Padding:</span>{" "}
+            {props.finishType || "-"}
           </div>
         </div>
       </div>
@@ -624,7 +624,7 @@ export const ModernTemplate = (props) => (
   </div>
 );
 
-// Premium Joinery Template
+// Premium Interiors Template
 export const CorporateTemplate = (props) => (
   <div className="bg-white p-6" style={{ padding: "5mm 10mm" }}>
     <div className="border-4 border-amber-800 p-8">
@@ -640,7 +640,7 @@ export const CorporateTemplate = (props) => (
           {props.businessInfo.businessName || props.businessInfo.companyName}
         </div>
         <div className="text-sm text-gray-600">
-          Premium Joinery & Custom Woodwork
+          Premium Upholstery & Bespoke Furniture
         </div>
         <div className="text-sm text-gray-600">
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
@@ -648,7 +648,7 @@ export const CorporateTemplate = (props) => (
         <div className="text-2xl font-serif text-amber-700 mt-4">
           {props.documentType === "quote"
             ? "PROJECT QUOTE"
-            : "CARPENTRY INVOICE"}
+            : "UPHOLSTERY INVOICE"}
         </div>
         <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
       </div>
@@ -671,10 +671,10 @@ export const CorporateTemplate = (props) => (
           <div className="text-sm space-y-1">
             <div className="font-semibold">{props.projectName}</div>
             <div>Location: {props.projectAddress}</div>
-            <div>Type: {props.projectType || "Custom Carpentry"}</div>
-            <div>Units: {props.projectSize || "N/A"} pieces</div>
-            <div>Wood: {props.woodType || "Oak"}</div>
-            <div>Finish: {props.finishType || "Varnish"}</div>
+            <div>Type: {props.projectType || "Custom Upholstery"}</div>
+            <div>Fabric Required: {props.projectSize ? `${props.projectSize} m` : "N/A"}</div>
+            <div>Fabric: {props.woodType || "-"}</div>
+            <div>Padding: {props.finishType || "-"}</div>
           </div>
         </div>
       </div>
@@ -779,7 +779,7 @@ export const CorporateTemplate = (props) => (
   </div>
 );
 
-// Executive Furniture Template
+// Executive Furniture & Upholstery Template
 export const ContemporaryTemplate = (props) => (
   <div
     className="bg-gradient-to-br from-amber-50 to-yellow-50"
@@ -801,7 +801,7 @@ export const ContemporaryTemplate = (props) => (
                 props.businessInfo.companyName}
             </div>
             <div className="text-sm text-gray-600">
-              Custom Furniture Specialists
+              Furniture Store & Upholstery Workshop
             </div>
             <div className="text-sm text-gray-600">
               {props.businessInfo.addressLine1}
@@ -841,11 +841,11 @@ export const ContemporaryTemplate = (props) => (
               Type: {props.projectType || "Custom Furniture"}
             </div>
             <div className="text-gray-600">
-              Units: {props.projectSize || "N/A"} pieces
+              Fabric Required: {props.projectSize ? `${props.projectSize} m` : "N/A"}
             </div>
-            <div className="text-gray-600">Wood: {props.woodType || "Oak"}</div>
+            <div className="text-gray-600">Fabric: {props.woodType || "-"}</div>
             <div className="text-gray-600">
-              Finish: {props.finishType || "Varnish"}
+              Padding: {props.finishType || "-"}
             </div>
           </div>
         </div>
@@ -946,8 +946,7 @@ export const ContemporaryTemplate = (props) => (
       )}
 
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-        Crafting quality furniture with passion. Payment: 50% deposit, balance
-        on completion.
+        Quality furniture and upholstery, made with care. Payment: 50% deposit, balance on completion.
       </div>
     </div>
   </div>
@@ -970,7 +969,7 @@ export const DetailedTemplate = (props) => (
             {props.businessInfo.businessName || props.businessInfo.companyName}
           </div>
           <div className="text-sm font-semibold text-amber-800 mb-2">
-            Professional Carpentry & Joinery
+            Upholstery, Restoration & Furniture Sales
           </div>
           <div className="text-sm text-gray-600">
             {props.businessInfo.addressLine1}
@@ -1032,19 +1031,19 @@ export const DetailedTemplate = (props) => (
           </div>
           <div>
             <span className="font-semibold">Type:</span>{" "}
-            {props.projectType || "Custom Carpentry"}
+            {props.projectType || "Custom Upholstery"}
           </div>
           <div>
-            <span className="font-semibold">Units:</span>{" "}
-            {props.projectSize || "N/A"} pieces
+            <span className="font-semibold">Fabric Required:</span>{" "}
+            {props.projectSize ? `${props.projectSize} m` : "N/A"}
           </div>
           <div>
-            <span className="font-semibold">Wood Type:</span>{" "}
-            {props.woodType || "Oak"}
+            <span className="font-semibold">Fabric / Covering:</span>{" "}
+            {props.woodType || "-"}
           </div>
           <div>
-            <span className="font-semibold">Finish:</span>{" "}
-            {props.finishType || "Varnish"}
+            <span className="font-semibold">Padding:</span>{" "}
+            {props.finishType || "-"}
           </div>
         </div>
       </div>
@@ -1052,7 +1051,7 @@ export const DetailedTemplate = (props) => (
 
     <div className="mb-6">
       <div className="bg-amber-800 text-white px-4 py-2 font-bold">
-        CARPENTRY ITEMS
+        ITEMS & SERVICES
       </div>
       <table className="w-full">
         <thead>
@@ -1173,7 +1172,7 @@ export const TemplateRenderer = ({
   showStamp = false,
   paymentMethod = "Bank Transfer/EFT",
   paymentTerms = "50% Deposit, Balance on Completion",
-  serviceGuarantee = "12 Months Craftsmanship Warranty",
+  serviceGuarantee = "12 Months Workmanship Warranty",
   currency,
   ...props
 }) => {

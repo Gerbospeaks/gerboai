@@ -164,6 +164,8 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
@@ -594,6 +596,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
     setCustomerName("Meridian Developments");
     setCustomerEmail("projects@meridian.co.za");
     setCustomerPhone("+27 11 234 5678");
+    setIssueDate(new Date().toISOString());
     setPropertyAddress("45 Corporate Boulevard, Sandton, Johannesburg, 2196");
     setSiteType("Commercial");
     setSiteSize("1200");

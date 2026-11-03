@@ -131,6 +131,8 @@ const PlumbingDashboard = () => {
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState('invoice');
   const [stampSettings, setStampSettings] = useState({
@@ -528,6 +530,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerName("John Smith");
     setCustomerId("CUST-2026-5678");
     setCustomerEmail("john.smith@example.com");
+    setIssueDate(new Date().toISOString());
     setCustomerPhone("082 987 6543");
     setCustomerAddress("456 Water Street, Manchester, M1 2AB");
     setPropertyType("Residential");

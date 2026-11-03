@@ -41,26 +41,27 @@ const MONTH_NAMES = [
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 7); // 07:00–18:00
 
 const PROJECT_COLORS = {
-  "Smith Kitchen": {
+  "Smith Lounge Suite": {
     bg: "bg-[#dbeafe]",
     text: "text-[#1d4ed8]",
     bar: "bg-[#3b82f6]",
   },
-  "Riverside Office": {
+  "Riverside Booths": {
     bg: "bg-[#f3e8ff]",
     text: "text-[#7c3aed]",
     bar: "bg-[#a855f7]",
   },
-  "Ndlovu Bedroom": {
+  "Ndlovu Headboard": {
     bg: "bg-[#dcfce7]",
     text: "text-[#166534]",
     bar: "bg-[#22c55e]",
   },
-  "Van der Berg": {
+  "Van der Berg Chairs": {
     bg: "bg-[#fff7ed]",
     text: "text-[#c2410c]",
     bar: "bg-[#f97316]",
   },
+  Showroom: { bg: "bg-[#ecfeff]", text: "text-[#0e7490]", bar: "bg-[#06b6d4]" },
   Workshop: { bg: "bg-[#f1f5f9]", text: "text-[#475569]", bar: "bg-[#94a3b8]" },
   Admin: { bg: "bg-[#fef3c7]", text: "text-[#92400e]", bar: "bg-[#f59e0b]" },
   Delivery: { bg: "bg-[#fdf4ff]", text: "text-[#86198f]", bar: "bg-[#d946ef]" },
@@ -80,60 +81,60 @@ const getMonday = (base) => {
 // Seed events are stored relative to current Monday (dayIndex = 0..5)
 const buildSeed = () => [
   {
-    title: "Cabinet Installation",
-    project: "Smith Kitchen",
+    title: "Strip & Re-upholster Lounge Suite",
+    project: "Smith Lounge Suite",
     dayIndex: 0,
     startHour: 8,
     endHour: 16,
-    crew: "Pieter, Johan",
+    crew: "Pieter, Johan"
   },
   {
-    title: "Cabinet Installation",
-    project: "Smith Kitchen",
+    title: "Cushion Fill & Final Fitting",
+    project: "Smith Lounge Suite",
     dayIndex: 1,
     startHour: 8,
     endHour: 13,
-    crew: "Pieter, Johan",
+    crew: "Pieter, Johan"
   },
   {
-    title: "Riverside Site Meeting",
-    project: "Riverside Office",
+    title: "Site Meeting & Fabric Sign-off",
+    project: "Riverside Booths",
     dayIndex: 1,
     startHour: 14,
     endHour: 16,
-    crew: "Manager",
+    crew: "Manager"
   },
   {
-    title: "Finishing & Sanding",
-    project: "Ndlovu Bedroom",
+    title: "Final Trim & Quality Check",
+    project: "Ndlovu Headboard",
     dayIndex: 2,
     startHour: 9,
     endHour: 15,
-    crew: "Sipho, Andile",
+    crew: "Sipho, Andile"
   },
   {
-    title: "Cabinet Machining",
+    title: "Frame Building & Foam Cutting",
     project: "Workshop",
     dayIndex: 3,
     startHour: 7,
     endHour: 17,
-    crew: "All crew",
+    crew: "All crew"
   },
   {
-    title: "Timber City Delivery",
+    title: "Fabric & Foam Supplier Delivery",
     project: "Delivery",
     dayIndex: 3,
     startHour: 14,
     endHour: 15,
-    crew: "",
+    crew: ""
   },
   {
-    title: "Site Measure",
-    project: "Van der Berg",
+    title: "Chair Collection & Fabric Swatch",
+    project: "Van der Berg Chairs",
     dayIndex: 4,
     startHour: 9,
     endHour: 11,
-    crew: "Pieter",
+    crew: "Pieter"
   },
   {
     title: "Quote Preparation",
@@ -141,21 +142,29 @@ const buildSeed = () => [
     dayIndex: 4,
     startHour: 14,
     endHour: 16,
-    crew: "Manager",
+    crew: "Manager"
   },
   {
-    title: "Workshop Clean-up",
+    title: "Showroom Display Update & Pricing",
+    project: "Showroom",
+    dayIndex: 4,
+    startHour: 11,
+    endHour: 13,
+    crew: "Manager"
+  },
+  {
+    title: "Workshop Clean-up (Offcuts & Fluff)",
     project: "Workshop",
     dayIndex: 5,
     startHour: 8,
     endHour: 12,
-    crew: "All crew",
-  },
+    crew: "All crew"
+  }
 ];
 
 const BLANK = {
   title: "",
-  project: "Smith Kitchen",
+  project: "Smith Lounge Suite",
   dayIndex: 0,
   startHour: 8,
   endHour: 10,
@@ -516,7 +525,7 @@ export default function ScheduleView({ user }) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, title: e.target.value }))
                   }
-                  placeholder="e.g. Cabinet Installation"
+                  placeholder="e.g. Cutting & Sewing, Fabric Delivery, Customer Fitting"
                   className={inputCls}
                 />
               </div>

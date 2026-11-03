@@ -94,6 +94,8 @@ const ConstructionDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
  const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState("quote");
   const [showPreview, setShowPreview] = useState(false);
@@ -447,6 +449,7 @@ const handleAddNewCustomer = () => {
     setCustomerName("Meridian Developments");
     setCustomerEmail("projects@meridian.co.za");
     setCustomerPhone("+27 11 234 5678");
+    setIssueDate(new Date().toISOString());
     setPropertyAddress("45 Corporate Boulevard, Sandton, Johannesburg, 2196");
     setSiteType("Commercial");
     setSiteSize("1200");

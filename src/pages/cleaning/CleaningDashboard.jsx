@@ -116,6 +116,8 @@ const CleaningDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState("home");
   const [showPreview, setShowPreview] = useState(false);
@@ -508,6 +510,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerName("Johnson Residence");
     setCustomerEmail("johnson@email.com");
     setCustomerPhone("+27 82 123 4567");
+    setIssueDate(new Date().toISOString());
     setPropertyAddress("123 Sunset Avenue, Sandton, Johannesburg, 2196");
     setPropertyType("Residential");
     setPropertySize("200");

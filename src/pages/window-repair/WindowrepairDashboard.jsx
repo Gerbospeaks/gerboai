@@ -129,6 +129,8 @@ const WindowrepairDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isQuotesInvoicesOpen, setIsQuotesInvoicesOpen] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [documentType, setDocumentType] = useState("quote");
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState('invoice');
@@ -554,6 +556,7 @@ const handleAddNewCustomer = () => {
     setCustomerName("Johnson Residence");
     setCustomerEmail("johnson@email.com");
     setCustomerPhone("+27 82 123 4567");
+    setIssueDate(new Date().toISOString());
     setPropertyAddress("123 Sunset Avenue, Sandton, Johannesburg, 2196");
     setWindowType("Standard Window");
     setWindowCount("4");

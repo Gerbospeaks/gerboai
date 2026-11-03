@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
-export default function CarpentrySidebar({
+export default function UpholsterySidebar({
   navigate,
   user,
   activeView,
@@ -73,7 +73,7 @@ export default function CarpentrySidebar({
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate leading-tight">
-              {businessInfo?.businessName || "CarpentryPro"}
+              {businessInfo?.businessName || "UpholsteryPro"}
             </p>
             <p className="text-[10px] text-[#64748b]">Management Suite</p>
           </div>
@@ -154,13 +154,13 @@ export default function CarpentrySidebar({
         {/* Projects accordion */}
         <Accordion
           icon={Hammer}
-          label="Projects"
+          label="Jobs & Production"
           isOpen={isProjectsOpen}
           onToggle={() => setIsProjectsOpen((p) => !p)}
         >
           <SubItem
             dot="bg-[#d97706]"
-            label="Active Projects"
+            label="Active Jobs"
             onClick={() => goTo("projects")}
           />
           <SubItem
@@ -170,7 +170,7 @@ export default function CarpentrySidebar({
           />
           <SubItem
             dot="bg-[#b45309]"
-            label="Materials List"
+            label="Fabric & Materials"
             onClick={() => goTo("materials")}
           />
         </Accordion>
@@ -206,7 +206,7 @@ export default function CarpentrySidebar({
 
         <NavItem
           icon={Package}
-          label="Inventory"
+          label="Inventory & Stock"
           onClick={() => goTo("inventory")}
           active={activeView === "inventory"}
         />
@@ -340,7 +340,7 @@ export default function CarpentrySidebar({
                 },
                 {
                   icon: Hammer,
-                  title: "Projects",
+                  title: "Jobs",
                   action: () => goTo("projects"),
                   active: activeView === "projects",
                 },
@@ -352,7 +352,7 @@ export default function CarpentrySidebar({
                 },
                 {
                   icon: Package,
-                  title: "Inventory",
+                  title: "Stock",
                   action: () => goTo("inventory"),
                   active: activeView === "inventory",
                 },

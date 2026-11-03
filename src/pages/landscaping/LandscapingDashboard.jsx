@@ -98,6 +98,8 @@ const LandscapingDashboard = () => {
   const [activeView, setActiveView] = useState("home");
   const { user } = useAuth();
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [jobCardNumber, setJobCardNumber] = useState("");
   const [jobCardId, setJobCardId] = useState(null);
   const [savedJobCards, setSavedJobCards] = useState([]);
@@ -494,6 +496,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerName("Sarah Johnson");
     setCustomerId("CUST-2026-1234");
     setCustomerEmail("sarah.johnson@example.com");
+    setIssueDate(new Date().toISOString());
     setCustomerPhone("082 123 4567");
     setCustomerAddress("123 Oak Street, Cape Town, 8001");
     setPropertyType("Residential Garden");

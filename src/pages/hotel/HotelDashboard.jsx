@@ -108,6 +108,8 @@ const HotelDashboard = () => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [autoCreateCheckIn] = useState(true);
   const { user } = useAuth();
   const location = useLocation();
@@ -374,7 +376,12 @@ const HotelDashboard = () => {
     invoiceNumber: num,
     locked: true,
     status: paymentStatus.status || "pending",
-    dates: { invoiceDate: new Date().toISOString(), checkInDate, checkOutDate },
+    dates: { checkInDate, checkOutDate,
+  serviceDate: issueDate,
+  invoiceDate: documentType === "invoice" ? issueDate : null,
+  quoteDate: documentType === "quote" ? issueDate : null,
+  completedDate: null,
+},
     guest: {
       name: guestName,
       email: guestEmail,
@@ -458,6 +465,7 @@ const HotelDashboard = () => {
     setGuestDOB("1985-05-15");
     setGuestNationality("Zimbabwean");
     setIdType("ID Document");
+    setIssueDate(new Date().toISOString());
     setIdNumber("8505155678901");
     setRoomNumber("205");
     setRoomType("Deluxe Double Room");

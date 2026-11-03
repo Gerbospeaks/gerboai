@@ -465,6 +465,8 @@ const EducationDashboard = () => {
   // ── UI state ────────────────────────────────────────────────────────────────
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [activeView, setActiveView] = useState("home");
   const [documentType, setDocumentType] = useState("reports");
   const [showSettings, setShowSettings] = useState(false);

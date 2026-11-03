@@ -2794,6 +2794,8 @@ const LegalDashboard = () => {
   const { formatCurrency: formatVisitorCurrency } = useAppCurrency();
   const formatCurrencyZAR = (n) => formatVisitorCurrency(n || 0, "ZAR");
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
@@ -3146,6 +3148,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setClientId("CLIENT-2026-1234");
     setClientEmail("john.smith@example.com");
     setClientPhone("082 123 4567");
+    setIssueDate(new Date().toISOString());
     setClientAddress("123 Legal Street, Cape Town, 8001");
     setCaseType("Commercial Litigation");
     setCaseNumber("CASE-2026-001");

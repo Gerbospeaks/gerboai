@@ -9,7 +9,6 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  writeBatch,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import {
@@ -26,186 +25,37 @@ import {
 // ── Constants ─────────────────────────────────────────────────────────────────
 const CATEGORIES = [
   "All",
-  "Lumber",
-  "Sheet Goods",
-  "Hardware",
-  "Finishes",
+  "Fabrics & Leather",
+  "Foam & Padding",
+  "Frames & Timber",
+  "Springs & Hardware",
+  "Trims & Consumables",
   "Tools",
-  "Consumables",
+  "Showroom Stock",
 ];
 const UNITS = [
   "m",
+  "roll",
+  "hide",
   "sheet",
-  "pair",
   "pc",
+  "pair",
+  "set",
+  "box",
   "can",
   "bottle",
-  "blade",
-  "set",
   "kg",
   "L",
 ];
 
-const SEED = [
-  {
-    name: "Oak Planks 22mm",
-    category: "Lumber",
-    qty: 45,
-    unit: "m",
-    unitCost: 185,
-    supplier: "Timber City",
-    reorderLevel: 20,
-    location: "Bay A1",
-  },
-  {
-    name: "Pine Planks 19mm",
-    category: "Lumber",
-    qty: 8,
-    unit: "m",
-    unitCost: 65,
-    supplier: "Builders Warehouse",
-    reorderLevel: 15,
-    location: "Bay A2",
-  },
-  {
-    name: "Meranti Beams 69x69mm",
-    category: "Lumber",
-    qty: 22,
-    unit: "m",
-    unitCost: 125,
-    supplier: "SA Pine",
-    reorderLevel: 10,
-    location: "Bay A3",
-  },
-  {
-    name: "Plywood 9mm 1200x2400",
-    category: "Sheet Goods",
-    qty: 24,
-    unit: "sheet",
-    unitCost: 280,
-    supplier: "Timber City",
-    reorderLevel: 10,
-    location: "Bay B1",
-  },
-  {
-    name: "MDF 18mm 1200x2400",
-    category: "Sheet Goods",
-    qty: 6,
-    unit: "sheet",
-    unitCost: 320,
-    supplier: "Timber City",
-    reorderLevel: 10,
-    location: "Bay B2",
-  },
-  {
-    name: "Melamine Board White",
-    category: "Sheet Goods",
-    qty: 15,
-    unit: "sheet",
-    unitCost: 410,
-    supplier: "PG Bison",
-    reorderLevel: 8,
-    location: "Bay B3",
-  },
-  {
-    name: "Euro Hinges 35mm",
-    category: "Hardware",
-    qty: 85,
-    unit: "pair",
-    unitCost: 28,
-    supplier: "Hardware Haus",
-    reorderLevel: 40,
-    location: "Shelf C1",
-  },
-  {
-    name: "Drawer Slides 500mm",
-    category: "Hardware",
-    qty: 12,
-    unit: "pair",
-    unitCost: 145,
-    supplier: "Hardware Haus",
-    reorderLevel: 20,
-    location: "Shelf C2",
-  },
-  {
-    name: "Bar Handles 160mm",
-    category: "Hardware",
-    qty: 45,
-    unit: "pc",
-    unitCost: 85,
-    supplier: "Hardware Haus",
-    reorderLevel: 20,
-    location: "Shelf C3",
-  },
-  {
-    name: "Wood Screws 4x40mm",
-    category: "Hardware",
-    qty: 2000,
-    unit: "pc",
-    unitCost: 0.8,
-    supplier: "Builders Warehouse",
-    reorderLevel: 500,
-    location: "Shelf C4",
-  },
-  {
-    name: "Varnish 5L",
-    category: "Finishes",
-    qty: 8,
-    unit: "can",
-    unitCost: 420,
-    supplier: "Plascon",
-    reorderLevel: 4,
-    location: "Shelf D1",
-  },
-  {
-    name: "Dark Oak Stain 1L",
-    category: "Finishes",
-    qty: 3,
-    unit: "can",
-    unitCost: 185,
-    supplier: "Plascon",
-    reorderLevel: 4,
-    location: "Shelf D2",
-  },
-  {
-    name: "Wood Glue 5L",
-    category: "Consumables",
-    qty: 2,
-    unit: "bottle",
-    unitCost: 245,
-    supplier: "Builders Warehouse",
-    reorderLevel: 3,
-    location: "Shelf E1",
-  },
-  {
-    name: "Sandpaper 120 Grit",
-    category: "Consumables",
-    qty: 80,
-    unit: "sheet",
-    unitCost: 8,
-    supplier: "Builders Warehouse",
-    reorderLevel: 30,
-    location: "Shelf E2",
-  },
-  {
-    name: "Circular Saw Blade 185mm",
-    category: "Tools",
-    qty: 3,
-    unit: "blade",
-    unitCost: 285,
-    supplier: "Makita SA",
-    reorderLevel: 2,
-    location: "Tool Wall",
-  },
-];
-
 const CAT_COLORS = {
-  Lumber: "bg-[#fff7ed] text-[#c2410c]",
-  "Sheet Goods": "bg-[#faf5ff] text-[#7c3aed]",
-  Hardware: "bg-[#eff6ff] text-[#1d4ed8]",
-  Finishes: "bg-[#f0fdf4] text-[#166534]",
-  Tools: "bg-[#fef3c7] text-[#92400e]",
-  Consumables: "bg-[#f1f5f9] text-[#475569]",
+  "Fabrics & Leather": "bg-[#fff7ed] text-[#c2410c]",
+  "Foam & Padding": "bg-[#faf5ff] text-[#7c3aed]",
+  "Frames & Timber": "bg-[#fef3c7] text-[#92400e]",
+  "Springs & Hardware": "bg-[#eff6ff] text-[#1d4ed8]",
+  "Trims & Consumables": "bg-[#f1f5f9] text-[#475569]",
+  Tools: "bg-[#f0fdf4] text-[#166534]",
+  "Showroom Stock": "bg-[#ecfeff] text-[#0e7490]",
 };
 
 const getStatus = (qty, reorderLevel) => {
@@ -222,7 +72,7 @@ const STATUS_CFG = {
 
 const BLANK = {
   name: "",
-  category: "Lumber",
+  category: "Fabrics & Leather",
   qty: "",
   unit: "m",
   unitCost: "",
@@ -249,7 +99,7 @@ export default function InventoryView({ user }) {
 
   const inventoryCol = () => collection(db, "users", user.uid, "inventory");
 
-  // ── Load from Firestore, seed on first visit ──────────────────────
+  // ── Load the user's own inventory from Firestore ──────────────────
   useEffect(() => {
     if (!user?.uid) return;
     (async () => {
@@ -258,23 +108,7 @@ export default function InventoryView({ user }) {
         const q = query(inventoryCol(), orderBy("createdAt", "asc"));
         const snap = await getDocs(q);
 
-        if (snap.empty) {
-          // First time for this user — write seed data in one batch
-          const batch = writeBatch(db);
-          SEED.forEach((item) => {
-            batch.set(doc(inventoryCol()), {
-              ...item,
-              createdAt: serverTimestamp(),
-            });
-          });
-          await batch.commit();
-          const snap2 = await getDocs(
-            query(inventoryCol(), orderBy("createdAt", "asc")),
-          );
-          setItems(snap2.docs.map((d) => ({ id: d.id, ...d.data() })));
-        } else {
-          setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        }
+        setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
       } catch (e) {
         console.error("Inventory load:", e);
       } finally {
@@ -382,7 +216,7 @@ export default function InventoryView({ user }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-[#1e293b]">Inventory</h1>
+          <h1 className="text-lg font-bold text-[#1e293b]">Inventory & Showroom Stock</h1>
           <p className="text-xs text-[#64748b] mt-0.5">
             Manage workshop stock, materials &amp; tools
           </p>
@@ -608,7 +442,7 @@ export default function InventoryView({ user }) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, name: e.target.value }))
                   }
-                  placeholder="e.g. Oak Planks 22mm"
+                  placeholder="e.g. Velvet Emerald 140cm"
                   className={inputCls}
                 />
               </div>
@@ -683,7 +517,7 @@ export default function InventoryView({ user }) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, location: e.target.value }))
                   }
-                  placeholder="e.g. Bay A1"
+                  placeholder="e.g. Rack A1 / Showroom Floor"
                   className={inputCls}
                 />
               </div>
@@ -694,7 +528,7 @@ export default function InventoryView({ user }) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, supplier: e.target.value }))
                   }
-                  placeholder="e.g. Timber City"
+                  placeholder="e.g. Textile Wholesaler"
                   className={inputCls}
                 />
               </div>

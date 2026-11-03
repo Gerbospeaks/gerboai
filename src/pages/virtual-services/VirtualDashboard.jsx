@@ -119,6 +119,8 @@ const VirtualDashboardInner = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -369,7 +371,7 @@ const VirtualDashboardInner = () => {
     invoiceNumber: numberToUse,
     locked: true,
     status: "pending",
-    dates: { invoiceDate: new Date().toISOString(), dueDate: null },
+    dates: { invoiceDate: documentType === "invoice" ? issueDate : null, quoteDate: documentType === "quote" ? issueDate : null, dueDate: null },
     customer: {
       name: customerName,
       email: customerEmail,
@@ -478,6 +480,7 @@ const VirtualDashboardInner = () => {
     setCustomerId("CUST-2026-5678");
     setCustomerEmail("sarah.johnson@example.com");
     setCustomerPhone("082 456 7890");
+    setIssueDate(new Date().toISOString());
     setCustomerAddress("456 Oak Avenue, Johannesburg, 2000");
     setEventDate("2026-06-15");
     setEventType("Consultation");

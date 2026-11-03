@@ -106,6 +106,8 @@ const HealthcareDashboard = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSickNoteModal, setShowSickNoteModal] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [showNotificationsPanel, setShowNotificationsPanel] = useState(false);
   const { user } = useAuth();
   const location = useLocation();
@@ -349,10 +351,15 @@ const [stampConfig, setStampConfig] = useState(null);
     invoiceNumber: numberToUse,
     locked: true,
     status: paymentStatus.status || "pending",
-    dates: { serviceDate: new Date().toISOString(), completedDate: null },
     patient: { name: patientName, email: patientEmail, phone: patientPhone, address: patientAddress, patientId, dateOfBirth: patientDOB, gender: patientGender, insuranceProvider, insuranceNumber },
     medical: { diagnosis, treatmentPlan, prescription },
     items,
+    dates: {
+  serviceDate: issueDate,
+  invoiceDate: documentType === "invoice" ? issueDate : null,
+  quoteDate: documentType === "quote" ? issueDate : null,
+  completedDate: null,
+},
     totals: { subtotal, vat, total, paid: paymentStatus.totalPaid || 0, due: paymentStatus.balanceDue || total },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

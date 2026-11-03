@@ -224,6 +224,8 @@ const PhotographyDashboardInner = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [stampSettings, setStampSettings] = useState({
@@ -477,7 +479,7 @@ const [stampConfig, setStampConfig] = useState(null);
     invoiceNumber: numberToUse,
     locked: true,
     status: "pending",
-    dates: { invoiceDate: new Date().toISOString(), dueDate: null },
+    dates: { invoiceDate: documentType === "invoice" ? issueDate : null, dueDate: null },
     customer: {
       name: customerName,
       email: customerEmail,
@@ -586,6 +588,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerId("CUST-2026-5678");
     setCustomerEmail("sarah.johnson@example.com");
     setCustomerPhone("082 456 7890");
+    setIssueDate(new Date().toISOString());
     setCustomerAddress("456 Oak Avenue, Johannesburg, 2000");
     setEventDate("2026-06-15");
     setEventType("Wedding");

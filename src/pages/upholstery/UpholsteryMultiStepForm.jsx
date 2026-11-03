@@ -8,7 +8,7 @@ import {
   Edit,
 } from "lucide-react";
 
-const ConstructionMultiStepForm = ({
+const UpholsteryMultiStepForm = ({
   // Client Info Props
   clientName,
   setClientName,
@@ -126,8 +126,8 @@ const ConstructionMultiStepForm = ({
               >
                 <option value="Residential">Residential</option>
                 <option value="Commercial">Commercial</option>
-                <option value="Industrial">Industrial</option>
-                <option value="Government">Government</option>
+                <option value="Hospitality">Hospitality</option>
+                <option value="Designer / Trade">Designer / Trade</option>
               </select>
             </div>
             <div>
@@ -202,7 +202,7 @@ const ConstructionMultiStepForm = ({
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                placeholder="e.g., Downtown Office Complex"
+                placeholder="e.g., Smith Lounge Suite Re-cover"
               />
             </div>
             <div className="col-span-1 sm:col-span-2">
@@ -214,7 +214,7 @@ const ConstructionMultiStepForm = ({
                 value={projectAddress}
                 onChange={(e) => setProjectAddress(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                placeholder="Project site location"
+                placeholder="Pick-up / delivery address"
               />
             </div>
             <div>
@@ -225,21 +225,21 @@ const ConstructionMultiStepForm = ({
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="">Select Type</option>
-                <option value="New Build">New Build</option>
-                <option value="Renovation">Renovation</option>
-                <option value="Extension">Extension</option>
-                <option value="Repairs">Repairs</option>
-                <option value="Maintenance">Maintenance</option>
+                <option value="Re-cover">Re-cover / Reupholstery</option>
+                <option value="Custom Order">Custom Furniture (Made to Order)</option>
+                <option value="Repair">Repair & Restoration</option>
+                <option value="Stock Build">Showroom Piece (Made for Sale)</option>
+                <option value="Retail Sale">Retail Sale (Ready-Made)</option>
               </select>
             </div>
             <div>
-              <div className="text-sm text-gray-500 mb-1">Project Size</div>
+              <div className="text-sm text-gray-500 mb-1">Fabric Required</div>
               <input
                 type="text"
                 value={projectSize}
                 onChange={(e) => setProjectSize(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                placeholder="e.g., 500 sqm"
+                placeholder="e.g., 12 m"
               />
             </div>
             <div>
@@ -249,7 +249,7 @@ const ConstructionMultiStepForm = ({
                 value={projectDuration}
                 onChange={(e) => setProjectDuration(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                placeholder="e.g., 3 months"
+                placeholder="e.g., 3 weeks"
               />
             </div>
             <div>
@@ -288,10 +288,11 @@ const ConstructionMultiStepForm = ({
                 }
                 className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
-                <option value="Labor">Labor</option>
-                <option value="Materials">Materials</option>
-                <option value="Equipment">Equipment</option>
-                <option value="Subcontractor">Subcontractor</option>
+                <option value="Labour">Labour</option>
+                <option value="Fabric & Leather">Fabric & Leather</option>
+                <option value="Foam & Padding">Foam & Padding</option>
+                <option value="Frame & Hardware">Frame & Hardware</option>
+                <option value="Showroom Item">Showroom / Retail Item</option>
               </select>
 
               <input
@@ -457,4 +458,4 @@ const ConstructionMultiStepForm = ({
   );
 };
 
-export default ConstructionMultiStepForm;
+export default UpholsteryMultiStepForm;

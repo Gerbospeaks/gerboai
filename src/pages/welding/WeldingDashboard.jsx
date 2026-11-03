@@ -112,6 +112,8 @@ const WeldingDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const { user, authUser } = useAuth();
   const [quoteNumber, setQuoteNumber] = useState("");
   const [quoteId, setQuoteId] = useState(null);
@@ -603,6 +605,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerName("ABC Manufacturing Ltd");
     setCustomerEmail("procurement@abcmfg.co.za");
     setCustomerPhone("+27 11 456 7890");
+    setIssueDate(new Date().toISOString());
     setProjectAddress("Industrial Park, 123 Factory Road, Germiston, 1401");
     setWeldingProcess("MIG/GMAW");
     setProjectScale("Medium");

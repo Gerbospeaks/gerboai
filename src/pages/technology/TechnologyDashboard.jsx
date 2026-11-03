@@ -235,6 +235,8 @@ const TechnologyDashboardInner = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [savedProjects, setSavedProjects] = useState([]);
   const [savedClients, setSavedClients] = useState([]);
   const [showProjectsList, setShowProjectsList] = useState(false);
@@ -507,7 +509,7 @@ const TechnologyDashboardInner = () => {
     documentType, // ← carries "quote" or "invoice"
     locked: true,
     status: documentType === "quote" ? "draft" : "pending",
-    dates: { invoiceDate: new Date().toISOString(), dueDate: null },
+    dates: { invoiceDate: documentType === "invoice" ? issueDate : null, dueDate: null },
     customer: {
       name: customerName,
       email: customerEmail,
@@ -616,6 +618,7 @@ const TechnologyDashboardInner = () => {
     setCustomerEmail("");
     setCustomerPhone("");
     setCustomerAddress("");
+    setIssueDate(new Date().toISOString());
     setProjectDate(new Date().toISOString().split("T")[0]);
     setProjectName("");
     setProjectScope("");

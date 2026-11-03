@@ -204,6 +204,8 @@ const SecurityDashboard = () => {
   const [activeView, setActiveView] = useState("home");
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [isIncidentsOpen, setIsIncidentsOpen] = useState(false);
   const [isSchedulesOpen, setIsSchedulesOpen] = useState(false);
   const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);

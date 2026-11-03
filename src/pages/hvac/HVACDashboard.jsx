@@ -225,6 +225,8 @@ const HvacDashboard = () => {
   const [serviceId, setServiceId] = useState(null);
   const [quoteId, setQuoteId] = useState(null);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [savedServices, setSavedServices] = useState([]);
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [savedCustomers, setSavedCustomers] = useState([]);
@@ -686,6 +688,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerId("CUST-2026-1234");
     setCustomerEmail("contact@abcproperty.com");
     setCustomerPhone("082 123 4567");
+    setIssueDate(new Date().toISOString());
     setCustomerAddress("123 Business Park, Johannesburg, 2001");
     setSystemType("Split Air Conditioner");
     setSystemBrand("Daikin");

@@ -113,6 +113,8 @@ const [stampConfig, setStampConfig] = useState(null);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [activeView, setActiveView] = useState("home");
@@ -520,10 +522,6 @@ const [stampConfig, setStampConfig] = useState(null);
     locked: true,
     status: "pending",
     documentType,
-    dates: {
-      invoiceDate: new Date().toISOString(),
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    },
     customer: {
       name: customerName,
       email: customerEmail,
@@ -531,6 +529,12 @@ const [stampConfig, setStampConfig] = useState(null);
       address: customerAddress,
       tax_id: taxId,
     },
+    dates: {
+  serviceDate: issueDate,
+  invoiceDate: documentType === "invoice" ? issueDate : null,
+  quoteDate: documentType === "quote" ? issueDate : null,
+  completedDate: null,
+},
     items,
     totals: { subtotal, tax: totalTax, total, paid: 0, due: total },
     createdAt: serverTimestamp(),
@@ -610,6 +614,7 @@ const handleNewInvoiceDoc = () => {
     setCustomerName("ABC Corporation");
     setTaxId("TAX-123-456-789");
     setCustomerEmail("contact@abccorp.com");
+    setIssueDate(new Date().toISOString());
     setCustomerPhone("+27 11 123 4567");
     setCustomerAddress("123 Business Park, Sandton, Johannesburg, 2196");
     setItems([]);

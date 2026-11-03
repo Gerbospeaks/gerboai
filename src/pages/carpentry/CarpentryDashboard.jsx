@@ -178,6 +178,8 @@ const [stampConfig, setStampConfig] = useState(null);
     enabled: true,
   });
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const location = useLocation();
   useEffect(() => {
     if (location.state?.activeView) setActiveView(location.state.activeView);
@@ -622,6 +624,7 @@ const bottomNavItems = [
     setCustomerName("Smith Residence");
     setCustomerEmail("john.smith@email.com");
     setCustomerPhone("+27 82 123 4567");
+    setIssueDate(new Date().toISOString());
     setPropertyAddress("15 Oak Street, Sandton, Johannesburg, 2196");
     setProjectType("Kitchen Cabinetry");
     setProjectSize("15");

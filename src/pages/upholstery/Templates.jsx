@@ -7,7 +7,7 @@ import {
   Check,
   Eye,
   Sparkles,
-  HardHat,
+  Scissors,
   Building2,
   Hammer,
   Crown,
@@ -23,33 +23,33 @@ import  {
   serverTimestamp,
 } from "firebase/firestore";
 
-// Template definitions - 5 Construction Industry Specific Templates
+// Template definitions - 5 Upholstery & Furniture Industry Templates
 const TEMPLATES = {
   professional: {
     id: "professional",
-    name: "Professional Builder",
-    description: "Classic construction invoice with organized 3-column layout",
+    name: "Professional Upholsterer",
+    description: "Classic upholstery invoice with organized 3-column layout",
     price: 0,
     isPremium: false,
     category: "free",
-    icon: HardHat,
+    icon: Scissors,
     color: "orange",
     image:
       "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=500&fit=crop",
     features: [
       "Professional 3-column layout",
-      "Project details section",
-      "Materials and labor breakdown",
+      "Piece & fabric details section",
+      "Fabric, padding and labour breakdown",
       "Print optimized for A4",
     ],
     preview:
-      "Three neat columns showing client info, project details, and billing information with a comprehensive items table.",
+      "Three neat columns showing client info, piece and fabric details, and billing information with a comprehensive items table.",
   },
   premium: {
     id: "premium",
-    name: "Premium Construction Pro",
+    name: "Premium Interiors",
     description:
-      "Elegant design with strong branding for established contractors",
+      "Elegant design with strong branding for established upholstery studios and furniture stores",
     price: 299,
     isPremium: true,
     category: "premium",
@@ -64,13 +64,13 @@ const TEMPLATES = {
       "High-quality presentation",
     ],
     preview:
-      "Elegant bordered design with professional fonts and slate accents. Perfect for established construction companies and general contractors.",
+      "Elegant bordered design with professional fonts and slate accents. Perfect for established upholstery studios, furniture makers and furniture stores.",
   },
   commercial: {
     id: "commercial",
-    name: "Commercial Builder Pro",
+    name: "Commercial Seating Pro",
     description:
-      "Bold and professional design for commercial construction projects",
+      "Bold and professional design for commercial seating, hospitality and fit-out projects",
     price: 349,
     isPremium: true,
     category: "commercial",
@@ -80,16 +80,16 @@ const TEMPLATES = {
       "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=500&fit=crop",
     features: [
       "Corporate steel blue design",
-      "Commercial project layout",
+      "Commercial seating & fit-out layout",
       "Bold typography",
       "Professional styling",
     ],
     preview:
-      "Dynamic steel blue design with corporate styling. Ideal for commercial buildings and large-scale construction projects.",
+      "Dynamic steel blue design with corporate styling. Ideal for restaurants, hotels, offices and large-scale commercial seating projects.",
   },
   modern: {
     id: "modern",
-    name: "Modern Contractor",
+    name: "Modern Studio",
     description: "Clean, contemporary design with professional yellow accents",
     price: 249,
     isPremium: true,
@@ -105,13 +105,13 @@ const TEMPLATES = {
       "Clean and professional",
     ],
     preview:
-      "Contemporary design with construction yellow accents and generous white space. Perfect for modern contractors and builders.",
+      "Contemporary design with bold yellow accents and generous white space. Perfect for modern upholstery studios and furniture stores.",
   },
   residential: {
     id: "residential",
-    name: "Residential Specialist",
+    name: "Home Furnishings",
     description:
-      "Warm layout perfect for home builders and remodeling contractors",
+      "Warm layout perfect for home furnishings, sofa restoration and furniture sales",
     price: 279,
     isPremium: true,
     category: "residential",
@@ -121,12 +121,12 @@ const TEMPLATES = {
       "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=500&fit=crop",
     features: [
       "Warm residential theme",
-      "Home building focus",
-      "Remodeling section",
+      "Home furnishings focus",
+      "Re-cover & restoration section",
       "Client-friendly layout",
     ],
     preview:
-      "Warm design with earthy accents. Optimized for residential builders, home remodelers, and renovation specialists.",
+      "Warm design with earthy accents. Optimized for home furnishers, sofa and chair restorers, and furniture retailers.",
   },
 };
 
@@ -370,12 +370,11 @@ const money = (zar) =>
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 to-amber-600 rounded-lg p-8 text-gray-800">
         <div className="flex items-center gap-3 mb-3">
-          <HardHat className="w-8 h-8" />
+          <Scissors className="w-8 h-8" />
           <h1 className="text-3xl font-bold">Invoice Templates</h1>
         </div>
         <p className="text-orange-50 text-lg">
-          Professional invoice designs crafted specifically for contractors,
-          builders, and construction companies
+          Professional quote and invoice designs made for upholsterers, furniture makers and furniture stores
         </p>
         <div className="mt-4 flex items-center gap-6 text-sm">
           <div className="flex items-center gap-2">
@@ -582,12 +581,12 @@ const money = (zar) =>
       {/* Help Section */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
         <h3 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
-          <HardHat className="w-5 h-5" />
+          <Scissors className="w-5 h-5" />
           How to use your templates
         </h3>
         <ol className="text-sm text-amber-800 space-y-2 list-decimal list-inside">
           <li>
-            Purchase a template that matches your construction business style
+            Purchase a template that matches your upholstery or furniture business style
           </li>
           <li>Go to "Create Invoice" from the sidebar menu</li>
           <li>
@@ -602,32 +601,32 @@ const money = (zar) =>
       <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-lg p-6">
         <h3 className="font-semibold text-orange-900 mb-3 flex items-center gap-2">
           <Building2 className="w-5 h-5" />
-          Perfect for Construction Professionals
+          Perfect for Upholstery & Furniture Businesses
         </h3>
         <div className="grid md:grid-cols-2 gap-4 text-sm text-orange-800">
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>General contractors and builders</span>
+            <span>Upholsterers and soft furnishing studios</span>
           </div>
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Commercial construction companies</span>
+            <span>Furniture stores and showrooms</span>
           </div>
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Residential home builders</span>
+            <span>Custom furniture makers (made to order or to sell)</span>
           </div>
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Remodeling and renovation specialists</span>
+            <span>Sofa, chair and antique restoration specialists</span>
           </div>
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Subcontractors (plumbing, electrical, HVAC)</span>
+            <span>Commercial seating for restaurants, hotels and offices</span>
           </div>
           <div className="flex items-start gap-2">
             <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-            <span>Roofing and exterior specialists</span>
+            <span>Vehicle, marine and outdoor cushion specialists</span>
           </div>
         </div>
       </div>

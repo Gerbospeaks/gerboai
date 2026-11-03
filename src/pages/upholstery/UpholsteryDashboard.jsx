@@ -91,6 +91,26 @@ const generateQuoteNumber = async (userId, documentType) => {
 
 const functions = getFunctions();
 
+// Upholstery & furniture store lists
+const ORDER_TYPES = [
+  "Customer Job (Re-cover / Repair)",
+  "Custom Order (Made to Order)",
+  "Showroom Sale (Ready-Made)",
+  "Stock Build (Made for Showroom)",
+];
+const ITEM_STAGES = [
+  "Quote & Measure",
+  "Fabric Selection",
+  "Strip & Assess",
+  "Frame Repair / Build",
+  "Padding & Foam",
+  "Cutting & Sewing",
+  "Upholstering",
+  "Finishing & QC",
+  "Ready for Delivery / Collection",
+  "On Showroom Floor"
+];
+
 const UpholsteryDashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showPreview, setShowPreview] = useState(false);
@@ -146,6 +166,8 @@ const UpholsteryDashboard = () => {
   const [showStampModal, setShowStampModal] = useState(false);
 const [stampConfig, setStampConfig] = useState(null);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const location = useLocation();
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
@@ -168,18 +190,19 @@ const [stampConfig, setStampConfig] = useState(null);
   const [propertyAddress, setPropertyAddress] = useState(
     "15 Oak Street, Sandton, Johannesburg, 2196",
   );
-  const [projectType, setProjectType] = useState("Kitchen Cabinetry");
-  const [projectSize, setProjectSize] = useState("15");
-  const [woodType, setWoodType] = useState("Oak");
-  const [finishType, setFinishType] = useState("Varnish");
+  const [projectType, setProjectType] = useState("Sofa / Couch Reupholstery");
+  const [orderType, setOrderType] = useState(ORDER_TYPES[0]);
+  const [projectSize, setProjectSize] = useState("12");
+  const [woodType, setWoodType] = useState("Velvet");
+  const [finishType, setFinishType] = useState("High-Density Foam");
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
     description: "",
     rate: "",
     qty: "",
-    workCategory: "Custom Cabinetry",
+    workCategory: "Upholstery Labour",
     taxRate: "15",
-    phase: "Phase 1",
+    phase: "Upholstering",
   });
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "MASTER Upholstery CO.",
@@ -203,7 +226,7 @@ const [stampConfig, setStampConfig] = useState(null);
 
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
-    { number: 2, title: "Project Details", icon: Hammer },
+    { number: 2, title: "Piece Details", icon: Hammer },
     { number: 3, title: "Items & Materials", icon: Wrench },
     { number: 4, title: "Schedule & Payment", icon: Calendar },
   ];
@@ -370,6 +393,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setPropertyAddress(quote.customer?.address || "");
     setProjectType(quote.projectDetails?.type || "");
     setProjectSize(quote.projectDetails?.size || "");
+    setOrderType(quote.projectDetails?.orderType || ORDER_TYPES[0]);
     setWoodType(quote.projectDetails?.woodType || "");
     setFinishType(quote.projectDetails?.finishType || "");
     setItems(quote.items || []);
@@ -398,6 +422,7 @@ const [stampConfig, setStampConfig] = useState(null);
     },
     projectDetails: {
       type: projectType,
+      orderType,
       size: projectSize,
       woodType,
       finishType,
@@ -474,11 +499,13 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerName("Smith Residence");
     setCustomerEmail("john.smith@email.com");
     setCustomerPhone("+27 82 123 4567");
+    setIssueDate(new Date().toISOString());
     setPropertyAddress("15 Oak Street, Sandton, Johannesburg, 2196");
-    setProjectType("Kitchen Cabinetry");
+    setProjectType("Sofa / Couch Reupholstery");
+    setOrderType(ORDER_TYPES[0]);
     setProjectSize("15");
-    setWoodType("Oak");
-    setFinishType("Varnish");
+    setWoodType("Velvet");
+    setFinishType("High-Density Foam");
     setItems([]);
     setCurrentStep(1);
     const load = async () => {
@@ -509,23 +536,23 @@ const [stampConfig, setStampConfig] = useState(null);
       ...prev,
       {
         description: newItem.description,
-        workCategory: newItem.workCategory || "Custom Cabinetry",
+        workCategory: newItem.workCategory || "Upholstery Labour",
         rate,
         qty,
         amount,
         taxRate,
         taxAmount,
         totalAmount: amount + taxAmount,
-        phase: newItem.phase || "Phase 1",
+        phase: newItem.phase || "Upholstering",
       },
     ]);
     setNewItem({
       description: "",
       rate: "",
       qty: "",
-      workCategory: "Custom Cabinetry",
+      workCategory: "Upholstery Labour",
       taxRate: "15",
-      phase: "Phase 1",
+      phase: "Upholstering",
     });
   };
 
@@ -1226,7 +1253,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                     Client Information
                                   </h2>
                                   <p className="text-xs text-[#64748b]">
-                                    Enter client / contractor details
+                                    Enter client or showroom customer details
                                   </p>
                                 </div>
                               </div>
@@ -1313,18 +1340,32 @@ const [stampConfig, setStampConfig] = useState(null);
                                 </div>
                                 <div>
                                   <h2 className="text-base font-semibold text-[#1e293b]">
-                                    Project Details
+                                    Piece Details
                                   </h2>
                                   <p className="text-xs text-[#64748b]">
-                                    Provide project specifications for an
-                                    accurate quote
+                                    Describe the piece, fabric and padding for an accurate quote
                                   </p>
                                 </div>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="sm:col-span-2">
+                                  <label className={labelCls}>Order Type</label>
+                                  <select
+                                    value={orderType}
+                                    onChange={(e) => setOrderType(e.target.value)}
+                                    className={selectCls}
+                                  >
+                                    {ORDER_TYPES.map((o) => (
+                                      <option key={o}>{o}</option>
+                                    ))}
+                                  </select>
+                                  <p className="text-[11px] text-[#94a3b8] mt-1">
+                                    Re-covers and repairs, made-to-order pieces, ready-made showroom sales or pieces built to sell.
+                                  </p>
+                                </div>
                                 <div>
                                   <label className={labelCls}>
-                                    Project Type
+                                    Piece / Service Type
                                   </label>
                                   <select
                                     value={projectType}
@@ -1333,31 +1374,34 @@ const [stampConfig, setStampConfig] = useState(null);
                                     }
                                     className={selectCls}
                                   >
-                                    <option>Kitchen Cabinetry</option>
-                                    <option>Bedroom Furniture</option>
-                                    <option>Built-in Wardrobes</option>
-                                    <option>Custom Shelving</option>
-                                    <option>Decking</option>
-                                    <option>Doors & Frames</option>
-                                    <option>Flooring</option>
-                                    <option>Ceilings</option>
-                                    <option>Custom Furniture</option>
+                                    <option>Sofa / Couch Reupholstery</option>
+                                    <option>Dining Chair Recovering</option>
+                                    <option>Headboard & Bed Base</option>
+                                    <option>Cushions & Loose Covers</option>
+                                    <option>Ottoman / Pouf / Bench</option>
+                                    <option>Office & Commercial Seating</option>
+                                    <option>Restaurant Booths & Banquettes</option>
+                                    <option>Furniture Repair & Restoration</option>
+                                    <option>Vehicle / Marine Trim</option>
+                                    <option>Custom Furniture (Made to Order)</option>
+                                    <option>Showroom Piece (Made for Sale)</option>
+                                    <option>Retail Sale (Ready-Made)</option>
                                   </select>
                                 </div>
                                 <div>
-                                  <label className={labelCls}>Area (sqm)</label>
+                                  <label className={labelCls}>Fabric Required (m)</label>
                                   <input
                                     type="number"
                                     value={projectSize}
                                     onChange={(e) =>
                                       setProjectSize(e.target.value)
                                     }
-                                    placeholder="15"
+                                    placeholder="12"
                                     className={inputCls}
                                   />
                                 </div>
                                 <div>
-                                  <label className={labelCls}>Wood Type</label>
+                                  <label className={labelCls}>Fabric / Covering</label>
                                   <select
                                     value={woodType}
                                     onChange={(e) =>
@@ -1365,18 +1409,21 @@ const [stampConfig, setStampConfig] = useState(null);
                                     }
                                     className={selectCls}
                                   >
-                                    <option>Oak</option>
-                                    <option>Pine</option>
-                                    <option>Meranti</option>
-                                    <option>Sapele</option>
-                                    <option>MDF</option>
-                                    <option>Plywood</option>
-                                    <option>Melamine</option>
+                                    <option>Velvet</option>
+                                    <option>Linen</option>
+                                    <option>Cotton / Canvas</option>
+                                    <option>Chenille</option>
+                                    <option>Microfibre / Suede</option>
+                                    <option>Leather (Genuine)</option>
+                                    <option>Faux Leather / PU</option>
+                                    <option>Vinyl (Commercial)</option>
+                                    <option>Outdoor / Water-Resistant</option>
+                                    <option>Customer's Own Fabric</option>
                                   </select>
                                 </div>
                                 <div>
                                   <label className={labelCls}>
-                                    Finish Type
+                                    Padding & Fill
                                   </label>
                                   <select
                                     value={finishType}
@@ -1385,12 +1432,13 @@ const [stampConfig, setStampConfig] = useState(null);
                                     }
                                     className={selectCls}
                                   >
-                                    <option>Varnish</option>
-                                    <option>Stain & Varnish</option>
-                                    <option>Paint</option>
-                                    <option>Oil Finish</option>
-                                    <option>Lacquer</option>
-                                    <option>Natural/Unfinished</option>
+                                    <option>High-Density Foam</option>
+                                    <option>Foam & Dacron Wrap</option>
+                                    <option>Feather & Down</option>
+                                    <option>Hollow Fibre</option>
+                                    <option>Springs & Webbing Renewed</option>
+                                    <option>Re-use Existing Fill</option>
+                                    <option>Not Applicable (Retail Item)</option>
                                   </select>
                                 </div>
                               </div>
@@ -1401,7 +1449,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                     <span className="font-semibold">
                                       {projectType}
                                     </span>{" "}
-                                    · {projectSize} sqm · {woodType} ·{" "}
+                                    · {projectSize} m fabric · {woodType} ·{" "}
                                     {finishType}
                                   </span>
                                 </div>
@@ -1421,7 +1469,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                     Items & Materials
                                   </h2>
                                   <p className="text-xs text-[#64748b]">
-                                    Add work items and materials to the quote
+                                    Add labour, fabric, padding, parts and showroom items to the quote
                                   </p>
                                 </div>
                               </div>
@@ -1430,7 +1478,7 @@ const [stampConfig, setStampConfig] = useState(null);
                               <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-5 mb-5">
                                 <h3 className="text-sm font-semibold text-[#374151] mb-4 flex items-center gap-2">
                                   <Plus className="w-4 h-4 text-[#2563eb]" />
-                                  Add Work Item
+                                  Add Line Item
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                   <div className="sm:col-span-2">
@@ -1439,7 +1487,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                     </label>
                                     <input
                                       type="text"
-                                      placeholder="Work item / material description"
+                                      placeholder="e.g. Re-cover 3-seater sofa in velvet, incl. new foam"
                                       value={newItem.description}
                                       onChange={(e) =>
                                         setNewItem({
@@ -1462,15 +1510,17 @@ const [stampConfig, setStampConfig] = useState(null);
                                       }
                                       className={selectCls}
                                     >
-                                      <option>Custom Cabinetry</option>
-                                      <option>Installation</option>
-                                      <option>Materials</option>
-                                      <option>Hardware</option>
-                                      <option>Finishing</option>
+                                      <option>Upholstery Labour</option>
+                                    <option>Frame Repair / Build</option>
+                                    <option>Fabric & Leather</option>
+                                    <option>Foam & Padding</option>
+                                    <option>Springs, Webbing & Trims</option>
+                                    <option>Showroom / Retail Item</option>
+                                    <option>Delivery & Fitting</option>
                                     </select>
                                   </div>
                                   <div>
-                                    <label className={labelCls}>Phase</label>
+                                    <label className={labelCls}>Stage</label>
                                     <select
                                       value={newItem.phase}
                                       onChange={(e) =>
@@ -1481,10 +1531,16 @@ const [stampConfig, setStampConfig] = useState(null);
                                       }
                                       className={selectCls}
                                     >
-                                      <option>Phase 1</option>
-                                      <option>Phase 2</option>
-                                      <option>Phase 3</option>
-                                      <option>Final</option>
+                                      <option>Quote & Measure</option>
+                                    <option>Fabric Selection</option>
+                                    <option>Strip & Assess</option>
+                                    <option>Frame Repair / Build</option>
+                                    <option>Padding & Foam</option>
+                                    <option>Cutting & Sewing</option>
+                                    <option>Upholstering</option>
+                                    <option>Finishing & QC</option>
+                                    <option>Ready for Delivery / Collection</option>
+                                    <option>On Showroom Floor</option>
                                     </select>
                                   </div>
                                   <div>
@@ -1549,7 +1605,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                 <div className="border border-[#e2e8f0] rounded-xl overflow-hidden mb-5">
                                   <div className="px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center justify-between">
                                     <span className="text-sm font-semibold text-[#374151]">
-                                      Work Items
+                                      Line Items
                                     </span>
                                     <span className="text-xs text-[#64748b] bg-[#e2e8f0] px-2 py-0.5 rounded-full">
                                       {items.length} items
@@ -1562,7 +1618,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                           {[
                                             "Description",
                                             "Category",
-                                            "Phase",
+                                            "Stage",
                                             "Rate",
                                             "Qty",
                                             "VAT",
@@ -1594,7 +1650,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                             </td>
                                             <td className="px-4 py-3">
                                               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#faf5ff] text-[#7c3aed]">
-                                                {item.phase || "Phase 1"}
+                                                {item.phase || "Upholstering"}
                                               </span>
                                             </td>
                                             <td className="px-4 py-3 text-sm text-[#374151]">
@@ -1683,14 +1739,14 @@ const [stampConfig, setStampConfig] = useState(null);
                               <div className="grid grid-cols-3 gap-3 mb-5">
                                 {[
                                   {
-                                    label: "Project Total",
+                                    label: "Quote Total",
                                     value: `R${total.toFixed(2)}`,
                                     icon: DollarSign,
                                     bg: "bg-[#eff6ff]",
                                     color: "text-[#2563eb]",
                                   },
                                   {
-                                    label: "Work Items",
+                                    label: "Line Items",
                                     value: items.length,
                                     icon: ClipboardList,
                                     bg: "bg-[#f0fdf4]",
@@ -1781,17 +1837,17 @@ const [stampConfig, setStampConfig] = useState(null);
                                     </p>
                                     <p>
                                       <span className="font-semibold text-[#374151]">
-                                        Area:
+                                        Fabric:
                                       </span>{" "}
-                                      {projectSize} sqm
+                                      {projectSize} m
                                     </p>
                                     <p>
                                       <span className="font-semibold text-[#374151]">
-                                        Wood:
+                                        Fabric:
                                       </span>{" "}
                                       {woodType} |{" "}
                                       <span className="font-semibold text-[#374151]">
-                                        Finish:
+                                        Padding:
                                       </span>{" "}
                                       {finishType}
                                     </p>

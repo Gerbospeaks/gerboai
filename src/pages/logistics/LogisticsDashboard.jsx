@@ -131,6 +131,8 @@ const LogisticsDashboard = () => {
   const [activeView, setActiveView] = useState("home");
   const { user, authUser } = useAuth();
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [waybillNumber, setWaybillNumber] = useState("");
   const [waybillId, setWaybillId] = useState(null);
   const [aiWindowOpen, setAiWindowOpen] = useState(false);

@@ -114,6 +114,8 @@ const ElectricalDashboard = () => {
   const [inputMode, setInputMode] = useState("manual");
   const [isMobile, setIsMobile] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const { user, authUser } = useAuth();
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
@@ -457,6 +459,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerName("Meridian Developments");
     setCustomerEmail("projects@meridian.co.za");
     setCustomerPhone("+27 11 234 5678");
+    setIssueDate(new Date().toISOString());
     setPropertyAddress("45 Corporate Boulevard, Sandton, Johannesburg, 2196");
     setSiteType("Commercial");
     setSiteSize("850");

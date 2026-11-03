@@ -143,6 +143,8 @@ const TowingDashboard = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
+ const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
   const { can, isAdmin } = usePermissions();
@@ -178,7 +180,6 @@ const TowingDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [invoices, setInvoices] = useState([]);
-    const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
     const [deliveryDate, setDeliveryDate] = useState("");
     const [supplierName, setSupplierName] = useState("");
     const [supplierContact, setSupplierContact] = useState("");
@@ -903,6 +904,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerEmail("john.smith@example.com");
     setCustomerPhone("082 123 4567");
     setCustomerAddress("123 Main Street, Pretoria, 0001");
+    setIssueDate(new Date().toISOString());
     setVehicleMake("Toyota");
     setVehicleModel("Hilux");
     setVehicleYear("2020");
