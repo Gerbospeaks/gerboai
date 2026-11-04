@@ -451,7 +451,7 @@ export const DefaultTemplate = ({
     {/* Footer Note */}
     <div className="text-center text-xs text-red-600 italic">
       {documentType === "quote"
-        ? "This quote is valid for 30 days. All services are insured and compliant with industry standards."
+        ? "This quote is valid for 7 days. All services are insured and compliant with industry standards."
         : "NB: Professional towing service with full insurance coverage. Vehicle safety is our priority."}
     </div>
   </div>
@@ -659,7 +659,7 @@ export const ClassicTemplate = (props) => (
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
-        ? "This quote is valid for 30 days. All services are insured and compliant with industry standards."
+        ? "This quote is valid for 7 days. All services are insured and compliant with industry standards."
         : "Thank you for your business. Professional towing service with full insurance coverage."}
     </div>
   </div>
@@ -857,7 +857,7 @@ export const ModernTemplate = (props) => (
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3 mt-4">
       {props.documentType === "quote"
-        ? "This quote is valid for 30 days. All services are insured and compliant with industry standards."
+        ? "This quote is valid for 7 days. All services are insured and compliant with industry standards."
         : "Thank you for your business. Professional towing service with full insurance coverage."}
     </div>
   </div>
@@ -1033,7 +1033,7 @@ export const ElegantTemplate = (props) => (
 
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
         {props.documentType === "quote"
-          ? "This quote is valid for 30 days. All services are insured and compliant with industry standards."
+          ? "This quote is valid for 7 days. All services are insured and compliant with industry standards."
           : "Thank you for your business. Professional recovery service with full insurance coverage."}
       </div>
     </div>
@@ -1438,7 +1438,7 @@ export const DiagnosticTemplate = (props) => (
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
-        ? "This quote is valid for 30 days. Professional recovery service with full insurance coverage."
+        ? "This quote is valid for 7 days. Professional recovery service with full insurance coverage."
         : "Thank you for your business. Specialist vehicle recovery with comprehensive insurance."}
     </div>
   </div>

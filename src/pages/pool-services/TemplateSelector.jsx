@@ -434,7 +434,7 @@ export const ProfessionalTemplate = ({
     {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {documentType === "quote"
-        ? "Quote valid for 30 days. Terms & conditions apply."
+        ? "Quote valid for 7 days. Terms & conditions apply."
         : "Payment terms: 50% deposit on acceptance, balance on completion. Warranty: 12 months workmanship."}
     </div>
   </div>

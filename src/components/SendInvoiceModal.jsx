@@ -45,7 +45,7 @@ const MESSAGE_TEMPLATES = [
   {
     label: "Estimate",
     message: (inv, biz) =>
-      `Dear ${inv.customer?.name || "Valued Client"},\n\nThank you for your enquiry. Please find the attached estimate ${inv.invoiceNumber} for R${fmt(inv.totals?.total)} for your review.\n\nThis estimate is valid for 30 days. Should you wish to proceed, please reply to this email and we will convert it to a formal invoice.\n\nWe look forward to doing business with you.\n\n${biz?.businessName || ""}`,
+      `Dear ${inv.customer?.name || "Valued Client"},\n\nThank you for your enquiry. Please find the attached estimate ${inv.invoiceNumber} for R${fmt(inv.totals?.total)} for your review.\n\nThis estimate is valid for 7 days. Should you wish to proceed, please reply to this email and we will convert it to a formal invoice.\n\nWe look forward to doing business with you.\n\n${biz?.businessName || ""}`,
   },
 ];
 

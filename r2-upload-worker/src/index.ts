@@ -1081,7 +1081,7 @@ function buildQuoteHTML(docNumber: string, d: Record<string, any>): string {
     ${carpentryTotals(d)}
     ${bottomStrip(d)}
     ${d.notes ? `<div class="notes"><strong>Terms &amp; Conditions:</strong> ${d.notes}</div>` : ''}
-    <div class="footer">This quote is valid for 30 days from date of issue — ${(d.businessInfo ?? d.company ?? {}).businessName ?? ''}</div>`;
+    <div class="footer">This quote is valid for 7 days from date of issue — ${(d.businessInfo ?? d.company ?? {}).businessName ?? ''}</div>`;
 	return carpentryShell('quote', docNumber, d, body);
 }
 

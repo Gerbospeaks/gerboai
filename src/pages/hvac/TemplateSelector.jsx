@@ -368,7 +368,7 @@ export const DefaultTemplate = ({
       {isQuote(documentType) && (
         <div className="bg-amber-50 border border-amber-200 p-3 mb-4 text-xs text-amber-800">
           <span className="font-bold">Note:</span> This is a quotation only and
-          is not a tax invoice. Valid for 30 days from date of issue.
+          is not a tax invoice. Valid for 7 days from date of issue.
         </div>
       )}
 
@@ -549,7 +549,7 @@ export const ClassicTemplate = (props) => {
       {isQuote(props.documentType) && (
         <div className="bg-amber-50 border border-amber-200 p-3 mb-4 rounded text-xs text-amber-800">
           <span className="font-bold">Quotation:</span> This is not a tax
-          invoice. Prices are valid for 30 days.
+          invoice. Prices are valid for 7 days.
         </div>
       )}
 
@@ -727,7 +727,7 @@ export const ModernTemplate = (props) => {
       {isQuote(props.documentType) && (
         <div className="bg-amber-50 border border-amber-200 p-3 mt-6 rounded text-xs text-amber-800">
           <span className="font-bold">Quotation:</span> This is not a tax
-          invoice. Prices are valid for 30 days from date of issue.
+          invoice. Prices are valid for 7 days from date of issue.
         </div>
       )}
 
@@ -889,7 +889,7 @@ export const ElegantTemplate = (props) => {
         {isQuote(props.documentType) && (
           <div className="bg-amber-50 border border-amber-200 p-3 mt-6 text-xs text-amber-800">
             <span className="font-bold">Quotation:</span> This is not a tax
-            invoice. Valid for 30 days.
+            invoice. Valid for 7 days.
           </div>
         )}
 
@@ -1077,7 +1077,7 @@ export const CoolingTemplate = (props) => {
       {isQuote(props.documentType) && (
         <div className="bg-amber-50 border-2 border-amber-300 p-3 mt-6 rounded-lg text-xs text-amber-800">
           <span className="font-bold">Quotation:</span> This is not a tax
-          invoice. Prices are valid for 30 days.
+          invoice. Prices are valid for 7 days.
         </div>
       )}
 

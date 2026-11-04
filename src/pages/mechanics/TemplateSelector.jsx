@@ -554,7 +554,7 @@ export const DefaultTemplate = ({
 
     <div className="text-center text-xs text-red-600 italic">
       {documentType === "quote"
-        ? "This quote is valid for 30 days. All our parts and workmanship have 12 months or 15000KM Guarantee"
+        ? "This quote is valid for 7 days. All our parts and workmanship have 12 months or 15000KM Guarantee"
         : "NB: All our parts and workmanship have 12 months or 15000KM Guarantee"}
     </div>
   </div>
@@ -699,7 +699,7 @@ export const ClassicTemplate = (props) => (
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
-        ? "This quote is valid for 30 days from the date above."
+        ? "This quote is valid for 7 days from the date above."
         : "Thank you for your business. Payment is due within 30 days of invoice date."}
     </div>
   </div>
@@ -847,7 +847,7 @@ export const ModernTemplate = (props) => (
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3 mt-4">
       {props.documentType === "quote"
-        ? "This quote is valid for 30 days from the date above."
+        ? "This quote is valid for 7 days from the date above."
         : "Thank you for your business. Payment is due within 30 days of invoice date."}
     </div>
   </div>
@@ -978,7 +978,7 @@ export const ElegantTemplate = (props) => (
       </div>
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
         {props.documentType === "quote"
-          ? "This quote is valid for 30 days from the date above."
+          ? "This quote is valid for 7 days from the date above."
           : "Thank you for your business. Payment is due within 30 days of invoice date."}
       </div>
     </div>
@@ -1111,7 +1111,7 @@ export const SpeedTemplate = (props) => (
     </div>
     <div className="text-center text-xs text-gray-500 italic border-t border-gray-800 pt-3">
       {props.documentType === "quote"
-        ? "This quote is valid for 30 days from the date above."
+        ? "This quote is valid for 7 days from the date above."
         : "Thank you for your business. Payment is due within 30 days of invoice date."}
     </div>
   </div>
@@ -1285,7 +1285,7 @@ export const DiagnosticTemplate = (props) => (
     </div>
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {props.documentType === "quote"
-        ? "This quote is valid for 30 days from the date above. Price subject to change after expiry."
+        ? "This quote is valid for 7 days from the date above. Price subject to change after expiry."
         : "Thank you for your business. Payment is due within 30 days of invoice date."}
     </div>
   </div>
