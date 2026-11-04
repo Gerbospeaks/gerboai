@@ -758,30 +758,7 @@ const handleVoiceFileUpload = async (e) => {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Floating toggle button */}
-      <button
-        className={`${styles.fab} ${position === "left" ? styles.fabLeft : styles.fabRight} ${open ? styles.fabOpen : ""}`}
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close AI assistant" : "Open AI assistant"}
-      >
-        {open ? (
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
-            <path d="M20 2H4C2.9 2 2 2.9 2 4v16l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 11H6v-2h12v2zm0-3H6V8h12v2z" />
-          </svg>
-        )}
-        {!open && <span className={styles.fabLabel}>AI Assistant</span>}
-      </button>
+    
 
       {/* Chat panel */}
       {open && (
