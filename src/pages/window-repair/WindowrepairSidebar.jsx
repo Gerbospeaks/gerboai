@@ -18,6 +18,8 @@ import {
   Menu,
   Plus,
   Store,
+  Wrench,
+  Package,
 } from "lucide-react";
 
 export default function WindowRepairSidebar({
@@ -43,6 +45,9 @@ export default function WindowRepairSidebar({
 }) {
   const [isQuotesOpen, setIsQuotesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
+  const [isJobsOpen, setIsJobsOpen] = useState(
+    ["projects", "work-orders", "materials"].includes(activeView),
+  );
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -175,6 +180,45 @@ export default function WindowRepairSidebar({
             }}
           />
         </Accordion>
+
+        <SectionLabel>Operations</SectionLabel>
+
+        {/* Jobs & Installations */}
+        <Accordion
+          icon={Wrench}
+          label="Jobs & Installations"
+          isOpen={isJobsOpen}
+          onToggle={() => setIsJobsOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-sky-400"
+            label="Active Jobs"
+            onClick={() => goTo("projects")}
+          />
+          <SubItem
+            dot="bg-orange-400"
+            label="Work Orders"
+            onClick={() => goTo("work-orders")}
+          />
+          <SubItem
+            dot="bg-cyan-400"
+            label="Glass & Materials"
+            onClick={() => goTo("materials")}
+          />
+        </Accordion>
+
+        <NavItem
+          icon={Package}
+          label="Inventory & Stock"
+          onClick={() => goTo("inventory")}
+          active={activeView === "inventory"}
+        />
+        <NavItem
+          icon={Calendar}
+          label="Schedule"
+          onClick={() => goTo("schedule")}
+          active={activeView === "schedule"}
+        />
 
         <SectionLabel>Tools</SectionLabel>
 
@@ -401,6 +445,21 @@ export default function WindowRepairSidebar({
                   icon: Users,
                   title: "Clients",
                   action: () => setShowCustomersListModal(true),
+                },
+                {
+                  icon: Wrench,
+                  title: "Jobs & Installations",
+                  action: () => goTo("projects"),
+                },
+                {
+                  icon: Package,
+                  title: "Inventory & Stock",
+                  action: () => goTo("inventory"),
+                },
+                {
+                  icon: Calendar,
+                  title: "Schedule",
+                  action: () => goTo("schedule"),
                 },
                 {
                   icon: FileText,

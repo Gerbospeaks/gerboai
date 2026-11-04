@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { db, auth } from "../../firebase";
 import {
-  getFirestore,
   collection,
   addDoc,
   updateDoc,
@@ -12,290 +11,409 @@ import {
   orderBy,
   serverTimestamp,
 } from "firebase/firestore";
+import { Search, Edit2, Trash2, Loader2, StickyNote } from "lucide-react";
 
-// Notes View Component with Firebase
-const NotesView = ({ jobCardId }) => {
+// Notes are standalone by default (users/{uid}/notes). If a jobCardId is
+// passed, they attach to that job card instead (users/{uid}/jobcards/{id}/notes),
+// so anything saved the old way is still reachable.
+
+const CATEGORIES = [
+  "General",
+  "Measurements",
+  "Customer",
+  "Supplier & Orders",
+  "Site & Safety",
+];
+
+const CAT_COLORS = {
+  General: "bg-[#f1f5f9] text-[#475569]",
+  Measurements: "bg-[#eff6ff] text-[#1d4ed8]",
+  Customer: "bg-[#f0fdf4] text-[#166534]",
+  "Supplier & Orders": "bg-[#faf5ff] text-[#7c3aed]",
+  "Site & Safety": "bg-[#fff7ed] text-[#c2410c]",
+};
+
+const PLACEHOLDERS = {
+  General: "Add a note, reminder or observation…",
+  Measurements: "e.g. Kitchen window 1200 x 900 mm, 6mm toughened, rebate 18mm",
+  Customer: "e.g. Prefers morning fittings. Call before arriving.",
+  "Supplier & Orders": "e.g. Laminated panes ordered, due Thursday",
+  "Site & Safety":
+    "e.g. Second-floor access via side gate. Wear gloves, broken glass.",
+};
+
+const inputCls =
+  "w-full px-3 py-2 text-sm border border-[#d1d5db] rounded-lg bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb]";
+
+const formatWhen = (date) =>
+  date
+    ? date.toLocaleString("en-ZA", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Just now";
+
+const initials = (name) =>
+  (name || "?")
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+const NotesView = ({ user, jobCardId }) => {
+  const userId = user?.uid || auth.currentUser?.uid;
+  const authorName =
+    user?.name ||
+    user?.displayName ||
+    auth.currentUser?.displayName ||
+    user?.email ||
+    auth.currentUser?.email ||
+    "Team member";
+
   const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [newNote, setNewNote] = useState("");
+  const [newCategory, setNewCategory] = useState("General");
+  const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const userId = auth.currentUser?.uid;
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
 
+  const notesCol = () =>
+    jobCardId
+      ? collection(db, "users", userId, "jobcards", jobCardId, "notes")
+      : collection(db, "users", userId, "notes");
+  const noteDoc = (id) =>
+    jobCardId
+      ? doc(db, "users", userId, "jobcards", jobCardId, "notes", id)
+      : doc(db, "users", userId, "notes", id);
+
+  // ── Live notes ────────────────────────────────────────────────────
   useEffect(() => {
-    if (!userId || !jobCardId) return;
-
-    // Reference to notes subcollection: users/{userId}/jobcards/{jobCardId}/notes
-    const notesRef = collection(
-      db,
-      "users",
-      userId,
-      "jobcards",
-      jobCardId,
-      "notes",
-    );
-    const q = query(notesRef, orderBy("timestamp", "desc"));
-
-    // Real-time listener
+    if (!userId) {
+      // Not signed in yet: show the empty state instead of spinning forever
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     const unsubscribe = onSnapshot(
-      q,
+      query(notesCol(), orderBy("timestamp", "desc")),
       (snapshot) => {
-        const notesData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          timestamp:
-            doc.data().timestamp?.toDate().toLocaleString("en-US", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-            }) || "N/A",
-        }));
-        setNotes(notesData);
+        setNotes(
+          snapshot.docs.map((d) => {
+            // "estimate" gives a note you just saved a time straight away
+            const data = d.data({ serverTimestamps: "estimate" });
+            return {
+              id: d.id,
+              ...data,
+              date: data.timestamp?.toDate?.() || null,
+              editedDate: data.editedAt?.toDate?.() || null,
+            };
+          }),
+        );
+        setError("");
         setLoading(false);
       },
-      (error) => {
-        console.error("Error fetching notes:", error);
+      (err) => {
+        console.error("Error fetching notes:", err);
+        setError(
+          "Could not load your notes. Check your connection and refresh.",
+        );
         setLoading(false);
       },
     );
-
     return () => unsubscribe();
   }, [userId, jobCardId]);
 
+  // ── Actions ───────────────────────────────────────────────────────
   const handleAddNote = async () => {
-    if (!newNote.trim() || !userId || !jobCardId) return;
-
+    if (!newNote.trim() || !userId || adding) return;
+    setAdding(true);
     try {
-      const notesRef = collection(
-        db,
-        "users",
-        userId,
-        "jobcards",
-        jobCardId,
-        "notes",
-      );
-      await addDoc(notesRef, {
+      await addDoc(notesCol(), {
         timestamp: serverTimestamp(),
-        user:
-          auth.currentUser?.displayName ||
-          auth.currentUser?.email ||
-          "Current User",
-        content: newNote,
+        user: authorName,
+        content: newNote.trim(),
+        category: newCategory,
         pinned: false,
       });
       setNewNote("");
-    } catch (error) {
-      console.error("Error adding note:", error);
-      alert("Failed to add note. Please try again.");
+      setError("");
+    } catch (err) {
+      console.error("Error adding note:", err);
+      setError("Could not add your note. Try again.");
+    } finally {
+      setAdding(false);
     }
   };
 
-  const handleDeleteNote = async (noteId) => {
-    if (!userId || !jobCardId) return;
-
+  const handleDeleteNote = async (id) => {
+    if (!window.confirm("Delete this note?")) return;
     try {
-      const noteRef = doc(
-        db,
-        "users",
-        userId,
-        "jobcards",
-        jobCardId,
-        "notes",
-        noteId,
-      );
-      await deleteDoc(noteRef);
-    } catch (error) {
-      console.error("Error deleting note:", error);
-      alert("Failed to delete note. Please try again.");
+      await deleteDoc(noteDoc(id));
+    } catch (err) {
+      console.error("Error deleting note:", err);
+      setError("Could not delete the note. Try again.");
     }
   };
 
-  const handlePinNote = async (noteId, currentPinned) => {
-    if (!userId || !jobCardId) return;
-
+  const handlePinNote = async (id, pinned) => {
     try {
-      const noteRef = doc(
-        db,
-        "users",
-        userId,
-        "jobcards",
-        jobCardId,
-        "notes",
-        noteId,
-      );
-      await updateDoc(noteRef, {
-        pinned: !currentPinned,
-      });
-    } catch (error) {
-      console.error("Error pinning note:", error);
-      alert("Failed to pin note. Please try again.");
+      await updateDoc(noteDoc(id), { pinned: !pinned });
+    } catch (err) {
+      console.error("Error pinning note:", err);
+      setError("Could not update the note. Try again.");
     }
   };
 
-  const handleEditNote = (id, content) => {
-    setEditingId(id);
-    setEditContent(content);
+  const startEdit = (note) => {
+    setEditingId(note.id);
+    setEditContent(note.content || "");
   };
 
-  const handleSaveEdit = async (noteId) => {
-    if (!userId || !jobCardId || !editContent.trim()) return;
-
+  const handleSaveEdit = async (id) => {
+    if (!editContent.trim()) return;
     try {
-      const noteRef = doc(
-        db,
-        "users",
-        userId,
-        "jobcards",
-        jobCardId,
-        "notes",
-        noteId,
-      );
-      await updateDoc(noteRef, {
-        content: editContent,
+      await updateDoc(noteDoc(id), {
+        content: editContent.trim(),
         editedAt: serverTimestamp(),
       });
       setEditingId(null);
       setEditContent("");
-    } catch (error) {
-      console.error("Error updating note:", error);
-      alert("Failed to update note. Please try again.");
+    } catch (err) {
+      console.error("Error updating note:", err);
+      setError("Could not save your changes. Try again.");
     }
   };
 
-  const sortedNotes = [...notes].sort((a, b) => {
-    if (a.pinned && !b.pinned) return -1;
-    if (!a.pinned && b.pinned) return 1;
-    return 0;
-  });
+  // ── Derived ───────────────────────────────────────────────────────
+  const visibleNotes = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return notes
+      .filter(
+        (n) =>
+          (filter === "All" || (n.category || "General") === filter) &&
+          (!term ||
+            n.content?.toLowerCase().includes(term) ||
+            n.user?.toLowerCase().includes(term)),
+      )
+      .sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return (b.date?.getTime() || 0) - (a.date?.getTime() || 0);
+      });
+  }, [notes, search, filter]);
 
+  // ── Render ────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400"></div>
+      <div className="flex items-center justify-center py-24 gap-3 text-[#64748b]">
+        <Loader2 className="w-5 h-5 animate-spin" />
+        <span className="text-sm">Loading notes…</span>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Notes</h2>
-        <p className="text-gray-600 mt-1">
-          Add important observations and reminders
+    <div className="max-w-4xl mx-auto space-y-5 pb-24 md:pb-6">
+      <div>
+        <h1 className="text-lg font-bold text-[#1e293b]">Notes</h1>
+        <p className="text-xs text-[#64748b] mt-0.5">
+          Measurements, customer details, supplier orders and site reminders
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+      {error && (
+        <div className="bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-sm rounded-lg px-4 py-3">
+          {error}
+        </div>
+      )}
+
+      {/* New note */}
+      <div className="bg-white border border-[#e2e8f0] rounded-xl shadow-sm p-4 space-y-3">
+        <div className="flex gap-1.5 flex-wrap">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c}
+              onClick={() => setNewCategory(c)}
+              className={`px-3 py-1 text-xs font-medium rounded-lg transition-all ${
+                newCategory === c
+                  ? "bg-[#2563eb] text-white shadow-sm"
+                  : "bg-white border border-[#e2e8f0] text-[#64748b] hover:border-[#2563eb] hover:text-[#2563eb]"
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
         <textarea
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
-          placeholder="Add a new note..."
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 min-h-24 resize-none"
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") handleAddNote();
+          }}
+          placeholder={PLACEHOLDERS[newCategory]}
+          className={`${inputCls} min-h-24 resize-none`}
         />
-        <div className="flex justify-end mt-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] text-[#94a3b8] hidden sm:block">
+            Ctrl + Enter to add
+          </span>
           <button
             onClick={handleAddNote}
-            disabled={!newNote.trim()}
-            className="px-6 py-2 bg-orange-400 text-gray-800 rounded-lg hover:bg-orange-500 disabled:bg-gray-800 disabled:cursor-not-allowed transition-colors"
+            disabled={!newNote.trim() || adding}
+            className="ml-auto flex items-center gap-2 px-5 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-lg shadow-sm disabled:bg-[#cbd5e1] disabled:text-[#64748b] disabled:shadow-none disabled:cursor-not-allowed transition-colors"
           >
-            Add Note
+            {adding && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            Add note
           </button>
         </div>
       </div>
 
-      <div className="space-y-4">
-        {sortedNotes.map((note) => (
-          <div
-            key={note.id}
-            className={`bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow ${
-              note.pinned ? "border-l-4 border-orange-400" : ""
-            }`}
-          >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {note.pinned && (
-                  <span className="text-orange-400 text-xl" title="Pinned">
-                    📌
+      {/* Search + filter */}
+      {notes.length > 0 && (
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search notes…"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-[#e2e8f0] rounded-lg bg-white text-[#1e293b] focus:outline-none focus:ring-2 focus:ring-[#2563eb]"
+            />
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            {["All", ...CATEGORIES].map((c) => (
+              <button
+                key={c}
+                onClick={() => setFilter(c)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                  filter === c
+                    ? "bg-[#1e293b] text-white"
+                    : "bg-white border border-[#e2e8f0] text-[#64748b] hover:border-[#1e293b] hover:text-[#1e293b]"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Notes list */}
+      <div className="space-y-3">
+        {visibleNotes.map((note) => {
+          const cat = note.category || "General";
+          return (
+            <div
+              key={note.id}
+              className={`bg-white border border-[#e2e8f0] rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow ${
+                note.pinned ? "border-l-4 border-l-[#2563eb]" : ""
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-8 h-8 bg-[#dbeafe] text-[#1d4ed8] rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    {initials(note.user)}
                   </span>
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-xs text-sm font-medium">
-                      {note.user
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </span>
-                    <span className="font-semibold text-gray-800">
-                      {note.user}
-                    </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#1e293b] truncate">
+                      {note.user || "Team member"}
+                    </p>
+                    <p className="text-xs text-[#94a3b8]">
+                      {formatWhen(note.date)}
+                      {note.editedDate && " · edited"}
+                    </p>
                   </div>
                 </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {note.pinned && (
+                    <span title="Pinned" className="text-sm">
+                      📌
+                    </span>
+                  )}
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold whitespace-nowrap ${
+                      CAT_COLORS[cat] || CAT_COLORS.General
+                    }`}
+                  >
+                    {cat}
+                  </span>
+                </div>
               </div>
-              <span className="text-sm text-gray-500">{note.timestamp}</span>
+
+              {editingId === note.id ? (
+                <div>
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className={`${inputCls} min-h-24 resize-none mb-2`}
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleSaveEdit(note.id)}
+                      disabled={!editContent.trim()}
+                      className="px-4 py-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-sm font-medium rounded-lg disabled:opacity-60"
+                    >
+                      Save changes
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="px-4 py-1.5 text-sm font-medium text-[#64748b] bg-[#f8fafc] border border-[#e2e8f0] rounded-lg hover:bg-[#e2e8f0]"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm text-[#374151] mb-3 whitespace-pre-wrap break-words">
+                    {note.content}
+                  </p>
+                  <div className="flex gap-1 -ml-2">
+                    <button
+                      onClick={() => handlePinNote(note.id, note.pinned)}
+                      className="px-2 py-1 text-xs text-[#64748b] hover:text-[#2563eb] hover:bg-[#eff6ff] rounded-lg transition-colors"
+                    >
+                      {note.pinned ? "Unpin" : "Pin"}
+                    </button>
+                    <button
+                      onClick={() => startEdit(note)}
+                      className="flex items-center gap-1 px-2 py-1 text-xs text-[#64748b] hover:text-[#2563eb] hover:bg-[#eff6ff] rounded-lg transition-colors"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteNote(note.id)}
+                      className="flex items-center gap-1 px-2 py-1 text-xs text-[#64748b] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
-
-            {editingId === note.id ? (
-              <div>
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 min-h-24 resize-none mb-2"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleSaveEdit(note.id)}
-                    className="px-4 py-1 bg-orange-400 text-gray-800 rounded hover:bg-orange-500 text-sm"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="px-4 py-1 bg-gray-800 text-gray-700 rounded hover:bg-gray-400 text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="text-gray-700 mb-3 whitespace-pre-wrap">
-                  {note.content}
-                </p>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handlePinNote(note.id, note.pinned)}
-                    className="text-sm text-gray-600 hover:text-orange-400 transition-colors"
-                  >
-                    {note.pinned ? "📌 Unpin" : "📌 Pin"}
-                  </button>
-                  <button
-                    onClick={() => handleEditNote(note.id, note.content)}
-                    className="text-sm text-gray-600 hover:text-blue-500 transition-colors"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteNote(note.id)}
-                    className="text-sm text-gray-600 hover:text-red-500 transition-colors"
-                  >
-                    🗑️ Delete
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {notes.length === 0 && (
-        <div className="text-center py-12 text-gray-500 bg-white rounded-lg shadow-md">
-          <p className="text-lg">No notes yet</p>
-          <p className="text-sm mt-2">
-            Add your first note above to get started
+      {visibleNotes.length === 0 && (
+        <div className="text-center py-14 bg-white border border-[#e2e8f0] rounded-xl">
+          <StickyNote className="w-8 h-8 text-[#cbd5e1] mx-auto mb-2" />
+          <p className="text-sm text-[#64748b]">
+            {notes.length === 0
+              ? "No notes yet. Write your first note above."
+              : "No notes match your search or filter."}
           </p>
         </div>
       )}

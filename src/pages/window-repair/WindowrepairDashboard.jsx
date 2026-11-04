@@ -53,6 +53,9 @@ import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import NotesView from "./NotesView";
+import InventoryView from "./InventoryView";
+import ScheduleView from "./ScheduleView";
+import ProjectsView from "./ProjectsView";
 import AIInvoiceWindow from '../AIInvoiceWindow';
 import {
   ChevronDown,
@@ -1313,6 +1316,23 @@ const handleAddNewCustomer = () => {
           {activeView === "notes-view" && (
             <div className="flex-1 overflow-y-auto p-4">
               <NotesView user={user} />
+            </div>
+          )}
+          {activeView === "inventory" && (
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
+              <InventoryView user={user} />
+            </div>
+          )}
+          {activeView === "schedule" && (
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
+              <ScheduleView user={user} />
+            </div>
+          )}
+          {(activeView === "projects" ||
+            activeView === "work-orders" ||
+            activeView === "materials") && (
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
+              <ProjectsView user={user} defaultTab={activeView} />
             </div>
           )}
           {activeView === "templates" && (
