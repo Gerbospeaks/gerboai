@@ -8,6 +8,7 @@ import CookieConsent from "../components/CookieConsent";
 import { css } from "./landingPageStyles";
 import google from "../assets/google-play.png";
 import appStore from "../assets/app-store.png";
+import CallAnswering, { callAnsweringCss } from "./CallAnswering";
 import {
   Zap,
   TrendingUp,
@@ -249,8 +250,8 @@ const FUNNEL = [
 const NAV = [
   { id: "features", label: "Features", type: "scroll" },
   { id: "ai-invoicing", label: "AI Invoicing", type: "scroll" },
+  { id: "call-answering", label: "Call Answering", type: "scroll" },
   { id: "pricing", label: "Pricing", type: "scroll" },
-  { id: "marketplace", label: "Marketplace", type: "modal" },
   { id: "customers", label: "Customers", type: "modal" },
   { id: "faq", label: "FAQ", type: "modal" },
 ];
@@ -621,7 +622,7 @@ const LandingPage = () => {
       </Helmet>
 
       <div className="lp">
-        <style>{css}</style>
+       <style>{css + callAnsweringCss}</style>
 
         <div className="lp-content">
           {/* ── Nav ── */}
@@ -817,6 +818,12 @@ const LandingPage = () => {
               </div>
             </div>
           </section>
+          <CallAnswering
+  localPrice={localPrice}
+  currencyLoading={currencyLoading}
+  onStart={() => open("register")}
+  onContact={openCalendly}
+/>
           {/* ── Pricing ── */}
           <section id="pricing" className="lp-section">
             <div className="lp-section-inner">
