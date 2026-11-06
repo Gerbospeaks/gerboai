@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { serverTimestamp } from "firebase/firestore";
@@ -56,6 +57,7 @@ import {
   ChevronDown,
   ArrowUpRight,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -1012,6 +1014,7 @@ const alerts = buildAlerts({ products, invoices, onlineOrders });
     { id: "purchases", label: "Purchases", icon: Truck },
 { id: "online-orders", label: "Online Orders", icon: Globe },
 { id: "expenses", label: "Expenses", icon: Wallet },
+{ id: "gerbo-ai", label: "GerboAI Receptionist", icon: GerboAIIcon },
 { id: "branches", label: "Branches", icon: Building2 },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "vat", label: "VAT Report", icon: Receipt },
@@ -1890,6 +1893,7 @@ const renderOverview = () => (
     purchases: () => <PurchasesView user={user} />,
 "online-orders": () => <OnlineOrdersView user={user} onChanged={loadOnlineOrders} />,
 expenses: () => <ExpensesView user={user} />,
+"gerbo-ai": () => <GerboAIPanel user={user} fixedHeight />,
 branches: () => <BranchesView user={user} />,
   };
 

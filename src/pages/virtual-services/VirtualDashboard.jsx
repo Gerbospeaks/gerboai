@@ -9,6 +9,7 @@ import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import ReportsView from "../mechanics/ReportsView";
 import HistoryView from "../mechanics/HistoryView";
 import { serverTimestamp } from "firebase/firestore";
@@ -17,6 +18,7 @@ import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
+import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { useLocation } from "react-router-dom";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -24,6 +26,12 @@ import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
 import VirtualMultiStepForm from "./VirtualMultiStepForm";
 import VirtualSidebar from "./VirtualSidebar";
+// ── Virtual Services operational views (counterparts of the Upholstery views)
+import VirtualProjectsView from "./VirtualProjectsView";
+import VirtualScheduleView from "./VirtualScheduleView";
+import VirtualCatalogView from "./VirtualCatalogView";
+import VirtualNotesView from "./VirtualNotesView";
+import VirtualAnalyticsView from "./VirtualAnalyticsView";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import {
   getFirestore,
@@ -57,6 +65,12 @@ import {
   LogOut,
   Eye,
   Lock,
+  CreditCard,
+  CheckSquare,
+  Wallet,
+  DollarSign,
+  Receipt,
+  ClipboardList,
 } from "lucide-react";
 
 // ── Plan gating – import from the separate planGating.js file ────────────────
@@ -66,22 +80,68 @@ import { UpgradeModal } from "./planGating";
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
-const generateInvoiceNumber = async (userId) => {
+
+/**
+ * Next document number for the given type: INV-2026-1001 / QTE-2026-1001.
+ * Quotes and invoices are numbered independently (separate collections).
+ */
+const generateDocumentNumber = async (userId, type = "invoice") => {
   const db = getFirestore();
   const year = new Date().getFullYear();
-  const invoicesRef = collection(db, "users", userId, "invoices");
-  const q = query(invoicesRef, orderBy("createdAt", "desc"), limit(1));
-  const snapshot = await getDocs(q);
+  const isQuote = type === "quote";
+  const ref = collection(db, "users", userId, isQuote ? "quotes" : "invoices");
+  const snapshot = await getDocs(
+    query(ref, orderBy("createdAt", "desc"), limit(1)),
+  );
   let lastNumber = 1000;
   if (!snapshot.empty) {
-    const lastInvoice = snapshot.docs[0].data();
-    const match = lastInvoice.invoiceNumber?.match(/(\d+)$/);
+    const last = snapshot.docs[0].data();
+    const match = (last.invoiceNumber || last.quoteNumber || "").match(
+      /(\d+)$/,
+    );
     if (match) lastNumber = Number(match[1]);
   }
-  return `INV-${year}-${String(lastNumber + 1).padStart(4, "0")}`;
+  return `${isQuote ? "QTE" : "INV"}-${year}-${String(lastNumber + 1).padStart(4, "0")}`;
 };
 
+const collectionFor = (type) => (type === "quote" ? "quotes" : "invoices");
+const docLabel = (type) => (type === "quote" ? "Quote" : "Invoice");
+
+const daysFromNow = (n) =>
+  new Date(Date.now() + n * 24 * 60 * 60 * 1000).toISOString();
+
 const functions = getFunctions();
+
+/**
+ * Views that sit behind a plan feature. Everything not listed here is open on
+ * every plan. Feature keys come from FEATURE_PLAN in planGating.js
+ * (bookings / packages are Elite). Delete an entry to un-gate that view.
+ */
+const VIEW_GATES = {
+  schedule: ["bookings", "Schedule & Bookings"],
+  inventory: ["packages", "Service Catalogue"],
+};
+
+// Catalogue "kind" -> line-item "type" understood by VirtualMultiStepForm
+const KIND_TO_ITEM_TYPE = {
+  Service: "Service",
+  Package: "Service",
+  "Digital Product": "Digital Product",
+  "Software / Licence": "Subscription",
+};
+
+const BUILDER_VIEWS = ["invoice", "quote"];
+
+const statusBadge = (s) =>
+  s === "paid"
+    ? "bg-green-100 text-green-700"
+    : s === "partially_paid"
+      ? "bg-amber-100 text-amber-700"
+      : s === "converted"
+        ? "bg-purple-100 text-purple-700"
+        : s === "pending"
+          ? "bg-blue-100 text-blue-700"
+          : "bg-gray-100 text-gray-700";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Inner dashboard – consumes the plan context
@@ -91,36 +151,29 @@ const VirtualDashboardInner = () => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
-  const [documentType, setDocumentType] = useState("invoice");
-  const [useAI, setUseAI] = useState(false);
-  const [activeTab, setActiveTab] = useState("Invoice");
-  const [showInvoice, setShowInvoice] = useState(false);
+  const [documentType, setDocumentType] = useState("invoice"); // "invoice" | "quote"
   const { user, authUser } = useAuth();
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceId, setInvoiceId] = useState(null);
   const [savedInvoices, setSavedInvoices] = useState([]);
-  const [showInvoicesList, setShowInvoicesList] = useState(false);
+  const [savedQuotes, setSavedQuotes] = useState([]);
+  const [listModal, setListModal] = useState(null); // null | "quote" | "invoice"
   const [showSettings, setShowSettings] = useState(false);
-  const [showCustomersList, setShowCustomersList] = useState(false);
-  const [savedCustomers, setSavedCustomers] = useState([]);
   const [activeView, setActiveView] = useState("home");
   const { can, isAdmin } = usePermissions();
   const [showUserManagement, setShowUserManagement] = useState(false);
-  const [activeTemplate, setActiveTemplate] = useState("classic");
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [customers, setCustomers] = useState([]);
-  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
-    useState(null);
-  const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
-  const [isClientsOpen, setIsClientsOpen] = useState(false);
+  const [selectedForPayment, setSelectedForPayment] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
- const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [issueDate, setIssueDate] = useState(new Date().toISOString());
   const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
+  const [toast, setToast] = useState(null); // { msg, action?: {label, onClick} }
   const [stampSettings, setStampSettings] = useState({
     text: "APPROVED",
     color: "#d32f2f",
@@ -190,7 +243,8 @@ const VirtualDashboardInner = () => {
     subtotal,
     vat,
     total,
-    documentType: "virtual",
+    // "quote" | "invoice" – the templates switch their title/number label on this
+    documentType,
     serviceType: "VIRTUAL SERVICE",
     showStamp: stampSettings?.enabled || false,
     stampText: stampSettings?.text || "APPROVED",
@@ -199,41 +253,57 @@ const VirtualDashboardInner = () => {
     stampConfig,
   };
 
+  // ── Navigation (plan-aware) ────────────────────────────────────────────────
+  const navigate = (view) => {
+    const gate = VIEW_GATES[view];
+    if (gate) requirePlan(gate[0], () => setActiveView(view), gate[1]);
+    else setActiveView(view);
+  };
+
+  const showToast = (msg, action) => setToast({ msg, action });
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   // ── Effects ────────────────────────────────────────────────────────────────
+  // Number preview for a fresh (unsaved) document; follows the Quote/Invoice toggle
   useEffect(() => {
-    if (!user?.uid) return;
-    generateInvoiceNumber(user.uid).then(setInvoiceNumber);
-    loadSavedInvoices();
-  }, [user]);
+    if (!user?.uid || invoiceId) return;
+    generateDocumentNumber(user.uid, documentType).then(setInvoiceNumber);
+  }, [user?.uid, documentType, invoiceId]);
 
   useEffect(() => {
-    loadCustomers();
-  }, []);
+    if (user?.uid) loadSavedDocuments();
+  }, [user?.uid]);
 
   useEffect(() => {
-    if (location.state?.activeView) setActiveView(location.state.activeView);
+    if (user?.uid) loadCustomers();
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (location.state?.activeView) navigate(location.state.activeView);
   }, [location.state]);
 
   useEffect(() => {
-    if (user?.uid) loadBusinessInfo();
-  }, [user]);
+    const run = async () => {
+      if (!user?.uid) return;
+      await loadBusinessInfo();
+      setLoading(false);
+    };
+    run();
+  }, [user?.uid]);
 
   useEffect(() => {
-    const fetchBusinessInfo = async () => {
-      if (!user?.uid) return;
-      try {
-        const db = getFirestore();
-        const docRef = doc(db, "users", user.uid, "settings", "businessInfo");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) setBusinessInfo(docSnap.data());
-      } catch (error) {
-        console.error("Error fetching business info:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBusinessInfo();
-  }, [user]);
+    if (!invoiceId) {
+      setPaymentStatus({ totalPaid: 0, balanceDue: total, status: "pending" });
+    }
+  }, [total, invoiceId]);
+
+  useEffect(() => {
+    loadPaymentStatus();
+  }, [invoiceId, user?.uid, documentType]);
 
   useEffect(() => {
     const handleResize = () => setSidebarOpen(window.innerWidth >= 1024);
@@ -244,44 +314,43 @@ const VirtualDashboardInner = () => {
 
   // ── Data loaders ───────────────────────────────────────────────────────────
   const loadCustomers = async () => {
+    if (!user?.uid) return;
     try {
       const q = query(
-        collection(db, "customers"),
+        collection(db, "users", user.uid, "clients"),
         orderBy("createdAt", "desc"),
       );
       const snap = await getDocs(q);
-      setCustomers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      setCustomers(
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((c) => !c._placeholder),
+      );
     } catch (e) {
       console.error("Error loading customers:", e);
     }
   };
 
-  const loadSavedInvoices = async () => {
+  const loadSavedDocuments = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
-    const q = query(
-      collection(db, "users", user.uid, "invoices"),
-      orderBy("createdAt", "desc"),
-      limit(50),
-    );
-    const snap = await getDocs(q);
-    setSavedInvoices(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-  };
-
-  const loadSavedCustomers = async () => {
-    if (!user?.uid) return;
-    const db = getFirestore();
-    const q = query(
-      collection(db, "users", user.uid, "clients"),
-      orderBy("createdAt", "desc"),
-      limit(50),
-    );
-    const snap = await getDocs(q);
-    setSavedCustomers(
-      snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .filter((c) => !c._placeholder),
-    );
+    const grab = async (type) => {
+      try {
+        const q = query(
+          collection(db, "users", user.uid, collectionFor(type)),
+          orderBy("createdAt", "desc"),
+          limit(50),
+        );
+        const snap = await getDocs(q);
+        return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      } catch (e) {
+        console.error(`Error loading ${type}s:`, e);
+        return [];
+      }
+    };
+    const [inv, quo] = await Promise.all([grab("invoice"), grab("quote")]);
+    setSavedInvoices(inv);
+    setSavedQuotes(quo);
   };
 
   const loadBusinessInfo = async () => {
@@ -291,7 +360,11 @@ const VirtualDashboardInner = () => {
       const docSnap = await getDoc(
         doc(db, "users", user.uid, "settings", "businessInfo"),
       );
-      if (docSnap.exists()) setBusinessInfo(docSnap.data());
+      if (docSnap.exists()) {
+        const d = docSnap.data();
+        setBusinessInfo(d);
+        if (d.stampSettings) setStampSettings(d.stampSettings);
+      }
     } catch (e) {
       console.error("Error loading business info:", e);
     }
@@ -303,13 +376,14 @@ const VirtualDashboardInner = () => {
       return;
     }
     try {
-      const col = documentType === "estimate" ? "estimates" : "invoices";
-      const snap = await getDoc(doc(db, "users", user.uid, col, invoiceId));
+      const snap = await getDoc(
+        doc(db, "users", user.uid, collectionFor(documentType), invoiceId),
+      );
       if (snap.exists()) {
         const data = snap.data();
         setPaymentStatus({
-          totalPaid: data.totals?.paid || 0,
-          balanceDue: data.totals?.due || data.totals?.total || 0,
+          totalPaid: data.totals?.paid ?? 0,
+          balanceDue: data.totals?.due ?? data.totals?.total ?? 0,
           status: data.status || "pending",
         });
       } else {
@@ -325,10 +399,16 @@ const VirtualDashboardInner = () => {
     }
   };
 
-  const loadInvoiceForExport = async () => {
+  const loadDocumentForExport = async () => {
     if (!user?.uid || !invoiceId) return null;
     const snap = await getDoc(
-      doc(getFirestore(), "users", user.uid, "invoices", invoiceId),
+      doc(
+        getFirestore(),
+        "users",
+        user.uid,
+        collectionFor(documentType),
+        invoiceId,
+      ),
     );
     return snap.exists() ? snap.data() : null;
   };
@@ -352,26 +432,43 @@ const VirtualDashboardInner = () => {
     setCustomerId(customer.customerId || "");
   };
 
-  const loadInvoice = (invoice) => {
-    setInvoiceId(invoice.id);
-    setInvoiceNumber(invoice.invoiceNumber || "");
-    setCustomerName(invoice.customer?.name || "");
-    setCustomerEmail(invoice.customer?.email || "");
-    setCustomerPhone(invoice.customer?.phone || "");
-    setCustomerAddress(invoice.customer?.address || "");
-    setCustomerId(invoice.customer?.customerId || "");
-    setEventDate(invoice.event?.date || "");
-    setEventType(invoice.event?.type || "");
-    setEventLocation(invoice.event?.location || "");
-    setItems(invoice.items || []);
-    setShowInvoicesList(false);
+  /** Open a saved quote or invoice in the builder */
+  const loadDocument = (d, type) => {
+    setDocumentType(type);
+    setInvoiceId(d.id);
+    setInvoiceNumber(d.invoiceNumber || d.quoteNumber || "");
+    setCustomerName(d.customer?.name || "");
+    setCustomerEmail(d.customer?.email || "");
+    setCustomerPhone(d.customer?.phone || "");
+    setCustomerAddress(d.customer?.address || "");
+    setCustomerId(d.customer?.customerId || "");
+    setEventDate(d.event?.date || "");
+    setEventType(d.event?.type || "");
+    setEventLocation(d.event?.location || "");
+    setItems(d.items || []);
+    setPaymentStatus({
+      totalPaid: d.totals?.paid ?? 0,
+      balanceDue: d.totals?.due ?? d.totals?.total ?? 0,
+      status: d.status || "pending",
+    });
+    setListModal(null);
+    setActiveView("invoice");
   };
 
-  const buildInvoicePayload = (numberToUse) => ({
+  const buildPayload = (numberToUse, type) => ({
+    // both fields are written so every reader (shared reports, history, the
+    // other industries' components) finds the number under the name it expects
     invoiceNumber: numberToUse,
+    quoteNumber: numberToUse,
+    documentType: type,
     locked: true,
     status: "pending",
-    dates: { invoiceDate: documentType === "invoice" ? issueDate : null, quoteDate: documentType === "quote" ? issueDate : null, dueDate: null },
+    dates: {
+      invoiceDate: type === "invoice" ? issueDate : null,
+      quoteDate: type === "quote" ? issueDate : null,
+      dueDate: type === "invoice" ? daysFromNow(7) : null,
+      validUntil: type === "quote" ? daysFromNow(30) : null,
+    },
     customer: {
       name: customerName,
       email: customerEmail,
@@ -389,40 +486,56 @@ const VirtualDashboardInner = () => {
   const handleSaveInvoice = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
-    let numberToUse = invoiceNumber;
-    if (!invoiceId) {
-      numberToUse = await generateInvoiceNumber(user.uid);
-      setInvoiceNumber(numberToUse);
+    const type = documentType;
+    try {
+      let numberToUse = invoiceNumber;
+      if (!invoiceId) {
+        numberToUse = await generateDocumentNumber(user.uid, type);
+        setInvoiceNumber(numberToUse);
+      }
+      const payload = buildPayload(numberToUse, type);
+      if (invoiceId) {
+        // Don't overwrite createdAt, or editing an old document would make it
+        // the "latest" one and the next number would be generated from it.
+        // Don't reset what has already been paid either.
+        const { createdAt, totals, status, ...rest } = payload;
+        await updateDoc(
+          doc(db, "users", user.uid, collectionFor(type), invoiceId),
+          {
+            ...rest,
+            "totals.subtotal": subtotal,
+            "totals.vat": vat,
+            "totals.total": total,
+            "totals.due": Math.max(0, total - (paymentStatus.totalPaid || 0)),
+            updatedAt: serverTimestamp(),
+          },
+        );
+      } else {
+        const r = await addDoc(
+          collection(db, "users", user.uid, collectionFor(type)),
+          payload,
+        );
+        setInvoiceId(r.id);
+      }
+      alert(`${docLabel(type)} saved successfully`);
+      loadSavedDocuments();
+    } catch (e) {
+      console.error(e);
+      alert(`Failed to save ${type}.`);
     }
-    const payload = buildInvoicePayload(numberToUse);
-    if (invoiceId) {
-      await updateDoc(doc(db, "users", user.uid, "invoices", invoiceId), {
-        ...payload,
-        updatedAt: serverTimestamp(),
-      });
-    } else {
-      const r = await addDoc(
-        collection(db, "users", user.uid, "invoices"),
-        payload,
-      );
-      setInvoiceId(r.id);
-    }
-    alert("Invoice saved successfully");
-    loadSavedInvoices();
   };
 
   const handleConvertToInvoice = async () => {
-    if (!user?.uid || !invoiceId) {
+    if (!user?.uid || !invoiceId || documentType !== "quote") {
       alert("Please save the quote first.");
       return;
     }
     if (!window.confirm("Convert this quote to an invoice?")) return;
     try {
       const db = getFirestore();
-      const newNum = await generateInvoiceNumber(user.uid);
+      const newNum = await generateDocumentNumber(user.uid, "invoice");
       const payload = {
-        ...buildInvoicePayload(newNum),
-        documentType: "invoice",
+        ...buildPayload(newNum, "invoice"),
         convertedFromQuote: invoiceId,
         convertedFromQuoteNumber: invoiceNumber,
         convertedAt: serverTimestamp(),
@@ -442,7 +555,7 @@ const VirtualDashboardInner = () => {
       setInvoiceId(invoiceRef.id);
       setInvoiceNumber(newNum);
       alert(`Converted to Invoice ${newNum}`);
-      loadSavedInvoices();
+      loadSavedDocuments();
     } catch (e) {
       console.error(e);
       alert("Failed to convert.");
@@ -455,25 +568,28 @@ const VirtualDashboardInner = () => {
       return;
     }
     try {
-      const col = documentType === "estimate" ? "estimates" : "invoices";
-      const snap = await getDoc(doc(db, "users", user.uid, col, invoiceId));
+      const snap = await getDoc(
+        doc(db, "users", user.uid, collectionFor(documentType), invoiceId),
+      );
       if (snap.exists()) {
-        setSelectedInvoiceForPayment({ id: invoiceId, ...snap.data() });
+        setSelectedForPayment({ id: invoiceId, ...snap.data() });
         setShowPaymentModal(true);
-      } else alert("Invoice not found.");
+      } else alert("Document not found. Please save it first.");
     } catch (e) {
       console.error(e);
-      alert("Failed to load invoice.");
+      alert("Failed to load document.");
     }
   };
 
   const handlePaymentComplete = () => {
-    loadSavedInvoices();
+    loadSavedDocuments();
     loadPaymentStatus();
     setShowPaymentModal(false);
   };
 
-  const handleNewInvoice = () => {
+  /** Start a fresh document of the given type */
+  const handleNewDocument = (type = documentType) => {
+    setDocumentType(type);
     setInvoiceId(null);
     setInvoiceNumber("");
     setCustomerName("Sarah Johnson");
@@ -486,7 +602,24 @@ const VirtualDashboardInner = () => {
     setEventType("Consultation");
     setEventLocation("Online / Remote");
     setItems([]);
-    if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
+    if (user?.uid)
+      generateDocumentNumber(user.uid, type).then(setInvoiceNumber);
+  };
+  const handleNewInvoice = () => handleNewDocument("invoice");
+  const handleNewQuote = () => handleNewDocument("quote");
+
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice") {
+      handleNewInvoice();
+      navigate("invoice");
+    } else if (action === "newQuote") {
+      handleNewQuote();
+      navigate("invoice");
+    } else if (action === "newCustomer") {
+      handleAddNewCustomer();
+    } else if (view) {
+      navigate(view);
+    }
   };
 
   const handleAddItem = () => {
@@ -504,6 +637,32 @@ const VirtualDashboardInner = () => {
       },
     ]);
     setNewItem({ description: "", rate: "", qty: "", type: "Service" });
+  };
+
+  /** Catalogue -> current quote/invoice */
+  const handleAddCatalogItem = (it) => {
+    const rate = Number(it.price) || 0;
+    const suffix =
+      it.billing && it.billing !== "One-off"
+        ? ` (${it.billing.toLowerCase()})`
+        : "";
+    setItems((prev) => [
+      ...prev,
+      {
+        description: `${it.name}${suffix}`,
+        type: KIND_TO_ITEM_TYPE[it.kind] || "Service",
+        rate,
+        qty: 1,
+        amount: rate,
+      },
+    ]);
+    showToast(
+      `Added to ${documentType === "quote" ? "quote" : "invoice"}: ${it.name}`,
+      {
+        label: `Open ${documentType}`,
+        onClick: () => setActiveView("invoice"),
+      },
+    );
   };
 
   const handleLogoUpload = async (e) => {
@@ -561,12 +720,12 @@ const VirtualDashboardInner = () => {
   };
 
   const handleSavePDF = async () => {
-    const saved = await loadInvoiceForExport();
+    const saved = await loadDocumentForExport();
     if (!saved) {
-      alert("Please save the invoice before exporting PDF");
+      alert(`Please save the ${documentType} before exporting PDF`);
       return;
     }
-    setInvoiceNumber(saved.invoiceNumber);
+    setInvoiceNumber(saved.invoiceNumber || saved.quoteNumber || "");
     setItems(saved.items);
     setCustomerName(saved.customer.name);
     setCustomerEmail(saved.customer.email);
@@ -628,7 +787,7 @@ const VirtualDashboardInner = () => {
         requirePlan(
           "previewInvoice",
           () => setShowPreview(true),
-          "Invoice Preview",
+          "Document Preview",
         ),
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
@@ -642,11 +801,10 @@ const VirtualDashboardInner = () => {
     {
       label: "New",
       icon: Plus,
-      onClick: handleNewInvoice,
+      onClick: () => handleNewDocument(documentType),
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-sm font-semibold rounded-lg hover:from-emerald-700 transition-colors shadow-sm whitespace-nowrap",
     },
-   
     {
       label: "Save",
       icon: Save,
@@ -654,7 +812,6 @@ const VirtualDashboardInner = () => {
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-violet-600 to-violet-700 text-white text-sm font-semibold rounded-lg hover:from-violet-700 transition-colors shadow-sm whitespace-nowrap",
     },
-   
   ].filter(Boolean);
 
   const mobileDashboardActions = [
@@ -701,38 +858,106 @@ const VirtualDashboardInner = () => {
     },
   ].filter(Boolean);
 
+  const isQuote = documentType === "quote";
+  const listDocs = listModal === "quote" ? savedQuotes : savedInvoices;
+
+  // Summary cards above the builder: quotes show scope, invoices show money
+  const summaryCards = isQuote
+    ? [
+        {
+          label: "Quote Total",
+          value: `R${total.toFixed(2)}`,
+          icon: DollarSign,
+          iconBg: "bg-violet-50",
+          iconColor: "text-violet-600",
+          textColor: "text-violet-600",
+        },
+        {
+          label: "Line Items",
+          value: items.length,
+          icon: ClipboardList,
+          iconBg: "bg-slate-100",
+          iconColor: "text-slate-500",
+          textColor: "text-slate-800",
+        },
+        {
+          label: "VAT (15%)",
+          value: `R${vat.toFixed(2)}`,
+          icon: Receipt,
+          iconBg: "bg-slate-100",
+          iconColor: "text-slate-500",
+          textColor: "text-slate-800",
+        },
+      ]
+    : [
+        {
+          label: "Total Amount",
+          value: `R${total.toFixed(2)}`,
+          icon: DollarSign,
+          iconBg: "bg-violet-50",
+          iconColor: "text-violet-600",
+          textColor: "text-violet-600",
+        },
+        {
+          label: "Paid",
+          value: `R${paymentStatus.totalPaid.toFixed(2)}`,
+          icon: CheckSquare,
+          iconBg: paymentStatus.totalPaid > 0 ? "bg-green-100" : "bg-slate-100",
+          iconColor:
+            paymentStatus.totalPaid > 0 ? "text-green-600" : "text-slate-400",
+          textColor:
+            paymentStatus.totalPaid > 0 ? "text-green-600" : "text-slate-800",
+        },
+        {
+          label: "Balance Due",
+          value: `R${paymentStatus.balanceDue.toFixed(2)}`,
+          icon: Wallet,
+          iconBg: paymentStatus.balanceDue <= 0 ? "bg-green-100" : "bg-red-50",
+          iconColor:
+            paymentStatus.balanceDue <= 0 ? "text-green-600" : "text-red-600",
+          textColor:
+            paymentStatus.balanceDue <= 0 ? "text-green-600" : "text-red-600",
+        },
+      ];
+
   return (
     <div className="flex h-screen w-screen bg-gradient-to-br from-slate-50 via-slate-100 to-gray-100 overflow-hidden">
       {/* ── Upgrade modal (renders on top of everything) ─────────────────── */}
       <UpgradeModal />
 
-      {/* ── Sidebar (extracted into its own component) ───────────────────── */}
+      {/* ── Sidebar ──────────────────────────────────────────────────────── */}
       <VirtualSidebar
         user={user}
         activeView={activeView}
-        setActiveView={setActiveView}
+        setActiveView={navigate}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         setShowSettings={setShowSettings}
         handleNewInvoice={handleNewInvoice}
+        handleNewQuote={handleNewQuote}
         handleLogout={handleLogout}
         businessInfo={businessInfo}
         savedInvoices={savedInvoices}
-        savedCustomers={savedCustomers}
-        showInvoicesList={showInvoicesList}
-        setShowInvoicesList={setShowInvoicesList}
+        savedQuotes={savedQuotes}
+        savedCustomers={customers}
+        openDocumentsList={setListModal}
         setShowCustomersListModal={setShowCustomersListModal}
         handleAddNewCustomer={handleAddNewCustomer}
+        newRequestCount={0}
       />
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
       <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-16"}`}
+        className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "md:ml-2" : "md:ml-4"}`}
       >
         <div className="flex flex-col h-screen">
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            dashboardType="Virtual"
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -755,6 +980,18 @@ const VirtualDashboardInner = () => {
               existingCustomer={selectedCustomer}
               onCustomerSaved={handleCustomerSaved}
             />
+
+            {showPaymentModal && selectedForPayment && (
+              <PaymentProcessor
+                showModal={showPaymentModal}
+                setShowModal={setShowPaymentModal}
+                invoice={selectedForPayment}
+                onPaymentComplete={handlePaymentComplete}
+                user={user}
+                businessInfo={businessInfo}
+              />
+            )}
+
             {showStampModal && (
               <StampSignatureModal
                 isOpen={showStampModal}
@@ -774,61 +1011,87 @@ const VirtualDashboardInner = () => {
                 existingConfig={stampConfig}
               />
             )}
-            {showInvoicesList && (
+
+            {/* ── Saved quotes / invoices list ─────────────────────────── */}
+            {listModal && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="text-xl font-semibold">Saved Invoices</h2>
+                  <div className="p-4 border-b flex items-center justify-between gap-3">
+                    <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden">
+                      {["quote", "invoice"].map((t, i) => (
+                        <button
+                          key={t}
+                          onClick={() => setListModal(t)}
+                          className={`px-4 py-2 text-sm font-medium transition-colors ${i > 0 ? "border-l border-gray-300" : ""} ${listModal === t ? "bg-violet-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+                        >
+                          {docLabel(t)}s (
+                          {(t === "quote" ? savedQuotes : savedInvoices).length}
+                          )
+                        </button>
+                      ))}
+                    </div>
                     <button
-                      onClick={() => setShowInvoicesList(false)}
+                      onClick={() => setListModal(null)}
                       className="text-gray-500 hover:text-gray-700"
                     >
                       ✕
                     </button>
                   </div>
                   <div className="overflow-auto p-4">
-                    {savedInvoices.length === 0 ? (
+                    {listDocs.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
-                        No saved invoices yet
+                        No saved {listModal}s yet
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {savedInvoices.map((invoice) => (
+                        {listDocs.map((d) => (
                           <div
-                            key={invoice.id}
-                            onClick={() => loadInvoice(invoice)}
+                            key={d.id}
+                            onClick={() => loadDocument(d, listModal)}
                             className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                           >
                             <div className="flex justify-between items-start">
                               <div>
                                 <div className="font-semibold text-lg">
-                                  {invoice.invoiceNumber || "N/A"}
+                                  {d.invoiceNumber || d.quoteNumber || "N/A"}
                                 </div>
                                 <div className="text-sm text-gray-600 mt-1">
-                                  Client: {invoice.customer?.name || "N/A"}
+                                  Client: {d.customer?.name || "N/A"}
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  Event: {invoice.event?.type || "N/A"}
+                                  Service: {d.event?.type || "N/A"}
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  Location: {invoice.event?.location || "N/A"}
+                                  Platform: {d.event?.location || "N/A"}
                                 </div>
                               </div>
                               <div className="text-right">
                                 <div className="text-lg font-semibold text-violet-600">
-                                  R{invoice.totals?.total?.toFixed(2) || "0.00"}
+                                  R{d.totals?.total?.toFixed(2) || "0.00"}
                                 </div>
+                                {listModal === "invoice" && (
+                                  <div className="text-xs text-green-600">
+                                    Paid R{(d.totals?.paid ?? 0).toFixed(2)}
+                                  </div>
+                                )}
                                 <div className="text-sm text-gray-500">
-                                  {invoice.dates?.invoiceDate
-                                    ? new Date(
-                                        invoice.dates.invoiceDate,
-                                      ).toLocaleDateString("en-ZA")
-                                    : "N/A"}
+                                  {(() => {
+                                    const raw =
+                                      d.dates?.invoiceDate ||
+                                      d.dates?.quoteDate;
+                                    return raw
+                                      ? new Date(raw).toLocaleDateString(
+                                          "en-ZA",
+                                        )
+                                      : "N/A";
+                                  })()}
                                 </div>
                                 <div
-                                  className={`text-xs mt-1 px-2 py-1 rounded ${invoice.status === "paid" ? "bg-green-100 text-green-700" : invoice.status === "pending" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}`}
+                                  className={`text-xs mt-1 px-2 py-1 rounded inline-block ${statusBadge(d.status)}`}
                                 >
-                                  {invoice.status || "unknown"}
+                                  {d.status === "partially_paid"
+                                    ? "partial"
+                                    : d.status || "unknown"}
                                 </div>
                               </div>
                             </div>
@@ -841,6 +1104,7 @@ const VirtualDashboardInner = () => {
               </div>
             )}
 
+            {/* ── Fullscreen preview ───────────────────────────────────── */}
             {showPreview && (
               <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-4">
                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
@@ -851,7 +1115,7 @@ const VirtualDashboardInner = () => {
                       </div>
                       <div>
                         <h2 className="text-sm font-semibold text-[#1e293b]">
-                          Invoice Preview
+                          {docLabel(documentType)} Preview
                         </h2>
                         <p className="text-xs text-[#64748b]">
                           {invoiceNumber || "Draft"}
@@ -910,45 +1174,113 @@ const VirtualDashboardInner = () => {
                 documentType={documentType}
                 onExit={() => setShowAIWindow(false)}
                 industry="virtual"
+                onNavigateTo={(view) => {
+                  setShowAIWindow(false);
+                  navigate(view);
+                }}
                 TemplateRenderer={TemplateRenderer}
               />
             )}
 
+            {/* ── Views ───────────────────────────────────────────────── */}
             {activeView === "templates" && <Templates user={user} />}
+
             {activeView === "home" && (
               <div className="flex-1 overflow-y-auto p-4">
                 <HomeView
                   user={user}
                   onNavigate={(view, docType) => {
                     if (docType) setDocumentType(docType);
-                    setActiveView(view);
+                    navigate(view);
                   }}
                   onOpenAI={(type) => {
-    setDocumentType(type);   // so the AI window opens on the right tab
-    setShowAIWindow(true);
-  }}
-                  onGoToDashboard={() => setActiveView("quote")}
+                    setDocumentType(type); // so the AI window opens on the right tab
+                    setShowAIWindow(true);
+                  }}
+                  onGoToDashboard={() => navigate("invoice")}
                   onSidebarToggle={() => setSidebarOpen((p) => !p)}
                   sidebarOpen={sidebarOpen}
                 />
               </div>
             )}
+
             {activeView === "financial-overview" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <FinancialOverview user={user} />
-            </div>
-          )}
-          {activeView === "history-view" && (
-            <div className="flex-1 overflow-y-auto p-4">
-              <HistoryView user={user} />
-            </div>
-          )}
-{activeView === "reports" && (
-                      <div className="flex-1 overflow-y-auto p-4">
-                        <ReportsView user={user} />
-                      </div>
-                    )}
-            {activeView === "invoice" && (
+              <div className="flex-1 overflow-y-auto p-4">
+                <FinancialOverview user={user} />
+              </div>
+            )}
+            {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
+
+            {activeView === "history-view" && (
+              <div className="flex-1 overflow-y-auto p-4">
+                <HistoryView user={user} />
+              </div>
+            )}
+
+            {activeView === "reports" && (
+              <div className="flex-1 overflow-y-auto p-4">
+                <ReportsView user={user} />
+              </div>
+            )}
+
+            {activeView === "analytics" && (
+              <div className="p-4 sm:p-6">
+                <VirtualAnalyticsView user={user} />
+              </div>
+            )}
+
+            {activeView === "purchase-orders" && (
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <PurchaseOrders user={user} />
+              </div>
+            )}
+
+            {(activeView === "projects" ||
+              activeView === "work-orders" ||
+              activeView === "materials") && (
+              <div className="p-4 sm:p-6">
+                <VirtualProjectsView user={user} defaultTab={activeView} />
+              </div>
+            )}
+
+            {activeView === "schedule" && (
+              <div className="p-4 sm:p-6">
+                <VirtualScheduleView user={user} />
+              </div>
+            )}
+
+            {activeView === "inventory" && (
+              <div className="p-4 sm:p-6">
+                <VirtualCatalogView
+                  user={user}
+                  onAddToDocument={handleAddCatalogItem}
+                />
+              </div>
+            )}
+
+            {activeView === "notes-view" && (
+              <div className="p-4 sm:p-6">
+                <VirtualNotesView user={user} />
+              </div>
+            )}
+
+            {activeView === "marketplace" && (
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <ServiceMarketplaceView
+                  user={user}
+                  businessInfo={businessInfo}
+                />
+              </div>
+            )}
+
+            {activeView === "incoming-requests" && (
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <ServiceRequestsView user={user} businessInfo={businessInfo} />
+              </div>
+            )}
+
+            {/* "invoice" and "quote" are the same builder (documentType decides) */}
+            {BUILDER_VIEWS.includes(activeView) && (
               <div
                 className="flex flex-1 overflow-hidden min-h-0"
                 style={{ height: "calc(100vh - 60px)" }}
@@ -957,11 +1289,17 @@ const VirtualDashboardInner = () => {
                 <div className="flex-1 overflow-y-auto">
                   <div className="grid grid-cols-1 gap-6 px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
                     <button
-                      onClick={() => setShowInvoice(!showInvoice)}
+                      onClick={() =>
+                        requirePlan(
+                          "previewInvoice",
+                          () => setShowPreview(true),
+                          "Document Preview",
+                        )
+                      }
                       className="xl:hidden w-full mb-4 flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-800 rounded-lg hover:bg-violet-100 transition-colors"
                     >
                       <FileText className="w-5 h-5" />
-                      {showInvoice ? "Hide Invoice" : "View Invoice"}
+                      Preview {docLabel(documentType)}
                     </button>
 
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm pt-2 sm:pt-6">
@@ -993,39 +1331,109 @@ const VirtualDashboardInner = () => {
 
                     {inputMode === "manual" && (
                       <>
-                        <div className="bg-violet-50 border border-violet-200 rounded-lg px-4 py-3 flex items-center space-x-3">
-                          <div className="w-2 h-2 bg-violet-500 rounded-full"></div>
-                          <span className="text-violet-700 text-sm font-medium">
-                            Pending Payment
-                          </span>
-                          <span className="text-violet-600">Due in 7 days</span>
-                        </div>
+                        {/* Status banner – real payment state once the document is saved */}
+                        {invoiceId && !isQuote && (
+                          <div
+                            className={`px-5 py-3.5 rounded-xl border flex items-center justify-between ${paymentStatus.status === "paid" ? "bg-[#f0fdf4] border-[#bbf7d0]" : paymentStatus.status === "partially_paid" ? "bg-[#fffbeb] border-[#fde68a]" : "bg-violet-50 border-violet-200"}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${paymentStatus.status === "paid" ? "bg-[#dcfce7]" : paymentStatus.status === "partially_paid" ? "bg-[#fef3c7]" : "bg-violet-100"}`}
+                              >
+                                <CreditCard
+                                  className={`w-4 h-4 ${paymentStatus.status === "paid" ? "text-[#059669]" : paymentStatus.status === "partially_paid" ? "text-[#d97706]" : "text-violet-600"}`}
+                                />
+                              </div>
+                              <div
+                                className={`text-sm font-semibold ${paymentStatus.status === "paid" ? "text-[#166534]" : paymentStatus.status === "partially_paid" ? "text-[#92400e]" : "text-violet-700"}`}
+                              >
+                                {paymentStatus.status === "paid"
+                                  ? "Invoice Fully Paid"
+                                  : paymentStatus.status === "partially_paid"
+                                    ? `R${paymentStatus.totalPaid.toFixed(2)} paid · R${paymentStatus.balanceDue.toFixed(2)} remaining`
+                                    : `Payment Pending · R${paymentStatus.balanceDue.toFixed(2)} due`}
+                              </div>
+                            </div>
+                            {paymentStatus.status !== "paid" && (
+                              <button
+                                onClick={() =>
+                                  requirePlan(
+                                    "payments",
+                                    handleProcessPayment,
+                                    "Payment Processing",
+                                  )
+                                }
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#e2e8f0] text-[#374151] text-sm font-medium rounded-lg hover:bg-[#f8fafc] transition-colors shadow-sm"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                Record Payment
+                                {!canAccess("payments") && (
+                                  <Lock className="w-3 h-3 opacity-60" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {invoiceId && isQuote && (
+                          <div className="px-5 py-3.5 rounded-xl border bg-violet-50 border-violet-200 flex items-center justify-between gap-3">
+                            <div className="text-sm font-semibold text-violet-700">
+                              {paymentStatus.status === "converted"
+                                ? "Quote converted to an invoice"
+                                : "Quote saved · valid for 30 days"}
+                            </div>
+                            {paymentStatus.status !== "converted" && (
+                              <button
+                                onClick={() =>
+                                  requirePlan(
+                                    "convertToInvoice",
+                                    handleConvertToInvoice,
+                                    "Convert to Invoice",
+                                  )
+                                }
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-violet-200 text-violet-700 text-sm font-medium rounded-lg hover:bg-violet-100 transition-colors shadow-sm whitespace-nowrap"
+                              >
+                                <FileText className="w-4 h-4" />
+                                Convert to Invoice
+                              </button>
+                            )}
+                          </div>
+                        )}
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Total Amount
-                            </div>
-                            <div className="text-2xl font-semibold text-violet-600">
-                              R{total.toFixed(2)}
-                            </div>
-                          </div>
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Paid
-                            </div>
-                            <div className="text-2xl font-semibold text-green-600">
-                              R{paymentStatus.totalPaid.toFixed(2)}
-                            </div>
-                          </div>
-                          <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Balance Due
-                            </div>
-                            <div className="text-2xl font-semibold text-red-600">
-                              R{total.toFixed(2)}
-                            </div>
-                          </div>
+                          {summaryCards.map(
+                            ({
+                              label,
+                              value,
+                              icon: Icon,
+                              iconBg,
+                              iconColor,
+                              textColor,
+                            }) => (
+                              <div
+                                key={label}
+                                className="bg-white p-4 rounded-lg border border-gray-200"
+                              >
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="text-sm text-gray-500">
+                                    {label}
+                                  </div>
+                                  <div
+                                    className={`w-7 h-7 ${iconBg} rounded-lg flex items-center justify-center`}
+                                  >
+                                    <Icon
+                                      className={`w-3.5 h-3.5 ${iconColor}`}
+                                    />
+                                  </div>
+                                </div>
+                                <div
+                                  className={`text-2xl font-semibold ${textColor}`}
+                                >
+                                  {value}
+                                </div>
+                              </div>
+                            ),
+                          )}
                         </div>
 
                         <VirtualMultiStepForm
@@ -1095,6 +1503,7 @@ const VirtualDashboardInner = () => {
                 <div className="hidden xl:flex w-[420px] flex-shrink-0 flex-col border-l border-slate-200 bg-slate-100 overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 flex-shrink-0">
                     <TemplateSelector
+                      user={user}
                       selectedTemplate={selectedTemplate}
                       onTemplateChange={(t) =>
                         requirePlan(
@@ -1158,6 +1567,30 @@ const VirtualDashboardInner = () => {
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[120] bg-slate-900 text-white text-sm rounded-xl shadow-2xl px-4 py-3 flex items-center gap-3 max-w-sm print:hidden">
+          <span>{toast.msg}</span>
+          {toast.action && (
+            <button
+              onClick={() => {
+                toast.action.onClick();
+                setToast(null);
+              }}
+              className="font-semibold text-violet-300 hover:text-white whitespace-nowrap"
+            >
+              {toast.action.label}
+            </button>
+          )}
+          <button
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Print area */}
       <div

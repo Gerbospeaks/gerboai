@@ -11,6 +11,7 @@ import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
@@ -803,6 +804,7 @@ const [stampConfig, setStampConfig] = useState(null);
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {activeView === "pending" && (
             <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <PendingPayments user={user} />

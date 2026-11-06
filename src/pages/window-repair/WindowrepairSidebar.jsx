@@ -21,6 +21,7 @@ import {
   Wrench,
   Package,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 
 export default function WindowRepairSidebar({
   navigate,
@@ -118,6 +119,12 @@ export default function WindowRepairSidebar({
           label="Financial Dashboard"
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
         />
 
         {/* Quotes & Invoices */}
@@ -432,6 +439,11 @@ export default function WindowRepairSidebar({
                   icon: TrendingUp,
                   title: "Financial Dashboard",
                   action: () => goTo("financial-overview"),
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
                 },
                 {
                   icon: Receipt,

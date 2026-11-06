@@ -23,6 +23,7 @@ import {
   X,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function MechanicsSidebar({
@@ -120,6 +121,12 @@ export default function MechanicsSidebar({
           label="Business Overview"
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
         />
         <NavItem
           icon={ShoppingBag}
@@ -436,6 +443,12 @@ export default function MechanicsSidebar({
                   title: "Business Overview",
                   action: () => goTo("financial-overview"),
                   active: activeView === "financial-overview",
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
+                  active: activeView === "gerbo-ai",
                 },
                 {
                   icon: ClipboardList,

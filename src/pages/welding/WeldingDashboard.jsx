@@ -15,6 +15,7 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
@@ -22,6 +23,11 @@ import ServiceMarketplaceView from "../ServiceMarketplaceView";
 import ServiceRequestsView from "../ServiceRequestsView";
 import PurchaseOrders from "../PurchaseOrders";
 import ScheduleView from "./ScheduleView";
+import InventoryView from "./InventoryView";
+import ProjectsView, {
+  PROJECT_STAGES as ITEM_STAGES,
+  ORDER_TYPES,
+} from "./ProjectsView";
 import WeldingSidebar from "./WeldingSidebar";
 import { useNavigate, useLocation } from "react-router-dom";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
@@ -128,6 +134,22 @@ const WeldingDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const mobileNavPad = "pb-24 lg:pb-6";
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice") {
+      handleNewInvoice();
+      setActiveView("quote");
+    }
+    if (action === "newQuote") {
+      handleNewQuote();
+      setActiveView("quote");
+    }
+    if (action === "newCustomer") {
+      handleAddNewCustomer();
+    }
+    if (view && !action) {
+      setActiveView(view);
+    }
+  };
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -142,6 +164,7 @@ const [stampConfig, setStampConfig] = useState(null);
 
   // ── project detail fields ────────────────────────────────────────────────
   const [projectType, setProjectType] = useState("Structural Welding");
+  const [orderType, setOrderType] = useState(ORDER_TYPES[0]);
   const [materialType, setMaterialType] = useState("Mild Steel");
   const [materialThickness, setMaterialThickness] = useState("10");
   const [urgencyLevel, setUrgencyLevel] = useState("Standard");
@@ -225,7 +248,7 @@ const [stampConfig, setStampConfig] = useState(null);
     workCategory: "Structural Welding",
     taxRate: "15",
     urgency: "Standard",
-    phase: "Phase 1",
+    phase: "Welding",
   });
 
   // ── derived totals ───────────────────────────────────────────────────────
@@ -489,6 +512,7 @@ const [stampConfig, setStampConfig] = useState(null);
     setItems(quote.items || []);
     setShowQuotesList(false);
     setProjectType(quote.projectDetails?.type || "");
+    setOrderType(quote.projectDetails?.orderType || ORDER_TYPES[0]);
     setMaterialType(quote.projectDetails?.materialType || "");
     setMaterialThickness(quote.projectDetails?.materialThickness || "");
     setUrgencyLevel(quote.projectDetails?.urgency || "");
@@ -517,6 +541,7 @@ const [stampConfig, setStampConfig] = useState(null);
     },
     projectDetails: {
       type: projectType,
+      orderType,
       materialType,
       materialThickness,
       urgency: urgencyLevel,
@@ -607,6 +632,8 @@ const [stampConfig, setStampConfig] = useState(null);
     setCustomerPhone("+27 11 456 7890");
     setIssueDate(new Date().toISOString());
     setProjectAddress("Industrial Park, 123 Factory Road, Germiston, 1401");
+    setProjectType("Structural Welding");
+    setOrderType(ORDER_TYPES[0]);
     setWeldingProcess("MIG/GMAW");
     setProjectScale("Medium");
     setEstimatedHours("40");
@@ -653,7 +680,7 @@ const [stampConfig, setStampConfig] = useState(null);
         taxAmount,
         totalAmount: amount + taxAmount,
         urgency: newItem.urgency || "Standard",
-        phase: newItem.phase || "Phase 1",
+        phase: newItem.phase || "Welding",
       },
     ]);
     setNewItem({
@@ -663,7 +690,7 @@ const [stampConfig, setStampConfig] = useState(null);
       workCategory: "Structural Welding",
       taxRate: "15",
       urgency: "Standard",
-      phase: "Phase 1",
+      phase: "Welding",
     });
   };
 
@@ -1240,6 +1267,8 @@ const [stampConfig, setStampConfig] = useState(null);
   setShowCustomersListModal={setShowCustomersListModal}
   documentType={documentType}
   handleLogout={handleLogout}
+  isAdmin={isAdmin}
+  setShowUserManagement={setShowUserManagement}
 />
 
         {/* ── Main content ─────────────────────────────────────────────────── */}
@@ -1247,6 +1276,10 @@ const [stampConfig, setStampConfig] = useState(null);
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            dashboardType="Welding"
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -1557,6 +1590,7 @@ const [stampConfig, setStampConfig] = useState(null);
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {activeView === "history-view" && (
             <div className="flex-1 overflow-y-auto p-4">
               <HistoryView user={user} />
@@ -1587,6 +1621,23 @@ const [stampConfig, setStampConfig] = useState(null);
     <ScheduleView user={user} />
   </div>
 )}
+          {activeView === "purchase-orders" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <PurchaseOrders user={user} />
+            </div>
+          )}
+          {activeView === "inventory" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <InventoryView user={user} />
+            </div>
+          )}
+          {(activeView === "projects" ||
+            activeView === "work-orders" ||
+            activeView === "materials") && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ProjectsView user={user} defaultTab={activeView} />
+            </div>
+          )}
 
 {activeView === "incoming-requests" && (
   <div className="flex-1 overflow-y-auto p-6">
@@ -1875,6 +1926,21 @@ const [stampConfig, setStampConfig] = useState(null);
                                 </div>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="sm:col-span-2">
+                                  <label className={labelCls}>Order Type</label>
+                                  <select
+                                    value={orderType}
+                                    onChange={(e) => setOrderType(e.target.value)}
+                                    className={selectCls}
+                                  >
+                                    {ORDER_TYPES.map((o) => (
+                                      <option key={o}>{o}</option>
+                                    ))}
+                                  </select>
+                                  <p className="text-[11px] text-[#94a3b8] mt-1">
+                                    Repairs and maintenance, made-to-order fabrication, on-site installs or standard stock products.
+                                  </p>
+                                </div>
                                 <div>
                                   <label className={labelCls}>
                                     Project Type
@@ -2038,6 +2104,8 @@ const [stampConfig, setStampConfig] = useState(null);
                                 </h3>
                                 <div className="text-xs text-[#c2410c] space-y-1">
                                   <p>
+                                    <span className="font-semibold">Order:</span>{" "}
+                                    {orderType} |{" "}
                                     <span className="font-semibold">Type:</span>{" "}
                                     {projectType} |{" "}
                                     <span className="font-semibold">
@@ -2148,7 +2216,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                       </select>
                                     </div>
                                     <div>
-                                      <label className={labelCls}>Phase</label>
+                                      <label className={labelCls}>Production Stage</label>
                                       <select
                                         value={newItem.phase}
                                         onChange={(e) =>
@@ -2159,11 +2227,11 @@ const [stampConfig, setStampConfig] = useState(null);
                                         }
                                         className={selectCls}
                                       >
-                                        <option value="Phase 1">Phase 1</option>
-                                        <option value="Phase 2">Phase 2</option>
-                                        <option value="Phase 3">Phase 3</option>
-                                        <option value="Phase 4">Phase 4</option>
-                                        <option value="Ongoing">Ongoing</option>
+                                        {ITEM_STAGES.map((stage) => (
+                                          <option key={stage} value={stage}>
+                                            {stage}
+                                          </option>
+                                        ))}
                                       </select>
                                     </div>
                                   </div>
@@ -2298,7 +2366,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                             </td>
                                             <td className="px-4 py-3">
                                               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#eff6ff] text-[#1d4ed8]">
-                                                {item.phase || "Phase 1"}
+                                                {item.phase || "Welding"}
                                               </span>
                                             </td>
                                             <td className="px-4 py-3 text-sm text-[#374151]">

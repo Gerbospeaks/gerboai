@@ -72,6 +72,7 @@ import BusinessSettingsModal from "../BusinessSettingsModal";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import ReportsView from "./ReportsView";
 import HistoryView from "./HistoryView";
 import MechanicsSidebar from "./MechanicsSidebar";
@@ -2384,6 +2385,7 @@ const handleStampConfirm = async (cfg) => {
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {activeView === "parts-inventory" && (
             <div className="flex-1 overflow-y-auto p-4">
               <PartsInventory user={user} />

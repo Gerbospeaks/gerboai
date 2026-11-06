@@ -22,6 +22,7 @@ import {
   FolderOpen,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function PhotographySidebar({
@@ -116,6 +117,13 @@ export default function PhotographySidebar({
                   icon: TrendingUp,
                   title: "Business Overview",
                   action: () => goTo("financial-overview"),
+                  text: "text-slate-400",
+                  color: "from-indigo-600 to-indigo-700",
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
                   text: "text-slate-400",
                   color: "from-indigo-600 to-indigo-700",
                 },
@@ -258,6 +266,12 @@ export default function PhotographySidebar({
                   icon={TrendingUp}
                   label="Business Overview"
                   onClick={() => goTo("financial-overview")}
+                  color="indigo"
+                />
+                <NavItem
+                  icon={GerboAIIcon}
+                  label="GerboAI Receptionist"
+                  onClick={() => goTo("gerbo-ai")}
                   color="indigo"
                 />
 

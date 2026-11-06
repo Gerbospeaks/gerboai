@@ -26,6 +26,7 @@ import {
   X,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function HotelSidebar({
@@ -123,6 +124,13 @@ export default function HotelSidebar({
         />
 
         <SectionLabel>Finance</SectionLabel>
+
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
+        />
 
         {/* Invoices accordion */}
         <Accordion
@@ -378,6 +386,12 @@ export default function HotelSidebar({
                   title: "Settings",
                   action: () => setShowSettings(true),
                   active: false,
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
+                  active: activeView === "gerbo-ai",
                 },
 
                 {

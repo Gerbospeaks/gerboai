@@ -25,6 +25,7 @@ import {
   Plus,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function useDateInfo() {
@@ -100,6 +101,12 @@ export default function EducationSidebar({
       icon: TrendingUp,
       title: "School Overview",
       action: () => goTo("overview"),
+      color: "from-indigo-600 to-indigo-700",
+    },
+    {
+      icon: GerboAIIcon,
+      title: "GerboAI Receptionist",
+      action: () => goTo("gerbo-ai"),
       color: "from-indigo-600 to-indigo-700",
     },
     {
@@ -304,6 +311,12 @@ export default function EducationSidebar({
               icon={TrendingUp}
               label="School Overview"
               onClick={() => goTo("overview")}
+              color="indigo"
+            />
+            <NavItem
+              icon={GerboAIIcon}
+              label="GerboAI Receptionist"
+              onClick={() => goTo("gerbo-ai")}
               color="indigo"
             />
 

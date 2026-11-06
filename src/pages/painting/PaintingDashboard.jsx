@@ -12,6 +12,7 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
@@ -1219,6 +1220,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {activeView === "history-view" && (
             <div className="flex-1 overflow-y-auto p-4">
               <HistoryView user={user} />

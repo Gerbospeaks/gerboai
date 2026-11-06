@@ -19,6 +19,7 @@ import {
   X,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function FlooringSidebar({
@@ -115,6 +116,12 @@ export default function FlooringSidebar({
           label="Financial Dashboard"
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
         />
 
         {/* Quotes & Invoices */}
@@ -336,6 +343,12 @@ export default function FlooringSidebar({
                   title: "Financial Dashboard",
                   action: () => goTo("financial-overview"),
                   active: activeView === "financial-overview",
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
+                  active: activeView === "gerbo-ai",
                 },
                 {
                   icon: Receipt,

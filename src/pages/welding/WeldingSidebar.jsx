@@ -18,7 +18,11 @@ import {
   Menu,
   Plus,
   Store,
+  ShoppingBag,
+  Package,
+  Flame,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/solidflo-logo.png";
 
 export default function WeldingSidebar({
@@ -46,6 +50,7 @@ export default function WeldingSidebar({
 }) {
   const [isQuotesOpen, setIsQuotesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
+  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -117,6 +122,12 @@ export default function WeldingSidebar({
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
         />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
+        />
 
         {/* Quotes & Invoices */}
         <Accordion
@@ -149,6 +160,39 @@ export default function WeldingSidebar({
               setShowQuotesList(!showQuotesList);
               if (isMobile) setSidebarOpen(false);
             }}
+          />
+        </Accordion>
+
+        <NavItem
+          icon={ShoppingBag}
+          label="Purchase Orders"
+          onClick={() => goTo("purchase-orders")}
+          active={activeView === "purchase-orders"}
+        />
+
+        <SectionLabel>Operations</SectionLabel>
+
+        {/* Jobs & Production */}
+        <Accordion
+          icon={Flame}
+          label="Jobs & Production"
+          isOpen={isProjectsOpen}
+          onToggle={() => setIsProjectsOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-orange-500"
+            label="Active Jobs"
+            onClick={() => goTo("projects")}
+          />
+          <SubItem
+            dot="bg-amber-500"
+            label="Work Orders"
+            onClick={() => goTo("work-orders")}
+          />
+          <SubItem
+            dot="bg-stone-400"
+            label="Steel & Consumables"
+            onClick={() => goTo("materials")}
           />
         </Accordion>
 
@@ -186,6 +230,12 @@ export default function WeldingSidebar({
           label="Invoice Templates"
           onClick={() => goTo("templates")}
           active={activeView === "templates"}
+        />
+        <NavItem
+          icon={Package}
+          label="Inventory & Stock"
+          onClick={() => goTo("inventory")}
+          active={activeView === "inventory"}
         />
         <NavItem
           icon={Calendar}
@@ -409,6 +459,11 @@ export default function WeldingSidebar({
                   action: () => goTo("financial-overview"),
                 },
                 {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
+                },
+                {
                   icon: Receipt,
                   title: "Quotes & Invoices",
                   action: () => {
@@ -420,6 +475,21 @@ export default function WeldingSidebar({
                   icon: Users,
                   title: "Clients",
                   action: () => setShowCustomersListModal(true),
+                },
+                {
+                  icon: ShoppingBag,
+                  title: "Purchase Orders",
+                  action: () => goTo("purchase-orders"),
+                },
+                {
+                  icon: Flame,
+                  title: "Jobs & Production",
+                  action: () => goTo("projects"),
+                },
+                {
+                  icon: Package,
+                  title: "Inventory & Stock",
+                  action: () => goTo("inventory"),
                 },
                 {
                   icon: FileText,

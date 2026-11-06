@@ -24,6 +24,7 @@ import {
   Store,
   Plus,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function LandscapingSidebar({
@@ -125,6 +126,12 @@ export default function LandscapingSidebar({
           label="Business Overview"
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
         />
 
         {/* Work Orders accordion */}
@@ -440,6 +447,12 @@ export default function LandscapingSidebar({
                   title: "Business Overview",
                   action: () => goTo("financial-overview"),
                   active: activeView === "financial-overview",
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
+                  active: activeView === "gerbo-ai",
                 },
                 {
                   icon: ClipboardList,

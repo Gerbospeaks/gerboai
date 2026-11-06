@@ -20,6 +20,7 @@ import AIInvoiceWindow from "../AIInvoiceWindow";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import LandscapingMultiStepForm from "./LandscapingMultiStepForm";
 import LandscapingSidebar from "./LandscapingSidebar";
 import PropertiesView from "./PropertiesView";
@@ -1213,6 +1214,7 @@ const [stampConfig, setStampConfig] = useState(null);
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
 
           {activeView === "purchase-orders" && (
             <div className="flex-1 overflow-y-auto p-6">

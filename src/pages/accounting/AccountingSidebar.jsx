@@ -20,6 +20,7 @@ import {
   Store,
   X,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function AccountingSidebar({
@@ -118,6 +119,12 @@ export default function AccountingSidebar({
           label="Financial Overview"
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
         />
 
         {/* Invoicing */}
@@ -383,6 +390,11 @@ export default function AccountingSidebar({
                   icon: TrendingUp,
                   title: "Financial Overview",
                   action: () => goTo("financial-overview"),
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
                 },
                 {
                   icon: Receipt,

@@ -25,6 +25,7 @@ import {
   AlertCircle,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function HealthSidebar({
@@ -260,6 +261,12 @@ export default function HealthSidebar({
           label="Practice Overview"
           onClick={() => goTo("practice-overview")}
           active={activeView === "practice-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
         />
         <NavItem
           icon={ShoppingBag}
@@ -511,6 +518,12 @@ export default function HealthSidebar({
                   title: "Practice Overview",
                   action: () => goTo("practice-overview"),
                   active: activeView === "practice-overview",
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
+                  active: activeView === "gerbo-ai",
                 },
                 {
                   icon: Receipt,

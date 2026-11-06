@@ -23,6 +23,7 @@ import SignatureStamp from "../SignatureStamp";
 import StampOverlay, { AllPagesStampOverlay } from "../StampOverlay";
 import TechnologyMultiStepForm from "./TechnologyMultiStepForm";
 import TechnologySidebar from "./TechnologySidebar";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import DeploymentsView from "./DeploymentsView";
 import DomainsView from "./DomainsView";
 import DatabasesView from "./DatabasesView";
@@ -1157,6 +1158,7 @@ const TechnologyDashboardInner = () => {
                 />
               </div>
             )}
+            {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
             {activeView === "marketplace" && (
               <div className="flex-1 overflow-y-auto p-6">
                 <ServiceMarketplaceView

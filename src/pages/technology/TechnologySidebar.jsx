@@ -27,6 +27,7 @@ import {
   Zap,
   Database,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 
 import { usePlan, UpgradeModal } from "./planGating";
 let _usePlan;
@@ -126,6 +127,12 @@ export default function TechnologySidebar({
           "Business Overview",
         ),
       featureKey: "businessOverview",
+    },
+    {
+      icon: GerboAIIcon,
+      title: "GerboAI Receptionist",
+      action: () => goTo("gerbo-ai"),
+      gated: false,
     },
     {
       icon: Code2,
@@ -253,6 +260,12 @@ export default function TechnologySidebar({
               onClick={() =>
                 gatedGoTo("businessOverview", "overview", "Business Overview")
               }
+            />
+            <NavItem
+              icon={GerboAIIcon}
+              label="GerboAI Receptionist"
+              active={activeView === "gerbo-ai"}
+              onClick={() => goTo("gerbo-ai")}
             />
 
             {/* Projects accordion — free */}

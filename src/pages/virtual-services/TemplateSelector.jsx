@@ -30,7 +30,10 @@ const Money = ({ value }) => {
   const fallback = useInvoiceCurrency();
   return <>{formatMoney(value, fromCtx || fallback)}</>;
 };
-
+const getDocLabels = (documentType) =>
+  documentType === "quote"
+    ? { title: "SERVICE QUOTE", number: "QUOTE NO." }
+    : { title: "SERVICE INVOICE", number: "INVOICE NO." };
 export const TemplateSelector = ({
   user,
   selectedTemplate,
@@ -164,6 +167,7 @@ export const DefaultTemplate = ({
   customerPhone,
   customerAddress,
   eventType,
+  documentType,
   eventDate,
   eventLocation,
   items,
@@ -202,10 +206,14 @@ export const DefaultTemplate = ({
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+  {getDocLabels(documentType).title}
+</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">
+  {getDocLabels(documentType).number}
+</span>
               <span>{jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -367,10 +375,14 @@ export const ClassicTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+  {getDocLabels(props.documentType).title}
+</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">
+  {getDocLabels(props.documentType).number}
+</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -534,10 +546,14 @@ export const ModernTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+  {getDocLabels(props.documentType).title}
+</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">
+  {getDocLabels(props.documentType).number}
+</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -701,10 +717,14 @@ export const ElegantTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+  {getDocLabels(props.documentType).title}
+</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">
+  {getDocLabels(props.documentType).number}
+</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -868,10 +888,14 @@ export const SpeedTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+  {getDocLabels(props.documentType).title}
+</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">
+  {getDocLabels(props.documentType).number}
+</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -1034,10 +1058,14 @@ export const DiagnosticTemplate = (props) => (
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold mb-4">SERVICE INVOICE</div>
+          <div className="text-3xl font-bold mb-4">
+  {getDocLabels(props.documentType).title}
+</div>
           <div className="text-xs space-y-1">
             <div className="flex justify-between gap-8">
-              <span className="font-semibold">INVOICE NO.</span>
+              <span className="font-semibold">
+  {getDocLabels(props.documentType).number}
+</span>
               <span>{props.jobCardNumber}</span>
             </div>
             <div className="flex justify-between gap-8">
@@ -1195,28 +1223,32 @@ export const TemplateRenderer = ({
     showStampDate,
     showStamp,
   };
-  let content;
-  switch (templateId) {
-    case "default":
-      return content = <DefaultTemplate {...templateProps} />;
-    case "classic":
-      return content = <ClassicTemplate {...templateProps} />;
-    case "modern":
-      return content = <ModernTemplate {...templateProps} />;
-    case "elegant":
-    case "premium":
-      return content = <ElegantTemplate {...templateProps} />;
-    case "speed":
-      return content = <SpeedTemplate {...templateProps} />;
-    case "diagnostic":
-      return content = <DiagnosticTemplate {...templateProps} />;
-    default:
-      return content = <DefaultTemplate {...templateProps} />;
-  }
-  return (
-    <InvoiceCurrencyContext.Provider value={code}>
-      {content}
-    </InvoiceCurrencyContext.Provider>
-  );
+ let content;
+switch (templateId) {
+  case "classic":
+    content = <ClassicTemplate {...templateProps} />;
+    break;
+  case "modern":
+    content = <ModernTemplate {...templateProps} />;
+    break;
+  case "elegant":
+  case "premium":
+    content = <ElegantTemplate {...templateProps} />;
+    break;
+  case "speed":
+    content = <SpeedTemplate {...templateProps} />;
+    break;
+  case "diagnostic":
+    content = <DiagnosticTemplate {...templateProps} />;
+    break;
+  case "default":
+  default:
+    content = <DefaultTemplate {...templateProps} />;
+}
+return (
+  <InvoiceCurrencyContext.Provider value={code}>
+    {content}
+  </InvoiceCurrencyContext.Provider>
+);
 };
 export default TemplateSelector;

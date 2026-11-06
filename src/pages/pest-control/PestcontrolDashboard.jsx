@@ -12,6 +12,7 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
@@ -43,6 +44,7 @@ import {
   Home as HomeIcon,
   HardHat,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import { db } from "../../firebase";
 import CustomerModal from "../CustomerModal";
 import CustomersListModal from "../CustomersListModal";
@@ -1026,6 +1028,14 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                 </button>
+                <button
+                  onClick={() => setActiveView("gerbo-ai")}
+                  className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                  title="GerboAI Receptionist"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <GerboAIIcon className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                </button>
 
                 <button
                   onClick={() => {
@@ -1123,6 +1133,18 @@ const [stampConfig, setStampConfig] = useState(null);
                 <TrendingUp className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="text-xs md:text-sm font-semibold truncate">
                   Financial Dashboard
+                </span>
+              </div>
+              <div
+                onClick={() => {
+                  setActiveView("gerbo-ai");
+                  setSidebarOpen(false);
+                }}
+                className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-indigo-500/30"
+              >
+                <GerboAIIcon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-xs md:text-sm font-semibold truncate">
+                  GerboAI Receptionist
                 </span>
               </div>
 
@@ -1528,6 +1550,7 @@ const [stampConfig, setStampConfig] = useState(null);
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {activeView === "history-view" && (
             <div className="flex-1 overflow-y-auto p-4">
               <HistoryView user={user} />

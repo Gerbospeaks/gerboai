@@ -13,6 +13,7 @@ import { serverTimestamp } from "firebase/firestore";
 import logo from "../../assets/img/solidflo-logo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import Vehicles from "./Vehicles";
 import PartsInventory from "./PartsInventory";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
@@ -53,6 +54,9 @@ import NotesView from "./NotesView";
 import { logHistory } from "./historyLogger";
 import SignatureStamp from "./SignatureStamp";
 import AIInvoiceWindow from "../AIInvoiceWindow";
+import DashboardQuickActions from "./DashboardQuickActions";
+import ReportsView from "./ReportsView";
+import LetterheadEditor from "../../components/LetterheadEditor";
 import {
   ChevronDown,
   ChevronLeft,
@@ -143,7 +147,7 @@ const TowingDashboard = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showAIWindow, setShowAIWindow] = useState(false);
- const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [issueDate, setIssueDate] = useState(new Date().toISOString());
   const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
   const [aiDocType, setAiDocType] = useState("invoice");
@@ -151,23 +155,23 @@ const TowingDashboard = () => {
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [notes, setNotes] = useState("");
   const mobileNavPad = "pb-24 lg:pb-6";
-    const [paymentTerms, setPaymentTerms] = useState("30 Days");
-    const [shippingMethod, setShippingMethod] = useState("");
-    const [stampSettings, setStampSettings] = useState("");
-    const [paymentStatus, setPaymentStatus] = useState({
-      totalPaid: 0,
-      balanceDue: 0,
-      status: "pending",
-    });
-     const [stats, setStats] = useState({
-        totalInvoices: 0,
-        totalQuotes: 0,
-        totalInvoiced: 0,
-        totalClients: 0,
-        pendingPayments: 0,
-        loading: true,
-      });
-    const [documentType, setDocumentType] = useState("invoice");
+  const [paymentTerms, setPaymentTerms] = useState("30 Days");
+  const [shippingMethod, setShippingMethod] = useState("");
+  const [stampSettings, setStampSettings] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState({
+    totalPaid: 0,
+    balanceDue: 0,
+    status: "pending",
+  });
+  const [stats, setStats] = useState({
+    totalInvoices: 0,
+    totalQuotes: 0,
+    totalInvoiced: 0,
+    totalClients: 0,
+    pendingPayments: 0,
+    loading: true,
+  });
+  const [documentType, setDocumentType] = useState("invoice");
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] =
     useState(null);
   const [towLocation, setTowLocation] = useState("");
@@ -180,19 +184,19 @@ const TowingDashboard = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [invoices, setInvoices] = useState([]);
-    const [deliveryDate, setDeliveryDate] = useState("");
-    const [supplierName, setSupplierName] = useState("");
-    const [supplierContact, setSupplierContact] = useState("");
-    const [supplierEmail, setSupplierEmail] = useState("");
-    const [supplierPhone, setSupplierPhone] = useState("");
-    const [supplierAddress, setSupplierAddress] = useState("");
-    const [deliveryName, setDeliveryName] = useState("");
-    const [deliveryAddress, setDeliveryAddress] = useState("");
-    const [poItems, setPoItems] = useState([
-      { description: "", qty: 1, unit: "ea", unitPrice: 0, amount: 0 },
-    ]);
-    const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [supplierName, setSupplierName] = useState("");
+  const [supplierContact, setSupplierContact] = useState("");
+  const [supplierEmail, setSupplierEmail] = useState("");
+  const [supplierPhone, setSupplierPhone] = useState("");
+  const [supplierAddress, setSupplierAddress] = useState("");
+  const [deliveryName, setDeliveryName] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [poItems, setPoItems] = useState([
+    { description: "", qty: 1, unit: "ea", unitPrice: 0, amount: 0 },
+  ]);
+  const [showStampModal, setShowStampModal] = useState(false);
+  const [stampConfig, setStampConfig] = useState(null);
   const [newPoItem, setNewPoItem] = useState({
     description: "",
     qty: 1,
@@ -337,11 +341,11 @@ const [stampConfig, setStampConfig] = useState(null);
       setStats((p) => ({ ...p, loading: false }));
     }
   };
-    const poSubtotal = poItems.reduce(
+  const poSubtotal = poItems.reduce(
     (sum, item) => sum + Number(item.amount),
     0,
   );
-    const handleAddPoItem = () => {
+  const handleAddPoItem = () => {
     if (!newPoItem.description || !newPoItem.qty) return;
     const unitPrice = Number(newPoItem.unitPrice) || 0;
     const qty = Number(newPoItem.qty);
@@ -359,7 +363,7 @@ const [stampConfig, setStampConfig] = useState(null);
   };
   const poVat = poSubtotal * 0.15;
   const poTotal = poSubtotal + poVat;
- const handleSavePO = async () => {
+  const handleSavePO = async () => {
     if (!user?.uid) return;
     try {
       const db = getFirestore();
@@ -586,44 +590,52 @@ const [stampConfig, setStampConfig] = useState(null);
     return snap.exists() ? snap.data() : null;
   };
 
- const handleSavePDF = async () => {
-  const element = activeView === "purchase-orders"
-    ? document.getElementById("po-printable")
-    : document.getElementById("invoice-printable");
+  const handleSavePDF = async () => {
+    const element =
+      activeView === "purchase-orders"
+        ? document.getElementById("po-printable")
+        : document.getElementById("invoice-printable");
 
-  if (!element) {
-    alert("No printable content found. Please ensure the document is visible.");
-    return;
-  }
+    if (!element) {
+      alert(
+        "No printable content found. Please ensure the document is visible.",
+      );
+      return;
+    }
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff",
-  });
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    });
 
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = (canvas.height * pageWidth) / canvas.width;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = (canvas.height * pageWidth) / canvas.width;
 
-  pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
+    pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
 
-  // Filename reflects document type
-  const prefix =
-    activeView === "purchase-orders"
-      ? "PO"
-      : documentType === "quote"
-      ? "Quote"
-      : "Invoice";
+    // Filename reflects document type
+    const prefix =
+      activeView === "purchase-orders"
+        ? "PO"
+        : documentType === "quote"
+          ? "Quote"
+          : "Invoice";
 
-  const number = activeView === "purchase-orders"
-    ? poNumber || "draft"
-    : jobCardNumber || "draft";
+    const number =
+      activeView === "purchase-orders"
+        ? poNumber || "draft"
+        : jobCardNumber || "draft";
 
-  pdf.save(`${prefix}-${number}.pdf`);
-};
+    pdf.save(`${prefix}-${number}.pdf`);
+  };
 
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -973,8 +985,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    
-    
+
     {
       label: "Save",
       icon: Save,
@@ -1000,7 +1011,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
-    
+
     {
       label: "PDF",
       icon: Download,
@@ -1114,7 +1125,7 @@ const [stampConfig, setStampConfig] = useState(null);
     showStamp: stampSettings.enabled,
     stampConfig,
   };
- const poTemplateProps = {
+  const poTemplateProps = {
     templateId: selectedTemplate,
     businessInfo,
     poNumber,
@@ -1388,30 +1399,28 @@ const [stampConfig, setStampConfig] = useState(null);
     <div className="h-screen w-full overflow-hidden flex flex-col bg-[#f0f2f5]">
       {/* Print area */}
       <div
-  id="print-area"
-  className="hidden print:block bg-white"
-  style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
->
-  {activeView === "purchase-orders" ? (
-    <div id="po-printable">
-      <POTemplateRenderer {...poTemplateProps} />
-      <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
-
-    </div>
-  ) : (
-    <div id="invoice-printable">
-      <TemplateRenderer {...templateProps} />
-      <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
-
-    </div>
-  )}
-</div>
+        id="print-area"
+        className="hidden print:block bg-white"
+        style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
+      >
+        {activeView === "purchase-orders" ? (
+          <div id="po-printable">
+            <POTemplateRenderer {...poTemplateProps} />
+            <AllPagesStampOverlay
+              stampConfig={stampConfig}
+              businessInfo={businessInfo}
+            />
+          </div>
+        ) : (
+          <div id="invoice-printable">
+            <TemplateRenderer {...templateProps} />
+            <AllPagesStampOverlay
+              stampConfig={stampConfig}
+              businessInfo={businessInfo}
+            />
+          </div>
+        )}
+      </div>
       {showAIWindow && (
         <AIInvoiceWindow
           user={user}
@@ -1447,6 +1456,8 @@ const [stampConfig, setStampConfig] = useState(null);
           documentType={documentType}
           handleLogout={handleLogout}
           newRequestCount={0}
+          isAdmin={isAdmin}
+          setShowUserManagement={setShowUserManagement}
         />
         {/* ── Main content ─────────────────────────────────────────────────── */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
@@ -1454,6 +1465,7 @@ const [stampConfig, setStampConfig] = useState(null);
             actions={headerActions}
             mobileActions={mobileDashboardActions}
             onSettingsOpen={() => setShowSettings(true)}
+            onTeamOpen={() => setShowUserManagement(true)}
             onMenuClick={() => setSidebarOpen((p) => !p)}
           />
 
@@ -1475,23 +1487,28 @@ const [stampConfig, setStampConfig] = useState(null);
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
-     {showStampModal && (
-  <StampSignatureModal
-    isOpen={showStampModal}
-    onClose={() => setShowStampModal(false)}
-    onConfirm={(cfg) => {
-      setStampConfig(cfg);
-      setShowStampModal(false);
-    }}
-    previewContent={
-      activeView === "purchase-orders"
-        ? <POTemplateRenderer {...poTemplateProps} />
-        : <TemplateRenderer {...templateProps} />
-    }
-    businessInfo={businessInfo}
-    existingConfig={stampConfig}
-  />
-)}
+          {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
+          {showStampModal && (
+            <StampSignatureModal
+              isOpen={showStampModal}
+              onClose={() => setShowStampModal(false)}
+              onConfirm={(cfg) => {
+                setStampConfig(cfg);
+                setShowStampModal(false);
+              }}
+              previewContent={
+                activeView === "purchase-orders" ? (
+                  <POTemplateRenderer {...poTemplateProps} />
+                ) : (
+                  <TemplateRenderer {...templateProps} />
+                )
+              }
+              businessInfo={businessInfo}
+              existingConfig={stampConfig}
+            />
+          )}
           {showPaymentModal && selectedInvoiceForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}
@@ -1740,13 +1757,17 @@ const [stampConfig, setStampConfig] = useState(null);
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div
                     className="mx-auto bg-white shadow-xl"
-                    style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
+                    style={{
+                      position: "relative",
+                      width: "210mm",
+                      minHeight: "297mm",
+                    }}
                   >
                     <TemplateRenderer {...templateProps} />
                     <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
+                      stampConfig={stampConfig}
+                      businessInfo={businessInfo}
+                    />
                   </div>
                 </div>
               </div>
@@ -1756,6 +1777,20 @@ const [stampConfig, setStampConfig] = useState(null);
           {/* ── Views ───────────────────────────────────────────────────────── */}
           {activeView === "home" && (
             <div className="flex-1 overflow-y-auto p-4">
+              <DashboardQuickActions
+                onNewInvoice={() => {
+                  handleNewInvoice();
+                  setActiveView("invoice");
+                }}
+                onNewQuote={() => {
+                  handleNewQuote();
+                  setActiveView("invoice");
+                }}
+                onAddCustomer={handleAddNewCustomer}
+                goTo={setActiveView}
+                savedJobCardsCount={savedJobCards.length}
+                savedCustomersCount={savedCustomers.length}
+              />
               <HomeView
                 user={user}
                 onNavigate={(view, docType) => {
@@ -1763,9 +1798,9 @@ const [stampConfig, setStampConfig] = useState(null);
                   setActiveView(view);
                 }}
                 onOpenAI={(type) => {
-    setDocumentType(type);   // so the AI window opens on the right tab
-    setShowAIWindow(true);
-  }}
+                  setDocumentType(type); // so the AI window opens on the right tab
+                  setShowAIWindow(true);
+                }}
                 onGoToDashboard={() => setActiveView("quote")}
                 onSidebarToggle={() => setSidebarOpen((p) => !p)}
                 sidebarOpen={sidebarOpen}
@@ -1777,6 +1812,7 @@ const [stampConfig, setStampConfig] = useState(null);
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {activeView === "parts-inventory" && (
             <div className="flex-1 overflow-y-auto p-4">
               <PartsInventory user={user} />
@@ -1802,22 +1838,30 @@ const [stampConfig, setStampConfig] = useState(null);
               <Templates user={user} />
             </div>
           )}
-           {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+          {activeView === "letterheads" && <LetterheadEditor user={user} />}
+          {activeView === "reports" && (
+            <div className="flex-1 overflow-y-auto p-4">
+              <ReportsView user={user} />
+            </div>
+          )}
+          {activeView === "marketplace" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
 
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+          {activeView === "incoming-requests" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceRequestsView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
           {/* ── Invoice / Service Call Builder ────────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               {/* LEFT: Form panel */}
-              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
+              <div
+                className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}
+              >
                 <div className="space-y-5">
                   {/* Summary stat cards */}
                   <div className="grid grid-cols-3 gap-4">
@@ -2773,28 +2817,27 @@ const [stampConfig, setStampConfig] = useState(null);
                   >
                     <TemplateRenderer {...templateProps} />
                     <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
-
+                      stampConfig={stampConfig}
+                      businessInfo={businessInfo}
+                    />
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}
-<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-  <button
-    onClick={() => setShowStampModal(true)}
-    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <Stamp className="w-4 h-4" />
-    Stamp &amp; Signature
-  </button>
-</div>
+                <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                  <button
+                    onClick={() => setShowStampModal(true)}
+                    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <Stamp className="w-4 h-4" />
+                    Stamp &amp; Signature
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
-       <SolidFloAgent industry="towing" />
+      <SolidFloAgent industry="towing" />
     </div>
   );
 };

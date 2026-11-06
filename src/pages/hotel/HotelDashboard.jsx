@@ -11,6 +11,7 @@ import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import HospitalityMultiStepForm from "./HospitalityMultiStepForm";
 import { getFunctions } from "firebase/functions";
 import AIInvoiceWindow from "../AIInvoiceWindow";
@@ -1031,6 +1032,7 @@ const HotelDashboard = () => {
               <FinancialOverview user={user} />
             </div>
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {activeView === "templates" && (
             <div className="flex-1 overflow-y-auto p-4 pb-16 md:pb-0">
               <Templates user={user} />

@@ -18,6 +18,7 @@ import {
   LogOut,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function PlumbingSidebar({
@@ -104,6 +105,11 @@ export default function PlumbingSidebar({
                   icon: TrendingUp,
                   title: "Business Overview",
                   action: () => goTo("financial-overview"),
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
                 },
                 {
                   icon: ClipboardList,
@@ -217,6 +223,12 @@ export default function PlumbingSidebar({
                   icon={TrendingUp}
                   label="Business Overview"
                   onClick={() => goTo("financial-overview")}
+                  color="blue"
+                />
+                <NavItem
+                  icon={GerboAIIcon}
+                  label="GerboAI Receptionist"
+                  onClick={() => goTo("gerbo-ai")}
                   color="blue"
                 />
 

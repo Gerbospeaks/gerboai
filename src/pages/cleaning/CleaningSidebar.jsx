@@ -33,6 +33,7 @@ import {
   DollarSign,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 import AIInvoiceWindow from "../AIInvoiceWindow";
 
@@ -143,6 +144,12 @@ export default function CleaningSidebar({
           label="Financial Dashboard"
           onClick={() => goTo("financial-overview")}
           active={activeView === "financial-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
         />
 
         {/* Quotes & Invoices */}
@@ -501,6 +508,11 @@ export default function CleaningSidebar({
                   icon: TrendingUp,
                   title: "Financial Dashboard",
                   action: () => goTo("financial-overview"),
+                },
+                {
+                  icon: GerboAIIcon,
+                  title: "GerboAI Receptionist",
+                  action: () => goTo("gerbo-ai"),
                 },
                 {
                   icon: Receipt,

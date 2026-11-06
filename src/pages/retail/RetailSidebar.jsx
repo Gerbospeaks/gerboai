@@ -13,6 +13,7 @@ import {
   LogOut,
   Store,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function RetailSidebar({
@@ -120,6 +121,14 @@ export default function RetailSidebar({
                     <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                   </button>
                   <button
+                    onClick={() => goTo("gerbo-ai")}
+                    className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
+                    title="GerboAI Receptionist"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <GerboAIIcon className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  </button>
+                  <button
                     onClick={() => {
                       handleNewInvoice();
                     }}
@@ -198,6 +207,12 @@ export default function RetailSidebar({
                   label="Financial Dashboard"
                   onClick={() => goTo("financial-overview")}
                   color="emerald"
+                />
+                <NavItem
+                  icon={GerboAIIcon}
+                  label="GerboAI Receptionist"
+                  onClick={() => goTo("gerbo-ai")}
+                  color="indigo"
                 />
 
                 {/* Quotes & Invoices accordion */}

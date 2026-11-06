@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
@@ -64,6 +65,7 @@ import {
   Banknote,
   Wallet,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import {
   getFirestore,
   collection,
@@ -119,6 +121,7 @@ const NAV = [
   { id: "Orders", icon: ShoppingCart, label: "Orders" },
   { id: "Staff", icon: Users, label: "Staff & Sections" },
   { id: "Payments", icon: CreditCard, label: "Payments" },
+  { id: "GerboAI Receptionist", icon: GerboAIIcon, label: "GerboAI Receptionist" },
   { id: "History", icon: Archive, label: "Invoice History" },
   { id: "Analytics", icon: BarChart3, label: "Analytics" },
 ];
@@ -3148,6 +3151,7 @@ const RestaurantDashboard = () => {
           {activeTab === "Payments" && <PaymentsTab />}
           {activeTab === "History" && <HistoryTab />}
           {activeTab === "Analytics" && <AnalyticsTab salesData={salesData} />}
+          {activeTab === "GerboAI Receptionist" && <GerboAIPanel user={user} fixedHeight />}
         </div>
       </div>
 

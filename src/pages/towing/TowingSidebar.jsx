@@ -11,8 +11,17 @@ import {
   ClipboardList,
   Car,
   LogOut,
-  Store,
+  Menu,
+  Plus,
+  FilePlus,
+  Mail,
+  Shield,
+  Package,
+  History,
+  StickyNote,
+  BarChart2,
 } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import logo from "../../assets/img/logo.png";
 
 export default function TowingSidebar({
@@ -34,7 +43,9 @@ export default function TowingSidebar({
   setShowCustomersListModal,
   documentType,
   handleLogout,
-   newRequestCount,
+  newRequestCount,
+  isAdmin,
+  setShowUserManagement,
 }) {
   const [isJobCardsOpen, setIsJobCardsOpen] = useState(false);
   const [isCustomersOpen, setIsCustomersOpen] = useState(false);
@@ -46,377 +57,601 @@ export default function TowingSidebar({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = isMobile && sidebarOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, sidebarOpen]);
+
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    if (isMobile) setSidebarOpen(false);
   };
+
+  // ── Shared sidebar body ───────────────────────────────────────────────────
+  // Called as a function (not used as <Component />) so it doesn't remount
+  // on every render and reset the nav scroll position / accordion animations.
+  const renderSidebarContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-4 flex-shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
+            <img src={logo} className="w-5 h-5 object-contain" alt="logo" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white truncate leading-tight">
+              {businessInfo?.businessName || "Towing"}
+            </p>
+            <p className="text-[10px] text-[#64748b]">Dashboard</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="p-1.5 text-[#64748b] hover:text-white hover:bg-white/5 rounded-lg transition-all flex-shrink-0"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Scrollable nav */}
+      <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1">
+        <NavItem
+          icon={Home}
+          label="Home"
+          onClick={() => goTo("home")}
+          active={activeView === "home"}
+        />
+
+        <NavItem
+          icon={Settings}
+          label="Settings"
+          onClick={() => {
+            setShowSettings(true);
+            if (isMobile) setSidebarOpen(false);
+          }}
+        />
+
+        <SectionLabel>Operations</SectionLabel>
+
+        <NavItem
+          icon={TrendingUp}
+          label="Towing Operations"
+          onClick={() => goTo("financial-overview")}
+          active={activeView === "financial-overview"}
+        />
+        <NavItem
+          icon={GerboAIIcon}
+          label="GerboAI Receptionist"
+          onClick={() => goTo("gerbo-ai")}
+          active={activeView === "gerbo-ai"}
+        />
+
+        {/* Job Cards */}
+        <Accordion
+          icon={ClipboardList}
+          label="Job Cards"
+          isOpen={isJobCardsOpen}
+          onToggle={() => setIsJobCardsOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="Create Quote"
+            onClick={() => {
+              handleNewQuote();
+              goTo("invoice");
+            }}
+          />
+          <SubItem
+            dot="bg-[#059669]"
+            label="Create Invoice"
+            onClick={() => {
+              handleNewInvoice();
+              goTo("invoice");
+            }}
+          />
+          <SubItem
+            dot="bg-[#7c3aed]"
+            label={`All ${documentType === "quote" ? "Estimates" : "Service Calls"}`}
+            badge={savedJobCards?.length ?? 0}
+            onClick={() => {
+              setShowJobCardsList(!showJobCardsList);
+              if (isMobile) setSidebarOpen(false);
+            }}
+          />
+        </Accordion>
+
+        {/* Customers */}
+        <Accordion
+          icon={Users}
+          label="Customers"
+          isOpen={isCustomersOpen}
+          onToggle={() => setIsCustomersOpen((p) => !p)}
+        >
+          <SubItem
+            dot="bg-[#059669]"
+            label="Add Customer"
+            onClick={() => {
+              handleAddNewCustomer();
+              if (isMobile) setSidebarOpen(false);
+            }}
+          />
+          <SubItem
+            dot="bg-[#2563eb]"
+            label="All Customers"
+            badge={savedCustomers?.length ?? 0}
+            badgeBg="bg-[#7c3aed]"
+            onClick={() => {
+              setShowCustomersListModal(true);
+              if (isMobile) setSidebarOpen(false);
+            }}
+          />
+        </Accordion>
+
+        <SectionLabel>Tools</SectionLabel>
+
+        {/* Desktop-only items */}
+        {!isMobile && (
+          <>
+            <NavItem
+              icon={FileText}
+              label="Invoice Templates"
+              onClick={() => goTo("templates")}
+              active={activeView === "templates"}
+            />
+            <NavItem
+              icon={Car}
+              label="Vehicles"
+              onClick={() => goTo("vehicles")}
+              active={activeView === "vehicles"}
+            />
+          </>
+        )}
+        <NavItem
+          icon={Package}
+          label="Parts Inventory"
+          onClick={() => goTo("parts-inventory")}
+          active={activeView === "parts-inventory"}
+        />
+        <NavItem
+          icon={History}
+          label="Job History"
+          onClick={() => goTo("history-view")}
+          active={activeView === "history-view"}
+        />
+        <NavItem
+          icon={StickyNote}
+          label="Notes"
+          onClick={() => goTo("notes-view")}
+          active={activeView === "notes-view"}
+        />
+        <NavItem
+          icon={BarChart2}
+          label="Reports & Analytics"
+          onClick={() => goTo("reports")}
+          active={activeView === "reports"}
+        />
+        <NavItem
+          icon={Mail}
+          label="Letterheads"
+          onClick={() => goTo("letterheads")}
+          active={activeView === "letterheads"}
+        />
+      </div>
+
+      {isAdmin && (
+        <div className="px-3">
+          <button
+            onClick={() => {
+              setShowUserManagement?.(true);
+              if (isMobile) setSidebarOpen(false);
+            }}
+            className="flex items-center gap-2 px-3 py-2.5 text-sm text-[#94a3b8] hover:text-white hover:bg-white/5 rounded-xl w-full transition-all"
+          >
+            <Shield className="w-4 h-4" />
+            Manage Team
+          </button>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="px-3 pt-3 pb-4 flex-shrink-0">
+        <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-3 py-3">
+          <div className="w-8 h-8 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0 overflow-hidden">
+            {businessInfo?.logoUrl ? (
+              <img
+                src={businessInfo.logoUrl}
+                alt="logo"
+                className="w-5 h-5 object-contain"
+              />
+            ) : (
+              <Car className="w-4 h-4 text-[#64748b]" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-white truncate">
+              {user?.name || "User"}
+            </p>
+            <p className="text-xs text-[#64748b] truncate">
+              {user?.email || "email@example.com"}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            className="p-1.5 text-[#64748b] hover:text-white hover:bg-white/10 rounded-lg transition-all flex-shrink-0"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Mobile bottom nav items ───────────────────────────────────────────────
+  const bottomNavItems = [
+    {
+      icon: Home,
+      label: "Home",
+      action: () => goTo("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: ClipboardList,
+      label: "Job Cards",
+      action: () => goTo("invoice"),
+      active: activeView === "invoice",
+    },
+    {
+      icon: Plus,
+      label: "New",
+      action: () => {
+        handleNewInvoice();
+        goTo("invoice");
+      },
+      active: false,
+      isPrimary: true,
+    },
+    {
+      icon: FilePlus,
+      label: "Quotes",
+      action: () => {
+        handleNewQuote();
+        goTo("invoice");
+      },
+      active: false,
+      badge: newRequestCount > 0 ? newRequestCount : null,
+    },
+    {
+      icon: Menu,
+      label: "More",
+      action: () => setSidebarOpen(true),
+      active: false,
+    },
+  ];
+
+  // ── Desktop collapsed rail items ──────────────────────────────────────────
+  const railItems = [
+    {
+      icon: Home,
+      title: "Home",
+      action: () => goTo("home"),
+      active: activeView === "home",
+    },
+    {
+      icon: Settings,
+      title: "Settings",
+      action: () => setShowSettings(true),
+    },
+    {
+      icon: TrendingUp,
+      title: "Towing Operations",
+      action: () => goTo("financial-overview"),
+      active: activeView === "financial-overview",
+    },
+    {
+      icon: GerboAIIcon,
+      title: "GerboAI Receptionist",
+      action: () => goTo("gerbo-ai"),
+      active: activeView === "gerbo-ai",
+    },
+    {
+      icon: ClipboardList,
+      title: "Job Cards",
+      action: () => {
+        handleNewInvoice();
+        goTo("invoice");
+      },
+      active: activeView === "invoice",
+    },
+    {
+      icon: Users,
+      title: "Customers",
+      action: () => setShowCustomersListModal(true),
+    },
+    {
+      icon: FileText,
+      title: "Invoice Templates",
+      action: () => goTo("templates"),
+      active: activeView === "templates",
+    },
+    {
+      icon: Car,
+      title: "Vehicles",
+      action: () => goTo("vehicles"),
+      active: activeView === "vehicles",
+    },
+    {
+      icon: Package,
+      title: "Parts Inventory",
+      action: () => goTo("parts-inventory"),
+      active: activeView === "parts-inventory",
+    },
+    {
+      icon: History,
+      title: "Job History",
+      action: () => goTo("history-view"),
+      active: activeView === "history-view",
+    },
+    {
+      icon: StickyNote,
+      title: "Notes",
+      action: () => goTo("notes-view"),
+      active: activeView === "notes-view",
+    },
+    {
+      icon: BarChart2,
+      title: "Reports & Analytics",
+      action: () => goTo("reports"),
+      active: activeView === "reports",
+    },
+    {
+      icon: Mail,
+      title: "Letterheads",
+      action: () => goTo("letterheads"),
+      active: activeView === "letterheads",
+    },
+  ];
 
   return (
     <>
-      {/* ── Mobile overlay ─────────────────────────────────────────────── */}
-      {sidebarOpen && (
+      {/* ════════════════════════════════════════════════════════════════
+          MOBILE — bottom nav bar + slide-in drawer
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="md:hidden print:hidden">
+        {/* Dim overlay */}
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
+            sidebarOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
           onClick={() => setSidebarOpen(false)}
         />
-      )}
 
-      {/* ── Collapsed sidebar (icon rail) ─────────────────────────────── */}
-      {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 md:w-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden shadow-2xl z-30">
-          <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6 flex-1">
-            {/* Expand toggle */}
+        {/* Drawer */}
+        <div
+          className={`fixed inset-y-3 left-3 z-50 w-72 bg-[#151a28] rounded-3xl shadow-2xl transform transition-transform duration-300 ease-in-out overflow-hidden ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%+0.75rem)]"
+          }`}
+        >
+          {renderSidebarContent()}
+        </div>
+
+        {/* ── Bottom nav bar ── */}
+        <div className="fixed bottom-3 left-3 right-3 z-40 bg-[#151a28] rounded-3xl shadow-2xl">
+          <div className="flex items-center justify-around px-2 py-1 pb-safe">
+            {bottomNavItems.map(
+              ({ icon: Icon, label, action, active, badge, isPrimary }) =>
+                isPrimary ? (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="flex flex-col items-center justify-center -mt-5"
+                  >
+                    <div className="w-14 h-14 bg-[#c8f24c] hover:bg-[#bce83a] rounded-full flex items-center justify-center shadow-lg shadow-[#c8f24c]/30 border-4 border-[#151a28] transition-all active:scale-95">
+                      <Icon className="w-6 h-6 text-[#151a28]" />
+                    </div>
+                    <span className="text-[10px] text-[#c8f24c] font-semibold mt-0.5">
+                      {label}
+                    </span>
+                  </button>
+                ) : (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl transition-all active:scale-95 min-w-[56px]"
+                  >
+                    <div className="relative w-6 h-6 flex items-center justify-center">
+                      {active && (
+                        <span className="absolute inset-0 bg-[#c8f24c]/10 rounded-lg" />
+                      )}
+                      <div className="relative">
+                        <Icon
+                          className={`w-5 h-5 transition-colors ${
+                            active ? "text-[#c8f24c]" : "text-[#64748b]"
+                          }`}
+                        />
+                        {badge != null && (
+                          <span className="absolute -top-1.5 -right-2 bg-[#c8f24c] text-[#151a28] text-[9px] font-bold px-1 py-px rounded-full leading-none">
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-medium transition-colors ${
+                        active ? "text-[#c8f24c]" : "text-[#64748b]"
+                      }`}
+                    >
+                      {label}
+                    </span>
+                  </button>
+                ),
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════
+          DESKTOP — collapsed icon rail OR expanded panel
+          Both float with margin and rounded corners, like a card.
+      ════════════════════════════════════════════════════════════════ */}
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
+        {/* Collapsed icon rail */}
+        {!sidebarOpen && (
+          <div className="flex flex-col flex-shrink-0 w-16 bg-[#151a28] rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-110"
-              title="Expand Sidebar"
+              title="Expand"
+              className="p-2 text-[#64748b] hover:text-white hover:bg-white/5 rounded-lg transition-all"
             >
-              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
+              <ChevronRight className="w-5 h-5" />
             </button>
 
-            {/* Logo */}
-            <div className="relative group">
-              <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
-              <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-                <img
-                  src={logo}
-                  className="w-full h-full object-contain"
-                  alt="logo"
-                />
-              </div>
+            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center my-1">
+              <img src={logo} className="w-6 h-6 object-contain" alt="logo" />
             </div>
 
-            {/* Icon nav */}
-            <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
+            <div className="flex flex-col items-center gap-1 w-full px-2 mt-1">
+              {railItems.map(({ icon: Icon, title, action, active }) => (
+                <button
+                  key={title}
+                  onClick={action}
+                  title={title}
+                  className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
+                    active
+                      ? "bg-[#c8f24c] text-[#151a28]"
+                      : "text-[#64748b] hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                </button>
+              ))}
+            </div>
+
+            {isAdmin && (
               <button
-                onClick={() => goTo("home")}
-                className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                title="Home"
+                onClick={() => setShowUserManagement?.(true)}
+                title="Manage Team"
+                className="w-10 h-10 mt-1 flex items-center justify-center text-[#64748b] hover:text-white hover:bg-white/5 rounded-xl transition-all"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-stone-600 to-stone-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                <Shield className="w-5 h-5" />
               </button>
+            )}
 
-              <button
-                onClick={() => setShowSettings(true)}
-                className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                title="Settings"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Settings className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:rotate-90 transition-transform duration-500" />
-              </button>
-
-              {!isMobile && (
-                <>
-                  <button
-                    onClick={() => goTo("financial-overview")}
-                    className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Towing Operations"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleNewInvoice();
-                      goTo("invoice");
-                    }}
-                    className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Job Cards"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <ClipboardList className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                  <button
-                    onClick={() => setShowCustomersListModal(true)}
-                    className="group relative p-2 md:p-3 text-slate-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="Customers"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-pink-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <Users className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Business logo bottom */}
-          <div className="flex justify-center pb-4 md:pb-6">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg overflow-hidden">
-              {businessInfo?.logoUrl ? (
-                <img
-                  src={businessInfo.logoUrl}
-                  className="w-6 h-6 object-contain"
-                  alt="biz"
-                />
-              ) : (
-                <Car className="w-5 h-5 text-white" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Expanded sidebar ──────────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 h-full print:hidden shadow-2xl overflow-y-auto z-50 fixed inset-y-0 left-0 lg:relative lg:inset-y-auto lg:left-auto">
-          <div className="p-4 md:p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6 md:mb-8">
-              <div className="relative group">
-                <div className="absolute inset-0 rounded-xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-300" />
-                <img
-                  src={logo}
-                  className="w-12 h-10 md:w-16 md:h-12 object-contain rounded-lg bg-white/10 relative"
-                  alt="logo"
-                />
-              </div>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="group p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Nav */}
-            <nav className="space-y-1.5 md:space-y-2">
-              <NavItem
-                icon={Home}
-                label="Home"
-                onClick={() => goTo("home")}
-                color="stone"
-              />
-              <NavItem
-                icon={Settings}
-                label="Settings"
-                onClick={() => {
-                  setShowSettings(true);
-                  setSidebarOpen(false);
-                }}
-                color="purple"
-              />
-
-              <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-slate-700/50 space-y-1.5 md:space-y-2">
-                <NavItem
-                  icon={TrendingUp}
-                  label="Towing Operations"
-                  onClick={() => goTo("financial-overview")}
-                  color="emerald"
-                />
-
-                {/* Job Cards accordion */}
-                <div>
-                  <button
-                    onClick={() => setIsJobCardsOpen((p) => !p)}
-                    className="w-full group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-orange-600/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
-                  >
-                    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                      <ClipboardList className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="text-xs md:text-sm font-semibold truncate">
-                        Job Cards
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isJobCardsOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  <div
-                    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${isJobCardsOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
-                    <SubItem
-                      dot="bg-blue-500"
-                      label="Create Quote"
-                      onClick={() => {
-                        handleNewQuote();
-                        goTo("invoice");
-                      }}
-                    />
-                    <SubItem
-                      dot="bg-emerald-500"
-                      label="Create Invoice"
-                      onClick={() => {
-                        handleNewInvoice();
-                        goTo("invoice");
-                      }}
-                    />
-                    <SubItem
-                      dot="bg-purple-500"
-                      label={`All ${documentType === "quote" ? "Estimates" : "Service Calls"}`}
-                      badge={savedJobCards?.length ?? 0}
-                      badgeColor="from-blue-600 to-purple-600"
-                      onClick={() => {
-                        setShowJobCardsList(!showJobCardsList);
-                        if (isMobile) setSidebarOpen(false);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Customers accordion */}
-                <div>
-                  <button
-                    onClick={() => setIsCustomersOpen((p) => !p)}
-                    className="w-full group flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 text-slate-300 hover:text-white hover:bg-pink-600/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-pink-500/30"
-                  >
-                    <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
-                      <Users className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="text-xs md:text-sm font-semibold truncate">
-                        Customers
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isCustomersOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  <div
-                    className={`ml-4 md:ml-6 mt-1.5 md:mt-2 space-y-1 border-l-2 border-slate-700/50 pl-3 md:pl-4 overflow-hidden transition-all duration-300 ${isCustomersOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"}`}
-                  >
-                    <SubItem
-                      dot="bg-emerald-500"
-                      label="Add Customer"
-                      onClick={() => {
-                        handleAddNewCustomer();
-                        if (isMobile) setSidebarOpen(false);
-                      }}
-                    />
-                    <SubItem
-                      dot="bg-blue-500"
-                      label="All Customers"
-                      badge={savedCustomers?.length ?? 0}
-                      badgeColor="from-pink-600 to-purple-600"
-                      onClick={() => {
-                        setShowCustomersListModal(true);
-                        if (isMobile) setSidebarOpen(false);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Desktop-only items */}
-                {!isMobile && (
-                  <>
-                    <NavItem
-                      icon={FileText}
-                      label="Invoice Templates"
-                      onClick={() => goTo("templates")}
-                      color="indigo"
-                    />
-                    <NavItem
-                      icon={Car}
-                      label="Vehicles"
-                      onClick={() => goTo("vehicles")}
-                      color="cyan"
-                    />
-                  </>
+            <div className="mt-auto pb-2">
+              <div className="w-9 h-9 bg-[#253347] rounded-full flex items-center justify-center ring-1 ring-[#334155] overflow-hidden">
+                {businessInfo?.logoUrl ? (
+                  <img
+                    src={businessInfo.logoUrl}
+                    className="w-5 h-5 object-contain"
+                    alt="biz"
+                  />
+                ) : (
+                  <Car className="w-4 h-4 text-[#64748b]" />
                 )}
               </div>
-            </nav>
-          </div>
-
-          {/* Footer */}
-          <div className="sticky bottom-0 p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-            <div className="flex items-center space-x-2 md:space-x-3">
-              <div className="relative group flex-shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-                <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-blue-500/50 transition-all duration-300 flex items-center justify-center overflow-hidden">
-                  {businessInfo?.logoUrl ? (
-                    <img
-                      src={businessInfo.logoUrl}
-                      alt="Business Logo"
-                      className="max-h-[70%] max-w-[70%] object-contain"
-                    />
-                  ) : (
-                    <Car className="w-5 h-5 text-blue-500" />
-                  )}
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs md:text-sm font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                  {user?.name || "User"}
-                </p>
-                <p className="text-xs text-slate-400 truncate">
-                  {user?.email || "email@example.com"}
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="group text-slate-400 hover:text-white hover:bg-red-600/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-              >
-                <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Expanded panel */}
+        {sidebarOpen && (
+          <div className="flex-shrink-0 w-64 bg-[#151a28] rounded-3xl h-full shadow-xl z-30 overflow-hidden">
+            {renderSidebarContent()}
+          </div>
+        )}
+      </div>
     </>
   );
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function NavItem({ icon: Icon, label, onClick, color }) {
-  const colors = {
-    stone: {
-      text: "text-cyan-300",
-      hover: "hover:bg-stone-600/20",
-      border: "hover:border-cyan-500/30",
-    },
-    purple: {
-      text: "text-slate-300",
-      hover: "hover:bg-purple-600/20",
-      border: "hover:border-purple-500/30",
-    },
-    emerald: {
-      text: "text-slate-300",
-      hover: "hover:bg-emerald-600/20",
-      border: "hover:border-emerald-500/30",
-    },
-    indigo: {
-      text: "text-slate-300",
-      hover: "hover:bg-indigo-600/20",
-      border: "hover:border-indigo-500/30",
-    },
-    cyan: {
-      text: "text-slate-300",
-      hover: "hover:bg-cyan-600/20",
-      border: "hover:border-cyan-500/30",
-    },
-  };
-  const c = colors[color] ?? colors.emerald;
+function SectionLabel({ children }) {
   return (
-    <div
-      onClick={onClick}
-      className={`group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 ${c.text} hover:text-white hover:bg-gradient-to-r ${c.hover} rounded-xl cursor-pointer transition-all duration-300 border border-transparent ${c.border}`}
-    >
-      <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-      <span className="text-xs md:text-sm font-semibold truncate">{label}</span>
+    <div className="pt-3 pb-1">
+      <p className="px-3 text-[10px] font-bold text-[#475569] uppercase tracking-widest">
+        {children}
+      </p>
     </div>
   );
 }
 
-function SubItem({ label, dot, onClick, badge, badgeColor }) {
+function NavItem({ icon: Icon, label, onClick, active = false, badge = null }) {
   return (
     <div
       onClick={onClick}
-      className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all text-sm font-medium ${
+        active
+          ? "bg-[#c8f24c] text-[#151a28]"
+          : "text-[#94a3b8] hover:bg-white/5 hover:text-white"
+      }`}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2 min-w-0">
-          {dot && (
-            <div
-              className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0 group-hover:scale-150 transition-transform duration-300`}
-            />
-          )}
-          <span className="truncate">{label}</span>
+      <Icon className="w-4 h-4 flex-shrink-0" />
+      <span className="truncate flex-1">{label}</span>
+      {badge != null && (
+        <span
+          className={`text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ${
+            active
+              ? "bg-[#151a28] text-[#c8f24c]"
+              : "bg-[#c8f24c] text-[#151a28]"
+          }`}
+        >
+          {badge}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function Accordion({ icon: Icon, label, isOpen, onToggle, children }) {
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-white/5 rounded-xl transition-all text-sm font-medium"
+      >
+        <div className="flex items-center gap-3">
+          <Icon className="w-4 h-4 flex-shrink-0" />
+          <span>{label}</span>
         </div>
-        {badge != null && (
-          <span
-            className={`bg-gradient-to-r ${badgeColor} text-white px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-xs font-bold shadow-lg flex-shrink-0 ml-2`}
-          >
-            {badge}
-          </span>
-        )}
+        <ChevronDown
+          className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div
+        className={`ml-7 mt-0.5 space-y-0.5 overflow-hidden transition-all duration-200 ${
+          isOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        {children}
       </div>
+    </div>
+  );
+}
+
+function SubItem({ label, dot, onClick, badge, badgeBg = "bg-[#2563eb]" }) {
+  return (
+    <div
+      onClick={onClick}
+      className="flex items-center justify-between px-2 py-2 text-[#64748b] hover:text-white hover:bg-white/5 rounded-xl cursor-pointer transition-all text-sm"
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        {dot && (
+          <div className={`w-1.5 h-1.5 rounded-full ${dot} flex-shrink-0`} />
+        )}
+        <span className="truncate">{label}</span>
+      </div>
+      {badge != null && (
+        <span
+          className={`${badgeBg} text-white text-xs px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 ml-2`}
+        >
+          {badge}
+        </span>
+      )}
     </div>
   );
 }

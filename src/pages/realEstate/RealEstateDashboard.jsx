@@ -18,6 +18,7 @@ import PurchaseOrders from "../PurchaseOrders";
 import { useLocation } from "react-router-dom";
 import AIInvoiceWindow from '../AIInvoiceWindow';
 import FinancialOverview from "../FinancialOverview";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import TemplateSelector, { TemplateRenderer } from "./TemplateSelector";
 import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getAuth, signOut } from "firebase/auth";
@@ -857,6 +858,7 @@ const [stampConfig, setStampConfig] = useState(null);
                        <FinancialOverview user={user} />
                      </div>
                    )}
+         {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
           {/* ── Views ─────────────────────────────────────────────────────── */}
           {activeView === "templates" && <div className="flex-1 overflow-y-auto p-4"><Templates user={user} /></div>}
          {activeView === "home" && (

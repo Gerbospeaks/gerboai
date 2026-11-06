@@ -22,6 +22,7 @@ import uploadLogoToR2 from "../../utils/uploadLogoToR2";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { useFeesFirebase } from "../../hooks/useFeesFirebase";
 import EducationSidebar from "./EducationSidebar";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import AttendanceTrends from "./AttendanceTrends";
 import DocumentsVault from "./DocumentsVault";
 import { MedicalAlert } from "./StudentMedicalSection";
@@ -1231,6 +1232,7 @@ const EducationDashboard = () => {
               businessInfo={businessInfo}
             />
           )}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
         </main>
         {/* ── Mobile bottom nav ── */}
         <div

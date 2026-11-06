@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import GerboAIPanel from "../../components/GerboAIPanel";
 import { useAuth } from "../../contexts/AuthContext";
 import HomeView from "../HomeView";
 import SolidFloAgent from "../../components/SolidFloAgent/SolidFloAgent";
@@ -35,6 +36,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { Printer, Download } from "lucide-react";
+import { Bot as GerboAIIcon } from "lucide-react";
 import { db } from "../../firebase";
 import {
   ChevronDown,
@@ -914,6 +916,12 @@ const mobileNavPad = "pb-24 lg:pb-6";
                 color: "text-[#64748b]",
               },
               {
+                icon: GerboAIIcon,
+                view: "gerbo-ai",
+                title: "GerboAI Receptionist",
+                color: "text-[#64748b]",
+              },
+              {
                 icon: AlertTriangle,
                 view: null,
                 title: "Incident Reports",
@@ -1058,6 +1066,14 @@ const mobileNavPad = "pb-24 lg:pb-6";
               >
                 <TrendingUp className="w-4 h-4 flex-shrink-0" />
                 Business Overview
+              </div>
+
+              <div
+                onClick={() => navigate("gerbo-ai")}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition-all ${activeView === "gerbo-ai" ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}
+              >
+                <GerboAIIcon className="w-4 h-4 flex-shrink-0" />
+                GerboAI Receptionist
               </div>
 
               {/* Incident Reports dropdown */}
@@ -1671,6 +1687,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
           {activeView === "reports" && <ReportsPage user={user} />}
           {activeView === "analytics" && <AnalyticsPage user={user} />}
           {activeView === "overview" && <BusinessOverviewPage user={user} />}
+          {activeView === "gerbo-ai" && <GerboAIPanel user={user} fixedHeight />}
           {activeView === "calendar" && <ShiftCalendarPage user={user} />}
         </div>
       </div>
