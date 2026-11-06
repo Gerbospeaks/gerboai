@@ -244,7 +244,7 @@ const addNotification = useCallback(async (
     const checkProvisioningStatus = async () => {
       try {
         setIsLoadingSettings(true);
-        const firestoreDb = db; // Gerbo-scoped Firestore (never the default SolidFlo app)
+        const firestoreDb = db; // Gerbo-scoped Firestore (never the default GerboAI app)
         const settingsRef = doc(
           firestoreDb,
           "users",
@@ -725,7 +725,7 @@ const addNotification = useCallback(async (
       if (result.success) {
         setSaveMessage("Settings saved successfully!");
         await addNotification("success", "Settings Saved", "Your AI assistant settings have been updated");
-        const firestoreDb = db; // Gerbo-scoped Firestore (never the default SolidFlo app)
+        const firestoreDb = db; // Gerbo-scoped Firestore (never the default GerboAI app)
         const docRef = doc(
           firestoreDb,
           "users",

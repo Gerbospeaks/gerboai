@@ -105,7 +105,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/virtual/INV-0088
+            gerboai.com/virtual/INV-0088
           </span>
         </div>
       </div>
@@ -397,7 +397,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -709,7 +709,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA freelancers, consultants,
+            GerboAI is purpose-built for SA freelancers, consultants,
             designers, copywriters, and digital agency owners. Send polished
             quotes, collect retainers, and get fully paid in under 60 seconds.
           </p>
@@ -1479,14 +1479,14 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to send work and then spend weeks waiting for EFTs to clear. With SolidFlo the download link only activates after payment. I haven't had a single late payer in three months.",
+        "I used to send work and then spend weeks waiting for EFTs to clear. With GerboAI the download link only activates after payment. I haven't had a single late payer in three months.",
       name: "Lungelo Nkosi",
       role: "Nkosi Digital Studio, Cape Town",
       avatar: "LN",
     },
     {
       quote:
-        "The retainer invoicing changed my entire cash flow. I now take 50% upfront on every project — SolidFlo makes it feel completely standard to the client because the quote looks so professional.",
+        "The retainer invoicing changed my entire cash flow. I now take 50% upfront on every project — GerboAI makes it feel completely standard to the client because the quote looks so professional.",
       name: "Carla du Plessis",
       role: "Cape Copy & Content, Cape Town",
       avatar: "CD",
@@ -1686,7 +1686,7 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for virtual service providers?",
+      q: "Is GerboAI built specifically for virtual service providers?",
       a: "Yes. The service package builder, retainer/balance split invoicing, contracts, and work delivery links are designed around how freelancers, consultants, and digital agencies actually manage clients — not adapted from generic small business software.",
     },
     {
@@ -1702,7 +1702,7 @@ function FAQ() {
       a: "Yes — the Professional plan includes digital service contracts. Clients sign before the retainer is due. Your signed contract and invoice are stored together on every project.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — the Starter plan is free forever with 5 invoices per month and no credit card required. Upgrade to Professional when you need unlimited invoicing, retainer splitting, contracts, and delivery links.",
     },
     {
@@ -1884,7 +1884,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 600+ African freelancers, consultants, and digital agencies
-          who quote professionally and get paid faster with SolidFlo.
+          who quote professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1964,7 +1964,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2103,7 +2103,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{

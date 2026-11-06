@@ -85,7 +85,7 @@ const ARTICLES = [
 const FAQS = [
   {
     q: "Which URL should I use to log in?",
-    a: "Log in from your industry's subdomain — for example mechanics.solidflo.co.za — not the main solidflo.co.za site, which doesn't host accounts. If you're not sure which subdomain you signed up on, use the recovery link on the main login page.",
+    a: "Log in from your industry's subdomain — for example mechanics.gerboai.com — not the main gerboai.com site, which doesn't host accounts. If you're not sure which subdomain you signed up on, use the recovery link on the main login page.",
   },
   {
     q: "Can I change my industry after signing up?",
@@ -285,12 +285,12 @@ const HelpCenter = () => {
   return (
     <>
       <Helmet>
-        <title>Help Center — SolidFlo</title>
+        <title>Help Center — GerboAI</title>
         <meta
           name="description"
-          content="Find answers about billing, account settings, industry dashboards, integrations, and troubleshooting for SolidFlo."
+          content="Find answers about billing, account settings, industry dashboards, integrations, and troubleshooting for GerboAI."
         />
-        <link rel="canonical" href="https://solidflo.co.za/help-center" />
+        <link rel="canonical" href="https://gerboai.com/help-center" />
       </Helmet>
 
       <div className="hc">
@@ -298,9 +298,9 @@ const HelpCenter = () => {
 
         <nav className="hc-nav">
           <button className="hc-nav-back" onClick={() => navigate("/")}>
-            <ArrowLeft size={16} /> Back to SolidFlo
+            <ArrowLeft size={16} /> Back to GerboAI
           </button>
-          <img src={logo} alt="SolidFlo" className="hc-nav-logo" />
+          <img src={logo} alt="GerboAI" className="hc-nav-logo" />
         </nav>
 
         <section className="hc-hero">

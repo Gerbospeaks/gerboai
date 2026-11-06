@@ -284,7 +284,7 @@ export default function EducationSidebar({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold text-white truncate leading-tight">
-                  {businessInfo?.name || "Solidflo"}
+                  {businessInfo?.name || "Gerbo"}
                 </div>
                 <div className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase truncate">
                   {businessInfo?.tagline || "Learning Centre"}

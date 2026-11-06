@@ -75,7 +75,7 @@ function MockInvoice({ config }) {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/jobs/INV-2024
+            gerboai.com/jobs/INV-2024
           </span>
         </div>
       </div>
@@ -112,7 +112,7 @@ function MockInvoice({ config }) {
                   color: C.ink,
                 }}
               >
-                SolidFlo
+                GerboAI
               </span>
             </div>
             <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
@@ -365,7 +365,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -677,7 +677,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA window and windscreen repair
+            GerboAI is purpose-built for SA window and windscreen repair
             businesses. Create professional job quotes, track parts &amp;
             labour, and send VAT invoices in under 60 seconds.
           </p>
@@ -1143,7 +1143,7 @@ function CTABanner({ config, onRegister }) {
         </h2>
         <p className="text-white/50 mb-8 text-sm sm:text-base">
           Join hundreds of {config.label.toLowerCase()} businesses already using
-          SolidFlo.
+          GerboAI.
         </p>
         <button
           onClick={onRegister}
@@ -1171,7 +1171,7 @@ function Footer({ config, onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -1304,7 +1304,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{

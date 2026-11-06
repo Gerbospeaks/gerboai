@@ -107,7 +107,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/technology/INV-0053
+            gerboai.com/technology/INV-0053
           </span>
         </div>
       </div>
@@ -399,7 +399,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -711,7 +711,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA software developers, IT
+            GerboAI is purpose-built for SA software developers, IT
             consultants, and tech agencies. Send professional quotes, collect
             deposits, and get fully paid in under 60 seconds.
           </p>
@@ -1469,14 +1469,14 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to hand over the finished website and then spend weeks chasing the final payment. With SolidFlo the client only gets the credentials once the balance clears. I haven't had a single late payer since.",
+        "I used to hand over the finished website and then spend weeks chasing the final payment. With GerboAI the client only gets the credentials once the balance clears. I haven't had a single late payer since.",
       name: "Sipho Ndlovu",
       role: "Nexus Tech Solutions, Johannesburg",
       avatar: "SN",
     },
     {
       quote:
-        "The milestone invoicing feature alone changed my business. I take 50% upfront on every project now — SolidFlo makes it feel completely normal to the client because it looks so professional.",
+        "The milestone invoicing feature alone changed my business. I take 50% upfront on every project now — GerboAI makes it feel completely normal to the client because it looks so professional.",
       name: "Anri van der Berg",
       role: "CodeCraft Agency, Cape Town",
       avatar: "AV",
@@ -1674,7 +1674,7 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for tech businesses?",
+      q: "Is GerboAI built specifically for tech businesses?",
       a: "Yes. The service package builder, deposit/milestone split invoicing, project contracts, and deliverable gating links are designed around how tech businesses manage projects — not adapted from generic small business software.",
     },
     {
@@ -1690,7 +1690,7 @@ function FAQ() {
       a: "Yes — the Builder plan includes digital project contracts. Clients sign before the deposit is due. Your signed contract and invoice are stored together on every project.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — the Starter plan is free forever with 5 invoices per month and no credit card required. Upgrade to Builder when you need unlimited invoicing, milestone splitting, contracts, and deliverable gating.",
     },
     {
@@ -1872,7 +1872,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 500+ African tech businesses and consultants who quote
-          professionally and get paid faster with SolidFlo.
+          professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1952,7 +1952,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -1987,7 +1987,7 @@ function Footer({ onLogin, onRegister }) {
                 marginBottom: 16,
               }}
             >
-              <img src={logo} width={160} alt="SolidFlo" />
+              <img src={logo} width={160} alt="GerboAI" />
             </div>
             <p
               style={{
@@ -2077,7 +2077,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{

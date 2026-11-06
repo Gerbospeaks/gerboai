@@ -153,7 +153,7 @@ const AboutPage = () => {
       name: "Emily Rodriguez",
       role: "Head of Marketing",
       
-      bio: "Growth strategist helping businesses discover SolidFlo.",
+      bio: "Growth strategist helping businesses discover GerboAI.",
     },
   ];
 
@@ -445,7 +445,7 @@ const AboutPage = () => {
               <div className="flex items-center">
                 <img
                   src={logo}
-                  alt="SolidFlo"
+                  alt="GerboAI"
                   className="h-16 w-auto cursor-pointer"
                   onClick={() => navigate("/")}
                 />
@@ -515,7 +515,7 @@ const AboutPage = () => {
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 rounded-full mb-8 animate-slide-up">
                 <Sparkles className="w-4 h-4 text-orange-600" />
                 <span className="text-sm font-semibold text-orange-600">
-                  About SolidFlo
+                  About GerboAI
                 </span>
               </div>
 
@@ -571,7 +571,7 @@ const AboutPage = () => {
                 </h2>
                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed">
                   <p>
-                    SolidFlo was born from a simple frustration: invoicing
+                    GerboAI was born from a simple frustration: invoicing
                     shouldn't be complicated. As business owners ourselves, we
                     spent countless hours wrestling with clunky software,
                     chasing down payments, and managing spreadsheets.
@@ -663,7 +663,7 @@ const AboutPage = () => {
                 Our Journey
               </h2>
               <p className="text-xl text-gray-400">
-                Milestones that shaped SolidFlo
+                Milestones that shaped GerboAI
               </p>
             </div>
 
@@ -716,7 +716,7 @@ const AboutPage = () => {
                 Meet Our <span className="gradient-text">Team</span>
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                The talented people behind SolidFlo
+                The talented people behind GerboAI
               </p>
             </div>
 
@@ -763,7 +763,7 @@ const AboutPage = () => {
             </h2>
             <p className="text-xl text-white/90 mb-10 leading-relaxed">
               Be part of the invoicing revolution. Start your free trial today
-              and see why 10,000+ businesses trust SolidFlo.
+              and see why 10,000+ businesses trust GerboAI.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -794,7 +794,7 @@ const AboutPage = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
               {/* Company Info */}
               <div>
-                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+                <img src={logo1} alt="GerboAI" className="h-10 mb-4" />
                 <p className="text-gray-400 mb-6 leading-relaxed">
                   Free online invoicing for small businesses. Create and send
                   invoices, track time and expenses, and accept online payments.
@@ -901,7 +901,7 @@ const AboutPage = () => {
             {/* Bottom Bar */}
             <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
               <p>
-                &copy; {new Date().getFullYear()} SolidFlo. All rights reserved.
+                &copy; {new Date().getFullYear()} GerboAI. All rights reserved.
               </p>
             </div>
           </div>

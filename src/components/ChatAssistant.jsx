@@ -7,7 +7,7 @@ function ChatAssistant() {
     {
       role: "assistant",
       content:
-        "Hi! I'm here to answer questions about SolidFlo. What would you like to know?",
+        "Hi! I'm here to answer questions about GerboAI. What would you like to know?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -97,7 +97,7 @@ function ChatAssistant() {
                 S
               </div>
               <div>
-                <h3 className="font-semibold">SolidFlo Assistant</h3>
+                <h3 className="font-semibold">GerboAI Assistant</h3>
                 <p className="text-xs opacity-90">
                   Typically replies instantly
                 </p>

@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals, no-undef */
 
-// ── SolidFlo Service Worker ───────────────────────────────────────────────────
+// ── GerboAI Service Worker ───────────────────────────────────────────────────
 // Cache-first for static assets, network-first for API calls,
 // offline fallback page for navigation requests.
 
@@ -75,7 +75,7 @@ self.addEventListener("sync", (event) => {
 // ── Push notifications ────────────────────────────────────────────────────────
 self.addEventListener("push", (event) => {
   const data = event.data?.json() ?? {};
-  const title   = data.title || "SolidFlo";
+  const title   = data.title || "GerboAI";
   const options = {
     body:  data.body  || "You have a new notification",
     icon:  "/logo192.png",

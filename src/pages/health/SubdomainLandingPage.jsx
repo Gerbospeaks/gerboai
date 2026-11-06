@@ -105,7 +105,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/healthcare/INV-2024
+            gerboai.com/healthcare/INV-2024
           </span>
         </div>
       </div>
@@ -134,7 +134,7 @@ function MockInvoice() {
               }}
             >
               <span style={{ fontSize: 22 }}>
-                <img src={logotop} width={140} alt="SolidFlo" />
+                <img src={logotop} width={140} alt="GerboAI" />
               </span>
               
             </div>
@@ -387,7 +387,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -1446,7 +1446,7 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to lose 2 hours a week chasing co-payments. SolidFlo sends the reminder automatically. My front desk can finally focus on patients instead of invoices.",
+        "I used to lose 2 hours a week chasing co-payments. GerboAI sends the reminder automatically. My front desk can finally focus on patients instead of invoices.",
       name: "Dr. Priya Naidoo",
       role: "GP, Sandton",
       avatar: "PN",
@@ -1653,19 +1653,19 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for healthcare practices?",
+      q: "Is GerboAI built specifically for healthcare practices?",
       a: "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how African healthcare practices actually bill — not adapted from generic invoicing software.",
     },
     {
       q: "Does it support NHRPL and BHF tariff codes?",
-      a: "Yes. SolidFlo includes a built-in tariff code library for common NHRPL and BHF codes. Select a procedure and the correct billing rate populates automatically, reducing errors and saving time on every invoice.",
+      a: "Yes. GerboAI includes a built-in tariff code library for common NHRPL and BHF codes. Select a procedure and the correct billing rate populates automatically, reducing errors and saving time on every invoice.",
     },
     {
       q: "Can I track medical aid claims separately from private patients?",
       a: "Absolutely. You can tag invoices by payment type — medical aid scheme or private — and track each claim's status from submission through to remittance or rejection, all in one dashboard.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Solo plan is free forever. You get 10 invoices per month with no credit card required. When your practice grows, upgrade to Practice or Clinic for unlimited billing and medical aid tracking.",
     },
     {
@@ -1833,7 +1833,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 700+ African practitioners and clinics that bill
-          professionally and get paid faster with SolidFlo.
+          professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1918,7 +1918,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2075,7 +2075,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -2105,43 +2105,43 @@ export default function SubdomainLandingPage() {
   return (
     <>
     <Helmet>
-  <title>Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo</title>
+  <title>Medical Billing & Invoicing Software for Healthcare Practices | GerboAI</title>
   <meta
     name="description"
     content="Bill patients with built-in tariff codes, track medical aid claims, and send SARS & HPCSA-compliant invoices in under 60 seconds. Built for African GPs, specialists, and allied health practitioners. Free plan available, no credit card required."
   />
-  <link rel="canonical" href="https://healthcare.solidflo.co.za/" />
+  <link rel="canonical" href="https://healthcare.gerboai.com/" />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
+  <meta property="og:title" content="Medical Billing & Invoicing Software for Healthcare Practices | GerboAI" />
   <meta
     property="og:description"
     content="Tariff code billing, medical aid claim tracking, and compliant invoicing — built for African healthcare practitioners."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://healthcare.solidflo.co.za/" />
-  <meta property="og:image" content="https://healthcare.solidflo.co.za/og-image.jpg" />
+  <meta property="og:url" content="https://healthcare.gerboai.com/" />
+  <meta property="og:image" content="https://healthcare.gerboai.com/og-image.jpg" />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Medical Billing & Invoicing Software for Healthcare Practices | SolidFlo" />
+  <meta name="twitter:title" content="Medical Billing & Invoicing Software for Healthcare Practices | GerboAI" />
   <meta
     name="twitter:description"
     content="Tariff code billing and medical aid claim tracking — built for African healthcare practices."
   />
-  <meta name="twitter:image" content="https://healthcare.solidflo.co.za/og-image.jpg" />
+  <meta name="twitter:image" content="https://healthcare.gerboai.com/og-image.jpg" />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "SolidFlo for Healthcare Practices",
+      "name": "GerboAI for Healthcare Practices",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://healthcare.solidflo.co.za/",
+      "url": "https://healthcare.gerboai.com/",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -2163,7 +2163,7 @@ export default function SubdomainLandingPage() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Is SolidFlo built specifically for healthcare practices?",
+          "name": "Is GerboAI built specifically for healthcare practices?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Yes. The tariff code library, medical aid claim tracking, and HPCSA-compliant invoice templates are all designed around how African healthcare practices actually bill — not adapted from generic invoicing software.",
@@ -2174,7 +2174,7 @@ export default function SubdomainLandingPage() {
           "name": "Does it support NHRPL and BHF tariff codes?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. SolidFlo includes a built-in tariff code library for common NHRPL and BHF codes. Select a procedure and the correct billing rate populates automatically, reducing errors and saving time on every invoice.",
+            "text": "Yes. GerboAI includes a built-in tariff code library for common NHRPL and BHF codes. Select a procedure and the correct billing rate populates automatically, reducing errors and saving time on every invoice.",
           },
         },
         {
@@ -2187,7 +2187,7 @@ export default function SubdomainLandingPage() {
         },
         {
           "@type": "Question",
-          "name": "Is SolidFlo really free?",
+          "name": "Is GerboAI really free?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Yes — our Solo plan is free forever. You get 10 invoices per month with no credit card required. When your practice grows, upgrade to Practice or Clinic for unlimited billing and medical aid tracking.",

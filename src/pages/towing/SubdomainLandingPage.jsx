@@ -76,7 +76,7 @@ function MockInvoice({ config }) {
           <span key={c} style={{ width: 11, height: 11, borderRadius: "50%", background: c, display: "inline-block" }} />
         ))}
         <div style={{ flex: 1, background: T.white, borderRadius: 4, height: 20, margin: "0 10px", display: "flex", alignItems: "center", paddingLeft: 9 }}>
-          <span style={{ fontSize: 10, color: T.muted }}>solidflo.co.za/invoice/{refNo}</span>
+          <span style={{ fontSize: 10, color: T.muted }}>gerboai.com/invoice/{refNo}</span>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ function MockInvoice({ config }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 20, color: config.color, marginBottom: 4 }}>
-              SolidFlo
+              GerboAI
             </div>
             <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>{bizName}</p>
           </div>
@@ -211,7 +211,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -523,7 +523,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA towing and roadside recovery
+            GerboAI is purpose-built for SA towing and roadside recovery
             operators. Create on-the-spot invoices, track call-outs and fleet
             jobs, and get paid in under 60 seconds.
           </p>
@@ -884,7 +884,7 @@ function CTABanner({ config, onRegister }) {
           Ready to get paid faster?
         </h2>
         <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 15, margin: "0 0 34px", fontFamily: "'Barlow', sans-serif" }}>
-          Join hundreds of {config.label.toLowerCase()} businesses already using SolidFlo.
+          Join hundreds of {config.label.toLowerCase()} businesses already using GerboAI.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <button
@@ -921,7 +921,7 @@ function Footer({ config, onLogin, onRegister }) {
     },
     {
       title: "Company",
-      links: ["About SolidFlo", "Contact Us", "Privacy Policy", "Terms of Service", "Made in Africa"],
+      links: ["About GerboAI", "Contact Us", "Privacy Policy", "Terms of Service", "Made in Africa"],
     },
   ];
 
@@ -981,7 +981,7 @@ function Footer({ config, onLogin, onRegister }) {
         {/* Bottom bar */}
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 22, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, fontFamily: "'Barlow', sans-serif", margin: 0 }}>
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, fontFamily: "'Barlow', sans-serif", margin: 0 }}>
             Proudly  African

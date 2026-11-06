@@ -7,14 +7,14 @@ export function getSubdomainFromHost() {
     return ind || null;
   }
 
-  const BASE_DOMAIN = "solidflo.co.za";
+  const BASE_DOMAIN = "gerboai.com";
 
   // Exact match or www → no subdomain
   if (hostname === BASE_DOMAIN || hostname === `www.${BASE_DOMAIN}`) {
     return null;
   }
 
-  // Anything else ending in .solidflo.co.za → strip the suffix to get the subdomain
+  // Anything else ending in .gerboai.com → strip the suffix to get the subdomain
   if (hostname.endsWith(`.${BASE_DOMAIN}`)) {
     return hostname.slice(0, -(`.${BASE_DOMAIN}`.length)).toLowerCase();
   }

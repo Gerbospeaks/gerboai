@@ -1030,7 +1030,7 @@ const PageHeader = ({ t, title, sub, businessName }) => (
         color: t.p,
       }}
     >
-      {businessName || "Solidflo Daycare"}
+      {businessName || "Gerbo Daycare"}
     </div>
   </div>
 );
@@ -3996,7 +3996,7 @@ const CoverPage = ({ t, data, businessName, logoUrl }) => (
             textTransform: "uppercase",
           }}
         >
-          {businessName || "Solidflo Pre School"}
+          {businessName || "Gerbo Pre School"}
         </span>
       </div>
     )}
@@ -4021,7 +4021,7 @@ const CoverPage = ({ t, data, businessName, logoUrl }) => (
             textTransform: "uppercase",
           }}
         >
-          {businessName || "Solidflo Pre School"}
+          {businessName || "Gerbo Pre School"}
         </span>
       </div>
     )}
@@ -4218,7 +4218,7 @@ const CoverPage = ({ t, data, businessName, logoUrl }) => (
         }}
       >
         {data.address || "Ext 36, Olivienhoutsbosch"} &nbsp;|&nbsp;{" "}
-        {businessName || "Solidflo Pre School"} &nbsp;|&nbsp;{" "}
+        {businessName || "Gerbo Pre School"} &nbsp;|&nbsp;{" "}
         {data.schoolYear || "2026"}
       </p>
     </div>
@@ -4261,7 +4261,7 @@ const KeyPage = ({ t, data, businessName }) => {
       <PageHeader
         t={t}
         title="Assessment Key & Attendance"
-        sub={`${businessName || "Solidflo Saas School"} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
+        sub={`${businessName || "Gerbo Saas School"} · Grade ${data.grade || "1"} · ${data.schoolYear || "2026"}`}
         businessName={businessName}
       />
       <div style={{ flex: 1 }}>
@@ -4627,7 +4627,7 @@ const TermPage = ({ t, td, data, businessName }) => {
                 letterSpacing: "0.5px",
               }}
             >
-              {businessName || "Solidflo Pre School"} ·{" "}
+              {businessName || "Gerbo Pre School"} ·{" "}
               {data.address || "Ext 36, Olivienhoutsbosch"} · Grade{" "}
               {normaliseGrade(data.grade) || "1"} Progress Report{" "}
               {data.schoolYear || "2026"}
@@ -6213,7 +6213,7 @@ export default function Reports() {
   const [savedStudentIds, setSavedStudentIds] = useState(new Set());
   const [isSaving, setIsSaving] = useState(false);
   const [businessInfo, setBusinessInfo] = useState(null);
-  const [businessName, setBusinessName] = useState("Solidflo Saas School");
+  const [businessName, setBusinessName] = useState("Gerbo Saas School");
   const [showGradeThemes, setShowGradeThemes] = useState(false);
   // Mobile tab state — "preview" | "inputs" | "classlist"
   const [mobileTab, setMobileTab] = useState("preview");

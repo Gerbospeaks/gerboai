@@ -1,7 +1,7 @@
 {
   "id": "/login",
-  "short_name": "Solidflo",
-  "name": "SolidFlo Saas",
+  "short_name": "Gerbo",
+  "name": "GerboAI Saas",
   "description": "Professional accounting, invoicing and payroll for your clients",
   "start_url": "/login",
   "scope": "/",
@@ -49,14 +49,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "SolidFlo Dashboard"
+      "label": "GerboAI Dashboard"
     },
     {
       "src": "screenshot2.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "SolidFlo on mobile"
+      "label": "GerboAI on mobile"
     }
   ],
   "shortcuts": [

@@ -49,7 +49,7 @@ const CALL_STEPS = [
   {
     n: 1,
     title: "Divert your calls",
-    desc: "Forward your number to SolidFlo. No technical setup, we help you onboard.",
+    desc: "Forward your number to GerboAI. No technical setup, we help you onboard.",
   },
   {
     n: 2,
@@ -127,7 +127,7 @@ const CallDemo = () => {
   return (
     <div
       className="cl-demo"
-      aria-label="Example of SolidFlo AI answering a call"
+      aria-label="Example of GerboAI AI answering a call"
     >
       <div className="cl-phone">
         <div className="cl-phone-head">
@@ -182,7 +182,7 @@ const CallAnswering = ({ localPrice, currencyLoading, onStart, onContact }) => (
       <div className="lp-section-head center">
         <h2>Never miss a call. Your AI receptionist answers for you.</h2>
         <p>
-          80% of missed calls never ring again. SolidFlo answers every call,
+          80% of missed calls never ring again. GerboAI answers every call,
           captures the lead and sends you a summary, so the job lands in your
           invoices instead of with a competitor.
         </p>

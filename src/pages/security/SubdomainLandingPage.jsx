@@ -81,7 +81,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -406,7 +406,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA security and guarding companies.
+            GerboAI is purpose-built for SA security and guarding companies.
             Create recurring contract invoices, track armed-response
             call-outs, and get paid in under 60 seconds.
           </p>
@@ -669,7 +669,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/invoices/INV-2024
+            gerboai.com/invoices/INV-2024
           </span>
         </div>
       </div>
@@ -706,7 +706,7 @@ function MockInvoice() {
                   color: C.ink,
                 }}
               >
-                SolidFlo
+                GerboAI
               </span>
             </div>
             <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
@@ -1051,7 +1051,7 @@ function CTABanner({ config, onRegister }) {
           Ready to get paid faster?
         </h2>
         <p className="text-white/50 mb-8 text-sm sm:text-base">
-          Join hundreds of {config.label.toLowerCase()} businesses already using SolidFlo.
+          Join hundreds of {config.label.toLowerCase()} businesses already using GerboAI.
         </p>
         <button
           onClick={onRegister}
@@ -1074,7 +1074,7 @@ function Footer({ config, onLogin, onRegister }) {
           <div className="flex items-center gap-2">
             <span className="text-lg">{config.icon}</span>
             <div>
-              <p className="font-bold text-gray-800 text-sm">SolidFlo {config.label}</p>
+              <p className="font-bold text-gray-800 text-sm">GerboAI {config.label}</p>
               <p className="text-xs text-gray-400">Professional invoicing for SA businesses</p>
             </div>
           </div>
@@ -1095,7 +1095,7 @@ function Footer({ config, onLogin, onRegister }) {
         </div>
 
         <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-300">
-          <p>© {new Date().getFullYear()} SolidFlo. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} GerboAI. All rights reserved.</p>
           <p>Made in South Africa 🇿🇦</p>
         </div>
       </div>

@@ -16,7 +16,7 @@ export default function PayPage({ params }) {
 
   const handlePay = () => {
     // Redirect to Peach Payments / PayFast / Stripe
-    window.location.href = `https://www.payfast.co.za/eng/process?merchant_id=YOUR_ID&amount=${invoice.total}&item_name=Invoice+${params.invoiceId}&return_url=https://solidflo.co.za/pay/success`;
+    window.location.href = `https://www.payfast.co.za/eng/process?merchant_id=YOUR_ID&amount=${invoice.total}&item_name=Invoice+${params.invoiceId}&return_url=https://gerboai.com/pay/success`;
   };
 
   if (!invoice) return <div>Loading...</div>;

@@ -532,7 +532,7 @@ const handleVoiceFileUpload = async (e) => {
         segments: [
           {
             kind: "text",
-            content: `Hi! I'm your SolidFlo assistant for your ${industry} business. I can create invoices, quotes, save clients, and manage your materials. What would you like to do?`,
+            content: `Hi! I'm your GerboAI assistant for your ${industry} business. I can create invoices, quotes, save clients, and manage your materials. What would you like to do?`,
           },
         ],
       },
@@ -771,7 +771,7 @@ const handleVoiceFileUpload = async (e) => {
               <img src={logo} width={80} alt="" />{" "}
             </div>
             <div className={styles.headerText}>
-              <p className={styles.headerTitle}>SolidFlo Assistant</p>
+              <p className={styles.headerTitle}>GerboAI Assistant</p>
               <p className={styles.headerSub}>
                 {industry.charAt(0).toUpperCase() + industry.slice(1)} · AI
                 powered

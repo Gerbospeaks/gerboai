@@ -891,7 +891,7 @@ export default function Home({
 
         {/* ── Footer ── */}
         <div className="zh-footer">
-          © 2026 SolidFlo · Modern Invoicing &amp; Billing
+          © 2026 GerboAI · Modern Invoicing &amp; Billing
         </div>
 
         {/* ── Business settings ── */}

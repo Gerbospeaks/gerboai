@@ -2904,7 +2904,7 @@ const RestaurantDashboard = () => {
                   color: "#fff",
                 }}
               >
-                SolidFlo
+                GerboAI
               </p>
               <p
                 style={{

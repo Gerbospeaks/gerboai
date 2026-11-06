@@ -1,11 +1,11 @@
 /**
  * SEO_MarketplaceMeta.jsx  (v2 — subdomain architecture)
  * ─────────────────────────────────────────────────────────────────
- * Built for:  market.solidflo.co.za
+ * Built for:  market.gerboai.com
  * Architecture: the marketplace is a subdomain, not a path.
- *   market.solidflo.co.za/           → all industries
- *   market.solidflo.co.za/plumbing   → plumbers page
- *   market.solidflo.co.za/electrical → electricians page
+ *   market.gerboai.com/           → all industries
+ *   market.gerboai.com/plumbing   → plumbers page
+ *   market.gerboai.com/electrical → electricians page
  *   … etc for all 27 industries
  *
  * INSTALL:
@@ -38,8 +38,8 @@ import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 
-const BASE = "https://market.solidflo.co.za";
-const MAIN = "https://solidflo.co.za";
+const BASE = "https://market.gerboai.com";
+const MAIN = "https://gerboai.com";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INDUSTRY SEO CONFIG
@@ -49,7 +49,7 @@ const MAIN = "https://solidflo.co.za";
 export const INDUSTRY_SEO = {
   all: {
     slug: "",
-    title: "Service Providers in Gauteng | SolidFlo Marketplace",
+    title: "Service Providers in Gauteng | GerboAI Marketplace",
     description:
       "Find verified tradespeople and service providers across Gauteng. Compare quotes, check ratings and book online. Plumbers, electricians, mechanics and 25+ industries.",
     h1: "Verified Service Providers in Gauteng",
@@ -57,10 +57,10 @@ export const INDUSTRY_SEO = {
     faqs: [
       {
         q: "How do I find a reliable service provider in Gauteng?",
-        a: "Browse SolidFlo's verified marketplace. Every listed provider has been reviewed by real Gauteng businesses. Filter by industry, check ratings and send a booking request — no middleman needed.",
+        a: "Browse GerboAI's verified marketplace. Every listed provider has been reviewed by real Gauteng businesses. Filter by industry, check ratings and send a booking request — no middleman needed.",
       },
       {
-        q: "Is SolidFlo free to use?",
+        q: "Is GerboAI free to use?",
         a: "Browsing the marketplace is completely free with no sign-up required. You only need a free account to post a job request or receive quotes from providers.",
       },
       {
@@ -71,7 +71,7 @@ export const INDUSTRY_SEO = {
   },
   mechanics: {
     slug: "mechanics",
-    title: "Mechanics & Auto Repair in Gauteng | SolidFlo Market",
+    title: "Mechanics & Auto Repair in Gauteng | GerboAI Market",
     description:
       "Book certified mechanics in Johannesburg and Pretoria. Fleet servicing, engine rebuilds, diagnostics and roadworthy inspections. Get quotes from R380/hr.",
     h1: "Mechanics & Auto Repair Services in Gauteng",
@@ -83,7 +83,7 @@ export const INDUSTRY_SEO = {
       },
       {
         q: "Can I get a mobile mechanic in Johannesburg?",
-        a: "Yes. Several SolidFlo providers offer mobile call-outs to your home or workplace across the JHB metro, including Sandton, Randburg and Midrand.",
+        a: "Yes. Several GerboAI providers offer mobile call-outs to your home or workplace across the JHB metro, including Sandton, Randburg and Midrand.",
       },
       {
         q: "What is a roadworthy inspection and how much does it cost?",
@@ -93,7 +93,7 @@ export const INDUSTRY_SEO = {
   },
   electrical: {
     slug: "electrical",
-    title: "Licensed Electricians in Gauteng | COC Certificates | SolidFlo",
+    title: "Licensed Electricians in Gauteng | COC Certificates | GerboAI",
     description:
       "Find ECSA-registered electricians in Johannesburg and Pretoria. COC certificates, DB upgrades, solar wiring, fault finding and emergency call-outs. From R420/hr.",
     h1: "Licensed Electricians in Gauteng",
@@ -109,13 +109,13 @@ export const INDUSTRY_SEO = {
       },
       {
         q: "Can electricians install solar panels in Johannesburg?",
-        a: "Yes. Many SolidFlo electricians are qualified to wire and commission solar PV systems compliant with NRS097, including grid-tied and off-grid installations.",
+        a: "Yes. Many GerboAI electricians are qualified to wire and commission solar PV systems compliant with NRS097, including grid-tied and off-grid installations.",
       },
     ],
   },
   carpentry: {
     slug: "carpentry",
-    title: "Carpenters & Joinery in Gauteng | Custom Built-ins | SolidFlo",
+    title: "Carpenters & Joinery in Gauteng | Custom Built-ins | GerboAI",
     description:
       "Hire skilled carpenters in Pretoria and Johannesburg. Custom built-in cupboards, doors, frames, decking and bespoke timber work. Rates from R320/hr.",
     h1: "Carpenters & Joinery Services in Gauteng",
@@ -133,7 +133,7 @@ export const INDUSTRY_SEO = {
   },
   plumbing: {
     slug: "plumbing",
-    title: "Plumbers in Gauteng | Emergency Plumbing | SolidFlo Market",
+    title: "Plumbers in Gauteng | Emergency Plumbing | GerboAI Market",
     description:
       "Find licensed plumbers in Johannesburg and Pretoria. 24/7 emergency call-outs, burst pipes, bathroom renovations, leak detection. Rates from R400/hr.",
     h1: "Licensed Plumbers in Gauteng",
@@ -155,7 +155,7 @@ export const INDUSTRY_SEO = {
   },
   logistics: {
     slug: "logistics",
-    title: "Logistics & Courier Services in Gauteng | SolidFlo Market",
+    title: "Logistics & Courier Services in Gauteng | GerboAI Market",
     description:
       "Book same-day couriers, freight and logistics companies in Johannesburg. Cold-chain, nationwide delivery and office relocation. Get quotes instantly.",
     h1: "Logistics & Courier Services in Gauteng",
@@ -169,7 +169,7 @@ export const INDUSTRY_SEO = {
   },
   construction: {
     slug: "construction",
-    title: "Construction Companies in Gauteng | CIDB Contractors | SolidFlo",
+    title: "Construction Companies in Gauteng | CIDB Contractors | GerboAI",
     description:
       "Find CIDB-registered builders in Johannesburg and Pretoria. Residential builds, commercial renovations, extensions and structural work. Get quotes today.",
     h1: "CIDB-Registered Construction Companies in Gauteng",
@@ -187,7 +187,7 @@ export const INDUSTRY_SEO = {
   },
   accounting: {
     slug: "accounting",
-    title: "Accountants & Bookkeepers in Gauteng | SARS Submissions | SolidFlo",
+    title: "Accountants & Bookkeepers in Gauteng | SARS Submissions | GerboAI",
     description:
       "Find SAIPA-registered accountants in Pretoria and Johannesburg. VAT returns, SARS submissions, payroll and SME bookkeeping. From R350/hr.",
     h1: "Registered Accountants & Bookkeepers in Gauteng",
@@ -206,7 +206,7 @@ export const INDUSTRY_SEO = {
   cleaning: {
     slug: "cleaning",
     title:
-      "Cleaning Services in Gauteng | Office & Industrial Cleaning | SolidFlo",
+      "Cleaning Services in Gauteng | Office & Industrial Cleaning | GerboAI",
     description:
       "Book professional cleaning companies in Johannesburg and Pretoria. Office cleaning, deep cleans and industrial cleaning. Rates from R280/hr.",
     h1: "Professional Cleaning Services in Gauteng",
@@ -221,7 +221,7 @@ export const INDUSTRY_SEO = {
   health: {
     slug: "health",
     title:
-      "Occupational Health Services in Gauteng | IOD & Medicals | SolidFlo",
+      "Occupational Health Services in Gauteng | IOD & Medicals | GerboAI",
     description:
       "Find occupational health practitioners in Johannesburg. Pre-employment medicals, IOD assessments and on-site wellness screenings. Book today.",
     h1: "Occupational Health Services in Gauteng",
@@ -236,7 +236,7 @@ export const INDUSTRY_SEO = {
   hotel: {
     slug: "hospitality",
     title:
-      "Event & Hospitality Services in Gauteng | Conference Catering | SolidFlo",
+      "Event & Hospitality Services in Gauteng | Conference Catering | GerboAI",
     description:
       "Book event management and hospitality companies in Johannesburg. Conference setup, catering, AV equipment and corporate functions.",
     h1: "Event & Hospitality Services in Gauteng",
@@ -251,7 +251,7 @@ export const INDUSTRY_SEO = {
   hvac: {
     slug: "hvac",
     title:
-      "HVAC Companies in Gauteng | Aircon Installation & Repair | SolidFlo",
+      "HVAC Companies in Gauteng | Aircon Installation & Repair | GerboAI",
     description:
       "Find HVAC specialists in Johannesburg and Pretoria. Aircon installation, VRV systems, maintenance contracts and emergency repairs. From R480/hr.",
     h1: "HVAC & Air Conditioning Services in Gauteng",
@@ -269,7 +269,7 @@ export const INDUSTRY_SEO = {
   },
   landscaping: {
     slug: "landscaping",
-    title: "Landscaping & Garden Services in Gauteng | SolidFlo Market",
+    title: "Landscaping & Garden Services in Gauteng | GerboAI Market",
     description:
       "Hire professional landscapers in Pretoria and Johannesburg. Garden design, irrigation, lawn maintenance and commercial landscaping. From R300/hr.",
     h1: "Landscaping & Garden Services in Gauteng",
@@ -283,7 +283,7 @@ export const INDUSTRY_SEO = {
   },
   legal: {
     slug: "legal",
-    title: "Commercial Lawyers in Gauteng | SME Legal Services | SolidFlo",
+    title: "Commercial Lawyers in Gauteng | SME Legal Services | GerboAI",
     description:
       "Find commercial attorneys and labour law specialists in Pretoria and Johannesburg. Contracts, CCMA representation and company compliance. From R1 200/hr.",
     h1: "Commercial Attorneys & Legal Services in Gauteng",
@@ -301,7 +301,7 @@ export const INDUSTRY_SEO = {
   },
   painting: {
     slug: "painting",
-    title: "Painters in Gauteng | Interior & Exterior Painting | SolidFlo",
+    title: "Painters in Gauteng | Interior & Exterior Painting | GerboAI",
     description:
       "Book professional painters in Johannesburg and Pretoria. Interior and exterior painting, waterproofing and texture finishes. From R280/hr.",
     h1: "Professional Painters in Gauteng",
@@ -315,7 +315,7 @@ export const INDUSTRY_SEO = {
   },
   "pestcontrol": {
     slug: "pestcontrol",
-    title: "Pest Control Services in Gauteng | Fumigation | SolidFlo Market",
+    title: "Pest Control Services in Gauteng | Fumigation | GerboAI Market",
     description:
       "Book registered pest control operators in Johannesburg. Cockroach, rodent and termite treatments. Same-day service from R550 flat rate.",
     h1: "Registered Pest Control Services in Gauteng",
@@ -329,7 +329,7 @@ export const INDUSTRY_SEO = {
   },
   photography: {
     slug: "photography",
-    title: "Commercial Photographers in Gauteng | Events & Products | SolidFlo",
+    title: "Commercial Photographers in Gauteng | Events & Products | GerboAI",
     description:
       "Book professional photographers in Johannesburg. Product shoots, corporate events, drone footage and headshots. Half-day rates from R1 800.",
     h1: "Commercial & Event Photographers in Gauteng",
@@ -343,7 +343,7 @@ export const INDUSTRY_SEO = {
   },
   poolservices: {
     slug: "poolservices",
-    title: "Pool Services in Gauteng | Cleaning & Maintenance | SolidFlo",
+    title: "Pool Services in Gauteng | Cleaning & Maintenance | GerboAI",
     description:
       "Find pool cleaning and maintenance companies in Pretoria and Johannesburg. Weekly service, chemical balancing and pump repairs. From R350/visit.",
     h1: "Pool Cleaning & Maintenance Services in Gauteng",
@@ -358,7 +358,7 @@ export const INDUSTRY_SEO = {
   realestate: {
     slug: "realestate",
     title:
-      "Commercial Property Agents in Gauteng | Industrial Listings | SolidFlo",
+      "Commercial Property Agents in Gauteng | Industrial Listings | GerboAI",
     description:
       "Find specialist commercial property agents in Johannesburg and Pretoria. Buying, selling, leasing and property valuations across Gauteng.",
     h1: "Commercial Property Agents in Gauteng",
@@ -372,7 +372,7 @@ export const INDUSTRY_SEO = {
   },
   restaurant: {
     slug: "restaurant",
-    title: "Corporate Catering in Gauteng | Event Food Services | SolidFlo",
+    title: "Corporate Catering in Gauteng | Event Food Services | GerboAI",
     description:
       "Book catering companies in Johannesburg. Corporate lunches, halaal-certified menus and set menus from R180/person.",
     h1: "Corporate Catering & Food Services in Gauteng",
@@ -386,7 +386,7 @@ export const INDUSTRY_SEO = {
   },
   security: {
     slug: "security",
-    title: "Security Companies in Gauteng | Armed Response | PSiRA | SolidFlo",
+    title: "Security Companies in Gauteng | Armed Response | PSiRA | GerboAI",
     description:
       "Find PSiRA-registered security companies in Johannesburg. Armed response, site guarding, CCTV installation and access control. From R220/hr.",
     h1: "PSiRA-Registered Security Companies in Gauteng",
@@ -404,7 +404,7 @@ export const INDUSTRY_SEO = {
   },
   solar: {
     slug: "solarinstallation",
-    title: "Solar Installers in Gauteng | Off-Grid & Grid-Tied | SolidFlo",
+    title: "Solar Installers in Gauteng | Off-Grid & Grid-Tied | GerboAI",
     description:
       "Find NRS097-compliant solar companies in Pretoria and Johannesburg. Off-grid, grid-tied and hybrid systems for homes and businesses.",
     h1: "Solar Installation Companies in Gauteng",
@@ -422,7 +422,7 @@ export const INDUSTRY_SEO = {
   },
   towing: {
     slug: "towing",
-    title: "Towing & Roadside Assistance in Gauteng | 24/7 | SolidFlo",
+    title: "Towing & Roadside Assistance in Gauteng | 24/7 | GerboAI",
     description:
       "Book 24-hour towing and accident recovery in Johannesburg. Flatbed towing and highway recovery across Gauteng from R800 flat.",
     h1: "24-Hour Towing & Roadside Assistance in Gauteng",
@@ -436,7 +436,7 @@ export const INDUSTRY_SEO = {
   },
   welding: {
     slug: "welding",
-    title: "Welding Services in Gauteng | Structural & Fabrication | SolidFlo",
+    title: "Welding Services in Gauteng | Structural & Fabrication | GerboAI",
     description:
       "Find certified welders in Johannesburg and Vereeniging. Structural steel, aluminium, pipe welding and on-site fabrication. From R380/hr.",
     h1: "Certified Welding Services in Gauteng",
@@ -451,7 +451,7 @@ export const INDUSTRY_SEO = {
   flooring: {
     slug: "flooring",
     title:
-      "Flooring Installation in Gauteng | Epoxy, Vinyl & Hardwood | SolidFlo",
+      "Flooring Installation in Gauteng | Epoxy, Vinyl & Hardwood | GerboAI",
     description:
       "Book flooring companies in Johannesburg. Epoxy, vinyl plank, hardwood and commercial flooring from R180/m². Residential and commercial.",
     h1: "Flooring Installation Services in Gauteng",
@@ -465,7 +465,7 @@ export const INDUSTRY_SEO = {
   },
   windows: {
     slug: "windowrepair",
-    title: "Window Repair & Glazing in Gauteng | Aluminium Frames | SolidFlo",
+    title: "Window Repair & Glazing in Gauteng | Aluminium Frames | GerboAI",
     description:
       "Book window repair specialists in Johannesburg. Double glazing, aluminium frames, shopfront glazing and glass repairs. From R350/hr.",
     h1: "Window Repair & Glazing Services in Gauteng",
@@ -479,7 +479,7 @@ export const INDUSTRY_SEO = {
   },
   education: {
     slug: "education",
-    title: "Tutoring & Education Services in Gauteng | SolidFlo Market",
+    title: "Tutoring & Education Services in Gauteng | GerboAI Market",
     description:
       "Find qualified tutors in Johannesburg and Pretoria. Grade 8–12 tutoring, online and in-person sessions, Maths and Science specialists from R250/hr.",
     h1: "Tutoring & Education Services in Gauteng",
@@ -494,7 +494,7 @@ export const INDUSTRY_SEO = {
   retail: {
     slug: "retail",
     title:
-      "Retail Services in Gauteng | Shop Fitouts & Merchandising | SolidFlo",
+      "Retail Services in Gauteng | Shop Fitouts & Merchandising | GerboAI",
     description:
       "Connect with retail service providers in Johannesburg and Pretoria. Shop fitouts, merchandising and retail operations support.",
     h1: "Retail Services in Gauteng",
@@ -510,11 +510,11 @@ function orgSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "SolidFlo",
+    name: "GerboAI",
     url: MAIN,
     logo: `${MAIN}/logo.png`,
     description:
-      "SolidFlo is an invoicing and business management platform for African service providers, with a public marketplace connecting Gauteng businesses with verified tradespeople.",
+      "GerboAI is an invoicing and business management platform for African service providers, with a public marketplace connecting Gauteng businesses with verified tradespeople.",
     areaServed: { "@type": "State", name: "Gauteng", addressCountry: "ZA" },
     sameAs: [MAIN, BASE],
   };
@@ -524,7 +524,7 @@ function websiteSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "SolidFlo Marketplace",
+    name: "GerboAI Marketplace",
     url: BASE,
     potentialAction: {
       "@type": "SearchAction",
@@ -594,7 +594,7 @@ export function MarketplaceSEO({ activeFilter, providers = [] }) {
 
       {/* Open Graph */}
       <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="SolidFlo Market" />
+      <meta property="og:site_name" content="GerboAI Market" />
       <meta property="og:title" content={seo.title} />
       <meta property="og:description" content={seo.description} />
       <meta property="og:url" content={canonical} />
@@ -653,7 +653,7 @@ export function useIndustryRoute(activeFilter, setActiveFilter) {
   const { industry } = useParams();
   const navigate = useNavigate();
 
-  // URL → state: direct navigation to market.solidflo.co.za/plumbing
+  // URL → state: direct navigation to market.gerboai.com/plumbing
   useEffect(() => {
     if (industry && INDUSTRY_SEO[industry]) {
       setActiveFilter(industry);
@@ -680,7 +680,7 @@ export function useIndustryRoute(activeFilter, setActiveFilter) {
 export function MarketplaceBreadcrumb({ activeFilter }) {
   const seo = INDUSTRY_SEO[activeFilter] || INDUSTRY_SEO.all;
   const crumbs = [
-    { name: "SolidFlo", url: MAIN },
+    { name: "GerboAI", url: MAIN },
     { name: "Marketplace", url: BASE },
   ];
   if (activeFilter !== "all" && seo.slug) {
@@ -846,7 +846,7 @@ export function IndustryFAQ({ activeFilter }) {
           href={`${MAIN}/contact`}
           style={{ color: "#6366f1", fontWeight: 700, textDecoration: "none" }}
         >
-          Contact SolidFlo
+          Contact GerboAI
         </a>{" "}
         or post a job request and let providers respond directly.
       </p>

@@ -691,7 +691,7 @@ useEffect(() => {
       <AuthProvider>
         <AdminProvider>
           {IS_SUBDOMAIN ? (
-            // ── SUBDOMAIN (e.g. mechanics.solidflo.co.za) ──────────────────
+            // ── SUBDOMAIN (e.g. mechanics.gerboai.com) ──────────────────
             <Routes>
               <Route path="/" element={<SubdomainRoot />} />
 
@@ -740,7 +740,7 @@ useEffect(() => {
               />
             </Routes>
           ) : (
-            // ── MAIN DOMAIN (solidflo.co.za) ──────────────────────────────
+            // ── MAIN DOMAIN (gerboai.com) ──────────────────────────────
             <Routes>
               <Route path="/" element={<MainDomainRoot />} />
               <Route path="/about" element={<AboutPage />} />

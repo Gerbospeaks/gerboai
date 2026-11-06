@@ -88,7 +88,7 @@ const [params] = useSearchParams();
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
   const fromQuery = params.get("industry");
-  const fromSubdomain = getSubdomainFromHost(); // e.g. "accounting" on accounting.solidflo.co.za
+  const fromSubdomain = getSubdomainFromHost(); // e.g. "accounting" on accounting.gerboai.com
   const pending =
     fromQuery || fromSubdomain || localStorage.getItem("pendingDashboardId");
 
@@ -175,7 +175,7 @@ const industry =
         <div className="flex-1 flex flex-col px-8 py-8 max-w-[560px] mx-auto w-full">
           {/* Logo */}
           <div className="mb-8">
-            <img src={logo} alt="SolidFlo" className="h-9 object-contain" />
+            <img src={logo} alt="GerboAI" className="h-9 object-contain" />
           </div>
 
           {/* Heading */}

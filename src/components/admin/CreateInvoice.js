@@ -200,7 +200,7 @@ const CreateInvoice = ({ clients, adminUserId, onSuccess }) => {
               <div className="line-item">
                 <input
                   type="text"
-                  placeholder="Description (e.g., SolidFlo Pro Plan - January)"
+                  placeholder="Description (e.g., GerboAI Pro Plan - January)"
                   value={item.description}
                   onChange={(e) => updateItem(index, 'description', e.target.value)}
                   required

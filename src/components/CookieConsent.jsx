@@ -17,7 +17,7 @@ const CATEGORIES = [
     id: "analytics",
     label: "Analytics & performance",
     description:
-      "Help us understand how visitors interact with Solidflo by collecting and reporting usage data anonymously. No personally identifiable information is stored.",
+      "Help us understand how visitors interact with Gerbo by collecting and reporting usage data anonymously. No personally identifiable information is stored.",
     examples: "Page views, session duration, error tracking (Mixpanel, Sentry)",
     required: false,
     icon: "📊",
@@ -284,7 +284,7 @@ export default function CookieConsent() {
                     margin: "0 0 4px",
                   }}
                 >
-                  Cookie preferences — Solidflo
+                  Cookie preferences — Gerbo
                 </h2>
                 <p
                   style={{

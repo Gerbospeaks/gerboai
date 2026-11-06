@@ -76,8 +76,8 @@ const ContactPage = () => {
     {
       icon: <Mail className="w-6 h-6" />,
       label: "Email",
-      value: "hello@solidflo.co.za",
-      link: "mailto:hello@solidflo.co.za",
+      value: "hello@gerboai.com",
+      link: "mailto:hello@gerboai.com",
     },
     {
       icon: <Phone className="w-6 h-6" />,
@@ -102,10 +102,10 @@ const ContactPage = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us - SolidFlo</title>
+        <title>Contact Us - GerboAI</title>
         <meta
           name="description"
-          content="Get in touch with SolidFlo. We're here to help with your invoicing needs."
+          content="Get in touch with GerboAI. We're here to help with your invoicing needs."
         />
       </Helmet>
 
@@ -274,7 +274,7 @@ const ContactPage = () => {
                 className="flex items-center cursor-pointer"
                 onClick={() => navigate("/")}
               >
-                <img src={logo} alt="SolidFlo" className="h-16 w-auto" />
+                <img src={logo} alt="GerboAI" className="h-16 w-auto" />
               </div>
 
               {/* Desktop Navigation */}
@@ -582,7 +582,7 @@ const ContactPage = () => {
               Ready to get started?
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Join 10,000+ businesses using SolidFlo. Start your free trial
+              Join 10,000+ businesses using GerboAI. Start your free trial
               today.
             </p>
 
@@ -605,7 +605,7 @@ const ContactPage = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
               {/* Company Info */}
               <div>
-                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+                <img src={logo1} alt="GerboAI" className="h-10 mb-4" />
                 <p className="text-gray-400 mb-6 leading-relaxed">
                   Free online invoicing for small businesses. Create and send
                   invoices, track time and expenses, and accept online payments.
@@ -712,7 +712,7 @@ const ContactPage = () => {
             {/* Bottom Bar */}
             <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
               <p>
-                &copy; {new Date().getFullYear()} SolidFlo. All rights reserved.
+                &copy; {new Date().getFullYear()} GerboAI. All rights reserved.
               </p>
             </div>
           </div>

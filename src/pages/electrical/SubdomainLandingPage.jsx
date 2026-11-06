@@ -72,7 +72,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/jobs/INV-0087
+            gerboai.com/jobs/INV-0087
           </span>
         </div>
       </div>
@@ -355,7 +355,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -668,7 +668,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA electricians. Create professional
+            GerboAI is purpose-built for SA electricians. Create professional
             job cards, track materials &amp; labour, issue Certificates of
             Compliance, and send VAT invoices in under 60 seconds.
           </p>
@@ -956,7 +956,7 @@ function Features() {
     {
       icon: "⏱️",
       title: "Labour Time Billing",
-      desc: "Log technician hours per job. Bill at your set labour rate. Flat rate or time-and-materials — SolidFlo handles both.",
+      desc: "Log technician hours per job. Bill at your set labour rate. Flat rate or time-and-materials — GerboAI handles both.",
     },
     {
       icon: "📜",
@@ -1372,7 +1372,7 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to spend hours typing up CoC certificates and invoices separately. SolidFlo does both in one tap. My admin time has dropped by 80%.",
+        "I used to spend hours typing up CoC certificates and invoices separately. GerboAI does both in one tap. My admin time has dropped by 80%.",
       name: "Kobus Steyn",
       role: "Owner, KS Electrical, Pretoria",
       avatar: "KS",
@@ -1580,12 +1580,12 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Sparky Pro or Enterprise for unlimited invoicing and CoC generation.",
     },
     {
       q: "Can I generate Certificates of Compliance (CoC)?",
-      a: "Yes! SolidFlo generates SANS 10142-compliant CoC certificates directly from your job card data. All required fields are pre-filled — just review, sign, and send. Available on Sparky Pro and Enterprise plans.",
+      a: "Yes! GerboAI generates SANS 10142-compliant CoC certificates directly from your job card data. All required fields are pre-filled — just review, sign, and send. Available on Sparky Pro and Enterprise plans.",
     },
     {
       q: "Are invoices VAT-compliant for SARS?",
@@ -1771,7 +1771,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 950+ African electricians that invoice professionally,
-          issue CoCs instantly, and get paid faster with SolidFlo.
+          issue CoCs instantly, and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1856,7 +1856,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2013,7 +2013,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -2043,43 +2043,43 @@ export default function ElectricalLandingPage() {
   return (
     <>
     <Helmet>
-  <title>Invoicing & CoC Software for Electricians | SolidFlo</title>
+  <title>Invoicing & CoC Software for Electricians | GerboAI</title>
   <meta
     name="description"
     content="Create job cards, issue SANS 10142-compliant Certificates of Compliance, and send VAT invoices in under 60 seconds. Built for African electricians and electrical contractors. Free plan available, no credit card required."
   />
-  <link rel="canonical" href="https://electrical.solidflo.co.za/" />
+  <link rel="canonical" href="https://electrical.gerboai.com/" />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="Invoicing & CoC Software for Electricians | SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
+  <meta property="og:title" content="Invoicing & CoC Software for Electricians | GerboAI" />
   <meta
     property="og:description"
     content="Job cards, Certificates of Compliance, materials tracking, and VAT invoicing — built for African electricians."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://electrical.solidflo.co.za/" />
-  <meta property="og:image" content="https://electrical.solidflo.co.za/og-image.jpg" />
+  <meta property="og:url" content="https://electrical.gerboai.com/" />
+  <meta property="og:image" content="https://electrical.gerboai.com/og-image.jpg" />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Invoicing & CoC Software for Electricians | SolidFlo" />
+  <meta name="twitter:title" content="Invoicing & CoC Software for Electricians | GerboAI" />
   <meta
     name="twitter:description"
     content="Job cards, CoC certificates, and VAT invoicing — built for African electricians."
   />
-  <meta name="twitter:image" content="https://electrical.solidflo.co.za/og-image.jpg" />
+  <meta name="twitter:image" content="https://electrical.gerboai.com/og-image.jpg" />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "SolidFlo for Electricians",
+      "name": "GerboAI for Electricians",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://electrical.solidflo.co.za/",
+      "url": "https://electrical.gerboai.com/",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -2101,7 +2101,7 @@ export default function ElectricalLandingPage() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Is SolidFlo really free?",
+          "name": "Is GerboAI really free?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Sparky Pro or Enterprise for unlimited invoicing and CoC generation.",
@@ -2112,7 +2112,7 @@ export default function ElectricalLandingPage() {
           "name": "Can I generate Certificates of Compliance (CoC)?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes! SolidFlo generates SANS 10142-compliant CoC certificates directly from your job card data. All required fields are pre-filled — just review, sign, and send. Available on Sparky Pro and Enterprise plans.",
+            "text": "Yes! GerboAI generates SANS 10142-compliant CoC certificates directly from your job card data. All required fields are pre-filled — just review, sign, and send. Available on Sparky Pro and Enterprise plans.",
           },
         },
         {

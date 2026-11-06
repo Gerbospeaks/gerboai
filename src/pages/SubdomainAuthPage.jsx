@@ -268,7 +268,7 @@ function LoginView() {
       <div className="w-full lg:w-[52%] flex flex-col overflow-y-auto">
         <div className="flex-1 flex flex-col px-8 py-8 max-w-[480px] mx-auto w-full justify-center">
           <div className="mb-10">
-            <img src={logo} alt="SolidFlo" className="h-9 object-contain" />
+            <img src={logo} alt="GerboAI" className="h-9 object-contain" />
           </div>
           <h1 className="text-[28px] font-bold text-[#111827] mb-1">
             Welcome back
@@ -560,7 +560,7 @@ function RegisterView() {
       <div className="w-full lg:w-[52%] flex flex-col overflow-y-auto">
         <div className="flex-1 flex flex-col px-8 py-8 max-w-[560px] mx-auto w-full">
           <div className="mb-8">
-            <img src={logo} alt="SolidFlo" className="h-9 object-contain" />
+            <img src={logo} alt="GerboAI" className="h-9 object-contain" />
           </div>
 
           <h1 className="text-[26px] font-bold text-[#111827] mb-1">

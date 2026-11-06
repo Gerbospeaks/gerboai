@@ -138,10 +138,10 @@ const TermsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Terms of Service - SolidFlo</title>
+        <title>Terms of Service - GerboAI</title>
         <meta
           name="description"
-          content="Read SolidFlo's Terms of Service to understand your rights and responsibilities when using our invoicing platform."
+          content="Read GerboAI's Terms of Service to understand your rights and responsibilities when using our invoicing platform."
         />
       </Helmet>
 
@@ -320,7 +320,7 @@ const TermsPage = () => {
                 className="flex items-center cursor-pointer"
                 onClick={() => navigate("/")}
               >
-                <img src={logo} alt="SolidFlo" className="h-16 w-auto" />
+                <img src={logo} alt="GerboAI" className="h-16 w-auto" />
               </div>
 
               {/* Desktop Navigation */}
@@ -390,7 +390,7 @@ const TermsPage = () => {
                 className="text-xl text-gray-600 leading-relaxed mb-4 animate-fade-in"
                 style={{ animationDelay: "0.2s" }}
               >
-                Please read these terms carefully before using SolidFlo
+                Please read these terms carefully before using GerboAI
               </p>
 
               <p
@@ -448,7 +448,7 @@ const TermsPage = () => {
                           </h3>
                           <p className="text-sm text-blue-800">
                             These Terms of Service constitute a legally binding
-                            agreement between you and SolidFlo. By accessing or
+                            agreement between you and GerboAI. By accessing or
                             using our service, you agree to be bound by these
                             terms.
                           </p>
@@ -456,8 +456,8 @@ const TermsPage = () => {
                       </div>
                     </div>
                     <p className="text-lg text-gray-700 leading-relaxed">
-                      Welcome to SolidFlo. These Terms of Service ("Terms")
-                      govern your access to and use of the SolidFlo platform,
+                      Welcome to GerboAI. These Terms of Service ("Terms")
+                      govern your access to and use of the GerboAI platform,
                       including our website, applications, and services. Please
                       read these Terms carefully.
                     </p>
@@ -480,13 +480,13 @@ const TermsPage = () => {
 
                     <div className="space-y-4 pl-15">
                       <p className="text-gray-700 leading-relaxed">
-                        By creating an account, accessing, or using SolidFlo,
+                        By creating an account, accessing, or using GerboAI,
                         you acknowledge that you have read, understood, and
                         agree to be bound by these Terms and our Privacy Policy.
                       </p>
                       <p className="text-gray-700 leading-relaxed">
                         If you do not agree to these Terms, you may not access
-                        or use our services. If you are using SolidFlo on behalf
+                        or use our services. If you are using GerboAI on behalf
                         of an organization, you represent and warrant that you
                         have the authority to bind that organization to these
                         Terms.
@@ -515,7 +515,7 @@ const TermsPage = () => {
                           {
                             term: "Service",
                             definition:
-                              "Refers to the SolidFlo platform, including all features, tools, and functionalities.",
+                              "Refers to the GerboAI platform, including all features, tools, and functionalities.",
                           },
                           {
                             term: "User/You",
@@ -525,7 +525,7 @@ const TermsPage = () => {
                           {
                             term: "Account",
                             definition:
-                              "Your registered user profile on the SolidFlo platform.",
+                              "Your registered user profile on the GerboAI platform.",
                           },
                           {
                             term: "Content",
@@ -575,7 +575,7 @@ const TermsPage = () => {
                           Account Creation
                         </h3>
                         <p className="text-gray-700 leading-relaxed mb-3">
-                          To use SolidFlo, you must create an account by
+                          To use GerboAI, you must create an account by
                           providing accurate and complete information. You agree
                           to:
                         </p>
@@ -692,7 +692,7 @@ const TermsPage = () => {
                           Subscription Plans
                         </h3>
                         <p className="text-gray-700 leading-relaxed">
-                          SolidFlo offers both free and paid subscription plans.
+                          GerboAI offers both free and paid subscription plans.
                           Paid subscriptions provide access to additional
                           features and functionality. Subscription fees are
                           billed in advance on a monthly or annual basis.
@@ -771,7 +771,7 @@ const TermsPage = () => {
                         </h3>
                         <p className="text-gray-700 leading-relaxed">
                           The Service and all its original content, features,
-                          and functionality are owned by SolidFlo and are
+                          and functionality are owned by GerboAI and are
                           protected by international copyright, trademark,
                           patent, trade secret, and other intellectual property
                           laws.
@@ -844,7 +844,7 @@ const TermsPage = () => {
                           "Scraping or harvesting data from the Service",
                           "Creating multiple accounts to abuse promotions",
                           "Reselling or redistributing the Service without authorization",
-                          "Using the Service to compete with SolidFlo",
+                          "Using the Service to compete with GerboAI",
                         ].map((item, index) => (
                           <div
                             key={index}
@@ -1149,10 +1149,10 @@ const TermsPage = () => {
                             </h3>
                           </div>
                           <a
-                            href="mailto:legal@solidflo.co.za"
+                            href="mailto:legal@gerboai.com"
                             className="text-orange-600 font-semibold hover:underline"
                           >
-                            legal@solidflo.co.za
+                            legal@gerboai.com
                           </a>
                         </div>
 
@@ -1164,7 +1164,7 @@ const TermsPage = () => {
                             </h3>
                           </div>
                           <p className="text-gray-700 text-sm">
-                            SolidFlo Legal Department
+                            GerboAI Legal Department
                             <br />
                             Mandela Square
                             <br />
@@ -1206,7 +1206,7 @@ const TermsPage = () => {
               Ready to get started?
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Join 10,000+ businesses using SolidFlo. Start your free trial
+              Join 10,000+ businesses using GerboAI. Start your free trial
               today.
             </p>
 
@@ -1229,7 +1229,7 @@ const TermsPage = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
               {/* Company Info */}
               <div>
-                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+                <img src={logo1} alt="GerboAI" className="h-10 mb-4" />
                 <p className="text-gray-400 mb-6 leading-relaxed">
                   Free online invoicing for small businesses. Create and send
                   invoices, track time and expenses, and accept online payments.
@@ -1336,7 +1336,7 @@ const TermsPage = () => {
             {/* Bottom Bar */}
             <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
               <p>
-                &copy; {new Date().getFullYear()} SolidFlo. All rights reserved.
+                &copy; {new Date().getFullYear()} GerboAI. All rights reserved.
               </p>
             </div>
           </div>

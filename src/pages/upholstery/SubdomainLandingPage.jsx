@@ -106,7 +106,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/upholstery/INV-2024
+            gerboai.com/upholstery/INV-2024
           </span>
         </div>
       </div>
@@ -387,7 +387,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -699,7 +699,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA upholstery and soft furnishing
+            GerboAI is purpose-built for SA upholstery and soft furnishing
             businesses. Send professional quotes, track fabric &amp;
             materials, and get paid on time in under 60 seconds.
           </p>
@@ -1678,19 +1678,19 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for upholstery?",
+      q: "Is GerboAI built specifically for upholstery?",
       a: "Yes. The quote templates, fabric tracking fields, and job costing tools are all designed around how upholstery and soft furnishing businesses actually work — not adapted from generic invoicing software.",
     },
     {
       q: "Can I use it on site at a client's home?",
-      a: "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a client's lounge, no laptop needed. Most upholsterers send their first quote within 10 minutes of signing up.",
+      a: "Absolutely. GerboAI is fully mobile-responsive. You can create and send quotes directly from a client's lounge, no laptop needed. Most upholsterers send their first quote within 10 minutes of signing up.",
     },
     {
       q: "Does it handle VAT automatically?",
       a: "Yes. You can set VAT-inclusive or exclusive pricing per quote, and it calculates everything correctly for SARS compliance. Every invoice includes the required fields for a valid tax invoice.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Studio or Workshop for unlimited invoicing.",
     },
     {
@@ -1874,7 +1874,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 400+ African upholsterers and soft furnishing studios that
-          quote professionally and get paid faster with SolidFlo.
+          quote professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1948,7 +1948,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2089,7 +2089,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{

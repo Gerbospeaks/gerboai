@@ -1,5 +1,5 @@
 // src/utils/payfastUtils.js
-// PayFast integration utilities for SolidFlo
+// PayFast integration utilities for GerboAI
 // Docs: https://developers.payfast.co.za/docs
 
 // ─── MD5 implementation (no dependency needed) ────────────────────────────

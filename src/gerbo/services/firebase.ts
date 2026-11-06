@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 
 /**
  * GerboAI runs on its own Firebase project (its Cloudflare worker verifies ID
- * tokens against that project), so it must NOT share SolidFlo's default app.
+ * tokens against that project), so it must NOT share GerboAI's default app.
  * We register a *named* app ("gerbo") so both projects coexist in one bundle.
  * Override any value with REACT_APP_GERBO_FIREBASE_* env vars.
  */

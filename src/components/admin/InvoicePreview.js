@@ -34,17 +34,17 @@ const InvoicePreview = ({ invoice, onBack }) => {
         <div className="invoice-header">
           <div className="company-info">
             <div className="logo-section">
-              <img src="/sovereign/solidflo.png" alt="SolidFlo Logo" />
+              <img src="/sovereign/solidflo.png" alt="GerboAI Logo" />
             </div>
             <div className="company-details">
-              <h1>SolidFlo</h1>
+              <h1>GerboAI</h1>
               <p>
                 58 Minuet Crescent<br />
                 Olivienhoutbosch<br />
                 South Africa
               </p>
               <p style={{ marginTop: '12px' }}>
-                <strong>Email:</strong> accounts@solidflo.co.za<br />
+                <strong>Email:</strong> accounts@gerboai.com<br />
                 <strong>Phone:</strong> +27 68 488 7039
               </p>
             </div>

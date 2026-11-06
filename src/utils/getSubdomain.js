@@ -1,5 +1,5 @@
 export function getSubdomain() {
-  const host = window.location.hostname; // e.g. "mechanics.solidflo.co.za"
+  const host = window.location.hostname; // e.g. "mechanics.gerboai.com"
   const parts = host.split('.');
   
   // If subdomain exists (more than 2 parts)

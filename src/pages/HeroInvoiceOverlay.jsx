@@ -458,10 +458,10 @@ export default function HeroInvoiceOverlay() {
 
         <div className="hio-head">
           <div className="hio-brand">
-           <img src={logo} alt="SolidFlo logo" className="hio-brand-mark" />
+           <img src={logo} alt="GerboAI logo" className="hio-brand-mark" />
             <div className="hio-brand-copy">
               <div className="hio-brand-name">
-                SolidFlo Saas
+                GerboAI Saas
                 <button
                   type="button"
                   className="hio-verified"

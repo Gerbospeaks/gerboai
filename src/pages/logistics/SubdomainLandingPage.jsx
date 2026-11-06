@@ -156,7 +156,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -592,7 +592,7 @@ function Hero({ config, onRegister }) {
                   }}
                 >
                   <span style={{ fontSize: 11, color: "#8C7B6B" }}>
-                    solidflo.co.za/{config.label.toLowerCase()}/INV-2025
+                    gerboai.com/{config.label.toLowerCase()}/INV-2025
                   </span>
                 </div>
               </div>
@@ -1677,7 +1677,7 @@ function CTABanner({ config, onRegister }) {
           }}
         >
           Join hundreds of {config.label.toLowerCase()} businesses already using
-          SolidFlo.
+          GerboAI.
         </p>
         <div
           style={{
@@ -1761,7 +1761,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -1918,7 +1918,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -1950,7 +1950,7 @@ export default function SubdomainLandingPage() {
   return (
     <>
     <Helmet>
-  <title>{config.metaTitle || `Invoicing Software for Logistics & Freight Businesses | SolidFlo`}</title>
+  <title>{config.metaTitle || `Invoicing Software for Logistics & Freight Businesses | GerboAI`}</title>
   <meta
     name="description"
     content={
@@ -1958,13 +1958,13 @@ export default function SubdomainLandingPage() {
       "Log loads, send VAT-compliant freight invoices, and get paid faster with payment links. Built for African transport, logistics, and freight operators. Free plan available, no credit card required."
     }
   />
-  <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
+  <link rel="canonical" href={`https://${subdomain}.gerboai.com/`} />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
   <meta
     property="og:title"
-    content={config.metaTitle || `Invoicing Software for Logistics & Freight Businesses | SolidFlo`}
+    content={config.metaTitle || `Invoicing Software for Logistics & Freight Businesses | GerboAI`}
   />
   <meta
     property="og:description"
@@ -1974,15 +1974,15 @@ export default function SubdomainLandingPage() {
     }
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content={`https://${subdomain}.solidflo.co.za/`} />
-  <meta property="og:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />
+  <meta property="og:url" content={`https://${subdomain}.gerboai.com/`} />
+  <meta property="og:image" content={`https://${subdomain}.gerboai.com/og-image.jpg`} />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
   <meta
     name="twitter:title"
-    content={config.metaTitle || `Invoicing Software for Logistics & Freight Businesses | SolidFlo`}
+    content={config.metaTitle || `Invoicing Software for Logistics & Freight Businesses | GerboAI`}
   />
   <meta
     name="twitter:description"
@@ -1991,17 +1991,17 @@ export default function SubdomainLandingPage() {
       "Freight invoicing built for African logistics and transport operators."
     }
   />
-  <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />
+  <meta name="twitter:image" content={`https://${subdomain}.gerboai.com/og-image.jpg`} />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": `SolidFlo for ${config.label || "Logistics"}`,
+      "name": `GerboAI for ${config.label || "Logistics"}`,
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": `https://${subdomain}.solidflo.co.za/`,
+      "url": `https://${subdomain}.gerboai.com/`,
       "offers": {
         "@type": "Offer",
         "price": "0",

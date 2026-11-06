@@ -78,7 +78,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/jobs/INV-2024
+            gerboai.com/jobs/INV-2024
           </span>
         </div>
       </div>
@@ -115,7 +115,7 @@ function MockInvoice() {
                   color: C.ink,
                 }}
               >
-                SolidFlo
+                GerboAI
               </span>
             </div>
             <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
@@ -367,7 +367,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -680,7 +680,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA motor workshops. Create
+            GerboAI is purpose-built for SA motor workshops. Create
             professional job cards, track parts &amp; labour, and send VAT
             invoices in under 60 seconds.
           </p>
@@ -1000,7 +1000,7 @@ function Features() {
     {
       icon: "⏱️",
       title: "Labour Time Billing",
-      desc: "Log technician hours per job. Bill at your set labour rate. Flat rate or time-and-materials — SolidFlo handles both.",
+      desc: "Log technician hours per job. Bill at your set labour rate. Flat rate or time-and-materials — GerboAI handles both.",
     },
     {
       icon: "🧾",
@@ -1401,7 +1401,7 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to spend Sunday nights doing invoices. Now it takes me 5 minutes on Friday afternoon. SolidFlo changed how I run my shop.",
+        "I used to spend Sunday nights doing invoices. Now it takes me 5 minutes on Friday afternoon. GerboAI changed how I run my shop.",
       name: "Mike van der Merwe",
       role: "Owner, MVdM Auto, Pretoria",
       avatar: "MV",
@@ -1610,7 +1610,7 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Workshop or Fleet for unlimited invoicing.",
     },
     {
@@ -1780,7 +1780,7 @@ function CTABanner({ onRegister }) {
           position: "relative",
         }}
       >
-       <img src={google} alt="SolidFlo" />
+       <img src={google} alt="GerboAI" />
         <h2
           style={{
             fontFamily: "'Barlow Condensed', sans-serif",
@@ -1802,7 +1802,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 1 200+ African workshops that bill professionally and get
-          paid faster with SolidFlo.
+          paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1888,7 +1888,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2045,7 +2045,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -2075,43 +2075,43 @@ export default function SubdomainLandingPage() {
   return (
     <>
     <Helmet>
-  <title>Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo</title>
+  <title>Invoicing Software for Motor Mechanics & Auto Workshops | GerboAI</title>
   <meta
     name="description"
     content="Create digital job cards, track parts and labour, and send VAT-compliant invoices in under 60 seconds. Built for African motor mechanics and auto workshops. Free plan available, no credit card required."
   />
-  <link rel="canonical" href="https://mechanics.solidflo.co.za/" />
+  <link rel="canonical" href="https://mechanics.gerboai.com/" />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
+  <meta property="og:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | GerboAI" />
   <meta
     property="og:description"
     content="Job cards, parts tracking, and VAT invoicing — built for African motor workshops."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://mechanics.solidflo.co.za/" />
-  <meta property="og:image" content="https://mechanics.solidflo.co.za/og-image.jpg" />
+  <meta property="og:url" content="https://mechanics.gerboai.com/" />
+  <meta property="og:image" content="https://mechanics.gerboai.com/og-image.jpg" />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | SolidFlo" />
+  <meta name="twitter:title" content="Invoicing Software for Motor Mechanics & Auto Workshops | GerboAI" />
   <meta
     name="twitter:description"
     content="Job cards and VAT invoicing — built for African motor workshops."
   />
-  <meta name="twitter:image" content="https://mechanics.solidflo.co.za/og-image.jpg" />
+  <meta name="twitter:image" content="https://mechanics.gerboai.com/og-image.jpg" />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "SolidFlo for Motor Workshops",
+      "name": "GerboAI for Motor Workshops",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://mechanics.solidflo.co.za/",
+      "url": "https://mechanics.gerboai.com/",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -2133,7 +2133,7 @@ export default function SubdomainLandingPage() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Is SolidFlo really free?",
+          "name": "Is GerboAI really free?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Workshop or Fleet for unlimited invoicing."

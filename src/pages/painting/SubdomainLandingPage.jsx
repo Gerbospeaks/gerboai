@@ -132,7 +132,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 10, color: C.textMuted }}>
-            solidflo.co.za/invoice/{refNo}
+            gerboai.com/invoice/{refNo}
           </span>
         </div>
       </div>
@@ -161,7 +161,7 @@ function MockInvoice() {
                 marginBottom: 4,
               }}
             >
-              SolidFlo
+              GerboAI
             </div>
             <p style={{ fontSize: 11, color: C.textMuted, margin: 0 }}>
               {bizName}
@@ -414,7 +414,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -727,7 +727,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA painting &amp; decorating
+            GerboAI is purpose-built for SA painting &amp; decorating
             contractors. Create professional quotes, track materials &amp;
             labour, and send VAT invoices in under 60 seconds.
           </p>
@@ -1597,7 +1597,7 @@ function CTABanner({ config, onRegister }) {
           }}
         >
           Join hundreds of {config.label.toLowerCase()} businesses already using
-          SolidFlo.
+          GerboAI.
         </p>
         <div
           style={{
@@ -1671,7 +1671,7 @@ function Footer({ config, onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -1804,7 +1804,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -1837,7 +1837,7 @@ export default function SubdomainLandingPage() {
   return (
     <>
     <Helmet>
-  <title>{config.metaTitle || `Quoting & Invoicing Software for Painters & Decorators | SolidFlo`}</title>
+  <title>{config.metaTitle || `Quoting & Invoicing Software for Painters & Decorators | GerboAI`}</title>
   <meta
     name="description"
     content={
@@ -1845,13 +1845,13 @@ export default function SubdomainLandingPage() {
       "Create professional quotes, track materials and labour, and send VAT-compliant invoices in under 60 seconds. Built for African painting and decorating contractors. Free plan available, no credit card required."
     }
   />
-  <link rel="canonical" href={`https://${subdomain}.solidflo.co.za/`} />
+  <link rel="canonical" href={`https://${subdomain}.gerboai.com/`} />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
   <meta
     property="og:title"
-    content={config.metaTitle || `Quoting & Invoicing Software for Painters & Decorators | SolidFlo`}
+    content={config.metaTitle || `Quoting & Invoicing Software for Painters & Decorators | GerboAI`}
   />
   <meta
     property="og:description"
@@ -1861,15 +1861,15 @@ export default function SubdomainLandingPage() {
     }
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content={`https://${subdomain}.solidflo.co.za/`} />
-  <meta property="og:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />
+  <meta property="og:url" content={`https://${subdomain}.gerboai.com/`} />
+  <meta property="og:image" content={`https://${subdomain}.gerboai.com/og-image.jpg`} />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
   <meta
     name="twitter:title"
-    content={config.metaTitle || `Quoting & Invoicing Software for Painters & Decorators | SolidFlo`}
+    content={config.metaTitle || `Quoting & Invoicing Software for Painters & Decorators | GerboAI`}
   />
   <meta
     name="twitter:description"
@@ -1878,17 +1878,17 @@ export default function SubdomainLandingPage() {
       "Quotes and VAT invoicing — built for African painting contractors."
     }
   />
-  <meta name="twitter:image" content={`https://${subdomain}.solidflo.co.za/og-image.jpg`} />
+  <meta name="twitter:image" content={`https://${subdomain}.gerboai.com/og-image.jpg`} />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": `SolidFlo for ${config.label || "Painters"}`,
+      "name": `GerboAI for ${config.label || "Painters"}`,
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": `https://${subdomain}.solidflo.co.za/`,
+      "url": `https://${subdomain}.gerboai.com/`,
       "offers": {
         "@type": "Offer",
         "price": "0",

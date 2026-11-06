@@ -78,7 +78,7 @@ function MockQuote() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/jobs/QUO-2024
+            gerboai.com/jobs/QUO-2024
           </span>
         </div>
       </div>
@@ -115,7 +115,7 @@ function MockQuote() {
                   color: C.ink,
                 }}
               >
-                SolidFlo
+                GerboAI
               </span>
             </div>
             <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
@@ -368,7 +368,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -682,7 +682,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA contractors. Create professional
+            GerboAI is purpose-built for SA contractors. Create professional
             job quotes, track materials &amp; labour, and send VAT invoices in
             under 60 seconds — from the site or the office.
           </p>
@@ -971,7 +971,7 @@ function Features() {
     {
       icon: "⏱️",
       title: "Labour & Trade Billing",
-      desc: "Log hours per trade per job. Bill at your set rates. Fixed price or time-and-materials — SolidFlo handles both.",
+      desc: "Log hours per trade per job. Bill at your set rates. Fixed price or time-and-materials — GerboAI handles both.",
     },
     {
       icon: "🧾",
@@ -1373,7 +1373,7 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to quote jobs on scraps of paper. Now I send a professional PDF from my phone before I even leave the client's property. SolidFlo is a game-changer.",
+        "I used to quote jobs on scraps of paper. Now I send a professional PDF from my phone before I even leave the client's property. GerboAI is a game-changer.",
       name: "Danie Grobler",
       role: "Owner, Grobler Build & Civil, Pretoria",
       avatar: "DG",
@@ -1582,7 +1582,7 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Starter plan is free forever. You get 5 quotes and invoices per month with no credit card required. When you're ready to grow, upgrade to Contractor or Enterprise for unlimited invoicing.",
     },
     {
@@ -1773,7 +1773,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 850+ African contractors that quote professionally and get
-          paid faster with SolidFlo.
+          paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1859,7 +1859,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2016,7 +2016,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -2046,43 +2046,43 @@ export default function ConstructionLandingPage() {
   return (
     <>
     <Helmet>
-  <title>Quoting & Invoicing Software for Contractors | SolidFlo</title>
+  <title>Quoting & Invoicing Software for Contractors | GerboAI</title>
   <meta
     name="description"
     content="Create professional job quotes, track materials & labour, and send VAT-compliant invoices in under 60 seconds. Built for African contractors and construction companies. Free plan available, no credit card required."
   />
-  <link rel="canonical" href="https://construction.solidflo.co.za/" />
+  <link rel="canonical" href="https://construction.gerboai.com/" />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="Quoting & Invoicing Software for Contractors | SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
+  <meta property="og:title" content="Quoting & Invoicing Software for Contractors | GerboAI" />
   <meta
     property="og:description"
     content="Job quotes, materials tracking, labour billing, and VAT invoicing — built for African contractors and construction companies."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://construction.solidflo.co.za/" />
-  <meta property="og:image" content="https://construction.solidflo.co.za/og-image.jpg" />
+  <meta property="og:url" content="https://construction.gerboai.com/" />
+  <meta property="og:image" content="https://construction.gerboai.com/og-image.jpg" />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Quoting & Invoicing Software for Contractors | SolidFlo" />
+  <meta name="twitter:title" content="Quoting & Invoicing Software for Contractors | GerboAI" />
   <meta
     name="twitter:description"
     content="Job quotes, materials tracking, and VAT invoicing — built for African contractors."
   />
-  <meta name="twitter:image" content="https://construction.solidflo.co.za/og-image.jpg" />
+  <meta name="twitter:image" content="https://construction.gerboai.com/og-image.jpg" />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "SolidFlo for Contractors",
+      "name": "GerboAI for Contractors",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://construction.solidflo.co.za/",
+      "url": "https://construction.gerboai.com/",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -2104,7 +2104,7 @@ export default function ConstructionLandingPage() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Is SolidFlo really free?",
+          "name": "Is GerboAI really free?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Yes — our Starter plan is free forever. You get 5 quotes and invoices per month with no credit card required. When you're ready to grow, upgrade to Contractor or Enterprise for unlimited invoicing.",

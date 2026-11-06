@@ -105,7 +105,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/flooring/INV-2024
+            gerboai.com/flooring/INV-2024
           </span>
         </div>
       </div>
@@ -1006,7 +1006,7 @@ function Features() {
     {
       icon: "📐",
       title: "m² Quote Calculator",
-      desc: "Enter room dimensions and SolidFlo calculates coverage automatically. Add material grades, waste factor, and labour — send a quote before you leave the client.",
+      desc: "Enter room dimensions and GerboAI calculates coverage automatically. Add material grades, waste factor, and labour — send a quote before you leave the client.",
     },
     {
       icon: "🪨",
@@ -1644,19 +1644,19 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for flooring contractors?",
+      q: "Is GerboAI built specifically for flooring contractors?",
       a: "Yes. The m² calculator, material tracking fields, and job costing tools are designed around how flooring and tiling businesses actually work — not adapted from generic invoicing software.",
     },
     {
       q: "Can I use it on site from my phone?",
-      a: "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most contractors send their first quote within 10 minutes of signing up.",
+      a: "Absolutely. GerboAI is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most contractors send their first quote within 10 minutes of signing up.",
     },
     {
       q: "Does it handle VAT automatically?",
       a: "Yes. You can set VAT-inclusive or exclusive pricing per quote, and it calculates everything correctly for SARS compliance. Every invoice includes the required fields for a valid tax invoice.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Installer or Studio for unlimited invoicing.",
     },
     {
@@ -1825,7 +1825,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 600+ African flooring contractors and tiling businesses
-          that quote professionally and get paid faster with SolidFlo.
+          that quote professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1899,7 +1899,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2032,7 +2032,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -2063,43 +2063,43 @@ export default function SubdomainLandingPage() {
   return (
     <>
     <Helmet>
-  <title>Quoting & Invoicing Software for Flooring Contractors | SolidFlo</title>
+  <title>Quoting & Invoicing Software for Flooring Contractors | GerboAI</title>
   <meta
     name="description"
     content="Calculate quotes by m², track material costs, and send VAT-compliant invoices in under 60 seconds. Built for African flooring installers and tiling contractors. Free plan available, no credit card required."
   />
-  <link rel="canonical" href="https://flooring.solidflo.co.za/" />
+  <link rel="canonical" href="https://flooring.gerboai.com/" />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="Quoting & Invoicing Software for Flooring Contractors | SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
+  <meta property="og:title" content="Quoting & Invoicing Software for Flooring Contractors | GerboAI" />
   <meta
     property="og:description"
     content="m² quote calculator, material cost tracking, and VAT invoicing — built for African flooring and tiling contractors."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://flooring.solidflo.co.za/" />
-  <meta property="og:image" content="https://flooring.solidflo.co.za/og-image.jpg" />
+  <meta property="og:url" content="https://flooring.gerboai.com/" />
+  <meta property="og:image" content="https://flooring.gerboai.com/og-image.jpg" />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Quoting & Invoicing Software for Flooring Contractors | SolidFlo" />
+  <meta name="twitter:title" content="Quoting & Invoicing Software for Flooring Contractors | GerboAI" />
   <meta
     name="twitter:description"
     content="m² quote calculator and VAT invoicing — built for African flooring contractors."
   />
-  <meta name="twitter:image" content="https://flooring.solidflo.co.za/og-image.jpg" />
+  <meta name="twitter:image" content="https://flooring.gerboai.com/og-image.jpg" />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "SolidFlo for Flooring Contractors",
+      "name": "GerboAI for Flooring Contractors",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://flooring.solidflo.co.za/",
+      "url": "https://flooring.gerboai.com/",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -2121,7 +2121,7 @@ export default function SubdomainLandingPage() {
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "Is SolidFlo built specifically for flooring contractors?",
+          "name": "Is GerboAI built specifically for flooring contractors?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Yes. The m² calculator, material tracking fields, and job costing tools are designed around how flooring and tiling businesses actually work — not adapted from generic invoicing software.",
@@ -2132,7 +2132,7 @@ export default function SubdomainLandingPage() {
           "name": "Can I use it on site from my phone?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most contractors send their first quote within 10 minutes of signing up.",
+            "text": "Absolutely. GerboAI is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most contractors send their first quote within 10 minutes of signing up.",
           },
         },
         {
@@ -2145,7 +2145,7 @@ export default function SubdomainLandingPage() {
         },
         {
           "@type": "Question",
-          "name": "Is SolidFlo really free?",
+          "name": "Is GerboAI really free?",
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Installer or Studio for unlimited invoicing.",

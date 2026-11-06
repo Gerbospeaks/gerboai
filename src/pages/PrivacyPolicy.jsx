@@ -120,10 +120,10 @@ const PrivacyPolicy = () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy - SolidFlo</title>
+        <title>Privacy Policy - GerboAI</title>
         <meta
           name="description"
-          content="Learn how SolidFlo collects, uses, and protects your personal information."
+          content="Learn how GerboAI collects, uses, and protects your personal information."
         />
       </Helmet>
 
@@ -303,7 +303,7 @@ const PrivacyPolicy = () => {
                 className="flex items-center cursor-pointer"
                 onClick={() => navigate("/")}
               >
-                <img src={logo} alt="SolidFlo" className="h-16 w-auto" />
+                <img src={logo} alt="GerboAI" className="h-16 w-auto" />
               </div>
 
               {/* Desktop Navigation */}
@@ -423,13 +423,13 @@ const PrivacyPolicy = () => {
                   {/* Introduction */}
                   <div className="mb-12 pb-8 border-b border-gray-200">
                     <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                      At SolidFlo, we take your privacy seriously. This Privacy
+                      At GerboAI, we take your privacy seriously. This Privacy
                       Policy explains how we collect, use, disclose, and
                       safeguard your information when you use our invoicing
                       platform.
                     </p>
                     <p className="text-lg text-gray-700 leading-relaxed">
-                      By using SolidFlo, you agree to the collection and use of
+                      By using GerboAI, you agree to the collection and use of
                       information in accordance with this policy.
                     </p>
                   </div>
@@ -772,10 +772,10 @@ const PrivacyPolicy = () => {
                         <p className="text-gray-700">
                           To exercise any of these rights, please contact us at{" "}
                           <a
-                            href="mailto:privacy@solidflo.co.za"
+                            href="mailto:privacy@gerboai.com"
                             className="text-orange-600 font-semibold hover:underline"
                           >
-                            privacy@solidflo.co.za
+                            privacy@gerboai.com
                           </a>
                           . We will respond to your request within 30 days.
                         </p>
@@ -960,10 +960,10 @@ const PrivacyPolicy = () => {
                             </h3>
                           </div>
                           <a
-                            href="mailto:privacy@solidflo.co.za"
+                            href="mailto:privacy@gerboai.com"
                             className="text-orange-600 font-semibold hover:underline"
                           >
-                            privacy@solidflo.co.za
+                            privacy@gerboai.com
                           </a>
                         </div>
 
@@ -1015,7 +1015,7 @@ const PrivacyPolicy = () => {
               Ready to get started?
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Join 10,000+ businesses using SolidFlo. Your data is safe with us.
+              Join 10,000+ businesses using GerboAI. Your data is safe with us.
             </p>
 
             <button
@@ -1037,7 +1037,7 @@ const PrivacyPolicy = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
               {/* Company Info */}
               <div>
-                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+                <img src={logo1} alt="GerboAI" className="h-10 mb-4" />
                 <p className="text-gray-400 mb-6 leading-relaxed">
                   Free online invoicing for small businesses. Create and send
                   invoices, track time and expenses, and accept online payments.
@@ -1144,7 +1144,7 @@ const PrivacyPolicy = () => {
             {/* Bottom Bar */}
             <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
               <p>
-                &copy; {new Date().getFullYear()} SolidFlo. All rights reserved.
+                &copy; {new Date().getFullYear()} GerboAI. All rights reserved.
               </p>
             </div>
           </div>

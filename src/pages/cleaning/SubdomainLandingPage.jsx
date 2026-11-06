@@ -95,7 +95,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -566,7 +566,7 @@ function Hero({ config, onRegister }) {
                   }}
                 >
                   <span style={{ fontSize: 11, color: HC.textMuted }}>
-                    solidflo.co.za/{config.slug || "cleaning"}/invoices
+                    gerboai.com/{config.slug || "cleaning"}/invoices
                   </span>
                 </div>
               </div>
@@ -1474,7 +1474,7 @@ function CTABanner({ config, onRegister }) {
           }}
         >
           Join hundreds of {config.label.toLowerCase()} businesses already using
-          SolidFlo.
+          GerboAI.
         </p>
         <div
           style={{
@@ -1559,7 +1559,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -1716,7 +1716,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -1748,43 +1748,43 @@ export default function SubdomainLandingPage() {
   return (
     <>
     <Helmet>
-  <title>Invoicing & Booking Software for Cleaning Businesses | SolidFlo</title>
+  <title>Invoicing & Booking Software for Cleaning Businesses | GerboAI</title>
   <meta
     name="description"
     content="Manage bookings, send professional invoices, and track recurring clients — all in one place. Built for African cleaning businesses, from domestic to commercial. Free plan available, no credit card required."
   />
-  <link rel="canonical" href="https://cleaning.solidflo.co.za/" />
+  <link rel="canonical" href="https://cleaning.gerboai.com/" />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="Invoicing & Booking Software for Cleaning Businesses | SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
+  <meta property="og:title" content="Invoicing & Booking Software for Cleaning Businesses | GerboAI" />
   <meta
     property="og:description"
     content="Bookings, invoicing, and client management built for African cleaning businesses — domestic, office, and commercial."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://cleaning.solidflo.co.za/" />
-  <meta property="og:image" content="https://cleaning.solidflo.co.za/og-image.jpg" />
+  <meta property="og:url" content="https://cleaning.gerboai.com/" />
+  <meta property="og:image" content="https://cleaning.gerboai.com/og-image.jpg" />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Invoicing & Booking Software for Cleaning Businesses | SolidFlo" />
+  <meta name="twitter:title" content="Invoicing & Booking Software for Cleaning Businesses | GerboAI" />
   <meta
     name="twitter:description"
     content="Bookings, invoicing, and recurring client management — built for African cleaning businesses."
   />
-  <meta name="twitter:image" content="https://cleaning.solidflo.co.za/og-image.jpg" />
+  <meta name="twitter:image" content="https://cleaning.gerboai.com/og-image.jpg" />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "SolidFlo for Cleaning Businesses",
+      "name": "GerboAI for Cleaning Businesses",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://cleaning.solidflo.co.za/",
+      "url": "https://cleaning.gerboai.com/",
       "offers": {
         "@type": "Offer",
         "price": "0",

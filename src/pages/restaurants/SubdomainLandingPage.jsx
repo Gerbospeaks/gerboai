@@ -173,7 +173,7 @@ function MockInvoice({ config }) {
           }}
         >
           <span style={{ fontSize: 10, color: T.muted }}>
-            solidflo.co.za/invoice/{refNo}
+            gerboai.com/invoice/{refNo}
           </span>
         </div>
       </div>
@@ -425,7 +425,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -737,7 +737,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            From dine-in bills to catering quotes, SolidFlo handles the
+            From dine-in bills to catering quotes, GerboAI handles the
             paperwork for SA restaurants so your kitchen can focus on the
             food.
           </p>
@@ -1176,7 +1176,7 @@ function DashboardFeatures({ config, onRegister }) {
           overline="Platform"
           accent={config.accent}
           title="Your whole restaurant, one dashboard"
-          sub="Beyond invoicing — SolidFlo gives your front-of-house and back-office a single connected hub."
+          sub="Beyond invoicing — GerboAI gives your front-of-house and back-office a single connected hub."
         />
 
         {/* Tabs */}
@@ -1773,7 +1773,7 @@ function Testimonials({ config }) {
     },
     {
       quote:
-        "Split billing for large groups used to be a nightmare. SolidFlo handles it in seconds — customers love it.",
+        "Split billing for large groups used to be a nightmare. GerboAI handles it in seconds — customers love it.",
       name: "Ruan V.",
       role: "Manager, The Boma Steakhouse · Pretoria",
       avatar: "RV",
@@ -1948,7 +1948,7 @@ function FAQ({ config }) {
 
   const faqs = config.faqs || [
     {
-      q: "Can I use SolidFlo for both dine-in and takeaway?",
+      q: "Can I use GerboAI for both dine-in and takeaway?",
       a: "Yes — you can create table invoices for dine-in customers and separate delivery or takeaway invoices. Both are VAT-compliant and can be sent via WhatsApp or email.",
     },
     {
@@ -1957,7 +1957,7 @@ function FAQ({ config }) {
     },
     {
       q: "Can I split a bill between multiple guests?",
-      a: "Yes. SolidFlo supports splitting by item or equally between a set number of guests. Each person gets their own invoice or you can issue one combined bill.",
+      a: "Yes. GerboAI supports splitting by item or equally between a set number of guests. Each person gets their own invoice or you can issue one combined bill.",
     },
     {
       q: "Is the invoice SARS VAT-compliant?",
@@ -2126,7 +2126,7 @@ function CTABanner({ config, onRegister }) {
         >
           Join hundreds of African{" "}
           {(config.label || "restaurant").toLowerCase()} businesses that invoice
-          professionally and get paid faster with SolidFlo.
+          professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -2206,7 +2206,7 @@ function Footer({ config, onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2250,7 +2250,7 @@ function Footer({ config, onLogin, onRegister }) {
                   color: T.white,
                 }}
               >
-                SolidFlo {config.label}
+                GerboAI {config.label}
               </span>
             </div>
             <p
@@ -2340,7 +2340,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{

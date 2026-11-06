@@ -105,7 +105,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/pestcontrol/INV-0019
+            gerboai.com/pestcontrol/INV-0019
           </span>
         </div>
       </div>
@@ -396,7 +396,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -709,7 +709,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA pest control and fumigation
+            GerboAI is purpose-built for SA pest control and fumigation
             contractors. Send professional job sheets, track chemical usage
             per treatment, and get paid on-site in under 60 seconds.
           </p>
@@ -1684,19 +1684,19 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for pest control businesses?",
+      q: "Is GerboAI built specifically for pest control businesses?",
       a: "Yes. The job sheet fields — chemical name, batch number, dosage rate, pest type, and application method — are designed around how pest control operators actually work. It's not generic invoicing software adapted for the industry.",
     },
     {
       q: "Can I use it on-site from my phone?",
-      a: "Absolutely. SolidFlo is fully mobile-responsive. You can complete a job sheet and send the invoice while still at the client's property. Most operators send their first invoice within 10 minutes of signing up.",
+      a: "Absolutely. GerboAI is fully mobile-responsive. You can complete a job sheet and send the invoice while still at the client's property. Most operators send their first invoice within 10 minutes of signing up.",
     },
     {
       q: "Does it help with DFFE compliance and SANS 10199?",
       a: "Yes. Every job sheet captures the fields required for regulatory compliance — including chemical product name, batch number, dilution rate, and application method. Your records are searchable and exportable for any audit.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — the Starter plan is free forever and includes 5 job sheets per month. No credit card required. Upgrade to the Operator or Company plan when you're ready for unlimited invoicing and advanced features.",
     },
     {
@@ -1705,7 +1705,7 @@ function FAQ() {
     },
     {
       q: "Can I set up recurring service contracts?",
-      a: "Yes. The Operator plan includes recurring treatment scheduling. Set the treatment frequency, and SolidFlo automatically reminds both you and your client before each scheduled visit.",
+      a: "Yes. The Operator plan includes recurring treatment scheduling. Set the treatment frequency, and GerboAI automatically reminds both you and your client before each scheduled visit.",
     },
   ];
 
@@ -1880,7 +1880,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 500+ African pest control operators that quote
-          professionally and get paid faster with SolidFlo.
+          professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1960,7 +1960,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2093,7 +2093,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{

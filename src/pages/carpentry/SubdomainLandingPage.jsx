@@ -119,7 +119,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/carpentry/INV-2024
+            gerboai.com/carpentry/INV-2024
           </span>
         </div>
       </div>
@@ -402,7 +402,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -1654,19 +1654,19 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for carpentry?",
+      q: "Is GerboAI built specifically for carpentry?",
       a: "Yes. The quote templates, material tracking fields, and job costing tools are all designed around how carpentry and joinery businesses actually work — not adapted from generic invoicing software.",
     },
     {
       q: "Can I use it on site from my phone?",
-      a: "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most carpenters send their first quote within 10 minutes of signing up.",
+      a: "Absolutely. GerboAI is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed. Most carpenters send their first quote within 10 minutes of signing up.",
     },
     {
       q: "Does it handle VAT automatically?",
       a: "Yes. You can set VAT-inclusive or exclusive pricing per quote, and it calculates everything correctly for SARS compliance. Every invoice includes the required fields for a valid tax invoice.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Starter plan is free forever. You get 5 invoices per month with no credit card required. When you're ready to grow, upgrade to Craftsman or Workshop for unlimited invoicing.",
     },
     {
@@ -1851,7 +1851,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 500+ African carpenters and joinery businesses that quote
-          professionally and get paid faster with SolidFlo.
+          professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1937,7 +1937,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2094,7 +2094,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -2125,43 +2125,43 @@ export default function SubdomainLandingPage() {
   return (
     <>
     <Helmet>
-  <title>Invoicing Software for Carpenters & Joiners | SolidFlo</title>
+  <title>Invoicing Software for Carpenters & Joiners | GerboAI</title>
   <meta
     name="description"
     content="Send professional quotes, track materials, and get paid on time. VAT-compliant invoicing built for African carpenters and joinery businesses. Free plan available — no credit card required."
   />
-  <link rel="canonical" href="https://carpentry.solidflo.co.za/" />
+  <link rel="canonical" href="https://carpentry.gerboai.com/" />
 
   {/* Open Graph */}
-  <meta property="og:site_name" content="SolidFlo" />
-  <meta property="og:title" content="Invoicing Software for Carpenters & Joiners | SolidFlo" />
+  <meta property="og:site_name" content="GerboAI" />
+  <meta property="og:title" content="Invoicing Software for Carpenters & Joiners | GerboAI" />
   <meta
     property="og:description"
     content="Quotes, materials tracking, and VAT-compliant invoicing — purpose-built for African carpenters and joinery businesses."
   />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://carpentry.solidflo.co.za/" />
-  <meta property="og:image" content="https://carpentry.solidflo.co.za/og-image.jpg" />
+  <meta property="og:url" content="https://carpentry.gerboai.com/" />
+  <meta property="og:image" content="https://carpentry.gerboai.com/og-image.jpg" />
   <meta property="og:locale" content="en_ZA" />
 
   {/* Twitter */}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Invoicing Software for Carpenters & Joiners | SolidFlo" />
+  <meta name="twitter:title" content="Invoicing Software for Carpenters & Joiners | GerboAI" />
   <meta
     name="twitter:description"
     content="Quotes, materials tracking, and VAT-compliant invoicing — built for the workshop, not the boardroom."
   />
-  <meta name="twitter:image" content="https://carpentry.solidflo.co.za/og-image.jpg" />
+  <meta name="twitter:image" content="https://carpentry.gerboai.com/og-image.jpg" />
 
   {/* Structured data: software */}
   <script type="application/ld+json">
     {JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "SolidFlo for Carpenters",
+      "name": "GerboAI for Carpenters",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://carpentry.solidflo.co.za/",
+      "url": "https://carpentry.gerboai.com/",
       "offers": {
         "@type": "Offer",
         "price": "0",

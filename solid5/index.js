@@ -14,7 +14,7 @@ const zeptoFromEmail = defineString("ZEPTO_FROM_EMAIL");
 // ─── Initialize ───────────────────────────────────────────────────────────────
 admin.initializeApp();
 
-const APP_NAME = "SolidFlo";
+const APP_NAME = "GerboAI";
 const APP_ADDRESS = "58 Minuet Crescent, Olivienhoutbosch, South Africa";
 const APP_PHONE = "+27 68 488 7039";
 
@@ -258,7 +258,7 @@ function buildAdminEmailHtml({
       <p style="margin-top:30px;">If you have any questions, please don't hesitate to contact us.</p>
       <p>Best regards,<br>
         <strong>${appName} Team</strong><br>
-        📧 accounts@solidflo.co.za<br>
+        📧 accounts@gerboai.com<br>
         📞 ${appPhone}
       </p>
     </div>
@@ -547,7 +547,7 @@ exports.sendInvoiceEmail_firestore = functions
           </div>`;
 
         const htmlBody = buildAdminEmailHtml({
-          title: "Invoice from SolidFlo",
+          title: "Invoice from GerboAI",
           subtitle: "Thank you for your business!",
           detailsHtml,
           itemsHtml,
@@ -668,7 +668,7 @@ exports.sendQuoteEmail = functions
           </div>`;
 
         const htmlBody = buildAdminEmailHtml({
-          title: "Quote from SolidFlo",
+          title: "Quote from GerboAI",
           subtitle: "Your custom quotation",
           detailsHtml,
           itemsHtml,

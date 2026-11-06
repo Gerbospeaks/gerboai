@@ -7,8 +7,8 @@
 const { writeFileSync, mkdirSync, existsSync } = require("fs");
 const path = require("path");
 
-const MAIN_URL   = "https://solidflo.co.za";
-const MARKET_URL = "https://market.solidflo.co.za";
+const MAIN_URL   = "https://gerboai.com";
+const MARKET_URL = "https://market.gerboai.com";
 const TODAY      = new Date().toISOString().split("T")[0];
 
 const INDUSTRY_SLUGS = [
@@ -54,5 +54,5 @@ console.log("✅ Done!");
 console.log("   public/sitemap.xml        →", MAIN_PAGES.length, "pages");
 console.log("   public/market-sitemap.xml →", MARKET_PAGES.length, "pages");
 console.log("\nSubmit to Google Search Console:");
-console.log("   https://solidflo.co.za/sitemap.xml");
-console.log("   https://market.solidflo.co.za/market-sitemap.xml");
+console.log("   https://gerboai.com/sitemap.xml");
+console.log("   https://market.gerboai.com/market-sitemap.xml");

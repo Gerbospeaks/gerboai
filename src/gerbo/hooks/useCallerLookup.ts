@@ -292,7 +292,7 @@ export const useCallerLookup = (): UseCallerLookupReturn => {
         const phone           = input.phone?.trim() ?? '';
         const phoneNormalised = normalisePhone(phone);
 
-        // addDoc lets Firestore generate the ID — same pattern SolidFlo uses
+        // addDoc lets Firestore generate the ID — same pattern GerboAI uses
         const clientRef = await addDoc(
           collection(db, 'users', ownerUid, 'clients'),
           {
@@ -302,7 +302,7 @@ export const useCallerLookup = (): UseCallerLookupReturn => {
             phoneNormalised,
             address:          input.address?.trim() ?? '',
             notes:            input.notes?.trim() ?? '',
-            source:           'gerboai_call',   // tag so it shows in SolidFlo dashboard
+            source:           'gerboai_call',   // tag so it shows in GerboAI dashboard
             createdAt:        serverTimestamp(),
             updatedAt:        serverTimestamp(),
           },

@@ -540,7 +540,7 @@ const loadBusinessInfo = async () => {
                       })
                     }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
-                    placeholder="e.g. Solidflo Invoicing SaaS"
+                    placeholder="e.g. Gerbo Invoicing SaaS"
                   />
                 </div>
               </div>

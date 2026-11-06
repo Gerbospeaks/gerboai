@@ -27,7 +27,7 @@ const SLIDES = {
   verifyEmail: [
     { image: slide1, title: 'Almost there!',        description: 'Confirming your email address…' },
     { image: slide2, title: 'Stay secure',          description: 'Verified accounts keep your data safe' },
-    { image: slide3, title: 'Welcome to SolidFlo',  description: 'Your business, beautifully managed' },
+    { image: slide3, title: 'Welcome to GerboAI',  description: 'Your business, beautifully managed' },
   ],
   recoverEmail: [
     { image: slide1, title: 'Recovering your email', description: 'We are reverting your email change…' },
@@ -326,7 +326,7 @@ function VerifyEmailView({ oobCode }) {
     <div className="text-center">
       <StatusIcon success />
       <h2 className="text-3xl font-bold text-gray-900 mb-2">Email Verified!</h2>
-      <p className="text-gray-500 mb-6">Your email has been verified. Welcome to SolidFlo!</p>
+      <p className="text-gray-500 mb-6">Your email has been verified. Welcome to GerboAI!</p>
       <div className="text-left bg-green-50 border border-green-100 rounded-xl p-4 mb-6 space-y-2">
         {['Create professional invoices', 'Generate quotes for clients', 'Track payments and manage your business'].map(b => (
           <div key={b} className="flex items-center gap-2 text-green-700 text-sm">
@@ -434,11 +434,11 @@ function AuthAction() {
       <div className="w-full lg:w-1/2 bg-white flex items-center justify-center p-8">
         <div className="max-w-md w-full">
           <div className="mb-8">
-            <img src={logo} alt="SolidFlo" className="w-16 h-12 object-contain" />
+            <img src={logo} alt="GerboAI" className="w-16 h-12 object-contain" />
           </div>
           {renderContent()}
           <p className="text-center text-gray-400 text-xs mt-8">
-            Need help? <a href="mailto:accounts@solidflo.co.za" className="underline hover:text-gray-600">accounts@solidflo.co.za</a>
+            Need help? <a href="mailto:accounts@gerboai.com" className="underline hover:text-gray-600">accounts@gerboai.com</a>
           </p>
         </div>
       </div>

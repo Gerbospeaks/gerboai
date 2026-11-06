@@ -7,12 +7,12 @@ const APP_URL = (
 ).replace(/\/$/, "");
 
 interface Props {
-  /** Pre-fills the email with the SolidFlo user's address (still editable). */
+  /** Pre-fills the email with the GerboAI user's address (still editable). */
   defaultEmail?: string | null;
 }
 
 /**
- * GerboAI has its own accounts (separate Firebase project), so a SolidFlo user
+ * GerboAI has its own accounts (separate Firebase project), so a GerboAI user
  * signs in to GerboAI once here. Firebase persists the session, so this only
  * shows on first use (or after "Sign out" inside the GerboAI panel).
  */

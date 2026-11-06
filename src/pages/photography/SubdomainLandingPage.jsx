@@ -105,7 +105,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: C.muted }}>
-            solidflo.co.za/photography/INV-0053
+            gerboai.com/photography/INV-0053
           </span>
         </div>
       </div>
@@ -396,7 +396,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -709,7 +709,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA photographers, videographers, and
+            GerboAI is purpose-built for SA photographers, videographers, and
             content creators. Send polished quotes, collect deposits, deliver
             galleries, and get fully paid in under 60 seconds.
           </p>
@@ -1466,14 +1466,14 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "I used to release galleries and then spend weeks chasing the balance. With SolidFlo the gallery link only activates after payment clears. I haven't had a single late payer since.",
+        "I used to release galleries and then spend weeks chasing the balance. With GerboAI the gallery link only activates after payment clears. I haven't had a single late payer since.",
       name: "Lungelo Langa",
       role: "Langa Frame Studios, Johannesburg",
       avatar: "LL",
     },
     {
       quote:
-        "The deposit invoicing feature alone changed my business. I take 50% upfront on every wedding now — SolidFlo makes it feel completely normal to the client because it looks so professional.",
+        "The deposit invoicing feature alone changed my business. I take 50% upfront on every wedding now — GerboAI makes it feel completely normal to the client because it looks so professional.",
       name: "Carla du Plessis",
       role: "Cape Light Photography, Cape Town",
       avatar: "CD",
@@ -1673,7 +1673,7 @@ function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
     {
-      q: "Is SolidFlo built specifically for photographers?",
+      q: "Is GerboAI built specifically for photographers?",
       a: "Yes. The package builder, deposit/balance split invoicing, shoot contracts, and gallery delivery links are designed around how photographers actually manage bookings — not adapted from generic small business software.",
     },
     {
@@ -1689,7 +1689,7 @@ function FAQ() {
       a: "Yes — the Shooter plan includes digital shoot contracts. Clients sign before the deposit is due. Your signed contract and invoice are stored together on every booking.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — the Starter plan is free forever with 5 invoices per month and no credit card required. Upgrade to Shooter when you need unlimited invoicing, deposit splitting, contracts, and gallery links.",
     },
     {
@@ -1871,7 +1871,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 700+ African photographers and videographers who quote
-          professionally and get paid faster with SolidFlo.
+          professionally and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1951,7 +1951,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2082,7 +2082,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{

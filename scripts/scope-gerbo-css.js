@@ -5,14 +5,14 @@ if (!input) { console.error('Usage: node scripts/scope-gerbo-css.js <path/to/ger
 const src = fs.readFileSync(input, 'utf8');
 const root = postcss.parse(src);
 
-// 1) namespace keyframes so they can never clash with SolidFlo/Tailwind ones
+// 1) namespace keyframes so they can never clash with GerboAI/Tailwind ones
 const kf = new Map();
 root.walkAtRules(/keyframes$/, at => { const n = at.params.trim(); kf.set(n, 'gerbo-' + n); at.params = 'gerbo-' + n; });
 root.walkDecls(/^animation(-name)?$/, d => {
   kf.forEach((to, from) => { d.value = d.value.replace(new RegExp('(^|[\\s,])' + from + '(?=[\\s,;]|$)', 'g'), '$1' + to); });
 });
 
-// 2) viewport -> container-relative sizing (the panel lives inside SolidFlo's layout)
+// 2) viewport -> container-relative sizing (the panel lives inside GerboAI's layout)
 root.walkDecls(d => { if (/100vh/.test(d.value)) d.value = d.value.replace(/100vh/g, '100%'); });
 // mobile drawer: pin to the embed box rather than the browser viewport
 root.walkAtRules('media', at => at.walkRules(r => {

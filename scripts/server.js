@@ -77,7 +77,7 @@ function sseStart(res) {
 }
 app.get("/", (_req, res) => {
   res.json({ 
-    status: "SolidFlo seed server running",
+    status: "GerboAI seed server running",
     endpoints: ["/ping", "/auto-seed", "/create-accounts", "/seed-listings"]
   });
 });

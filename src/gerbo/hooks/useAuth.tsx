@@ -132,7 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   // ── Sign Up ──────────────────────────────────────────────────────────────
-  // Mirrors SolidFlo's register() so the shared Firestore schema stays intact.
+  // Mirrors GerboAI's register() so the shared Firestore schema stays intact.
   const signUp = async (
     email: string,
     password: string,
@@ -146,7 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       const { user: firebaseUser } = credential;
 
-      // Send verification email (same redirect as SolidFlo pattern)
+      // Send verification email (same redirect as GerboAI pattern)
       await sendEmailVerification(firebaseUser, {
         url: "https://gerboai.com/verify-email", // ← update to your domain
         handleCodeInApp: true,
@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         name: name || email.split("@")[0],
         email,
         dashboardId: null, // no industry dashboard for GerboAI users
-        gerboAiUser: true, // distinguishes origin from SolidFlo signups
+        gerboAiUser: true, // distinguishes origin from GerboAI signups
         createdAt: serverTimestamp(),
         emailVerified: false,
         role: "user",
@@ -167,8 +167,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         seeded: false,
       });
 
-      // ── Subcollections SolidFlo expects ──────────────────────────────────
-      // Required so that if a user later links a SolidFlo dashboard the
+      // ── Subcollections GerboAI expects ──────────────────────────────────
+      // Required so that if a user later links a GerboAI dashboard the
       // collections already exist and invoice/quote creation won't fail.
       const subcollections = [
         "clients",
@@ -185,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       // ── settings/businessInfo ─────────────────────────────────────────────
-      // Empty shell so SolidFlo invoice templates don't crash on missing doc.
+      // Empty shell so GerboAI invoice templates don't crash on missing doc.
       batch.set(
         doc(db, "users", firebaseUser.uid, "settings", "businessInfo"),
         {

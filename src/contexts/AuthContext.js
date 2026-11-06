@@ -146,7 +146,7 @@ export const AuthProvider = ({ children }) => {
 
       console.log("2. Sending verification email...");
       const actionCodeSettings = {
-        url: "https://solidflo.co.za/verify-email",
+        url: "https://gerboai.com/verify-email",
         handleCodeInApp: true,
       };
       await sendEmailVerification(user, actionCodeSettings);
@@ -368,7 +368,7 @@ export const AuthProvider = ({ children }) => {
   const resetPassword = async (email) => {
     try {
       const resetSettings = {
-        url: "https://solidflo.co.za/reset-password",
+        url: "https://gerboai.com/reset-password",
         handleCodeInApp: true,
       };
       await sendPasswordResetEmail(auth, email, resetSettings);
@@ -392,7 +392,7 @@ export const AuthProvider = ({ children }) => {
       if (!authUser) return { success: false, message: "No user logged in" };
 
       const changeSettings = {
-        url: "https://solidflo.co.za/change-email",
+        url: "https://gerboai.com/change-email",
         handleCodeInApp: true,
       };
       await verifyBeforeUpdateEmail(authUser, newEmail, changeSettings);

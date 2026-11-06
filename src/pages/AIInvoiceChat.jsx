@@ -29,7 +29,7 @@ import {
 /* ─────────────────────────────────────────────────────────────────────────────
    SYSTEM PROMPT — tells Claude exactly what structured JSON to return
 ───────────────────────────────────────────────────────────────────────────── */
-const SYSTEM_PROMPT = `You are an expert invoice assistant embedded inside SolidFlo, a professional billing platform.
+const SYSTEM_PROMPT = `You are an expert invoice assistant embedded inside GerboAI, a professional billing platform.
 
 Your ONLY job is to extract invoice data from the user's natural language message and return a JSON object.
 
@@ -169,7 +169,7 @@ function MessageBubble({ msg, onApply }) {
             alignSelf: isUser ? "flex-end" : "flex-start",
           }}
         >
-          {isUser ? "You" : "SolidFlo AI"}
+          {isUser ? "You" : "GerboAI AI"}
         </span>
 
         {/* Bubble */}
@@ -298,7 +298,7 @@ function TypingIndicator() {
             marginBottom: 6,
           }}
         >
-          SolidFlo AI
+          GerboAI AI
         </span>
         <div
           style={{
@@ -370,7 +370,7 @@ export default function AIInvoiceChat({
           // Welcome message
           const welcome = {
             role: "assistant",
-            content: `Hi! I'm your SolidFlo AI assistant. Just describe your invoice in plain English — who you're billing, what services or products, amounts, and any special terms — and I'll fill it in for you instantly. You can also edit specific fields like "change the tax rate to 0%" or "add another item for R500".`,
+            content: `Hi! I'm your GerboAI AI assistant. Just describe your invoice in plain English — who you're billing, what services or products, amounts, and any special terms — and I'll fill it in for you instantly. You can also edit specific fields like "change the tax rate to 0%" or "add another item for R500".`,
             hasData: false,
             applied: false,
           };
@@ -607,7 +607,7 @@ export default function AIInvoiceChat({
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
-              SolidFlo AI
+              GerboAI AI
             </div>
             <div
               style={{

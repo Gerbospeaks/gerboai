@@ -39,7 +39,7 @@ export default function InstallButton() {
   return (
     <div>
       <button onClick={handleInstall}>
-        ⬇ Install Solidflo
+        ⬇ Install Gerbo
       </button>
 
       {/* iOS manual tip */}

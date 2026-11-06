@@ -23,7 +23,7 @@ import InvoicePreview from "../components/admin/InvoicePreview";
 // ── Seed server ───────────────────────────────────────────────────
 const SERVER = import.meta.env.DEV
   ? "http://localhost:3001"
-  : "https://api.solidflo.co.za";
+  : "https://api.gerboai.com";
 
 const ALL_INDUSTRIES = [
   "mechanics","healthcare","security","electrical","restaurant",
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
         <div style={C.headerL}>
           <span style={C.badge("#a78bfa", "#1e1b4b")}>ADMIN</span>
           <div>
-            <p style={C.title}>SolidFlo Admin Portal</p>
+            <p style={C.title}>GerboAI Admin Portal</p>
             <p style={C.sub}>Manage clients, invoices, and seed data</p>
           </div>
         </div>

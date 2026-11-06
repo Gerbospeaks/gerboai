@@ -290,7 +290,7 @@ const buildPrompt = (userData, documentType, industry = "default") => {
         ? "purchase order"
         : "invoice";
 
-  return `You are SolidFlo AI — an expert ${docLabel} assistant for the ${industry} industry.
+  return `You are GerboAI AI — an expert ${docLabel} assistant for the ${industry} industry.
 
 NOTE: Client fields are auto-filled from Firebase when a client is matched. You only need to return clientNotInDB if the client is genuinely new.
 ${config.promptHint ? `\nINDUSTRY HINT: ${config.promptHint}` : ""}
@@ -613,7 +613,7 @@ function Sidebar({
                 color: C.text,
               }}
             >
-              Solidflo
+              Gerbo
             </span>
           </div>
         )}
@@ -1057,7 +1057,7 @@ const dismissedRef = useRef(new Set());
     id: "welcome",
     role: "assistant",
     content:
-      "Hi! I'm SolidFlo AI. Choose a document type then describe what you need. When you mention a saved client I'll load their details from your database instantly.",
+      "Hi! I'm GerboAI AI. Choose a document type then describe what you need. When you mention a saved client I'll load their details from your database instantly.",
   };
 
   useEffect(() => {
@@ -1593,7 +1593,7 @@ if (alreadySaved) newClient = null;
           style={{ animation: "sfPulse 1.4s ease-in-out infinite" }}
         />
         <div style={{ fontFamily: C.serif, fontSize: 24, color: C.text }}>
-          SolidFlo AI
+          GerboAI AI
         </div>
         <div
           style={{
@@ -1742,7 +1742,7 @@ if (alreadySaved) newClient = null;
           )}
           <span style={{ fontSize: 14, color: C.muted, whiteSpace: "nowrap" }}>
             {activeDt.short} ·{" "}
-            <span style={{ color: C.text }}>SolidFlo AI</span>
+            <span style={{ color: C.text }}>GerboAI AI</span>
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1918,7 +1918,7 @@ if (alreadySaved) newClient = null;
                 marginTop: 8,
               }}
             >
-              SolidFlo AI can make mistakes. Check amounts before sending.
+              GerboAI AI can make mistakes. Check amounts before sending.
             </div>
           </div>
         </>

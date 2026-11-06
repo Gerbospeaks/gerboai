@@ -51,14 +51,14 @@ function VapiAssistant() {
 
         // Option 2: OR create assistant inline
         // assistant: {
-        //   name: 'SolidFlo Support Assistant',
+        //   name: 'GerboAI Support Assistant',
         //   model: {
         //     provider: 'openai',
         //     model: 'gpt-4',
         //     messages: [
         //       {
         //         role: 'system',
-        //         content: 'You are a helpful assistant for SolidFlo, an invoicing SaaS. Answer questions about our product, pricing, and features. Be concise and friendly.'
+        //         content: 'You are a helpful assistant for GerboAI, an invoicing SaaS. Answer questions about our product, pricing, and features. Be concise and friendly.'
         //       }
         //     ]
         //   },
@@ -66,7 +66,7 @@ function VapiAssistant() {
         //     provider: 'elevenlabs',
         //     voiceId: 'your-voice-id'
         //   },
-        //   firstMessage: 'Hi! I\'m here to answer any questions about SolidFlo. How can I help you today?'
+        //   firstMessage: 'Hi! I\'m here to answer any questions about GerboAI. How can I help you today?'
         // }
       });
     } catch (error) {

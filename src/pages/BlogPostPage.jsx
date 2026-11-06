@@ -59,7 +59,7 @@ const BlogPostPage = () => {
       </ul>
 
       <h2>2. Send Invoices Immediately</h2>
-      <p>Don't wait to send invoices. The faster you invoice, the faster you get paid. With modern invoicing software like SolidFlo, you can automate this process and send invoices within minutes of completing work.</p>
+      <p>Don't wait to send invoices. The faster you invoice, the faster you get paid. With modern invoicing software like GerboAI, you can automate this process and send invoices within minutes of completing work.</p>
       <p>Studies show that invoices sent within 24 hours of work completion are paid 30% faster than those sent after a week.</p>
 
       <h2>3. Offer Multiple Payment Options</h2>
@@ -125,7 +125,7 @@ const BlogPostPage = () => {
       <p>This data helps you identify patterns and optimize your invoicing process over time.</p>
 
       <h2>Conclusion</h2>
-      <p>Implementing these invoicing best practices will help you get paid faster, improve your cash flow, and spend less time chasing payments. Modern invoicing software like SolidFlo can automate many of these processes, making it easier than ever to maintain healthy business finances.</p>
+      <p>Implementing these invoicing best practices will help you get paid faster, improve your cash flow, and spend less time chasing payments. Modern invoicing software like GerboAI can automate many of these processes, making it easier than ever to maintain healthy business finances.</p>
       <p>Remember, the key to getting paid faster is to make the payment process as simple and convenient as possible for your clients while maintaining clear, professional communication about payment expectations.</p>
     `,
     featuredImage:
@@ -234,7 +234,7 @@ const BlogPostPage = () => {
   return (
     <>
       <Helmet>
-        <title>{blogPost.title} - SolidFlo Blog</title>
+        <title>{blogPost.title} - GerboAI Blog</title>
         <meta name="description" content={blogPost.excerpt} />
         <meta property="og:title" content={blogPost.title} />
         <meta property="og:description" content={blogPost.excerpt} />
@@ -489,7 +489,7 @@ const BlogPostPage = () => {
                 className="flex items-center cursor-pointer"
                 onClick={() => navigate("/")}
               >
-                <img src={logo} alt="SolidFlo" className="h-16 w-auto" />
+                <img src={logo} alt="GerboAI" className="h-16 w-auto" />
               </div>
 
               {/* Desktop Navigation */}
@@ -871,7 +871,7 @@ const BlogPostPage = () => {
               Stay Updated with Our Newsletter
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Get the latest invoicing tips, business insights, and SolidFlo
+              Get the latest invoicing tips, business insights, and GerboAI
               updates delivered to your inbox.
             </p>
 
@@ -901,7 +901,7 @@ const BlogPostPage = () => {
               Ready to Improve Your Invoicing?
             </h2>
             <p className="text-xl text-gray-600 mb-10">
-              Join 10,000+ businesses using SolidFlo to get paid faster.
+              Join 10,000+ businesses using GerboAI to get paid faster.
             </p>
 
             <button
@@ -924,7 +924,7 @@ const BlogPostPage = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
               {/* Company Info */}
               <div>
-                <img src={logo1} alt="SolidFlo" className="h-10 mb-4" />
+                <img src={logo1} alt="GerboAI" className="h-10 mb-4" />
                 <p className="text-gray-400 mb-6 leading-relaxed">
                   Free online invoicing for small businesses. Create and send
                   invoices, track time and expenses, and accept online payments.
@@ -1031,7 +1031,7 @@ const BlogPostPage = () => {
             {/* Bottom Bar */}
             <div className="pt-8 border-t border-gray-800 text-center text-gray-400">
               <p>
-                &copy; {new Date().getFullYear()} SolidFlo. All rights reserved.
+                &copy; {new Date().getFullYear()} GerboAI. All rights reserved.
               </p>
             </div>
           </div>

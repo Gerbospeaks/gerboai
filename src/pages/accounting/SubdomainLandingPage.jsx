@@ -95,7 +95,7 @@ function MockInvoice() {
           }}
         >
           <span style={{ fontSize: 11, color: HC.textMuted }}>
-            solidflo.co.za/accounting/INV-2024
+            gerboai.com/accounting/INV-2024
           </span>
         </div>
       </div>
@@ -132,7 +132,7 @@ function MockInvoice() {
                   color: HC.navy,
                 }}
               >
-                SolidFlo
+                GerboAI
               </span>
             </div>
             <p style={{ fontSize: 12, color: HC.textMuted, margin: 0 }}>
@@ -383,7 +383,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -719,7 +719,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA accounting practices. Create
+            GerboAI is purpose-built for SA accounting practices. Create
             SARS-compliant invoices, automate payment reminders, and get
             real-time cash flow insights — in under 60 seconds.
           </p>
@@ -1430,14 +1430,14 @@ function Testimonials() {
   const testimonials = [
     {
       quote:
-        "SolidFlo cut our debtor days from 45 to 18. The automated reminders do the chasing for us — our clients pay on time now.",
+        "GerboAI cut our debtor days from 45 to 18. The automated reminders do the chasing for us — our clients pay on time now.",
       name: "Thabo Mokoena",
       role: "CA(SA), Mokoena & Associates, Johannesburg",
       avatar: "TM",
     },
     {
       quote:
-        "The Xero integration is seamless. I create an invoice in SolidFlo and it's in our books instantly. Saves us hours every month.",
+        "The Xero integration is seamless. I create an invoice in GerboAI and it's in our books instantly. Saves us hours every month.",
       name: "Suzanne van der Berg",
       role: "Bookkeeper, Van der Berg Accounting, Cape Town",
       avatar: "SV",
@@ -1642,7 +1642,7 @@ function FAQ() {
       a: "Absolutely. Every invoice includes your VAT registration number, correct VAT line items, the required SARS fields, and compliant date formatting. We stay updated with SARS guidelines automatically. You can also run a VAT Output report for your accountant or for e-filing.",
     },
     {
-      q: "Which accounting software does SolidFlo integrate with?",
+      q: "Which accounting software does GerboAI integrate with?",
       a: "We integrate natively with Xero, Sage One (Accounting), and QuickBooks Online. Invoices and payment status sync automatically — no CSV exports or manual capturing needed.",
     },
     {
@@ -1650,7 +1650,7 @@ function FAQ() {
       a: "Yes. Your banking details are embedded on every invoice with a unique payment reference for easy reconciliation. We also support instant EFT via PayFast, and card payments through Peach Payments — all tracked and reconciled automatically.",
     },
     {
-      q: "Is SolidFlo really free?",
+      q: "Is GerboAI really free?",
       a: "Yes — our Starter plan is free forever. You get 5 invoices per month across up to 3 clients with no credit card required. When you're ready to grow, upgrade to Professional or Firm for unlimited invoicing.",
     },
     {
@@ -1829,7 +1829,7 @@ function CTABanner({ onRegister }) {
           }}
         >
           Join 800+ African accounting practices that bill professionally
-          and get paid faster with SolidFlo.
+          and get paid faster with GerboAI.
         </p>
         <div
           style={{
@@ -1916,7 +1916,7 @@ function Footer({ onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -2073,7 +2073,7 @@ function Footer({ onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
@@ -2104,27 +2104,27 @@ export default function SubdomainLandingPage() {
   return (
     <>
       <Helmet>
-        <title>Accounting Software for SA Practices | SolidFlo</title>
+        <title>Accounting Software for SA Practices | GerboAI</title>
         <meta
           name="description"
           content="SARS-compliant invoicing, automated payment reminders, and cash flow dashboards built for African accounting firms. Free plan available — start in 60 seconds."
         />
-        <link rel="canonical" href="https://accounting.solidflo.co.za/" />
+        <link rel="canonical" href="https://accounting.gerboai.com/" />
 
-        <meta property="og:title" content="Accounting Software for SA Practices | SolidFlo" />
+        <meta property="og:title" content="Accounting Software for SA Practices | GerboAI" />
         <meta property="og:description" content="SARS-compliant invoicing and payment automation built for African accounting firms." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://accounting.solidflo.co.za/" />
+        <meta property="og:url" content="https://accounting.gerboai.com/" />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Accounting Software for SA Practices | SolidFlo" />
+        <meta name="twitter:title" content="Accounting Software for SA Practices | GerboAI" />
         <meta name="twitter:description" content="SARS-compliant invoicing and payment automation built for African accounting firms." />
 
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "SolidFlo for Accounting Practices",
+            "name": "GerboAI for Accounting Practices",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },

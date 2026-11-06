@@ -2,9 +2,9 @@
 export function injectDynamicManifest(subdomain) {
   const manifest = {
     name: `Solid Flo – ${subdomain}`,
-    short_name: "SolidFlo",
-    start_url: `https://${subdomain}.solidflo.co.za/login`,
-    scope: `https://${subdomain}.solidflo.co.za/`,
+    short_name: "GerboAI",
+    start_url: `https://${subdomain}.gerboai.com/login`,
+    scope: `https://${subdomain}.gerboai.com/`,
     display: "standalone",
     background_color: "#f8f9fc",
     theme_color: "#1655e0",

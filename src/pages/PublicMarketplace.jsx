@@ -12,7 +12,7 @@ import {
   IndustryFAQ,
   useIndustryRoute,
 } from './SEO_MarketplaceMeta';
-const SOLIDFLO_URL = "https://solidflo.co.za";
+const SOLIDFLO_URL = "https://gerboai.com";
 
 // ── CSS (mirrors LandingPage token system exactly) ────────────────────────────
 
@@ -2590,7 +2590,7 @@ function RegisterModal({ mode, providerName, onClose }) {
         {/* ── Left panel ── */}
         <div className="mp-modal-left">
           <div className="mp-modal-left-logo">
-            <img src={logo} alt="SolidFlo" style={{ height: 36 }} />
+            <img src={logo} alt="GerboAI" style={{ height: 36 }} />
           </div>
 
           <div className="mp-modal-trust">
@@ -2628,7 +2628,7 @@ function RegisterModal({ mode, providerName, onClose }) {
               ? "Sign in to manage your bookings, quotes and service requests."
               : providerName
                 ? `Create a free account to book ${providerName} and receive a quote directly.`
-                : "Join hundreds of Gauteng businesses already using SolidFlo to connect with verified service providers."}
+                : "Join hundreds of Gauteng businesses already using GerboAI to connect with verified service providers."}
           </p>
 
           <div className="mp-modal-features">
@@ -2643,7 +2643,7 @@ function RegisterModal({ mode, providerName, onClose }) {
             className="mp-modal-cta"
             onClick={() => navigateTo(isLogin ? "/" : "/")}
           >
-            {isLogin ? "Sign In at solidflo.co.za" : "Get Started Free"}
+            {isLogin ? "Sign In at gerboai.com" : "Get Started Free"}
             <svg
               width="14"
               height="14"
@@ -3076,7 +3076,7 @@ const handleSubmitBooking = useCallback(
       <nav className={`mp-nav${scrolled ? " scrolled" : ""}`}>
         <div className="mp-nav-inner">
           <div className="mp-nav-logo">
-            <img src={logo} alt="SolidFlo" style={{ height: 44 }} />
+            <img src={logo} alt="GerboAI" style={{ height: 44 }} />
           </div>
           <div className="mp-nav-ctas">
             <button className="mp-btn-ghost" onClick={() => openModal("login")}>
@@ -3292,7 +3292,7 @@ const handleSubmitBooking = useCallback(
                   No providers listed in this category yet
                 </div>
                 <div className="mp-empty-sub">
-                  Be the first to list your business — register on SolidFlo
+                  Be the first to list your business — register on GerboAI
                   today.
                 </div>
               </div>
@@ -3468,7 +3468,7 @@ const handleSubmitBooking = useCallback(
       <footer className="mp-footer">
         <div className="mp-footer-upper">
           <div className="mp-footer-brand">
-            <img src={logo} alt="SolidFlo" style={{ height: 80 }} />
+            <img src={logo} alt="GerboAI" style={{ height: 80 }} />
             <p className="mp-footer-tagline">
               The marketplace for verified trade and professional service
               providers across Gauteng.
@@ -3478,7 +3478,7 @@ const handleSubmitBooking = useCallback(
             <div className="mp-footer-links-label">Platform</div>
             <span
               className="mp-footer-link"
-              onClick={() => navigateTo("https://solidflo.co.za")}
+              onClick={() => navigateTo("https://gerboai.com")}
             >
               Register Free
             </span>
@@ -3513,13 +3513,13 @@ const handleSubmitBooking = useCallback(
               target="_blank"
               rel="noopener noreferrer"
             >
-              solidflo.co.za
+              gerboai.com
             </a>
           </div>
         </div>
         <div className="mp-footer-lower">
           <span className="mp-footer-copy">
-            © {new Date().getFullYear()} SolidFlo · Marketplace for verified
+            © {new Date().getFullYear()} GerboAI · Marketplace for verified
             service providers in Gauteng
           </span>
           <div className="mp-footer-legal">

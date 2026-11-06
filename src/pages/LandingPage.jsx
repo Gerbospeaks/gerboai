@@ -76,7 +76,7 @@ const AI_STEPS = [
   {
     icon: <Sparkles size={20} />,
     title: "Watch it build",
-    desc: "SolidFlo AI fills in the client, line items and VAT on a live preview as you type.",
+    desc: "GerboAI AI fills in the client, line items and VAT on a live preview as you type.",
   },
   {
     icon: <Repeat size={20} />,
@@ -207,7 +207,7 @@ const PLANS = [
 
 const FAQS = [
   {
-    q: "Is SolidFlo really free?",
+    q: "Is GerboAI really free?",
     a: "Yes! Our Starter plan is completely free forever. Unlimited invoices for up to 5 clients — no credit card required.",
   },
   {
@@ -316,11 +316,11 @@ const AIDemo = () => {
   return (
     <div
       className="ai-demo"
-      aria-label="Example of SolidFlo AI creating an invoice"
+      aria-label="Example of GerboAI AI creating an invoice"
     >
       <div className="ai-chat">
         <div className="ai-chat-label">
-          <Sparkles size={14} /> SolidFlo AI
+          <Sparkles size={14} /> GerboAI AI
         </div>
         <div className="ai-bubble">
           {demo.prompt.slice(0, typed)}
@@ -407,7 +407,7 @@ const LandingPage = () => {
 
   const openMarket = () =>
     window.open(
-      "https://market.solidflo.co.za",
+      "https://market.gerboai.com",
       "_blank",
       "noopener,noreferrer",
     );
@@ -458,7 +458,7 @@ const LandingPage = () => {
         widget.setAttribute("base-bg-color", "#002c7e");
         widget.setAttribute("accent-color", "#000000");
         widget.setAttribute("position", "bottom-right");
-        widget.setAttribute("title", "Solidflo Assistant");
+        widget.setAttribute("title", "Gerbo Assistant");
         widget.setAttribute("label", "");
         widget.setAttribute(
           "chat-first-message",
@@ -557,32 +557,32 @@ const LandingPage = () => {
       {isOpen && <IndustryPickerModal onClose={close} intent={intent} />}
 
       <Helmet>
-        <title>SolidFlo — Business Management Software for 26 Industries</title>
+        <title>GerboAI — Business Management Software for 26 Industries</title>
         <meta
           name="description"
-          content="SolidFlo is business management software built for every trade — invoicing, quotes, scheduling and client management for mechanics, electricians, construction, healthcare, education and more. Free plan available, no credit card required."
+          content="GerboAI is business management software built for every trade — invoicing, quotes, scheduling and client management for mechanics, electricians, construction, healthcare, education and more. Free plan available, no credit card required."
         />
-        <link rel="canonical" href="https://solidflo.co.za/" />
-        <meta property="og:site_name" content="SolidFlo" />
+        <link rel="canonical" href="https://gerboai.com/" />
+        <meta property="og:site_name" content="GerboAI" />
         <meta
           property="og:title"
-          content="SolidFlo — Business Management Software for 26 Industries"
+          content="GerboAI — Business Management Software for 26 Industries"
         />
         <meta
           property="og:description"
           content="Invoicing, quotes, scheduling and client management — one platform built for every trade. Start free, no credit card required."
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://solidflo.co.za/" />
+        <meta property="og:url" content="https://gerboai.com/" />
         <meta
           property="og:image"
-          content="https://solidflo.co.za/og-image.jpg"
+          content="https://gerboai.com/og-image.jpg"
         />
         <meta property="og:locale" content="en_ZA" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           name="twitter:title"
-          content="SolidFlo — Business Management Software for 26 Industries"
+          content="GerboAI — Business Management Software for 26 Industries"
         />
         <meta
           name="twitter:description"
@@ -590,16 +590,16 @@ const LandingPage = () => {
         />
         <meta
           name="twitter:image"
-          content="https://solidflo.co.za/og-image.jpg"
+          content="https://gerboai.com/og-image.jpg"
         />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            name: "SolidFlo",
+            name: "GerboAI",
             applicationCategory: "BusinessApplication",
             operatingSystem: "Web",
-            url: "https://solidflo.co.za/",
+            url: "https://gerboai.com/",
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
             aggregateRating: {
               "@type": "AggregateRating",
@@ -628,7 +628,7 @@ const LandingPage = () => {
           {/* ── Nav ── */}
           <nav className={`lp-nav${scrolled ? " scrolled" : ""}`}>
             <div className="lp-nav-inner">
-              <img src={logo} alt="SolidFlo" className="lp-nav-logo" />
+              <img src={logo} alt="GerboAI" className="lp-nav-logo" />
               <div className="lp-nav-links">
                 {NAV.map((n) => (
                   <button
@@ -735,16 +735,16 @@ const LandingPage = () => {
                   </p>
                 </div>
                 <div className="lp-hero-app">
-                  <img src={google} alt="Get SolidFlo on Google Play" />
+                  <img src={google} alt="Get GerboAI on Google Play" />
                   <img
                     src={appStore}
-                    alt="Download SolidFlo on the App Store"
+                    alt="Download GerboAI on the App Store"
                   />
                 </div>
               </div>
               <div
                 className="lp-hero-right"
-                aria-label="SolidFlo assistant preview"
+                aria-label="GerboAI assistant preview"
               >
                 <HeroInvoiceOverlay />
               </div>
@@ -785,7 +785,7 @@ const LandingPage = () => {
                 <h2>Invoice in 10 seconds. Just say what you did.</h2>
                 <p>
                   No forms and no typing line by line. Describe the job in one
-                  sentence and SolidFlo AI builds the invoice, quote or purchase
+                  sentence and GerboAI AI builds the invoice, quote or purchase
                   order for you.
                 </p>
               </div>
@@ -947,7 +947,7 @@ const LandingPage = () => {
         <footer className="lp-footer" ref={footerRef}>
           <div className="lp-footer-grid">
             <div>
-              <img src={logo} alt="SolidFlo" className="lp-footer-logo" />
+              <img src={logo} alt="GerboAI" className="lp-footer-logo" />
               <p className="lp-footer-tagline">
                 Free online invoicing for small businesses. Create and send
                 invoices, track time and expenses, and accept online payments.
@@ -1040,7 +1040,7 @@ const LandingPage = () => {
           </div>
           <div className="lp-footer-bottom">
             <span>
-              © {new Date().getFullYear()} SolidFlo. All rights reserved.
+              © {new Date().getFullYear()} GerboAI. All rights reserved.
             </span>
             <span>Modern Invoicing &amp; Billing</span>
           </div>
@@ -1054,7 +1054,7 @@ const LandingPage = () => {
           <Modal
             title="Loved by growing businesses"
             onClose={closeModal}
-            subtitle={<p>See what our customers have to say about SolidFlo.</p>}
+            subtitle={<p>See what our customers have to say about GerboAI.</p>}
           >
             <div className="lp-quotes">
               {TESTIMONIALS.map((t) => (
@@ -1082,7 +1082,7 @@ const LandingPage = () => {
           <Modal
             title="Frequently asked questions"
             onClose={closeModal}
-            subtitle={<p>Everything you need to know about SolidFlo.</p>}
+            subtitle={<p>Everything you need to know about GerboAI.</p>}
           >
             <div className="lp-faq-list">
               {FAQS.map((f) => (
@@ -1147,7 +1147,7 @@ const LandingPage = () => {
             wide
             title="Numbers that speak for themselves"
             onClose={closeModal}
-            subtitle={<p>Platform activity across SolidFlo businesses.</p>}
+            subtitle={<p>Platform activity across GerboAI businesses.</p>}
           >
             <div className="lp-metrics">
               {METRICS.map((m) => (

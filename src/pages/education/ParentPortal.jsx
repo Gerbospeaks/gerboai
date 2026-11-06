@@ -549,7 +549,7 @@ export default function ParentPortal() {
 
     const manifestData = {
       short_name: schoolName,
-      name: `${schoolName} | Solidflo`,
+      name: `${schoolName} | Gerbo`,
       start_url: window.location.href,
       scope: window.location.pathname,
       display: "standalone",

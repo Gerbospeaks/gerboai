@@ -36,4 +36,4 @@ Allow: /welding
 Allow: /flooring
 Allow: /windows
  
-Sitemap: https://market.solidflo.co.za/market-sitemap.xml
+Sitemap: https://market.gerboai.com/market-sitemap.xml

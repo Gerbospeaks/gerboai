@@ -61,7 +61,7 @@ const CATEGORIES = [
   {
     icon: Workflow,
     title: "Automation",
-    desc: "Trigger workflows in other tools whenever something changes in SolidFlo.",
+    desc: "Trigger workflows in other tools whenever something changes in GerboAI.",
     examples: ["Zapier", "Make"],
     status: "planned",
   },
@@ -70,7 +70,7 @@ const CATEGORIES = [
 const STEPS = [
   {
     title: "Tell us what you're building",
-    body: "Share what your tool does and how a SolidFlo connection would help mutual customers.",
+    body: "Share what your tool does and how a GerboAI connection would help mutual customers.",
   },
   {
     title: "We scope the integration together",
@@ -224,12 +224,12 @@ const Partners = () => {
   return (
     <>
       <Helmet>
-        <title>Technology partners — SolidFlo</title>
+        <title>Technology partners — GerboAI</title>
         <meta
           name="description"
-          content="Tools that connect with SolidFlo, and how to become an integration partner."
+          content="Tools that connect with GerboAI, and how to become an integration partner."
         />
-        <link rel="canonical" href="https://solidflo.co.za/partners" />
+        <link rel="canonical" href="https://gerboai.com/partners" />
       </Helmet>
 
       <div className="pt">
@@ -237,15 +237,15 @@ const Partners = () => {
 
         <nav className="pt-nav">
           <button className="pt-nav-back" onClick={() => navigate("/")}>
-            <ArrowLeft size={16} /> Back to SolidFlo
+            <ArrowLeft size={16} /> Back to GerboAI
           </button>
-          <img src={logo} alt="SolidFlo" className="pt-nav-logo" />
+          <img src={logo} alt="GerboAI" className="pt-nav-logo" />
         </nav>
 
         <section className="pt-hero">
           <h1>Technology partners</h1>
           <p>
-            SolidFlo connects to the tools businesses already run on — for
+            GerboAI connects to the tools businesses already run on — for
             payments, accounting, scheduling, and more.
           </p>
         </section>
@@ -287,7 +287,7 @@ const Partners = () => {
             <div>
               <h3>Build your own connection</h3>
               <p>
-                Read and write invoices, clients, and jobs through the SolidFlo
+                Read and write invoices, clients, and jobs through the GerboAI
                 API.
               </p>
             </div>

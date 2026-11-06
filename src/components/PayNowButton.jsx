@@ -2,7 +2,7 @@ import React from "react";
 
 export const PayNowButton = ({ invoiceId, amount, currency = "USD", paymentUrl, color = "#6366f1" }) => {
   // Build the payment URL — swap this with your actual payment gateway link
-  const url = paymentUrl || `https://pay.solidflo.co.za/${invoiceId}`;
+  const url = paymentUrl || `https://pay.gerboai.com/${invoiceId}`;
 
   return (
     <div className="my-4 flex flex-col items-center gap-2 no-print-hide">

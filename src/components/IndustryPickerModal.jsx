@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { dashboards } from "../config/dashboardConfig";
 import { X, Search, ArrowRight, Check, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-const BASE_DOMAIN = "solidflo.co.za";
+const BASE_DOMAIN = "gerboai.com";
 
 export const INDUSTRIES = [
   {

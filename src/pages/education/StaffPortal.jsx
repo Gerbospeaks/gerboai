@@ -329,7 +329,7 @@ const [hwError, setHwError] = useState("");
 
   const manifestData = {
     short_name: schoolName,
-    name: `${schoolName} | Solidflo`,
+    name: `${schoolName} | Gerbo`,
     start_url: window.location.href,
     scope: window.location.pathname,
     display: "standalone",
@@ -450,7 +450,7 @@ useEffect(() => {
 
   const manifestData = {
     short_name: schoolName,
-    name: `${schoolName} | Solidflo`,
+    name: `${schoolName} | Gerbo`,
     start_url: window.location.href,
     scope: window.location.pathname,
     display: "standalone",

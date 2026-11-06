@@ -9,7 +9,7 @@ export const INDUSTRY_CONFIG = {
     label: "Mechanics",
     headline: "Job Cards & Invoices Built for the Workshop",
     subheadline:
-      "Stop writing by hand. SolidFlo gives your workshop professional job cards, quotes and invoices — ready to send in seconds.",
+      "Stop writing by hand. GerboAI gives your workshop professional job cards, quotes and invoices — ready to send in seconds.",
     cta: "Start Free — No Card Needed",
     color: "#111827",
     accent: "#f59e0b",
@@ -233,7 +233,7 @@ export const INDUSTRY_CONFIG = {
         name: "Priya Naidoo",
         role: "CA(SA), Durban",
         quote:
-          "My month-end billing used to take a full day. With SolidFlo I'm done in under an hour. The recurring invoices are a game changer.",
+          "My month-end billing used to take a full day. With GerboAI I'm done in under an hour. The recurring invoices are a game changer.",
         avatar: "PN",
       },
       {
@@ -367,7 +367,7 @@ export const INDUSTRY_CONFIG = {
         name: "Dr. Ayesha Moosa",
         role: "General Practitioner, Sandton",
         quote:
-          "My admin used to take 2 hours after every session. SolidFlo cut that down to 15 minutes. Invoices look professional and go out same day.",
+          "My admin used to take 2 hours after every session. GerboAI cut that down to 15 minutes. Invoices look professional and go out same day.",
         avatar: "AM",
       },
       {
@@ -396,7 +396,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         q: "Can I bill medical aids?",
-        a: "You can generate the invoice with all required fields and send it to the medical aid directly from SolidFlo.",
+        a: "You can generate the invoice with all required fields and send it to the medical aid directly from GerboAI.",
       },
       {
         q: "Can multiple practitioners use the same account?",
@@ -562,8 +562,8 @@ export const INDUSTRY_CONFIG = {
     label: "Plumbing",
     headline: "Professional Invoicing for Plumbers",
     subheadline:
-      "Quote fast, invoice faster. SolidFlo helps plumbers send professional quotes and get paid the same day the job is done.",
-    cta: "Try SolidFlo Free",
+      "Quote fast, invoice faster. GerboAI helps plumbers send professional quotes and get paid the same day the job is done.",
+    cta: "Try GerboAI Free",
     color: "#0c2340",
     accent: "#0ea5e9",
     accentDark: "#0284c7",
@@ -681,7 +681,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         q: "Does it work on my phone?",
-        a: "SolidFlo is fully mobile-responsive. Create and send quotes from any smartphone.",
+        a: "GerboAI is fully mobile-responsive. Create and send quotes from any smartphone.",
       },
       {
         q: "What payment methods can clients use?",
@@ -786,7 +786,7 @@ export const INDUSTRY_CONFIG = {
         name: "Brendan Fourie",
         role: "Solar Installer, Pretoria",
         quote:
-          "My proposals used to take 3 hours in Word. SolidFlo gets them done in 20 minutes and they look ten times better.",
+          "My proposals used to take 3 hours in Word. GerboAI gets them done in 20 minutes and they look ten times better.",
         avatar: "BF",
       },
       {
@@ -942,12 +942,12 @@ export const INDUSTRY_CONFIG = {
     ],
     faqs: [
       {
-        q: "Is SolidFlo built specifically for carpentry?",
+        q: "Is GerboAI built specifically for carpentry?",
         a: "Yes. The quote templates, material tracking fields, and job costing tools are all designed around how carpentry and joinery businesses actually work.",
       },
       {
         q: "Can I use it on site from my phone?",
-        a: "Absolutely. SolidFlo is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed.",
+        a: "Absolutely. GerboAI is fully mobile-responsive. You can create and send quotes directly from a job site, no laptop needed.",
       },
       {
         q: "Does it handle VAT automatically?",
@@ -1063,7 +1063,7 @@ export const INDUSTRY_CONFIG = {
         name: "Pieter Louw",
         role: "Commercial Cleaning, Pretoria",
         quote:
-          "Managing 15 client sites was a nightmare in spreadsheets. SolidFlo makes it simple to bill each property at the right rate.",
+          "Managing 15 client sites was a nightmare in spreadsheets. GerboAI makes it simple to bill each property at the right rate.",
         avatar: "PL",
       },
       {
@@ -1190,14 +1190,14 @@ export const INDUSTRY_CONFIG = {
         name: "Bongani Zulu",
         role: "Building Contractor, Gauteng",
         quote:
-          "Progress billing used to be a mess of spreadsheets and emails. Now I track everything in SolidFlo and my clients always know what they're paying for.",
+          "Progress billing used to be a mess of spreadsheets and emails. Now I track everything in GerboAI and my clients always know what they're paying for.",
         avatar: "BZ",
       },
       {
         name: "Henk du Toit",
         role: "Civil Contractor, Western Cape",
         quote:
-          "Variation orders were always a headache. SolidFlo makes it quick to document and get approval before I start extra work.",
+          "Variation orders were always a headache. GerboAI makes it quick to document and get approval before I start extra work.",
         avatar: "HD",
       },
       {
@@ -1622,7 +1622,7 @@ export const INDUSTRY_CONFIG = {
       },
       {
         q: "Does it work on site without an office computer?",
-        a: "Yes — SolidFlo is fully mobile. Create and send invoices from your phone or tablet.",
+        a: "Yes — GerboAI is fully mobile. Create and send invoices from your phone or tablet.",
       },
       {
         q: "Can my admin manage invoices for me?",
@@ -1741,7 +1741,7 @@ export const INDUSTRY_CONFIG = {
         name: "Anri Bekker",
         role: "Garden Design, Pretoria",
         quote:
-          "Managing multiple properties per client was chaos before. SolidFlo makes it clean and professional.",
+          "Managing multiple properties per client was chaos before. GerboAI makes it clean and professional.",
         avatar: "AB",
       },
     ],
@@ -1861,7 +1861,7 @@ export const INDUSTRY_CONFIG = {
         name: "Adv. Siyanda Mthembu",
         role: "Advocate, Johannesburg Bar",
         quote:
-          "Billing used to be the part of practice I dreaded most. SolidFlo makes it quick and my fee accounts look completely professional.",
+          "Billing used to be the part of practice I dreaded most. GerboAI makes it quick and my fee accounts look completely professional.",
         avatar: "SM",
       },
       {
@@ -2411,7 +2411,7 @@ export const INDUSTRY_CONFIG = {
         name: "Amahle Dube",
         role: "Portrait Photographer, Durban",
         quote:
-          "I used to invoice in spreadsheets. SolidFlo made everything look professional overnight.",
+          "I used to invoice in spreadsheets. GerboAI made everything look professional overnight.",
         avatar: "AD",
       },
     ],
@@ -2545,7 +2545,7 @@ export const INDUSTRY_CONFIG = {
         name: "Cobus Rademeyer",
         role: "Pool Service Co., Cape Town",
         quote:
-          "Managing 60 weekly clients was impossible before. SolidFlo makes billing feel effortless.",
+          "Managing 60 weekly clients was impossible before. GerboAI makes billing feel effortless.",
         avatar: "CR",
       },
     ],
@@ -2665,7 +2665,7 @@ export const INDUSTRY_CONFIG = {
         name: "Celeste du Plessis",
         role: "Property Agent, Cape Town",
         quote:
-          "Commission invoices used to be informal and awkward. SolidFlo made them professional and I get paid faster at transfer.",
+          "Commission invoices used to be informal and awkward. GerboAI made them professional and I get paid faster at transfer.",
         avatar: "CD",
       },
       {
@@ -2813,7 +2813,7 @@ export const INDUSTRY_CONFIG = {
         name: "Elna Venter",
         role: "Wedding Caterer, Pretoria",
         quote:
-          "Per-head quoting used to take me hours in Excel. SolidFlo gets it done in minutes.",
+          "Per-head quoting used to take me hours in Excel. GerboAI gets it done in minutes.",
         avatar: "EV",
       },
     ],
@@ -2940,7 +2940,7 @@ export const INDUSTRY_CONFIG = {
         name: "Sandra Viljoen",
         role: "Retail Owner, Johannesburg",
         quote:
-          "Tracking which accounts are overdue used to take me half a day every week. SolidFlo makes it instant.",
+          "Tracking which accounts are overdue used to take me half a day every week. GerboAI makes it instant.",
         avatar: "SV",
       },
       {
@@ -3081,7 +3081,7 @@ export const INDUSTRY_CONFIG = {
         name: "JP Olivier",
         role: "Security Director, Cape Town",
         quote:
-          "Managing 30+ client sites was impossible before. SolidFlo keeps every account clean and current.",
+          "Managing 30+ client sites was impossible before. GerboAI keeps every account clean and current.",
         avatar: "JP",
       },
     ],
@@ -3876,7 +3876,7 @@ upholstery: {
       name: "Sipho Mhlongo",
       role: "Auto & Furniture Upholstery, Durban",
       quote:
-        "Tracking fabric costs per job finally showed me where I was losing money. My margins are healthier since I started using SolidFlo.",
+        "Tracking fabric costs per job finally showed me where I was losing money. My margins are healthier since I started using GerboAI.",
       avatar: "SM",
     },
     {
@@ -4043,7 +4043,7 @@ virtualservice: {
   // ─── FALLBACK / DEFAULT ───────────────────────────────────────────────────────
   default: {
     subdomain: null,
-    label: "SolidFlo",
+    label: "GerboAI",
     headline: "Professional Invoicing for Every Business",
     subheadline:
       "Send quotes, job cards and invoices in seconds. Get paid faster. Run your business smarter.",
@@ -4135,7 +4135,7 @@ virtualservice: {
         name: "Sipho Dlamini",
         role: "Freelance Contractor, Johannesburg",
         quote:
-          "SolidFlo made me look like a proper business from day one. Clients take me more seriously now.",
+          "GerboAI made me look like a proper business from day one. Clients take me more seriously now.",
         avatar: "SD",
       },
       {
@@ -4155,11 +4155,11 @@ virtualservice: {
     ],
     faqs: [
       {
-        q: "Is SolidFlo free to use?",
+        q: "Is GerboAI free to use?",
         a: "Yes — the Starter plan is free with up to 5 invoices per month. No credit card required.",
       },
       {
-        q: "Which industries does SolidFlo support?",
+        q: "Which industries does GerboAI support?",
         a: "Mechanics, accounting, healthcare, electrical, plumbing, solar, cleaning, legal, construction and more.",
       },
       {

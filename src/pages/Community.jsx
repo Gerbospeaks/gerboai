@@ -56,7 +56,7 @@ const SHOWCASE = [
     name: "Mark Moyo",
     role: "Electrician, Harare",
     image: "https://i.pravatar.cc/150?u=markmoyo",
-    body: "Switched all my quotes to SolidFlo templates. Clients sign off faster because everything looks like it came from a real company.",
+    body: "Switched all my quotes to GerboAI templates. Clients sign off faster because everything looks like it came from a real company.",
   },
   {
     type: "showcase",
@@ -237,12 +237,12 @@ const Community = () => {
   return (
     <>
       <Helmet>
-        <title>Community — SolidFlo</title>
+        <title>Community — GerboAI</title>
         <meta
           name="description"
-          content="Product updates, customer showcase, and discussions from the SolidFlo community."
+          content="Product updates, customer showcase, and discussions from the GerboAI community."
         />
-        <link rel="canonical" href="https://solidflo.co.za/community" />
+        <link rel="canonical" href="https://gerboai.com/community" />
       </Helmet>
 
       <div className="cm">
@@ -250,15 +250,15 @@ const Community = () => {
 
         <nav className="cm-nav">
           <button className="cm-nav-back" onClick={() => navigate("/")}>
-            <ArrowLeft size={16} /> Back to SolidFlo
+            <ArrowLeft size={16} /> Back to GerboAI
           </button>
-          <img src={logo} alt="SolidFlo" className="cm-nav-logo" />
+          <img src={logo} alt="GerboAI" className="cm-nav-logo" />
         </nav>
 
         <section className="cm-hero">
           <h1>Community</h1>
           <p>
-            What's new in SolidFlo, how other businesses are using it, and open
+            What's new in GerboAI, how other businesses are using it, and open
             questions we're still figuring out together.
           </p>
         </section>
@@ -359,7 +359,7 @@ const Community = () => {
           <div className="cm-cta-box">
             <div>
               <h3>Have your own story?</h3>
-              <p>Tell us how you use SolidFlo — we might feature it here.</p>
+              <p>Tell us how you use GerboAI — we might feature it here.</p>
             </div>
             <button className="cm-cta-btn" onClick={() => navigate("/contact")}>
               <Send size={15} /> Share your story

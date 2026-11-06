@@ -20,12 +20,12 @@ const Gate: React.FC<{ email?: string | null }> = ({ email }) => {
 };
 
 interface Props {
-  /** The signed-in SolidFlo user's email, used only to pre-fill GerboAI sign-in. */
+  /** The signed-in GerboAI user's email, used only to pre-fill GerboAI sign-in. */
   solidfloEmail?: string | null;
 }
 
 /**
- * GerboAI dashboard, embeddable inside any SolidFlo industry dashboard.
+ * GerboAI dashboard, embeddable inside any GerboAI industry dashboard.
  * Loaded lazily via src/components/GerboAIPanel.jsx.
  */
 const GerboAIDashboard: React.FC<Props> = ({ solidfloEmail }) => (

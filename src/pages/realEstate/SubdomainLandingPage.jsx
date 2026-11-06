@@ -120,7 +120,7 @@ function MockInvoice({ config }) {
           }}
         >
           <span style={{ fontSize: 10, color: T.muted }}>
-            solidflo.co.za/invoice/{refNo}
+            gerboai.com/invoice/{refNo}
           </span>
         </div>
       </div>
@@ -149,7 +149,7 @@ function MockInvoice({ config }) {
                 marginBottom: 4,
               }}
             >
-              SolidFlo
+              GerboAI
             </div>
             <p style={{ fontSize: 11, color: T.muted, margin: 0 }}>{bizName}</p>
           </div>
@@ -370,7 +370,7 @@ function Navbar({ onLogin, onRegister }) {
               justifyContent: "center",
             }}
           >
-            <img src={logotop} alt="SolidFlo" style={{ maxWidth: "100%" }} />
+            <img src={logotop} alt="GerboAI" style={{ maxWidth: "100%" }} />
           </div>
         </div>
 
@@ -682,7 +682,7 @@ function Hero({ onRegister }) {
               maxWidth: 480,
             }}
           >
-            SolidFlo is purpose-built for SA real estate agents and agencies.
+            GerboAI is purpose-built for SA real estate agents and agencies.
             Create professional commission invoices, track deals &amp;
             payouts, and get paid in under 60 seconds.
           </p>
@@ -1230,7 +1230,7 @@ function CTABanner({ config, onRegister }) {
           }}
         >
           Join hundreds of {config.label.toLowerCase()} businesses already using
-          SolidFlo.
+          GerboAI.
         </p>
         <div
           style={{
@@ -1310,7 +1310,7 @@ function Footer({ config, onLogin, onRegister }) {
     {
       title: "Company",
       links: [
-        "About SolidFlo",
+        "About GerboAI",
         "Contact Us",
         "Privacy Policy",
         "Terms of Service",
@@ -1443,7 +1443,7 @@ function Footer({ config, onLogin, onRegister }) {
               margin: 0,
             }}
           >
-            © {new Date().getFullYear()} SolidFlo. All rights reserved.
+            © {new Date().getFullYear()} GerboAI. All rights reserved.
           </p>
           <p
             style={{
