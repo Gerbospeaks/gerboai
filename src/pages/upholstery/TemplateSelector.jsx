@@ -207,8 +207,8 @@ export const ProfessionalTemplate = ({
   stampColor = "#92400e",
   showStampDate = true,
   paymentMethod = "Bank Transfer/EFT",
-  paymentTerms = "50% Deposit, Balance on Completion",
-  serviceGuarantee = "12 Months Workmanship Warranty",
+  paymentTerms = "70% Deposit, Balance on Completion",
+  serviceGuarantee = "60 Months Workmanship Warranty",
 }) => (
   <div className="bg-white p-6" style={{ padding: "5mm 10mm" }}>
     {/* Header Section */}
@@ -1192,8 +1192,8 @@ export const TemplateRenderer = ({
   showStampDate = true,
   showStamp = false,
   paymentMethod = "Bank Transfer/EFT",
-  paymentTerms = "50% Deposit, Balance on Completion",
-  serviceGuarantee = "12 Months Workmanship Warranty",
+  paymentTerms = "70% Deposit, Balance on Completion",
+  serviceGuarantee = "60 Months Workmanship Warranty",
   currency,
   ...props
 }) => {
