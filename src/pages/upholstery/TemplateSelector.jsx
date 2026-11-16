@@ -439,8 +439,8 @@ export const ProfessionalTemplate = ({
     {/* Footer Note */}
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
       {documentType === "quote"
-        ? "Quote valid for 7 days. Terms & conditions apply."
-        : "Payment terms: 50% deposit on acceptance, balance on completion. Warranty: 12 months craftsmanship."}
+        ? "Quote valid for 21 days. Terms & conditions apply."
+        : "Payment terms: 70% deposit on acceptance, balance on completion. Warranty: 12 months craftsmanship."}
     </div>
   </div>
 );
@@ -627,7 +627,7 @@ export const ModernTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Quality craftsmanship guaranteed. Payment: 50% deposit, balance on
+      Quality craftsmanship guaranteed. Payment: 70% deposit, balance on
       completion.
     </div>
   </div>
@@ -785,7 +785,7 @@ export const CorporateTemplate = (props) => (
       )}
 
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-        Handcrafted excellence. Terms: 50% deposit, balance on completion.
+        Handcrafted excellence. Terms: 70% deposit, balance on completion.
         Warranty: 12 months craftsmanship.
       </div>
     </div>
@@ -963,7 +963,7 @@ export const ContemporaryTemplate = (props) => (
       )}
 
       <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-        Quality furniture and upholstery, made with care. Payment: 50% deposit, balance on completion.
+        Quality furniture and upholstery, made with care. Payment: 70% deposit, balance on completion.
       </div>
     </div>
   </div>
@@ -1169,7 +1169,7 @@ export const DetailedTemplate = (props) => (
     )}
 
     <div className="text-center text-xs text-gray-500 italic border-t pt-3">
-      Payment terms: 50% deposit on acceptance, balance on completion. Warranty:
+      Payment terms: 70% deposit on acceptance, balance on completion. Warranty:
       12 months on craftsmanship.
     </div>
   </div>
