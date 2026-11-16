@@ -264,7 +264,12 @@ const mobileNavPad = "pb-24 lg:pb-6";
   });
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewIncident();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewIncident();    setActiveView("invoice"); }
+    
+    if (view && !action) { setActiveView(view); }
+  };
   useEffect(() => {
     if (location.state?.activeView) setActiveView(location.state.activeView);
   }, [location.state]);
@@ -918,7 +923,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
               {
                 icon: GerboAIIcon,
                 view: "gerbo-ai",
-                title: "GerboAI Receptionist",
+                title: "AI Receptionist",
                 color: "text-[#64748b]",
               },
               {
@@ -1073,7 +1078,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition-all ${activeView === "gerbo-ai" ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}
               >
                 <GerboAIIcon className="w-4 h-4 flex-shrink-0" />
-                GerboAI Receptionist
+                AI Receptionist
               </div>
 
               {/* Incident Reports dropdown */}
@@ -1297,6 +1302,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 

@@ -105,7 +105,7 @@ export default function EducationSidebar({
     },
     {
       icon: GerboAIIcon,
-      title: "GerboAI Receptionist",
+      title: "AI Receptionist",
       action: () => goTo("gerbo-ai"),
       color: "from-indigo-600 to-indigo-700",
     },
@@ -315,7 +315,7 @@ export default function EducationSidebar({
             />
             <NavItem
               icon={GerboAIIcon}
-              label="GerboAI Receptionist"
+              label="AI Receptionist"
               onClick={() => goTo("gerbo-ai")}
               color="indigo"
             />

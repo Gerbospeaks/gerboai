@@ -646,7 +646,7 @@ const loadBusinessInfo = async () => {
                       })
                     }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
-                    placeholder="082 514 4509"
+                    placeholder="0776 109 275"
                     required
                   />
                 </div>
@@ -664,7 +664,7 @@ const loadBusinessInfo = async () => {
                       })
                     }
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
-                    placeholder="084 583 9929"
+                    placeholder="077 610 9275"
                   />
                 </div>
               </div>

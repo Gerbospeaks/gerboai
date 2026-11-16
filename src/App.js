@@ -110,8 +110,8 @@ import ParentPortal from "./pages/education/ParentPortal";
 import StaffPortal from "./pages/education/StaffPortal";
 import { useSubAccount } from "./hooks/useSubAccount";
 import SubAccountDashboard from "./pages/mechanics/SubAccountDashboard";
- import GuestMenuPage from "./pages/hotel/GuestMenuPage"; 
- import MenuSignagePage from "./pages/hotel/MenuSignagePage";
+import GuestMenuPage from "./pages/hotel/GuestMenuPage";
+import MenuSignagePage from "./pages/hotel/MenuSignagePage";
 const IS_SUBDOMAIN = !!getSubdomainFromHost();
 
 const PUBLIC_ROUTES = new Set([
@@ -173,8 +173,8 @@ function PWAGate() {
   const isPublic =
     PUBLIC_ROUTES.has(pathname) ||
     pathname.startsWith("/parents/") ||
-    pathname.startsWith("/staff/") || 
-    pathname.startsWith("/menu/") || 
+    pathname.startsWith("/staff/") ||
+    pathname.startsWith("/menu/") ||
     pathname.startsWith("/display/");
 
   if (isPublic) return null;
@@ -203,398 +203,88 @@ function useSecurityLock() {
 }
 
 function ProtectedDashboard() {
-  const { authUser } = useAuth();              
+  const { authUser } = useAuth();
   const { parentUid, loading } = useSubAccount(authUser);
 
-  if (loading) return <AppLoader />;           
+  if (loading) return <AppLoader />;
 
   if (parentUid) {
-   
     return <SubAccountDashboard parentUid={parentUid} subUser={authUser} />;
   }
 
- 
   return <MechanicsDashboard />;
 }
 function DashboardRoutes() {
   const { userDashboard } = useAuth();
   return (
-   <>
-   
-   <Routes>
-      {/* 
+    <>
+      <Routes>
+        {/* 
         /dashboard is the entry point after login.
         DashboardRouter reads userDashboard from AuthContext
         and navigates to the correct industry path below.
       */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardRouter />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/home" element={<Navigate to="/dashboard" replace />} />
-
-      <Route
-        path="/financial-overview"
-        element={
-          <ProtectedRoute>
-            <FinancialOverview />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/template-renderer"
-        element={
-          <ProtectedRoute>
-            <TemplateSelector />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ── Mechanics ── */}
-      <Route
-        path="/mechanics"
-        element={
-          <ProtectedRoute>
-           <ProtectedDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/history-view"
-        element={
-          <ProtectedRoute>
-            <HistoryView />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/signature"
-        element={
-          <ProtectedRoute>
-            <SignatureStamp />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/vehicles"
-        element={
-          <ProtectedRoute>
-            <Vehicles />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/templates"
-        element={
-          <ProtectedRoute>
-            <Templates />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/parts-inventory"
-        element={
-          <ProtectedRoute>
-            <PartsInventory />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ── Healthcare ── */}
-      <Route
-        path="/healthcare"
-        element={
-          <ProtectedRoute>
-            <HealthcareDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/practice-overview"
-        element={
-          <ProtectedRoute>
-            <PracticeOverview />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/pending-payments"
-        element={
-          <ProtectedRoute>
-            <PendingPayments />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/appointments"
-        element={
-          <ProtectedRoute>
-            <AppointmentsCalendar />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ── All other industries ── */}
-      <Route
-        path="/security"
-        element={
-          <ProtectedRoute>
-            <SecurityDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/electrical"
-        element={
-          <ProtectedRoute>
-            <ElectricalDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/restaurant"
-        element={
-          <ProtectedRoute>
-            <RestaurantDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/construction"
-        element={
-          <ProtectedRoute>
-            <ConstructionDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/technology"
-        element={
-          <ProtectedRoute>
-           
-        <TechnologyDashboard />
-               
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/upholstery"
-        element={
-          <ProtectedRoute>
-            <UpholsteryDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/virtualservice"
-        element={
-          <ProtectedRoute>
-            <VirtualDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/cleaning"
-        element={
-          <ProtectedRoute>
-            <CleaningDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/notesview"
-        element={
-          <ProtectedRoute>
-            <NotesView />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/education"
-        element={
-          <ProtectedRoute>
-            <EducationDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/hotel"
-        element={
-          <ProtectedRoute>
-            <HotelDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/legal"
-        element={
-          <ProtectedRoute>
-            <LegalDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/plumbing"
-        element={
-          <ProtectedRoute>
-            <PlumbingDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/retail"
-        element={
-          <ProtectedRoute>
-            <RetailDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/landscaping"
-        element={
-          <ProtectedRoute>
-            <LandscapingDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/logistics"
-        element={
-          <ProtectedRoute>
-            <LogisticsDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/photography"
-        element={
-          <ProtectedRoute>
-            <PhotographyDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/realestate"
-        element={
-          <ProtectedRoute>
-            <RealEstateDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/flooring"
-        element={
-          <ProtectedRoute>
-            <FlooringDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/hvac"
-        element={
-          <ProtectedRoute>
-            <HVACDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/accounting"
-        element={
-          <ProtectedRoute>
-            <AccountingDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/painting"
-        element={
-          <ProtectedRoute>
-            <PaintingDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/pestcontrol"
-        element={
-          <ProtectedRoute>
-            <PestcontrolDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/poolservices"
-        element={
-          <ProtectedRoute>
-            <PoolservicesDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/solarinstallation"
-        element={
-          <ProtectedRoute>
-            <SolarDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/towing"
-        element={
-          <ProtectedRoute>
-            <TowingDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/welding"
-        element={
-          <ProtectedRoute>
-            <WeldingDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/carpentry"
-        element={
-          <ProtectedRoute>
-            <CarpentryDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/windowrepair"
-        element={
-          <ProtectedRoute>
-            <WindowrepairDashboard />
-          </ProtectedRoute>
-        }
-      />
-{/* ── Education portals (intentionally unprotected ── public links for parents/staff) ── */}
-    <Route path="/parents/:portalSlug" element={<ParentPortal />} /> <Route path="/staff/:portalSlug" element={<StaffPortal />} /> 
-    {/* ── Hotel guest menu (intentionally unprotected ── public QR link + TV signage) ── */} 
-    <Route path="/menu/:propertyId" element={<GuestMenuPage />} /> 
-   <Route path="/display/:propertyId" element={<MenuSignagePage />} />
-    <Route path="*" element={<Navigate to="/" replace />} /> 
-      {/* ── Education portals (intentionally unprotected — public links for parents/staff) ── */}
-      <Route path="/parents/:portalSlug" element={<ParentPortal />} />
-      <Route path="/staff/:portalSlug" element={<StaffPortal />} />
-
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-    <SolidFloAgent industry={userDashboard || "general"} />
-</>
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>}/>
+        <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
+        <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/financial-overview" element={<ProtectedRoute><FinancialOverview /></ProtectedRoute>}/>
+        <Route path="/template-renderer" element={<ProtectedRoute><TemplateSelector /></ProtectedRoute>}/>
+        {/* ── Mechanics ── */}
+        <Route path="/mechanics" element={<ProtectedRoute><ProtectedDashboard /></ProtectedRoute>}/>
+        <Route path="/history-view" element={<ProtectedRoute><HistoryView /></ProtectedRoute>}/>
+        <Route path="/signature" element={<ProtectedRoute><SignatureStamp /></ProtectedRoute>}/>
+        <Route path="/vehicles" element={<ProtectedRoute><Vehicles /></ProtectedRoute>}/>
+        <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>}/>
+        <Route path="/parts-inventory" element={<ProtectedRoute><PartsInventory /></ProtectedRoute>}/>
+        {/* ── Healthcare ── */}
+        <Route path="/healthcare" element={<ProtectedRoute><HealthcareDashboard /></ProtectedRoute>}/>
+        <Route path="/practice-overview" element={<ProtectedRoute><PracticeOverview /></ProtectedRoute>}/>
+        <Route path="/pending-payments" element={<ProtectedRoute><PendingPayments /></ProtectedRoute> }/>
+        <Route path="/appointments" element={ <ProtectedRoute><AppointmentsCalendar /></ProtectedRoute>}/>
+        {/* ── All other industries ── */}
+        <Route path="/security" element={<ProtectedRoute><SecurityDashboard /></ProtectedRoute>}/>
+        <Route path="/electrical" element={<ProtectedRoute><ElectricalDashboard /></ProtectedRoute>}/>
+        <Route path="/restaurant" element={<ProtectedRoute><RestaurantDashboard /></ProtectedRoute>}/>
+        <Route path="/construction" element={<ProtectedRoute><ConstructionDashboard /></ProtectedRoute>}/>
+        <Route  path="/technology" element={<ProtectedRoute><TechnologyDashboard /> </ProtectedRoute>} />
+        <Route  path="/upholstery" element={<ProtectedRoute><UpholsteryDashboard /> </ProtectedRoute>} />
+        <Route  path="/virtualservice" element={<ProtectedRoute><VirtualDashboard /> </ProtectedRoute>} />
+        <Route  path="/cleaning" element={<ProtectedRoute><CleaningDashboard /> </ProtectedRoute>} />
+        <Route  path="/notesview" element={<ProtectedRoute><NotesView /> </ProtectedRoute>} />
+        <Route  path="/education" element={<ProtectedRoute><EducationDashboard /> </ProtectedRoute>} />
+        <Route  path="/hotel" element={<ProtectedRoute><HotelDashboard /> </ProtectedRoute>} />
+        <Route  path="/legal" element={<ProtectedRoute><LegalDashboard /> </ProtectedRoute>} />
+        <Route  path="/plumbing" element={<ProtectedRoute><PlumbingDashboard /> </ProtectedRoute>} />
+        <Route  path="/retail" element={<ProtectedRoute><RetailDashboard /> </ProtectedRoute>} />
+        <Route  path="/landscaping" element={<ProtectedRoute><LandscapingDashboard /> </ProtectedRoute>} />
+        <Route  path="/logistics" element={<ProtectedRoute><LogisticsDashboard /> </ProtectedRoute>} />
+        <Route  path="/photography" element={<ProtectedRoute><PhotographyDashboard /> </ProtectedRoute>} />
+        <Route  path="/realestate" element={<ProtectedRoute><RealEstateDashboard /> </ProtectedRoute>} />
+        <Route  path="/flooring" element={<ProtectedRoute><FlooringDashboard /> </ProtectedRoute>} />
+        <Route  path="/hvac" element={<ProtectedRoute><HVACDashboard /> </ProtectedRoute>} />
+        <Route  path="/accounting" element={<ProtectedRoute><AccountingDashboard /> </ProtectedRoute>} />
+        <Route  path="/painting" element={<ProtectedRoute><PaintingDashboard /> </ProtectedRoute>} />
+        <Route  path="/pestcontrol" element={<ProtectedRoute><PestcontrolDashboard /> </ProtectedRoute>} />
+        <Route  path="/poolservices" element={<ProtectedRoute><PoolservicesDashboard /> </ProtectedRoute>} />
+        <Route  path="/solarinstallation" element={<ProtectedRoute><SolarDashboard /> </ProtectedRoute>} />
+        <Route  path="/towing" element={<ProtectedRoute><TowingDashboard /> </ProtectedRoute>} />
+        <Route  path="/welding" element={<ProtectedRoute><WeldingDashboard /> </ProtectedRoute>} />
+        <Route  path="/carpentry" element={<ProtectedRoute><CarpentryDashboard /> </ProtectedRoute>} />
+        <Route  path="/windowrepair" element={<ProtectedRoute><WindowrepairDashboard /> </ProtectedRoute>} />
+        {/* ── Education portals (intentionally unprotected ── public links for parents/staff) ── */}
+        <Route path="/parents/:portalSlug" element={<ParentPortal />} />{" "}
+        <Route path="/staff/:portalSlug" element={<StaffPortal />} />
+        {/* ── Hotel guest menu (intentionally unprotected ── public QR link + TV signage) ── */}
+        <Route path="/menu/:propertyId" element={<GuestMenuPage />} />
+        <Route path="/display/:propertyId" element={<MenuSignagePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* ── Education portals (intentionally unprotected — public links for parents/staff) ── */}
+        <Route path="/parents/:portalSlug" element={<ParentPortal />} />
+        <Route path="/staff/:portalSlug" element={<StaffPortal />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <SolidFloAgent industry={userDashboard || "general"} />
+    </>
   );
 }
 
@@ -644,23 +334,27 @@ function SubdomainRoot() {
     if (user && user.emailVerified) {
       navigate("/dashboard", { replace: true });
     }
-   
   }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
-  if (user && user.emailVerified) return <AppLoader />; 
+  if (user && user.emailVerified) return <AppLoader />;
 
   const LandingComponent = SUBDOMAIN_LANDING[subdomain];
   if (LandingComponent) return <LandingComponent />;
 
-  
   return <Navigate to="/login" replace />;
 }
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
   render() {
-    return this.state.hasError ? <p>Something went wrong. Please refresh.</p> : this.props.children;
+    return this.state.hasError ? (
+      <p>Something went wrong. Please refresh.</p>
+    ) : (
+      this.props.children
+    );
   }
 }
 function MainDomainRoot() {
@@ -675,117 +369,59 @@ function MainDomainRoot() {
   }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
-  return <LandingPage />;
+  return <LogisticsDashboard />;
 }
 // ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {
   useSecurityLock();
-useEffect(() => {
+  useEffect(() => {
     const subdomain = getSubdomainFromHost();
     if (subdomain) injectDynamicManifest(subdomain);
   }, []);
   return (
     <ErrorBoundary>
-    <Router>
-      <CurrencyProvider>
-      <AuthProvider>
-        <AdminProvider>
-          {IS_SUBDOMAIN ? (
-            // ── SUBDOMAIN (e.g. mechanics.gerboai.com) ──────────────────
-            <Routes>
-              <Route path="/" element={<SubdomainRoot />} />
+      <Router>
+        <CurrencyProvider>
+          <AuthProvider>
+            <AdminProvider>
+              {IS_SUBDOMAIN ? (
+         <Routes>
+            <Route path="/" element={<SubdomainRoot />} />
+            <Route path="/login" element={<PublicOnlyRoute><SubdomainAuthPage /></PublicOnlyRoute>}/>
+            <Route path="/register" element={<PublicOnlyRoute><SubdomainAuthPage /></PublicOnlyRoute>}/>
+            <Route path="/market" element={<SolidMarket />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/auth-action" element={<AuthAction />} />
+            <Route path="/marketplace/:industry"element={<PublicMarketplace />}/>
+                  {/* PWAGate lives inside Router so useLocation works */}
+            <Route path="/*"element={<><PWAGate /><DashboardRoutes /></>}/>
+        </Routes>
+              ) : (
+         <Routes>
+            <Route path="/" element={<MainDomainRoot />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/blogs" element={<BlogPostPage />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/partners" element={<Partners />} />
+            <Route path="/auth-action" element={<AuthAction />} />
 
-              {/* 
-                Login: SubdomainAuthPage reads pathname to show LoginView.
-                After successful Firebase sign-in it navigates to /dashboard.
-                DashboardRouter then reads userDashboard from AuthContext
-                and redirects to the correct industry dashboard path.
-              */}
-              <Route
-                path="/login"
-                element={
-                  <PublicOnlyRoute>
-                    <SubdomainAuthPage />
-                  </PublicOnlyRoute>
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  <PublicOnlyRoute>
-                    <SubdomainAuthPage />
-                  </PublicOnlyRoute>
-                }
-              />
-
-              <Route path="/market" element={<SolidMarket />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/help-center" element={<HelpCenter />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/auth-action" element={<AuthAction />} />
-              <Route
-                path="/marketplace/:industry"
-                element={<PublicMarketplace />}
-              />
-              {/* PWAGate lives inside Router so useLocation works */}
-              <Route
-                path="/*"
-                element={
-                  <>
-                    <PWAGate />
-                    <DashboardRoutes />
-                  </>
-                }
-              />
-            </Routes>
-          ) : (
-            // ── MAIN DOMAIN (gerboai.com) ──────────────────────────────
-            <Routes>
-              <Route path="/" element={<MainDomainRoot />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/blogs" element={<BlogPostPage />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsPage />} />
-              <Route path="/help-center" element={<HelpCenter />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/partners" element={<Partners />} />
-              <Route path="/auth-action" element={<AuthAction />} />
-
-              {/* Auth is subdomain-only — block direct access on main domain */}
-   <Route
-  path="/login"
-  element={
-    <PublicOnlyRoute>
-      <Login />
-    </PublicOnlyRoute>
-  }
-/>
-<Route
-  path="/register"
-  element={
-    <PublicOnlyRoute>
-      <Register />
-    </PublicOnlyRoute>
-  }
-/>
-
-              <Route
-                path="/*"
-                element={
-                  <>
-                    <PWAGate />
-                    <DashboardRoutes />
-                  </>
-                }
-              />
-            </Routes>
-          )}
-        </AdminProvider>
-      </AuthProvider>
-      </CurrencyProvider>
-    </Router>
+            {/* Auth is subdomain-only — block direct access on main domain */}
+            <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>}/>
+            <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>}/>
+            <Route path="/*" element={<><PWAGate /><DashboardRoutes /></>} />
+          </Routes>
+              )}
+            </AdminProvider>
+          </AuthProvider>
+        </CurrencyProvider>
+      </Router>
     </ErrorBoundary>
   );
 }

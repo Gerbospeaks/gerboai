@@ -480,7 +480,15 @@ const HotelDashboard = () => {
     if (user?.uid) generateInvoiceNumber(user.uid).then(setInvoiceNumber);
     setShowInvoiceModal(true);
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewInvoice();    setActiveView("quote"); }
+    if (action === "newCustomer") {
+      setSelectedGuest(null);
+      setShowGuestModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
     const rate = Number(newItem.rate) || 0;
@@ -724,6 +732,7 @@ const HotelDashboard = () => {
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 

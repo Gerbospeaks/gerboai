@@ -354,7 +354,7 @@ async function handleAIAgent(
     // ── Rate limit: 30 requests per user per minute (uses KV if available) ──
     // Simple approach — you can add KV rate limiting later if needed.
     // For now we cap at 20 history messages to control token usage.
-    const trimmedMessages = messages.slice(-20);
+    const trimmedMessages = messages.slice(-10);
  
     // ── Build system prompt with real user context ──────────────────────────
     const systemPrompt = buildAgentSystemPrompt(industry, context);
@@ -467,7 +467,7 @@ function buildAgentSystemPrompt(
         .join('\n')
     : '  No recent invoices.';
  
-  return `You are the GerboAI AI assistant — embedded inside GerboAI (gerboai.com), an African multi-industry SaaS for small businesses.
+  return `You are the Gerboai AI assistant — embedded inside GerboAI (gerboai.com), an African multi-industry SaaS for small businesses.
  
 CURRENT USER:
 Industry: ${industry}

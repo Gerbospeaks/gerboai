@@ -15,6 +15,7 @@ import { getAuth, signOut } from "firebase/auth";
 import logo from "../../assets/img/solidflo-logo.png";
 import FinancialOverview from "../FinancialOverview";
 import GerboAIPanel from "../../components/GerboAIPanel";
+import GerboAIDashboard from "../../gerbo/GerboAIDashboard";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
@@ -137,7 +138,7 @@ const MobileBottomNav = ({
       icon: Receipt,
       label: "Invoices",
       action: () => setActiveView("invoice"),
-      active: activeView === "invoice" ,
+      active: activeView === "invoice",
     },
     {
       icon: Plus,
@@ -207,7 +208,7 @@ const MobileBottomNav = ({
                 {label}
               </span>
             </button>
-          )
+          ),
         )}
       </div>
     </div>
@@ -226,7 +227,7 @@ const HvacDashboard = () => {
   const [serviceId, setServiceId] = useState(null);
   const [quoteId, setQuoteId] = useState(null);
   const [showAIWindow, setShowAIWindow] = useState(false);
- const [issueDate, setIssueDate] = useState(new Date().toISOString());
+  const [issueDate, setIssueDate] = useState(new Date().toISOString());
   const [poDate, setPoDate] = useState(new Date().toLocaleDateString("en-ZA"));
   const [savedServices, setSavedServices] = useState([]);
   const [savedQuotes, setSavedQuotes] = useState([]);
@@ -243,13 +244,13 @@ const HvacDashboard = () => {
   const [showConvertModal, setShowConvertModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showInvoicesList, setShowInvoicesList] = useState(false);
-const mobileNavPad = "pb-24 lg:pb-6";
+  const mobileNavPad = "pb-24 lg:pb-6";
   // Sidebar accordions
   const [isQuotesOpen, setIsQuotesOpen] = useState(false);
   const [isInvoicesOpen, setIsInvoicesOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [showStampModal, setShowStampModal] = useState(false);
-const [stampConfig, setStampConfig] = useState(null);
+  const [stampConfig, setStampConfig] = useState(null);
   // Misc
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -519,7 +520,15 @@ const [stampConfig, setStampConfig] = useState(null);
     setShowServicesList(false);
     setActiveView("invoice");
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const loadQuote = (q) => {
     setQuoteId(q.id);
     setQuoteNumber(q.quoteNumber || "");
@@ -774,8 +783,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
-    
-    
+
     {
       label: "Save",
       icon: Save,
@@ -801,7 +809,7 @@ const [stampConfig, setStampConfig] = useState(null);
       className:
         "flex items-center gap-1.5 px-3 py-2 bg-[#2563eb] text-white rounded-md text-xs font-medium active:scale-95 whitespace-nowrap",
     },
-    
+
     {
       label: "PDF",
       icon: Download,
@@ -1151,9 +1159,9 @@ const [stampConfig, setStampConfig] = useState(null);
       >
         <TemplateRenderer {...templateProps} />
         <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
+          stampConfig={stampConfig}
+          businessInfo={businessInfo}
+        />
       </div>
       {showAIWindow && (
         <AIInvoiceWindow
@@ -1166,34 +1174,38 @@ const [stampConfig, setStampConfig] = useState(null);
         />
       )}
       <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
-       <HVACSidebar
-  user={user}
-  activeView={activeView}
-  setActiveView={setActiveView}
-  sidebarOpen={sidebarOpen}
-  setSidebarOpen={setSidebarOpen}
-  setShowSettings={setShowSettings}
-  handleNewQuote={handleNewQuote}
-  handleNewService={handleNewInvoice}
-  handleAddNewCustomer={handleAddNewCustomer}
-  businessInfo={businessInfo}
-  savedQuotes={savedQuotes}
-  savedServices={savedServices}
-  savedCustomers={savedCustomers}
-  showServicesList={showInvoicesList}
-  setShowServicesList={setShowInvoicesList}
-  showQuotesList={showQuotesList}
-  setShowQuotesList={setShowQuotesList}
-  setShowCustomersListModal={setShowCustomersListModal}
-  handleLogout={handleLogout}
-  newRequestCount={0}
-/>
+        <HVACSidebar
+          user={user}
+          activeView={activeView}
+          setActiveView={setActiveView}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          setShowSettings={setShowSettings}
+          handleNewQuote={handleNewQuote}
+          handleNewService={handleNewInvoice}
+          handleAddNewCustomer={handleAddNewCustomer}
+          businessInfo={businessInfo}
+          savedQuotes={savedQuotes}
+          savedServices={savedServices}
+          savedCustomers={savedCustomers}
+          showServicesList={showInvoicesList}
+          setShowServicesList={setShowInvoicesList}
+          showQuotesList={showQuotesList}
+          setShowQuotesList={setShowQuotesList}
+          setShowCustomersListModal={setShowCustomersListModal}
+          handleLogout={handleLogout}
+          newRequestCount={0}
+        />
 
         {/* ── Main content ───────────────────────────────────────────────── */}
-       <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "md:ml-2" : "md:ml-4"}`}>
+        <div
+          className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "md:ml-2" : "md:ml-4"}`}
+        >
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onQuickCreate={handleQuickCreate}
+            onTeamOpen={() => setShowUserManagement(true)}
             onSettingsOpen={() => setShowSettings(true)}
           />
           {/* ── Modals ─────────────────────────────────────────────────── */}
@@ -1214,6 +1226,9 @@ const [stampConfig, setStampConfig] = useState(null);
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
+          {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
           {/* Convert to invoice modal */}
           {showConvertModal && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1242,22 +1257,24 @@ const [stampConfig, setStampConfig] = useState(null);
             </div>
           )}
           {showStampModal && (
-  <StampSignatureModal
-    isOpen={showStampModal}
-    onClose={() => setShowStampModal(false)}
-    onConfirm={(cfg) => {
-      setStampConfig(cfg);
-      setShowStampModal(false);
-    }}
-    previewContent={
-      activeView === "purchase-orders"
-        ? <POTemplateRenderer  />
-        : <TemplateRenderer {...templateProps} />
-    }
-    businessInfo={businessInfo}
-    existingConfig={stampConfig}
-  />
-)}
+            <StampSignatureModal
+              isOpen={showStampModal}
+              onClose={() => setShowStampModal(false)}
+              onConfirm={(cfg) => {
+                setStampConfig(cfg);
+                setShowStampModal(false);
+              }}
+              previewContent={
+                activeView === "purchase-orders" ? (
+                  <POTemplateRenderer />
+                ) : (
+                  <TemplateRenderer {...templateProps} />
+                )
+              }
+              businessInfo={businessInfo}
+              existingConfig={stampConfig}
+            />
+          )}
           {/* All invoices modal */}
           {showInvoicesList && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -1390,13 +1407,17 @@ const [stampConfig, setStampConfig] = useState(null);
                 <div className="flex-1 overflow-y-auto bg-[#e2e8f0] p-6">
                   <div
                     className="mx-auto bg-white shadow-xl"
-                    style={{ position: "relative", width: "210mm", minHeight: "297mm" }}
+                    style={{
+                      position: "relative",
+                      width: "210mm",
+                      minHeight: "297mm",
+                    }}
                   >
                     <TemplateRenderer {...templateProps} />
                     <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
+                      stampConfig={stampConfig}
+                      businessInfo={businessInfo}
+                    />
                   </div>
                 </div>
               </div>
@@ -1404,23 +1425,23 @@ const [stampConfig, setStampConfig] = useState(null);
           )}
           {/* ── Views ─────────────────────────────────────────────────── */}
           {activeView === "home" && (
-                      <div className="flex-1 overflow-y-auto p-4">
-                        <HomeView
-                          user={user}
-                          onNavigate={(view, docType) => {
-                            if (docType) setDocumentType(docType);
-                            setActiveView(view);
-                          }}
-                          onOpenAI={(type) => {
-    setDocumentType(type);   // so the AI window opens on the right tab
-    setShowAIWindow(true);
-  }}
-                          onGoToDashboard={() => setActiveView("quote")}
-                          onSidebarToggle={() => setSidebarOpen((p) => !p)}
-                          sidebarOpen={sidebarOpen}
-                        />
-                      </div>
-                    )}
+            <div className="flex-1 overflow-y-auto p-4">
+              <HomeView
+                user={user}
+                onNavigate={(view, docType) => {
+                  if (docType) setDocumentType(docType);
+                  setActiveView(view);
+                }}
+                onOpenAI={(type) => {
+                  setDocumentType(type); // so the AI window opens on the right tab
+                  setShowAIWindow(true);
+                }}
+                onGoToDashboard={() => setActiveView("quote")}
+                onSidebarToggle={() => setSidebarOpen((p) => !p)}
+                sidebarOpen={sidebarOpen}
+              />
+            </div>
+          )}
           {activeView === "templates" && (
             <div className="flex-1 overflow-y-auto p-4">
               <Templates user={user} />
@@ -1453,21 +1474,22 @@ const [stampConfig, setStampConfig] = useState(null);
             </div>
           )}
           {activeView === "marketplace" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
-  </div>
-)}
-
-{activeView === "incoming-requests" && (
-  <div className="flex-1 overflow-y-auto p-6">
-    <ServiceRequestsView user={user} businessInfo={businessInfo} />
-  </div>
-)}
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceMarketplaceView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
+          {activeView === "incoming-requests" && (
+            <div className="flex-1 overflow-y-auto p-6">
+              <ServiceRequestsView user={user} businessInfo={businessInfo} />
+            </div>
+          )}
           {/* ── Invoice builder — split layout ─────────────────────────── */}
           {activeView === "invoice" && (
             <div className="flex-1 overflow-hidden flex min-h-0">
               {/* LEFT: Form panel */}
-              <div className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}>
+              <div
+                className={`flex-1 overflow-y-auto px-4 sm:px-6 pt-6 min-w-0 ${mobileNavPad}`}
+              >
                 <div className="space-y-5">
                   {/* Summary stat cards */}
                   <div className="grid grid-cols-3 gap-4">
@@ -1671,35 +1693,34 @@ const [stampConfig, setStampConfig] = useState(null);
                   >
                     <TemplateRenderer {...templateProps} />
                     <AllPagesStampOverlay
-  stampConfig={stampConfig}
-  businessInfo={businessInfo}
-/>
-
+                      stampConfig={stampConfig}
+                      businessInfo={businessInfo}
+                    />
                   </div>
                 </div>
                 {/* ── Stamp button footer ── */}
-<div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
-  <button
-    onClick={() => setShowStampModal(true)}
-    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
-  >
-    <Stamp className="w-4 h-4" />
-    Stamp &amp; Signature
-  </button>
-</div>
+                <div className="flex-shrink-0 px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0]">
+                  <button
+                    onClick={() => setShowStampModal(true)}
+                    className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-[#ce1414] hover:bg-[#b01212] text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <Stamp className="w-4 h-4" />
+                    Stamp &amp; Signature
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
-       <MobileBottomNav
-      activeView={activeView}
-      setActiveView={setActiveView}
-      handleNewInvoice={handleNewInvoice}
-      handleNewQuote={handleNewQuote}
-      setShowCustomersListModal={setShowCustomersListModal}
-    />
-    <SolidFloAgent industry="hvac" />
+      <MobileBottomNav
+        activeView={activeView}
+        setActiveView={setActiveView}
+        handleNewInvoice={handleNewInvoice}
+        handleNewQuote={handleNewQuote}
+        setShowCustomersListModal={setShowCustomersListModal}
+      />
+      <SolidFloAgent industry="hvac" />
     </div>
   );
 };

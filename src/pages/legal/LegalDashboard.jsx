@@ -2834,7 +2834,15 @@ const mobileNavPad = "pb-24 lg:pb-6";
     balanceDue: 0,
     status: "pending",
   });
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewEstimate();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewEstimate();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const [clientName, setClientName] = useState("John Smith");
   const [clientId, setClientId] = useState("CLIENT-2026-1234");
   const [clientEmail, setClientEmail] = useState("john.smith@example.com");
@@ -3141,7 +3149,10 @@ const [stampConfig, setStampConfig] = useState(null);
       alert("Failed to convert");
     }
   };
-
+ const goTo = (view) => {
+    setActiveView(view);
+    if (isMobile) setSidebarOpen(false);
+  };
   const resetFields = () => {
     setInvoiceId(null);
     setInvoiceNumber("");
@@ -3421,8 +3432,8 @@ const [stampConfig, setStampConfig] = useState(null);
                 label: "New Invoice",
                 icon: FileText,
                 onClick: () => {
-                  handleNewInvoiceDoc();
-                  setActiveView("invoice");
+                  handleNewEstimate();
+                  goTo("invoice");
                 },
                 bg: "bg-[#ede9fe]",
                 hover: "hover:bg-[#ddd6fe]",
@@ -3435,7 +3446,7 @@ const [stampConfig, setStampConfig] = useState(null);
                 icon: Receipt,
                 onClick: () => {
                   handleNewEstimate();
-                  setActiveView("invoice");
+                  goTo("invoice");
                 },
                 bg: "bg-[#f0fdfa]",
                 hover: "hover:bg-[#ccfbf1]",
@@ -3631,6 +3642,8 @@ const [stampConfig, setStampConfig] = useState(null);
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onQuickCreate={handleQuickCreate}
+            onTeamOpen={() => setShowUserManagement(true)}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -3652,6 +3665,9 @@ const [stampConfig, setStampConfig] = useState(null);
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
+           {showUserManagement && (
+                      <SubUserManagement onClose={() => setShowUserManagement(false)} />
+                    )}
 {showStampModal && (
   <StampSignatureModal
     isOpen={showStampModal}

@@ -122,11 +122,11 @@ const UpholsteryDashboard = () => {
   const handleQuickCreate = ({ view, action }) => {
     if (action === "newInvoice") {
       handleNewInvoice();
-      setActiveView("invoice");
+      setActiveView("quote");
     }
     if (action === "newQuote") {
       handleNewQuote();
-      setActiveView("invoice");
+      setActiveView("quote");
     }
     if (action === "newCustomer") {
       handleAddNewCustomer();
@@ -797,6 +797,7 @@ const [stampConfig, setStampConfig] = useState(null);
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
             onQuickCreate={handleQuickCreate}
+            onTeamOpen={() => setShowUserManagement(true)}
             onSettingsOpen={() => setShowSettings(true)}
             plan="pro"
           />
@@ -819,6 +820,9 @@ const [stampConfig, setStampConfig] = useState(null);
             existingCustomer={selectedCustomer}
             onCustomerSaved={loadCustomers}
           />
+          {showUserManagement && (
+                      <SubUserManagement onClose={() => setShowUserManagement(false)} />
+                    )}
           {showPaymentModal && selectedQuoteForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}

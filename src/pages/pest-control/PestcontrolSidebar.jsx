@@ -49,7 +49,7 @@ export default function PestControlSidebar({
 
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   return (
@@ -120,7 +120,7 @@ export default function PestControlSidebar({
                   <button
                     onClick={() => goTo("gerbo-ai")}
                     className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                    title="GerboAI Receptionist"
+                    title="AI Receptionist"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <GerboAIIcon className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
@@ -179,7 +179,7 @@ export default function PestControlSidebar({
                 </div>
               </div>
               <button
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => setSidebarOpen(true)}
                 className="group p-2 text-amber-400 hover:text-white hover:bg-stone-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -199,7 +199,7 @@ export default function PestControlSidebar({
                 label="Settings"
                 onClick={() => {
                   setShowSettings(true);
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
                 color="orange"
               />
@@ -213,7 +213,7 @@ export default function PestControlSidebar({
                 />
                 <NavItem
                   icon={GerboAIIcon}
-                  label="GerboAI Receptionist"
+                  label="AI Receptionist"
                   onClick={() => goTo("gerbo-ai")}
                   color="indigo"
                 />
@@ -260,7 +260,7 @@ export default function PestControlSidebar({
                       badgeColor="from-amber-600 to-orange-600"
                       onClick={() => {
                         setShowQuotesList(!showQuotesList);
-                        if (isMobile) setSidebarOpen(false);
+                        if (isMobile) setSidebarOpen(true);
                       }}
                     />
                   </div>
@@ -290,7 +290,7 @@ export default function PestControlSidebar({
                       label="Add Client"
                       onClick={() => {
                         handleAddNewCustomer();
-                        if (isMobile) setSidebarOpen(false);
+                        if (isMobile) setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -300,7 +300,7 @@ export default function PestControlSidebar({
                       badgeColor="from-pink-600 to-purple-600"
                       onClick={() => {
                         setShowCustomersListModal(true);
-                        if (isMobile) setSidebarOpen(false);
+                        if (isMobile) setSidebarOpen(true);
                       }}
                     />
                   </div>

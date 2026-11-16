@@ -59,7 +59,7 @@ export default function PhotographySidebar({
 
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   return (
@@ -122,7 +122,7 @@ export default function PhotographySidebar({
                 },
                 {
                   icon: GerboAIIcon,
-                  title: "GerboAI Receptionist",
+                  title: "AI Receptionist",
                   action: () => goTo("gerbo-ai"),
                   text: "text-slate-400",
                   color: "from-indigo-600 to-indigo-700",
@@ -270,7 +270,7 @@ export default function PhotographySidebar({
                 />
                 <NavItem
                   icon={GerboAIIcon}
-                  label="GerboAI Receptionist"
+                  label="AI Receptionist"
                   onClick={() => goTo("gerbo-ai")}
                   color="indigo"
                 />

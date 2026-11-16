@@ -225,7 +225,15 @@ const handleAddNewCustomer = () => {
         : s === "pending"
           ? "bg-[#dbeafe] text-[#1e40af]"
           : "bg-[#fef2f2] text-[#991b1b]";
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleAllNewInvoice();  setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("quote"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!user?.uid) return;
@@ -575,7 +583,7 @@ const handleAddNewCustomer = () => {
     setDocumentType("quote");
     handleNewDocument();
   };
-  const handleNewInvoice = () => {
+  const handleAllNewInvoice = () => {
     setDocumentType("invoice");
     handleNewDocument();
   };
@@ -742,7 +750,7 @@ const handleAddNewCustomer = () => {
     {
       label: "New",
       icon: Plus,
-      onClick: documentType === "quote" ? handleNewQuote : handleNewInvoice,
+      onClick: documentType === "quote" ? handleNewQuote : handleAllNewInvoice,
       className:
         "flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-sm font-medium rounded-md transition-colors whitespace-nowrap",
     },
@@ -877,7 +885,7 @@ const handleAddNewCustomer = () => {
                 label: "New Invoice",
                 icon: Receipt,
                 onClick: () => {
-                  handleNewInvoice();
+                  handleAllNewInvoice();
                   setActiveView("quote");
                 },
                 bg: "bg-[#f0fdfa]",
@@ -1063,7 +1071,7 @@ const handleAddNewCustomer = () => {
   setSidebarOpen={setSidebarOpen}
   setShowSettings={setShowSettings}
   handleNewQuote={handleNewQuote}
-  handleNewInvoice={handleNewInvoice}
+  handleAllNewInvoice={handleAllNewInvoice}
   handleAddNewCustomer={handleAddNewCustomer}
   businessInfo={businessInfo}
   savedQuotes={savedQuotes}
@@ -1081,6 +1089,8 @@ const handleAddNewCustomer = () => {
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onTeamOpen={() => setShowUserManagement(true)}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -1108,6 +1118,9 @@ const handleAddNewCustomer = () => {
             existingCustomer={selectedCustomer}
             onCustomerSaved={loadCustomers}
           />
+          {showUserManagement && (
+                      <SubUserManagement onClose={() => setShowUserManagement(false)} />
+                    )}
           {showPaymentModal && selectedQuoteForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}

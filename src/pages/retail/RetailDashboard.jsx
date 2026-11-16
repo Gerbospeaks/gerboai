@@ -4,6 +4,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { serverTimestamp } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import BusinessSettingsModal from "../BusinessSettingsModal";
 import {
   getFirestore,
   collection,
@@ -253,7 +254,7 @@ function InvoicePreview({ inv, biz }) {
 }
 
 // ─── New / Edit Invoice Modal ─────────────────────────────────────────────────
-function InvoiceModal({ onClose, onSave, bizInfo, existingInv = null }) {
+function InvoiceModal({ onClose, onSave, businessInfo, existingInv = null }) {
   const isEdit = !!existingInv;
   const [form, setForm] = useState(
     existingInv || {
@@ -320,7 +321,7 @@ function InvoiceModal({ onClose, onSave, bizInfo, existingInv = null }) {
 
         <div className="overflow-y-auto flex-1 px-6 py-5">
           {preview ? (
-            <InvoicePreview inv={form} biz={bizInfo} />
+            <InvoicePreview inv={form} biz={businessInfo} />
           ) : (
             <>
               {/* Customer */}
@@ -723,21 +724,22 @@ export default function RetailDashboard() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [invFilter, setInvFilter] = useState("all");
-
+  const [showSettings, setShowSettings] = useState(false);
   // ── Data state
   const [invoices, setInvoices] = useState([]);
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [bizInfo, setBizInfo] = useState({
-    name: "My Retail Store",
-    email: "",
-    phone: "",
-    vatNo: "",
-    address: "",
-    bank: "",
-    accNo: "",
-    branch: "",
-  });
+   const [businessInfo, setBusinessInfo] = useState({
+      businessName: "Gerbo Atlas Services",
+      addressLine1: "1848 Clipsham Views",
+      addressLine2: "Clipsham",
+      city: "Masvingo",
+      postalCode: "2090",
+      primaryPhone: "0776 109 275",
+      secondaryPhone: "077 610 9275",
+      logoUrl: "",
+    });
+
   const [productForm, setProductForm] = useState({
     name: "",
     sku: "",
@@ -764,7 +766,7 @@ const [lastSync, setLastSync] = useState(null);
     loadInvoices();
     loadProducts();
     loadCustomers();
-    loadBizInfo();
+    loadbusinessInfo();
   }, [user]);
 
   useEffect(() => {
@@ -818,13 +820,13 @@ const [lastSync, setLastSync] = useState(null);
     }
   };
 
-  const loadBizInfo = async () => {
+  const loadbusinessInfo = async () => {
     if (!user?.uid) return;
     try {
       const snap = await getDoc(
         doc(db, "users", user.uid, "settings", "businessInfo"),
       );
-      if (snap.exists()) setBizInfo(snap.data());
+      if (snap.exists()) setBusinessInfo(snap.data());
     } catch (e) {
       console.error(e);
     }
@@ -846,7 +848,7 @@ const loadOnlineOrders = async () => {
 };
 
 const refreshAll = async () => {
-  await Promise.all([loadInvoices(), loadProducts(), loadCustomers(), loadBizInfo(), loadPosSales(), loadOnlineOrders()]);
+  await Promise.all([loadInvoices(), loadProducts(), loadCustomers(), loadbusinessInfo(), loadPosSales(), loadOnlineOrders()]);
   setLastSync(new Date());
 };
   // ── Invoice actions
@@ -973,11 +975,11 @@ const refreshAll = async () => {
   };
 
   // ── Settings save
-  const saveBizInfo = async () => {
+  const savebusinessInfo = async () => {
     if (!user?.uid) return;
     await setDoc(
       doc(db, "users", user.uid, "settings", "businessInfo"),
-      { ...bizInfo, updatedAt: serverTimestamp() },
+      { ...businessInfo, updatedAt: serverTimestamp() },
       { merge: true },
     );
     alert("Settings saved!");
@@ -1014,7 +1016,7 @@ const alerts = buildAlerts({ products, invoices, onlineOrders });
     { id: "purchases", label: "Purchases", icon: Truck },
 { id: "online-orders", label: "Online Orders", icon: Globe },
 { id: "expenses", label: "Expenses", icon: Wallet },
-{ id: "gerbo-ai", label: "GerboAI Receptionist", icon: GerboAIIcon },
+{ id: "gerbo-ai", label: "AI Receptionist", icon: GerboAIIcon },
 { id: "branches", label: "Branches", icon: Building2 },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "vat", label: "VAT Report", icon: Receipt },
@@ -1669,7 +1671,7 @@ const renderOverview = () => (
     return (
       <div className="space-y-5">
         <div className="text-sm text-gray-500">
-          VAT No: {bizInfo.vatNo || "Not set"} · Current period
+          VAT No: {businessInfo.vatNo || "Not set"} · Current period
         </div>
         <div className="grid grid-cols-3 gap-4">
           {[
@@ -1751,135 +1753,7 @@ const renderOverview = () => (
     );
   };
 
-  const renderSettings = () => (
-    <div className="max-w-xl space-y-5">
-      <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm space-y-4">
-        <div className="text-sm font-semibold text-gray-800">Store details</div>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            ["name", "Store name"],
-            ["email", "Email"],
-            ["phone", "Phone"],
-            ["vatNo", "VAT number"],
-          ].map(([k, l]) => (
-            <div key={k}>
-              <label className="block text-xs text-gray-500 mb-1">{l}</label>
-              <input
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-                value={bizInfo[k] || ""}
-                onChange={(e) =>
-                  setBizInfo((b) => ({ ...b, [k]: e.target.value }))
-                }
-              />
-            </div>
-          ))}
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">
-            Address (shown on invoices)
-          </label>
-          <input
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-            value={bizInfo.address || ""}
-            onChange={(e) =>
-              setBizInfo((b) => ({ ...b, address: e.target.value }))
-            }
-          />
-        </div>
-      </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm space-y-4">
-        <div className="text-sm font-semibold text-gray-800">
-          Banking details
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            ["bank", "Bank"],
-            ["accNo", "Account number"],
-            ["branch", "Branch code"],
-          ].map(([k, l]) => (
-            <div key={k}>
-              <label className="block text-xs text-gray-500 mb-1">{l}</label>
-              <input
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-                value={bizInfo[k] || ""}
-                onChange={(e) =>
-                  setBizInfo((b) => ({ ...b, [k]: e.target.value }))
-                }
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-        <div className="text-sm font-semibold text-gray-800 mb-2">Logo</div>
-        <div className="flex items-center gap-4">
-          {bizInfo.logoUrl && (
-            <img
-              src={bizInfo.logoUrl}
-              alt="Logo"
-              className="w-16 h-16 object-contain rounded-lg border"
-            />
-          )}
-          <div>
-            <input
-              type="file"
-              accept="image/*"
-              id="logo-upload"
-              className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (!file || !authUser) return;
-                try {
-                  const url = await uploadLogoToR2(file, authUser);
-                  setBizInfo((b) => ({ ...b, logoUrl: url }));
-                } catch {
-                  alert("Logo upload failed");
-                }
-              }}
-            />
-            <label
-              htmlFor="logo-upload"
-              className="cursor-pointer flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50"
-            >
-              <Upload className="w-4 h-4" />
-              Upload logo
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-        <div className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-          <svg
-            className="w-4 h-4 text-green-500"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-            <path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.447h.006c6.585 0 11.946-5.336 11.949-11.896 0-3.176-1.24-6.165-3.48-8.45z" />
-          </svg>
-          WhatsApp Business
-        </div>
-        <p className="text-sm text-gray-500 mb-3">
-          Connect your WhatsApp Business number to send invoices directly from
-          GerboAI.
-        </p>
-        <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600">
-          Connect WhatsApp Business
-        </button>
-      </div>
-
-      <button
-        onClick={saveBizInfo}
-        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-      >
-        <Save className="w-4 h-4" />
-        Save settings
-      </button>
-    </div>
-  );
 
   // ─── View map ─────────────────────────────────────────────────────────────
   const views = {
@@ -1889,7 +1763,7 @@ const renderOverview = () => (
     customers: renderCustomers,
     analytics: renderAnalytics,
     vat: renderVAT,
-    settings: renderSettings,
+    settings:  () => <BusinessSettingsModal user={user} />,
     purchases: () => <PurchasesView user={user} />,
 "online-orders": () => <OnlineOrdersView user={user} onChanged={loadOnlineOrders} />,
 expenses: () => <ExpensesView user={user} />,
@@ -1904,8 +1778,10 @@ branches: () => <BranchesView user={user} />,
   navItems={navItems}
   activeView={activeView}
   sidebarOpen={sidebarOpen}
+  showSettings={showSettings}
+  setShowSettings
   onNav={handleNav}
-  businessInfo={bizInfo}
+  businessInfo={businessInfo}
   alertCount={alerts.length}
 />
 
@@ -1915,7 +1791,7 @@ branches: () => <BranchesView user={user} />,
   activeView={activeView}
   viewLabel={navItems.find((n) => n.id === activeView)?.label || ""}
   user={user}
-  businessInfo={bizInfo}
+  businessInfo={businessInfo}
   onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
   lastSync={lastSync}
   onSync={refreshAll}
@@ -1924,6 +1800,10 @@ branches: () => <BranchesView user={user} />,
   onNewInvoice={() => { setEditingInvoice(null); setShowInvoiceModal(true); }}
   onLogout={handleLogout}
 />
+ {/* Modals */}
+          {showSettings && (
+            <BusinessSettingsModal onClose={() => setShowSettings(false)} />
+          )}
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-5">
           {(views[activeView] || (() => null))()}
@@ -1938,7 +1818,7 @@ branches: () => <BranchesView user={user} />,
             setEditingInvoice(null);
           }}
           onSave={handleSaveInvoice}
-          bizInfo={bizInfo}
+          businessInfo={businessInfo}
           existingInv={editingInvoice}
         />
       )}
@@ -1955,7 +1835,7 @@ branches: () => <BranchesView user={user} />,
               </button>
             </div>
             <div className="overflow-y-auto flex-1 p-5">
-              <InvoicePreview inv={previewInv} biz={bizInfo} />
+              <InvoicePreview inv={previewInv} biz={businessInfo} />
             </div>
             <div className="px-5 py-4 border-t flex gap-2 justify-end">
               <button className="flex items-center gap-1.5 px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600">

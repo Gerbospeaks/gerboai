@@ -818,6 +818,7 @@ const bottomNavItems = [
             dashboardType="accounting"
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            onTeamOpen={() => setShowUserManagement(true)}
             onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
             plan="pro"
@@ -841,6 +842,9 @@ const bottomNavItems = [
             existingCustomer={selectedCustomer}
             onCustomerSaved={loadCustomers}
           />
+           {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
           {showPaymentModal && selectedInvoiceForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}

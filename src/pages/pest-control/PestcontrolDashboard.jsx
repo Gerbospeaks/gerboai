@@ -209,7 +209,15 @@ const [stampConfig, setStampConfig] = useState(null);
     logoUrl: "",
   });
   const [loading, setLoading] = useState(true);
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("quote"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ── line-item state ──────────────────────────────────────────────────────
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -1031,7 +1039,7 @@ const [stampConfig, setStampConfig] = useState(null);
                 <button
                   onClick={() => setActiveView("gerbo-ai")}
                   className="group relative p-2 md:p-3 text-amber-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-                  title="GerboAI Receptionist"
+                  title="AI Receptionist"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <GerboAIIcon className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
@@ -1144,7 +1152,7 @@ const [stampConfig, setStampConfig] = useState(null);
               >
                 <GerboAIIcon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 <span className="text-xs md:text-sm font-semibold truncate">
-                  GerboAI Receptionist
+                  AI Receptionist
                 </span>
               </div>
 
@@ -1346,6 +1354,8 @@ const [stampConfig, setStampConfig] = useState(null);
         <AppHeader
           actions={headerActions}
           mobileActions={mobileDashboardActions}
+          onTeamOpen={() => setShowUserManagement(true)}
+          onQuickCreate={handleQuickCreate}
           onSettingsOpen={() => setShowSettings(true)}
         />
 
@@ -1369,6 +1379,9 @@ const [stampConfig, setStampConfig] = useState(null);
           existingCustomer={selectedCustomer}
           onCustomerSaved={handleCustomerSaved}
         />
+         {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
 {showStampModal && (
   <StampSignatureModal
     isOpen={showStampModal}

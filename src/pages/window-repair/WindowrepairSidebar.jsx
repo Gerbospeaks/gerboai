@@ -32,7 +32,7 @@ export default function WindowRepairSidebar({
   setSidebarOpen,
   setShowSettings,
   handleNewQuote,
-  handleNewInvoice,
+  handleAllNewInvoice,
   handleAddNewCustomer,
   businessInfo,
   savedQuotes,
@@ -72,7 +72,7 @@ export default function WindowRepairSidebar({
 
   // ── Shared sidebar body ───────────────────────────────────────────────────
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900">
+    <div className="flex flex-col h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-blue-700/50 flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
@@ -122,7 +122,7 @@ export default function WindowRepairSidebar({
         />
         <NavItem
           icon={GerboAIIcon}
-          label="GerboAI Receptionist"
+          label="AI Receptionist"
           onClick={() => goTo("gerbo-ai")}
           active={activeView === "gerbo-ai"}
         />
@@ -146,7 +146,7 @@ export default function WindowRepairSidebar({
             dot="bg-emerald-500"
             label="Create Invoice"
             onClick={() => {
-              handleNewInvoice();
+              handleAllNewInvoice();
               goTo("quote");
             }}
           />
@@ -307,7 +307,7 @@ export default function WindowRepairSidebar({
       icon: Plus,
       label: "New",
       action: () => {
-        handleNewInvoice();
+        handleAllNewInvoice();
         goTo("quote");
       },
       active: false,
@@ -442,14 +442,14 @@ export default function WindowRepairSidebar({
                 },
                 {
                   icon: GerboAIIcon,
-                  title: "GerboAI Receptionist",
+                  title: "AI Receptionist",
                   action: () => goTo("gerbo-ai"),
                 },
                 {
                   icon: Receipt,
                   title: "Quotes & Invoices",
                   action: () => {
-                    handleNewInvoice();
+                    handleAllNewInvoice();
                     goTo("quote");
                   },
                 },

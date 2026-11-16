@@ -126,7 +126,7 @@ export default function LogisticsSidebar({
         />
         <NavItem
           icon={GerboAIIcon}
-          label="GerboAI Receptionist"
+          label="AI Receptionist"
           onClick={() => goTo("gerbo-ai")}
           active={activeView === "gerbo-ai"}
         />
@@ -164,32 +164,6 @@ export default function LogisticsSidebar({
               setShowInTransitModal?.(true);
               if (isMobile) setSidebarOpen(false);
             }}
-          />
-        </Accordion>
-
-        {/* Invoices accordion */}
-        <Accordion
-          icon={Receipt}
-          label="Invoices"
-          isOpen={isInvoicesOpen}
-          onToggle={() => setIsInvoicesOpen((p) => !p)}
-        >
-          <SubItem
-            dot="bg-[#2563eb]"
-            label="Create Invoice"
-            onClick={() => goTo("invoice-new")}
-          />
-          <SubItem
-            dot="bg-[#7c3aed]"
-            label="All Invoices"
-            onClick={() => goTo("invoices-all")}
-          />
-          <SubItem
-            dot="bg-[#dc2626]"
-            label="Overdue"
-            badge={0}
-            badgeBg="bg-[#dc2626]"
-            onClick={() => goTo("invoices-overdue")}
           />
         </Accordion>
         <NavItem
@@ -519,7 +493,7 @@ export default function LogisticsSidebar({
                 },
                 {
                   icon: GerboAIIcon,
-                  title: "GerboAI Receptionist",
+                  title: "AI Receptionist",
                   action: () => goTo("gerbo-ai"),
                   active: activeView === "gerbo-ai",
                 },

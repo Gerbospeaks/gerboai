@@ -115,7 +115,7 @@ export default function CarpentrySidebar({
         />
         <NavItem
           icon={GerboAIIcon}
-          label="GerboAI Receptionist"
+          label="AI Receptionist"
           onClick={() => goTo("gerbo-ai")}
           active={activeView === "gerbo-ai"}
         />
@@ -341,7 +341,7 @@ export default function CarpentrySidebar({
                 },
                 {
                   icon: GerboAIIcon,
-                  title: "GerboAI Receptionist",
+                  title: "AI Receptionist",
                   action: () => goTo("gerbo-ai"),
                   active: activeView === "gerbo-ai",
                 },

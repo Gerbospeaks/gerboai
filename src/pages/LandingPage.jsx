@@ -21,6 +21,7 @@ import {
   Sparkles,
   MessageSquare,
   Repeat,
+  AlignLeft,
 } from "lucide-react";
 import logo from "../assets/img/solidflo.png";
 import instagram from "../assets/images/instagram.png";
@@ -169,7 +170,7 @@ const PLANS = [
   },
   {
     name: "Professional",
-    usdPrice: 5,
+    usdPrice: 15,
     period: "per month",
     popular: true,
     desc: "Ideal for growing businesses",
@@ -187,7 +188,7 @@ const PLANS = [
   },
   {
     name: "Enterprise",
-    usdPrice: 10,
+    usdPrice: 25,
     period: "per month",
     popular: false,
     desc: "For large teams and businesses",
@@ -629,27 +630,12 @@ const LandingPage = () => {
           <nav className={`lp-nav${scrolled ? " scrolled" : ""}`}>
             <div className="lp-nav-inner">
               <img src={logo} alt="GerboAI" className="lp-nav-logo" />
-              <div className="lp-nav-links">
-                {NAV.map((n) => (
-                  <button
-                    key={n.id}
-                    className="lp-nav-link"
-                    onClick={() => handleNav(n)}
-                  >
-                    {n.label}
-                  </button>
-                ))}
-              </div>
+             
               <div className="lp-nav-ctas">
                 <button className="lp-nav-link" onClick={() => open("login")}>
                   Login
                 </button>
-                <button
-                  className="lp-btn lp-btn-light lp-btn-sm"
-                  onClick={openCalendly}
-                >
-                  Contact sales
-                </button>
+               
                 <button
                   className="lp-btn lp-btn-dark lp-btn-sm"
                   onClick={() => open("register")}
@@ -710,30 +696,13 @@ const LandingPage = () => {
             <div className="lp-hero-grid">
               <div className="lp-hero-left">
                 <h1>
-                  Business management, made <em>proper</em>
+                  Business Operations, made <em>Simple</em>
                 </h1>
                 <p className="lp-hero-sub">
                   Invoices, quotes, bookings and reports for every trade — one
                   simple platform to run your business.
                 </p>
-                <div className="lp-signup">
-                  <button
-                    className="lp-btn lp-btn-dark lp-btn-block"
-                    onClick={() => open("register")}
-                  >
-                    Start free <ArrowRight size={16} />
-                  </button>
-                  <div className="lp-signup-or">OR</div>
-                  <button
-                    className="lp-btn lp-btn-light lp-btn-block"
-                    onClick={openCalendly}
-                  >
-                    Book a demo
-                  </button>
-                  <p className="lp-signup-fine">
-                    No credit card required · 14-day free trial · Cancel anytime
-                  </p>
-                </div>
+               
                 <div className="lp-hero-app">
                   <img src={google} alt="Get GerboAI on Google Play" />
                   <img
@@ -754,7 +723,7 @@ const LandingPage = () => {
           {/* ── Features ── */}
           <section id="features" className="lp-section">
             <div className="lp-section-inner">
-              <div className="lp-section-head">
+              <div className="lp-section-head center">
                 <h2>Everything you need to run your business</h2>
                 <p>
                   Powerful tools that streamline your billing and help you get

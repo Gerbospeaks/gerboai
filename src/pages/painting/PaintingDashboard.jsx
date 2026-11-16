@@ -624,7 +624,15 @@ const mobileNavPad = "pb-24 lg:pb-6";
     setDocumentType("invoice");
     handleNewDocument();
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("quote"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ============================================================================
   // Handlers – line items
   // ============================================================================
@@ -1010,6 +1018,8 @@ const mobileNavPad = "pb-24 lg:pb-6";
         <AppHeader
           actions={headerActions}
           mobileActions={mobileDashboardActions}
+          onTeamOpen={() => setShowUserManagement(true)}
+          onQuickCreate={handleQuickCreate}
           onSettingsOpen={() => setShowSettings(true)}
         />
 
@@ -1033,6 +1043,9 @@ const mobileNavPad = "pb-24 lg:pb-6";
           existingCustomer={selectedCustomer}
           onCustomerSaved={handleCustomerSaved}
         />
+         {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
         {showStampModal && (
           <StampSignatureModal
             isOpen={showStampModal}

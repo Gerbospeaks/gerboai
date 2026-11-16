@@ -1279,6 +1279,7 @@ const [stampConfig, setStampConfig] = useState(null);
             dashboardType="Welding"
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            onTeamOpen={() => setShowUserManagement(true)}
             onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
@@ -1301,6 +1302,9 @@ const [stampConfig, setStampConfig] = useState(null);
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
+          {showUserManagement && (
+                      <SubUserManagement onClose={() => setShowUserManagement(false)} />
+                    )}
           {showPaymentModal && selectedQuoteForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}

@@ -196,7 +196,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const [savedQuotes, setSavedQuotes] = useState([]);
   const [showQuotesList, setShowQuotesList] = useState(false);
   const [documentType, setDocumentType] = useState("quote");
-
+  const [showUserManagement, setShowUserManagement] = useState(false);
   // ── views / modals ─────────────────────────────────────────────────────────
   const [showSettings, setShowSettings] = useState(false);
   const [activeView, setActiveView] = useState("home");
@@ -526,7 +526,15 @@ const [stampConfig, setStampConfig] = useState(null);
 
   const handleNewQuote = () => { setDocumentType("quote"); handleNewDocument(); };
   const handleNewInvoice = () => { setDocumentType("invoice"); handleNewDocument(); };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("quote"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ── Handlers – line items ──────────────────────────────────────────────────
   const handleAddItem = () => {
     if (!newItem.description || !newItem.qty) return;
@@ -815,12 +823,20 @@ const [stampConfig, setStampConfig] = useState(null);
 />
         {/* ── Main content ───────────────────────────────────────────────────── */}
        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          <AppHeader actions={headerActions} mobileActions={mobileDashboardActions} onSettingsOpen={() => setShowSettings(true)} />
+          <AppHeader 
+          actions={headerActions} 
+          mobileActions={mobileDashboardActions}
+          onTeamOpen={() => setShowUserManagement(true)} 
+          onQuickCreate={handleQuickCreate}
+          onSettingsOpen={() => setShowSettings(true)} />
 
           {/* ── Modals ──────────────────────────────────────────────────────── */}
           {showSettings && <BusinessSettingsModal onClose={() => setShowSettings(false)} />}
           <CustomersListModal showModal={showCustomersListModal} setShowModal={setShowCustomersListModal} customers={customers} onLoadCustomer={loadCustomer} onEditCustomer={handleEditCustomer} onAddNewCustomer={handleAddNewCustomer} />
           <CustomerModal showModal={showCustomerModal} setShowModal={setShowCustomerModal} existingCustomer={selectedCustomer} onCustomerSaved={handleCustomerSaved} />
+        {showUserManagement && (
+                    <SubUserManagement onClose={() => setShowUserManagement(false)} />
+                  )}
          {showStampModal && (
   <StampSignatureModal
     isOpen={showStampModal}

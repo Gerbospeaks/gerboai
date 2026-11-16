@@ -96,7 +96,7 @@ export default function TechnologySidebar({
 
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   // Helper: navigate only if plan allows it
@@ -130,7 +130,7 @@ export default function TechnologySidebar({
     },
     {
       icon: GerboAIIcon,
-      title: "GerboAI Receptionist",
+      title: "AI Receptionist",
       action: () => goTo("gerbo-ai"),
       gated: false,
     },
@@ -247,7 +247,7 @@ export default function TechnologySidebar({
             label="Settings"
             onClick={() => {
               setShowSettings(true);
-              setSidebarOpen(false);
+              setSidebarOpen(true);
             }}
           />
 
@@ -263,7 +263,7 @@ export default function TechnologySidebar({
             />
             <NavItem
               icon={GerboAIIcon}
-              label="GerboAI Receptionist"
+              label="AI Receptionist"
               active={activeView === "gerbo-ai"}
               onClick={() => goTo("gerbo-ai")}
             />
@@ -284,7 +284,7 @@ export default function TechnologySidebar({
                 badge={savedProjects?.length ?? 0}
                 onClick={() => {
                   setShowProjectsList?.((p) => !p);
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
               />
               <SubItem
@@ -308,7 +308,7 @@ export default function TechnologySidebar({
                     "addClient",
                     () => {
                       handleAddNewClient?.();
-                      setSidebarOpen(false);
+                      setSidebarOpen(true);
                     },
                     "Add Client",
                   )
@@ -323,7 +323,7 @@ export default function TechnologySidebar({
                     "allClients",
                     () => {
                       setShowClientsModal?.(true);
-                      setSidebarOpen(false);
+                      setSidebarOpen(true);
                     },
                     "All Clients",
                   )

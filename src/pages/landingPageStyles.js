@@ -38,14 +38,14 @@ export const css = `
   }
       /* ── AI invoicing ── */
   .ai-layout {
-    display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: center;
+    display: block; gap: 40px; align-items: center;
   }
-  .ai-points { display: flex; flex-direction: column; gap: 14px; }
+  .ai-points { display: grid; gap: 14px; }
   .ai-points .lp-card { min-height: 0; padding: 24px 26px; }
   .ai-points .lp-card-icon { margin-bottom: 0; }
   .ai-points .lp-card h3 { font-size: 21px; margin: 16px 0 8px; }
   .ai-points .lp-card p { font-size: 14.5px; }
-  .ai-points .lp-cta-btns { justify-content: flex-start; margin-top: 6px; }
+  .ai-points .lp-cta-btns { justify-content: center; margin-top: 6px; }
 
   .ai-demo {
     background: var(--base-deep); border: 1px solid var(--line);
@@ -187,9 +187,10 @@ export const css = `
   .lp-hero h1 {
     font-size: clamp(2.8rem, 7vw, 5.2rem);
     line-height: 1.02; letter-spacing: -.03em;
-    margin-bottom: 24px;
+    margin-bottom: 44px;
+    
   }
-  .lp-hero h1 em { font-style: italic; color: var(--accent); }
+  .lp-hero h1 em { font-style: italic; color: #20f1f8; }
   .lp-hero-sub {
     font-size: clamp(1.05rem, 1.6vw, 1.3rem);
     color: var(--ink-mid); line-height: 1.55;
@@ -228,7 +229,7 @@ export const css = `
   .lp-card-icon {
     width: 44px; height: 44px; border-radius: var(--r-md);
     background: var(--panel); display: flex; align-items: center; justify-content: center;
-    color: var(--accent); margin-bottom: auto;
+    color: #20f1f8; margin-bottom: auto;
   }
   .lp-card h3 { font-size: 26px; margin: 48px 0 12px; line-height: 1.15; }
   .lp-card p { font-size: 15.5px; color: var(--ink-mid); line-height: 1.6; }
@@ -424,7 +425,7 @@ export const css = `
 
 
   /* ── Dark theme + split hero ── */
-  .lp-nav-logo, .lp-footer-logo { filter: brightness(0) invert(1); }
+  
   .lp-nav-link:hover { background: rgba(250,249,245,.08); }
   .lp-btn-light:hover { background: rgba(250,249,245,.08); }
   .lp-modal-close { background: rgba(250,249,245,.1); }
@@ -463,9 +464,9 @@ export const css = `
     display: flex; flex-direction: row; align-items: center; justify-content: center;
     gap: 12px; flex-wrap: nowrap;
   }
-  .lp-hero-app img { height: 68px; width: auto; display: block; }
+  .lp-hero-app img { height: 100px; width: auto; display: block; }
   .lp-hero-right {
-    border-radius: var(--r-xl); background: var(--base-deep);
+    border-radius: 20px; background-image: url("../assets/images/phone.png"); border:3px solid #20f1f8;
     min-height: 640px; padding: 32px; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
   }

@@ -106,7 +106,7 @@ export default function SecuritySidebar({
                 },
                 {
                   icon: GerboAIIcon,
-                  title: "GerboAI Receptionist",
+                  title: "AI Receptionist",
                   action: () => goTo("gerbo-ai"),
                 },
                 {
@@ -231,7 +231,7 @@ export default function SecuritySidebar({
                 />
                 <NavItem
                   icon={GerboAIIcon}
-                  label="GerboAI Receptionist"
+                  label="AI Receptionist"
                   onClick={() => goTo("gerbo-ai")}
                   color="blue"
                 />

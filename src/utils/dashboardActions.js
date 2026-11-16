@@ -56,7 +56,7 @@ export const getDashboardActions = (dashboardId, handlers = {}) => {
     ),
 
     mechanics: standard(
-      "New Job Card", Wrench,        handleNewInvoice, "invoice",
+      "New Job Card", Wrench,        handleNewJobcard, "jobcard",
       "New Quote",    ClipboardList, handleNewQuote,   "quote",
     ),
 
@@ -79,7 +79,6 @@ export const getDashboardActions = (dashboardId, handlers = {}) => {
     cleaning:         invoiceQuote,
     education:        invoiceQuote,
     electrical:       invoiceQuote,
-    elctrical:        invoiceQuote,
     flooring:         invoiceQuote,
     health:           invoiceQuote,
     hotel:            invoiceQuote,

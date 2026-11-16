@@ -453,7 +453,7 @@ export default function HeroInvoiceOverlay() {
       <div className="hio-card" role="group" aria-label="Live invoice preview">
         <div className="hio-livebadge">
           <span className="hio-dot" />
-          {reducedMotion ? "Drafted by agent" : "SolidAgent drafting on-device"}
+          {reducedMotion ? "Drafted by agent" : "GerboAi drafting on-device"}
         </div>
 
         <div className="hio-head">
@@ -461,7 +461,7 @@ export default function HeroInvoiceOverlay() {
            <img src={logo} alt="GerboAI logo" className="hio-brand-mark" />
             <div className="hio-brand-copy">
               <div className="hio-brand-name">
-                GerboAI Saas
+                GerboAI
                 <button
                   type="button"
                   className="hio-verified"
@@ -639,7 +639,7 @@ export default function HeroInvoiceOverlay() {
           z-index:1;
           container-type: inline-size;
           width:min(420px, 92cqi, 92vw);
-          background:var(--hio-paper);
+          background:var(--accent-soft);
           color:var(--hio-ink);
           border-radius:14px;
           padding:26px 26px 20px;
@@ -697,7 +697,7 @@ export default function HeroInvoiceOverlay() {
           font-family:Georgia,serif;font-weight:700;font-size:13px;
         }
         .hio-brand-name{
-         color:white;
+         color:black;
           font-weight:700;font-size:13.5px;line-height:1.2;
           display:flex; align-items:center; gap:5px;
         }
@@ -755,7 +755,7 @@ export default function HeroInvoiceOverlay() {
           color:var(--hio-accent-strong);text-transform:uppercase;margin-bottom:4px;
         }
         .hio-party-name{font-size:12.5px;color:grey;font-weight:600;min-height:16px;}
-        .hio-party-detail{font-size:11px;color:white;min-height:14px;}
+        .hio-party-detail{font-size:11px;color:black;min-height:14px;}
 
         .hio-table{margin-bottom:14px;}
         .hio-row{
@@ -775,8 +775,8 @@ export default function HeroInvoiceOverlay() {
         .hio-col-qty{text-align:center;}
         .hio-col-rate{text-align:right;}
         .hio-col-amt{text-align:right;}
-        .hio-desc{font-size:12px;color:white;line-height:1.3;}
-        .hio-num{font-size:12px;color:white;font-variant-numeric:tabular-nums;}
+        .hio-desc{font-size:12px;color:black;line-height:1.3;}
+        .hio-num{font-size:12px;color:black;font-variant-numeric:tabular-nums;}
         .hio-amount{font-weight:700;}
 
         .hio-cursor{

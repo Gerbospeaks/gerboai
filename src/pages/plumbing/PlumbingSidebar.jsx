@@ -52,7 +52,7 @@ export default function PlumbingSidebar({
 
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   return (
@@ -108,7 +108,7 @@ export default function PlumbingSidebar({
                 },
                 {
                   icon: GerboAIIcon,
-                  title: "GerboAI Receptionist",
+                  title: "AI Receptionist",
                   action: () => goTo("gerbo-ai"),
                 },
                 {
@@ -193,7 +193,7 @@ export default function PlumbingSidebar({
                 alt="logo"
               />
               <button
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => setSidebarOpen(true)}
                 className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -213,7 +213,7 @@ export default function PlumbingSidebar({
                 label="Settings"
                 onClick={() => {
                   setShowSettings(true);
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
                 color="slate"
               />
@@ -227,7 +227,7 @@ export default function PlumbingSidebar({
                 />
                 <NavItem
                   icon={GerboAIIcon}
-                  label="GerboAI Receptionist"
+                  label="AI Receptionist"
                   onClick={() => goTo("gerbo-ai")}
                   color="blue"
                 />
@@ -255,7 +255,7 @@ export default function PlumbingSidebar({
                       label="Create Work Order"
                       onClick={() => {
                         handleNewJobCard();
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -263,7 +263,7 @@ export default function PlumbingSidebar({
                       badge={savedJobCards?.length ?? 0}
                       onClick={() => {
                         setShowJobCardsList(!showJobCardsList);
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -300,7 +300,7 @@ export default function PlumbingSidebar({
                       label="Add Customer"
                       onClick={() => {
                         handleAddNewCustomer();
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -308,7 +308,7 @@ export default function PlumbingSidebar({
                       badge={savedCustomers?.length ?? 0}
                       onClick={() => {
                         setShowCustomersListModal(true);
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                   </div>

@@ -155,7 +155,15 @@ const handleAddNewCustomer = () => {
   setSelectedCustomer(null);
   setShowCustomerModal(true);
 };
- 
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("quote"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("quote"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ── Payment / stamp ───────────────────────────────────────────────────────
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
@@ -724,6 +732,8 @@ const bottomNavItems = [
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onQuickCreate={handleQuickCreate}
+            onTeamOpen={() => setShowUserManagement(true)}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -745,6 +755,9 @@ const bottomNavItems = [
             existingCustomer={selectedCustomer}
             onCustomerSaved={loadCustomers}
           />
+           {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
           {showPaymentModal && selectedQuoteForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}

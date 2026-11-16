@@ -679,12 +679,12 @@ const TowingDashboard = () => {
 
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "YOUR TOWING COMPANY NAME",
-    addressLine1: "9-10 CNR THIRD & ARKWRIGHT AVENUE",
-    addressLine2: "WYNBERG",
-    city: "SANDTON",
+    addressLine1: "1848 Clipsham Views",
+    addressLine2: "Clipsham",
+    city: "Masvingo",
     postalCode: "2090",
-    primaryPhone: "082 514 4509",
-    secondaryPhone: "084 583 9929",
+    primaryPhone: "0776 109 275",
+    secondaryPhone: "077 610 9275",
     logoUrl: "",
   });
   const [loading, setLoading] = useState(true);
@@ -907,7 +907,15 @@ const TowingDashboard = () => {
     setDocumentType("invoice");
     handleNewJobCard();
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewQuote();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const handleNewJobCard = () => {
     setJobCardId(null);
     setJobCardNumber("");
@@ -1465,6 +1473,7 @@ const TowingDashboard = () => {
             actions={headerActions}
             mobileActions={mobileDashboardActions}
             onSettingsOpen={() => setShowSettings(true)}
+            onQuickCreate={handleQuickCreate}
             onTeamOpen={() => setShowUserManagement(true)}
             onMenuClick={() => setSidebarOpen((p) => !p)}
           />

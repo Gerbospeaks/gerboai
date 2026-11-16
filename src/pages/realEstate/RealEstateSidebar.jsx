@@ -51,7 +51,7 @@ export default function RealEstateSidebar({
 
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   return (
@@ -107,7 +107,7 @@ export default function RealEstateSidebar({
                 },
                 {
                   icon: GerboAIIcon,
-                  title: "GerboAI Receptionist",
+                  title: "AI Receptionist",
                   action: () => goTo("gerbo-ai"),
                 },
                 {
@@ -212,7 +212,7 @@ export default function RealEstateSidebar({
                 label="Settings"
                 onClick={() => {
                   setShowSettings(true);
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
                 color="slate"
               />
@@ -226,7 +226,7 @@ export default function RealEstateSidebar({
                 />
                 <NavItem
                   icon={GerboAIIcon}
-                  label="GerboAI Receptionist"
+                  label="AI Receptionist"
                   onClick={() => goTo("gerbo-ai")}
                   color="blue"
                 />
@@ -254,7 +254,7 @@ export default function RealEstateSidebar({
                       label="Create Invoice"
                       onClick={() => {
                         handleNewInvoice();
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -262,7 +262,7 @@ export default function RealEstateSidebar({
                       badge={savedInvoices?.length ?? 0}
                       onClick={() => {
                         setShowInvoicesList(!showInvoicesList);
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -296,7 +296,7 @@ export default function RealEstateSidebar({
                       label="Add Client"
                       onClick={() => {
                         handleAddNewCustomer();
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -304,7 +304,7 @@ export default function RealEstateSidebar({
                       badge={savedCustomers?.length ?? 0}
                       onClick={() => {
                         setShowCustomersListModal(true);
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                   </div>

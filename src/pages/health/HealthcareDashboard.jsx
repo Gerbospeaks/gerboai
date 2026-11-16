@@ -413,7 +413,15 @@ const [stampConfig, setStampConfig] = useState(null);
     setItems((prev) => [...prev, { description: newItem.description, type: newItem.type || "Service", rate, qty, amount: rate * qty }]);
     setNewItem({ description: "", rate: "", qty: "", type: "Service" });
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewInvoice();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedPatient(null);
+      setShowPatientModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const handleProcessPayment = async () => {
     if (!invoiceId || !user?.uid) { alert("Please save the invoice before processing payment"); return; }
     try {
@@ -571,6 +579,7 @@ const [stampConfig, setStampConfig] = useState(null);
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 

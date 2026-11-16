@@ -495,16 +495,18 @@ export default function Home({
       navigate(getDashboardRoute(user?.dashboardId));
     }
   };
-  const handleNewInvoice = () => nav("quote", "invoice");
-  const handleNewQuote = () => nav("quote", "quote");
-  const handleNewEstimate = () => nav("estimate", "estimate");
-  const handleNewJobcard = () => nav("jobcard", "jobcard");
+  const handleNewInvoice = () => nav("invoice", "invoice");
+  const handleNewQuote = () => nav("invoice", "quote", "estimate");
+  const handleNewEstimate = () => nav("estimate", "quote");
+  const handleNewJobCard = () => nav("invoice", "invoice");
+  const handleAllNewInvoice = () => nav("quote", "quote");
 
   const { actions } = getDashboardActions(user?.dashboardId, {
     handleNewInvoice,
     handleNewQuote,
     handleNewEstimate,
-    handleNewJobcard,
+    handleNewJobCard,
+    handleAllNewInvoice,
     handleNewInvoiceDoc: handleNewInvoice,
   });
 
@@ -602,22 +604,23 @@ export default function Home({
         {/* ── Scrollable body ── */}
         <div className="zh-body">
           {onOpenAI && (
-  <div className="zh-ai-banner">
-    <div>
-      <div className="zh-ai-banner-title">
-        <Sparkles size={15} /> Invoice in 10 seconds
-      </div>
-      <div className="zh-ai-banner-sub">
-        Just say what you did, e.g. "Invoice Thabo for 5hrs at R650/hr".
-      </div>
-    </div>
-    <div className="zh-ai-banner-btns">
-      <button onClick={() => handleAI("invoice")}>Invoice</button>
-      <button onClick={() => handleAI("quote")}>Quote</button>
-      <button onClick={() => handleAI("purchase_order")}>PO</button>
-    </div>
-  </div>
-)}
+            <div className="zh-ai-banner">
+              <div>
+                <div className="zh-ai-banner-title">
+                  <Sparkles size={15} /> Invoice in 10 seconds
+                </div>
+                <div className="zh-ai-banner-sub">
+                  Just say what you did, e.g. "Invoice Thabo for 5hrs at
+                  R650/hr".
+                </div>
+              </div>
+              <div className="zh-ai-banner-btns">
+                <button onClick={() => handleAI("invoice")}>Invoice</button>
+                <button onClick={() => handleAI("quote")}>Quote</button>
+                <button onClick={() => handleAI("purchase_order")}>PO</button>
+              </div>
+            </div>
+          )}
           {/* KPIs */}
           <div className="zh-section">Overview</div>
           <div className="zh-kpi-grid">
@@ -704,33 +707,45 @@ export default function Home({
                 <ArrowRight size={13} color={Z.textMuted} />
               </div>
               <div className="zh-panel-body">
-  {onOpenAI && (
-    <button className="zh-ai-btn" onClick={() => handleAI("invoice")}>
-      <span className="zh-ai-btn-left">
-        <Sparkles size={15} /> Create with AI
-      </span>
-      <span className="zh-ai-btn-sub">Describe it in one sentence</span>
-    </button>
-  )}
+                {onOpenAI && (
+                  <button
+                    className="zh-ai-btn"
+                    onClick={() => handleAI("invoice")}
+                  >
+                    <span className="zh-ai-btn-left">
+                      <Sparkles size={15} /> Create with AI
+                    </span>
+                    <span className="zh-ai-btn-sub">
+                      Describe it in one sentence
+                    </span>
+                  </button>
+                )}
 
-  <div className="zh-actions-list">
-    {(actions || []).map((a, i) => {
-      const p = actionPalette[i % actionPalette.length];
-      const Icon = a.icon || FileText;
-      return (
-        <button key={a.label || i} className="zh-action-btn" onClick={a.onClick}>
-          <span className="zh-action-btn-left">
-            <span className="zh-action-icon" style={{ background: p.iconBg }}>
-              <Icon size={13} color={p.iconColor} />
-            </span>
-            <span className="zh-action-label">{a.label}</span>
-          </span>
-          <ArrowRight size={13} className="zh-action-arrow" />
-        </button>
-      );
-    })}
-  </div>
-</div>
+                <div className="zh-actions-list">
+                  {(actions || []).map((a, i) => {
+                    const p = actionPalette[i % actionPalette.length];
+                    const Icon = a.icon || FileText;
+                    return (
+                      <button
+                        key={a.label || i}
+                        className="zh-action-btn"
+                        onClick={a.onClick}
+                      >
+                        <span className="zh-action-btn-left">
+                          <span
+                            className="zh-action-icon"
+                            style={{ background: p.iconBg }}
+                          >
+                            <Icon size={13} color={p.iconColor} />
+                          </span>
+                          <span className="zh-action-label">{a.label}</span>
+                        </span>
+                        <ArrowRight size={13} className="zh-action-arrow" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 

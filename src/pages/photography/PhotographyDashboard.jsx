@@ -24,6 +24,7 @@ import { getAuth, signOut } from "firebase/auth";
 import SignatureStamp from "../SignatureStamp";
 import PhotographyMultiStepForm from "./PhotographyMultiStepForm";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import  PhotographySidebar from "./PhotographySidebar"
 import {
   getFirestore,
   collection,
@@ -257,7 +258,15 @@ const [stampConfig, setStampConfig] = useState(null);
   const [eventLocation, setEventLocation] = useState(
     "Silverstar Casino, Krugersdorp",
   );
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewInvoice();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "PERFECT MOMENTS PHOTOGRAPHY",
     addressLine1: "123 Studio Street",
@@ -840,463 +849,44 @@ const [stampConfig, setStampConfig] = useState(null);
   return (
     <div className="flex h-screen w-screen bg-gradient-to-br from-slate-50 via-slate-100 to-gray-100 overflow-hidden">
       {/* ── Upgrade modal (renders on top of everything) ─────────────────── */}
-      <UpgradeModal />
-
-      {/* ── Mobile Sidebar Backdrop ──────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* ── Collapsed Sidebar ────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "hidden" : "hidden md:block"} fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
-      >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-violet-600 hover:to-violet-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-violet-500/50 hover:scale-110"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-          </button>
-          <div className="w-10 h-10 mb-2">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-full h-full object-contain rounded-lg"
-            />
-          </div>
-          <div className="w-10 border-t border-slate-600"></div>
-          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button
-              onClick={() => setActiveView("home")}
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() =>
-                requirePlan("businessOverview", () => {}, "Business Overview")
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Business Overview"
-            >
-              <TrendingUp className="w-5 h-5" />
-              {!canAccess("businessOverview") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveView("gerbo-ai")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="GerboAI Receptionist"
-            >
-              <GerboAIIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => {
-                handleNewInvoice();
-                setActiveView("invoice");
-              }}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Invoices"
-            >
-              <ClipboardList className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() =>
-                requirePlan(
-                  "allClients",
-                  () => setShowCustomersListModal(true),
-                  "All Clients",
-                )
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Clients"
-            >
-              <Users className="w-5 h-5" />
-              {!canAccess("allClients") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() =>
-                requirePlan(
-                  "templates",
-                  () => setActiveView("templates"),
-                  "Invoice Templates",
-                )
-              }
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Templates"
-            >
-              <FileText className="w-5 h-5" />
-              {!canAccess("templates") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("bookings", () => {}, "Bookings")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Bookings"
-            >
-              <Calendar className="w-5 h-5" />
-              {!canAccess("bookings") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("portfolio", () => {}, "Portfolio")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Portfolio"
-            >
-              <Image className="w-5 h-5" />
-              {!canAccess("portfolio") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-            <button
-              onClick={() => requirePlan("packages", () => {}, "Packages")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-violet-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center relative"
-              title="Packages"
-            >
-              <Package className="w-5 h-5" />
-              {!canAccess("packages") && (
-                <Lock className="w-2.5 h-2.5 text-slate-600 absolute bottom-1 right-1" />
-              )}
-            </button>
-          </div>
-        </div>
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-          <div className="relative group">
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-violet-700 shadow-lg group-hover:ring-4 group-hover:ring-violet-500/50 transition-all duration-300">
-              <img src={businessInfo.logoUrl} alt="" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Expanded Sidebar ─────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 md:w-72 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
-      >
-        <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* ── Plan badge in sidebar ──────────────────────────────────── */}
-          <div className="flex items-center justify-between mb-4 px-3 py-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
-            <span className="text-xs text-slate-400">Your plan</span>
-            <div className="flex items-center gap-2">
-              <PlanBadge />
-              {currentPlan !== "elite" && (
-                <button
-                  onClick={() => requirePlan("elite", () => {}, "Elite plan")}
-                  className="text-xs text-violet-400 hover:text-violet-300 font-semibold transition-colors"
-                >
-                  Upgrade ↑
-                </button>
-              )}
-            </div>
-          </div>
-
-          <nav className="space-y-1.5 md:space-y-2">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-slate-600/20 hover:to-slate-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
-            >
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">Settings</span>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-slate-700/50">
-              {/* Business Overview */}
-              <SidebarItem
-                icon={TrendingUp}
-                label="Business Overview"
-                featureKey="businessOverview"
-                featureLabel="Business Overview"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              <div
-                onClick={() => {
-                  setActiveView("gerbo-ai");
-                  setSidebarOpen(false);
+      <PhotographySidebar 
+                user={user}
+                activeView={activeView}
+                setActiveView={setActiveView}
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                showSettings={showSettings}
+                setShowSettings={setShowSettings}
+                handleNewInvoice={() => {
+                  handleNewInvoice();
+                  setActiveView("invoice");
                 }}
-                className="flex items-center space-x-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 text-slate-300 hover:text-white hover:bg-slate-700/50 mt-2"
-              >
-                <GerboAIIcon className="w-5 h-5" />
-                <span className="text-sm font-medium">GerboAI Receptionist</span>
-              </div>
-
-              {/* Invoices */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <ClipboardList className="w-5 h-5" />
-                    <span className="text-sm font-medium">Invoices</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={() => {
-                      handleNewInvoice();
-                      setSidebarOpen(false);
-                      setActiveView("invoice");
-                    }}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    Create Invoice
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "allInvoices",
-                        () => {
-                          setShowInvoicesList(!showInvoicesList);
-                          setSidebarOpen(false);
-                        },
-                        "All Invoices",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        All Invoices
-                        {!canAccess("allInvoices") && (
-                          <Lock className="w-3 h-3 text-slate-600" />
-                        )}
-                      </span>
-                      <span className="text-violet-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedInvoices.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan("payments", () => {}, "Pending Payment")
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5"
-                  >
-                    Pending Payment
-                    {!canAccess("payments") && (
-                      <Lock className="w-3 h-3 text-slate-600" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Clients */}
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-5 h-5" />
-                    <span className="text-sm font-medium">Clients</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "addClient",
-                        () => {
-                          handleAddNewCustomer();
-                          setSidebarOpen(false);
-                        },
-                        "Add Client",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5"
-                  >
-                    Add Client
-                    {!canAccess("addClient") && (
-                      <Lock className="w-3 h-3 text-slate-600" />
-                    )}
-                  </div>
-                  <div
-                    onClick={() =>
-                      requirePlan(
-                        "allClients",
-                        () => {
-                          setShowCustomersListModal(true);
-                          setSidebarOpen(false);
-                        },
-                        "All Clients",
-                      )
-                    }
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        All Clients
-                        {!canAccess("allClients") && (
-                          <Lock className="w-3 h-3 text-slate-600" />
-                        )}
-                      </span>
-                      <span className="text-violet-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedCustomers.length}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Templates */}
-              <SidebarItem
-                icon={FileText}
-                label="Invoice Templates"
-                featureKey="templates"
-                featureLabel="Invoice Templates"
-                onClick={() => {
-                  setActiveView("templates");
-                  setSidebarOpen(false);
+                handleNewJobCard={() => {
+                  handleNewInvoice();
+                  setActiveView("invoice");
                 }}
-                className="mt-2"
-              />
+                businessInfo={businessInfo}
+                savedCustomers={savedCustomers}
+                documentType={documentType}
+                showCustomersListModal={showCustomersListModal}
+                setShowCustomersListModal={setShowCustomersListModal}
+                handleAddNewCustomer={handleAddNewCustomer}
+                handleLogout={handleLogout}
+                logo={logo}
+                newRequestCount={0}
+                isAdmin={isAdmin}
+      />
 
-              {/* Bookings */}
-              <SidebarItem
-                icon={Calendar}
-                label="Bookings"
-                featureKey="bookings"
-                featureLabel="Bookings"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Portfolio */}
-              <SidebarItem
-                icon={Image}
-                label="Portfolio"
-                featureKey="portfolio"
-                featureLabel="Portfolio"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Packages */}
-              <SidebarItem
-                icon={Package}
-                label="Packages"
-                featureKey="packages"
-                featureLabel="Packages"
-                onClick={() => setSidebarOpen(false)}
-              />
-
-              {/* Payments */}
-              <SidebarItem
-                icon={CreditCard}
-                label="Payments"
-                featureKey="payments"
-                featureLabel="Payments"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-
-              {/* Reports */}
-              <SidebarItem
-                icon={FileBarChart}
-                label="Reports"
-                featureKey="reports"
-                featureLabel="Reports"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-
-              {/* Analytics */}
-              <SidebarItem
-                icon={BarChart3}
-                label="Analytics"
-                featureKey="analytics"
-                featureLabel="Analytics"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <ChevronDown className="w-4 h-4" />
-              </SidebarItem>
-            </div>
-          </nav>
-        </div>
-
-        {/* Sidebar footer */}
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-violet-500/50 transition-all duration-300">
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Business Logo"
-                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
-          </div>
-        </div>
-      </div>
+  
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
-      <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-16"}`}
-      >
+     <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         <div className="flex flex-col h-screen">
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onTeamOpen={() => setShowUserManagement(true)}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -1319,6 +909,9 @@ const [stampConfig, setStampConfig] = useState(null);
               existingCustomer={selectedCustomer}
               onCustomerSaved={handleCustomerSaved}
             />
+             {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
 {showStampModal && (
   <StampSignatureModal
     isOpen={showStampModal}

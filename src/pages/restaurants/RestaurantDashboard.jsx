@@ -121,7 +121,7 @@ const NAV = [
   { id: "Orders", icon: ShoppingCart, label: "Orders" },
   { id: "Staff", icon: Users, label: "Staff & Sections" },
   { id: "Payments", icon: CreditCard, label: "Payments" },
-  { id: "GerboAI Receptionist", icon: GerboAIIcon, label: "GerboAI Receptionist" },
+  { id: "AI Receptionist", icon: GerboAIIcon, label: "AI Receptionist" },
   { id: "History", icon: Archive, label: "Invoice History" },
   { id: "Analytics", icon: BarChart3, label: "Analytics" },
 ];
@@ -2666,6 +2666,7 @@ const RestaurantDashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [menuForm, setMenuForm] = useState({
     name: "",
     category: "",
@@ -3151,7 +3152,7 @@ const RestaurantDashboard = () => {
           {activeTab === "Payments" && <PaymentsTab />}
           {activeTab === "History" && <HistoryTab />}
           {activeTab === "Analytics" && <AnalyticsTab salesData={salesData} />}
-          {activeTab === "GerboAI Receptionist" && <GerboAIPanel user={user} fixedHeight />}
+          {activeTab === "AI Receptionist" && <GerboAIPanel user={user} fixedHeight />}
         </div>
       </div>
 
@@ -3271,7 +3272,9 @@ const RestaurantDashboard = () => {
           </div>
         </Modal>
       )}
-
+{showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
       {showSettings && (
         <BusinessSettingsModal onClose={() => setShowSettings(false)} />
       )}

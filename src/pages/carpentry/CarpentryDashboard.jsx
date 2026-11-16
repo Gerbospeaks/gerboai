@@ -122,11 +122,11 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const handleQuickCreate = ({ view, action }) => {
     if (action === "newInvoice") {
       handleNewInvoice();
-      setActiveView("invoice");
+      setActiveView("quote");
     }
     if (action === "newQuote") {
       handleNewQuote();
-      setActiveView("invoice");
+      setActiveView("quote");
     }
     if (action === "newCustomer") {
       handleAddNewCustomer();
@@ -1147,7 +1147,7 @@ const bottomNavItems = [
             setSidebarOpen={setSidebarOpen}
             onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
-            onTeamOpen={() => setShowUserManagement(true)} // ✅ ADDED
+            onTeamOpen={() => setShowUserManagement(true)} 
             plan="pro"
             showConvertButton={
               documentType === "quote" && !!quoteId && activeView === "quote"
@@ -1174,6 +1174,7 @@ const bottomNavItems = [
             existingCustomer={selectedCustomer}
             onCustomerSaved={loadCustomers}
           />
+
           {showPaymentModal && selectedQuoteForPayment && (
             <PaymentProcessor
               showModal={showPaymentModal}
@@ -1202,7 +1203,6 @@ const bottomNavItems = [
   />
 )}
 
-          {/* ✅ ADDED — SubUserManagement modal */}
           {showUserManagement && (
             <SubUserManagement onClose={() => setShowUserManagement(false)} />
           )}

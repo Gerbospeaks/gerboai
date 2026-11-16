@@ -969,13 +969,13 @@ const handleUnlockStamp = async () => {
   const [authCode, setAuthCode] = useState("456789");
 
   const [businessInfo, setBusinessInfo] = useState({
-    businessName: "V8 POWERED AUTO SERVICE",
-    addressLine1: "9-10 CNR THIRD & ARKWRIGHT AVENUE",
-    addressLine2: "WYNBERG",
-    city: "SANDTON",
+    businessName: "Gerbo Atlas Services",
+    addressLine1: "1848 Clipsham Views",
+    addressLine2: "Clipsham",
+    city: "Masvingo",
     postalCode: "2090",
-    primaryPhone: "082 514 4509",
-    secondaryPhone: "084 583 9929",
+    primaryPhone: "0776 109 275",
+    secondaryPhone: "077 610 9275",
     logoUrl: "",
   });
   const [loading, setLoading] = useState(true);
@@ -2042,6 +2042,7 @@ const handleStampConfirm = async (cfg) => {
             onSettingsOpen={() => setShowSettings(true)}
             onTeamOpen={() => setShowUserManagement(true)}
             sidebarOpen={sidebarOpen}
+            onQuickCreate={handleQuickCreate}
             setSidebarOpen={setSidebarOpen}
             showConvertButton={
               documentType === "quote" &&
@@ -2093,7 +2094,7 @@ const handleStampConfirm = async (cfg) => {
                 ) : (
                   <TemplateRenderer {...templateProps} />
                 )
-              }
+              }setActiveViewNew Invoice
               businessInfo={businessInfo}
               existingConfig={stampConfig}
             />

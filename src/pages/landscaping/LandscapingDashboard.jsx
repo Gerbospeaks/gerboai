@@ -137,7 +137,15 @@ const [stampConfig, setStampConfig] = useState(null);
     balanceDue: 0,
     status: "pending",
   });
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewJobCard();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewJobCard();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ── Customer fields ──────────────────────────────────────────────────────
   const [customerName, setCustomerName] = useState("Sarah Johnson");
   const [customerId, setCustomerId] = useState("CUST-2026-1234");
@@ -175,8 +183,8 @@ const [stampConfig, setStampConfig] = useState(null);
     addressLine2: "CLAREMONT",
     city: "CAPE TOWN",
     postalCode: "7708",
-    primaryPhone: "082 514 4509",
-    secondaryPhone: "084 583 9929",
+    primaryPhone: "0776 109 275",
+    secondaryPhone: "077 610 9275",
     logoUrl: "",
   });
 
@@ -995,6 +1003,8 @@ const [stampConfig, setStampConfig] = useState(null);
             mobileActions={
               activeView === "invoice" ? mobileDashboardActions : []
             }
+            onQuickCreate={handleQuickCreate}
+            onTeamOpen={() => setShowUserManagement(true)}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -1017,6 +1027,9 @@ const [stampConfig, setStampConfig] = useState(null);
             existingCustomer={selectedCustomer}
             onCustomerSaved={handleCustomerSaved}
           />
+           {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
 {showStampModal && (
   <StampSignatureModal
     isOpen={showStampModal}

@@ -149,7 +149,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const [showSettings, setShowSettings] = useState(false);
   const [showCustomersListModal, setShowCustomersListModal] = useState(false);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
-
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   const [showWaybillSticker, setShowWaybillSticker] = useState(false);
@@ -214,7 +214,15 @@ const [stampConfig, setStampConfig] = useState(null);
   const [weight, setWeight] = useState("500");
   const [dimensions, setDimensions] = useState("100x80x60 cm");
   const [trackingNumber, setTrackingNumber] = useState("TRK" + Date.now());
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewWaybill();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewWaybill();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ── Items ────────────────────────────────────────────────────────────────
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -227,12 +235,12 @@ const [stampConfig, setStampConfig] = useState(null);
   // ── Business info ────────────────────────────────────────────────────────
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "SOLIDFLO LOGISTICS",
-    addressLine1: "9-10 CNR THIRD & ARKWRIGHT AVENUE",
-    addressLine2: "WYNBERG",
-    city: "SANDTON",
+    addressLine1: "1848 Clipsham Views",
+    addressLine2: "Clipsham",
+    city: "Masvingo",
     postalCode: "2090",
-    primaryPhone: "082 514 4509",
-    secondaryPhone: "084 583 9929",
+    primaryPhone: "0776 109 275",
+    secondaryPhone: "077 610 9275",
     logoUrl: "",
   });
 
@@ -1158,6 +1166,8 @@ const [stampConfig, setStampConfig] = useState(null);
             dashboardType="mechanics"
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            onQuickCreate={handleQuickCreate}
+            onTeamOpen={() => setShowUserManagement(true)}
             pageTitle="Job Cards"
             plan="pro"
             showConvertButton={
@@ -1187,7 +1197,9 @@ const [stampConfig, setStampConfig] = useState(null);
               existingCustomer={selectedCustomer}
               onCustomerSaved={handleCustomerSaved}
             />
-
+             {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
             <WaybillStickerModal
               isOpen={showWaybillSticker}
               onClose={() => setShowWaybillSticker(false)}
@@ -1412,7 +1424,7 @@ const [stampConfig, setStampConfig] = useState(null);
                 <FinancialOverview user={user} />
               </div>
             )}
-            {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
+           {activeView === "gerbo-ai" && <GerboAIPanel user={user} />}
             {activeView === "purchase-orders" && (
               <div className="flex-1 overflow-y-auto p-6">
                 <PurchaseOrders user={user} />

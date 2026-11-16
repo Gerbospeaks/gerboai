@@ -78,6 +78,7 @@ import {
   MapPin,
   Upload,
 } from "lucide-react";
+import PlumbingSidebar from "./PlumbingSidebar";
 
 const generateJobCardNumber = async (userId) => {
   const db = getFirestore();
@@ -126,6 +127,7 @@ const PlumbingDashboard = () => {
   const [customers, setCustomers] = useState([]);
   const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isWorkOrdersOpen, setIsWorkOrdersOpen] = useState(false);
   const [isInvoicingOpen, setIsInvoicingOpen] = useState(false);
   const [isClientsOpen, setIsClientsOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -519,7 +521,15 @@ const [stampConfig, setStampConfig] = useState(null);
       alert("Failed to load invoice for payment");
     }
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewJobCard();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewJobCard();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const handlePaymentComplete = () => {
     loadSavedJobCards();
     loadPaymentStatus();
@@ -769,343 +779,43 @@ const [stampConfig, setStampConfig] = useState(null);
   return (
     <div className="flex h-screen w-screen bg-gradient-to-br from-cyan-50 via-slate-50 to-blue-50 overflow-hidden">
       {/* ── Mobile Sidebar Backdrop ──────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* ── Collapsed Sidebar ────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "hidden" : "hidden md:block"} fixed z-40 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden transition-all duration-300 shadow-xl`}
-      >
-        <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="group p-2 md:p-3 text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-600 hover:to-cyan-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/50 hover:scale-110"
-            title="Expand Sidebar"
-          >
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:animate-pulse" />
-          </button>
-
-          <div className="relative group">
-            <div className="relative w-10 h-10 md:w-12 md:h-12 mb-2 md:mb-4 rounded-xl p-1 shadow-lg">
-              <img src={logo} alt="" />
-            </div>
-          </div>
-
-          <div className="w-10 border-t border-slate-600"></div>
-
-          <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full px-2 md:px-3">
-            <button
-              onClick={() => setActiveView("home")}
-              className="group relative p-2 md:p-3 text-cyan-400 hover:text-white rounded-xl transition-all duration-300 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden"
-              title="Home"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Home className="w-5 h-5 md:w-6 md:h-6 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Business Overview"
-            >
-              <TrendingUp className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setActiveView("gerbo-ai")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="GerboAI Receptionist"
-            >
-              <GerboAIIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => {
-                handleNewJobCard();
-                setActiveView("invoice");
-              }}
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Work Orders"
-            >
-              <ClipboardList className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setShowCustomersListModal(true)}
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Customers"
-            >
-              <Users className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => setActiveView("templates")}
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Invoice Templates"
-            >
-              <FileText className="w-5 h-5" />
-            </button>
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Properties"
-            >
-              <MapPin className="w-5 h-5" />
-            </button>
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Parts Inventory"
-            >
-              <Package className="w-5 h-5" />
-            </button>
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Invoices"
-            >
-              <Receipt className="w-5 h-5" />
-            </button>
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Payments"
-            >
-              <CreditCard className="w-5 h-5" />
-            </button>
-            <button
-              className="p-2 text-slate-400 hover:text-white hover:bg-cyan-600/80 rounded-lg transition-all duration-200 w-10 h-10 flex items-center justify-center"
-              title="Appointments"
-            >
-              <Calendar className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center">
-          <div className="relative group">
-            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-full flex items-center justify-center ring-2 ring-cyan-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
-              <img src={businessInfo.logoUrl} alt="" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Expanded Sidebar ─────────────────────────────────────────────── */}
-      <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
-      >
-        <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <img
-              src={logo}
-              alt="Business Logo"
-              className="w-16 h-12 object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
-              title="Collapse Sidebar"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          </div>
-
-          <nav className="space-y-1">
-            <div
-              onClick={() => {
-                setActiveView("home");
-                setSidebarOpen(false);
-              }}
-              className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-slate-600/20 hover:to-slate-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
-            >
-              <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-              <span className="text-xs md:text-sm font-semibold">Home</span>
-            </div>
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">Settings</span>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-slate-700/50">
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-cyan-600/20 rounded-lg cursor-pointer transition-all duration-200">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-medium">Business Overview</span>
-              </div>
-
-              <div
-                onClick={() => {
-                  setActiveView("gerbo-ai");
-                  setSidebarOpen(false);
+      <PlumbingSidebar
+      user={user}
+                activeView={activeView}
+                setActiveView={setActiveView}
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                showSettings={showSettings}
+                setShowSettings={setShowSettings}
+                handleNewInvoice={() => {
+                  handleNewJobCard();
+                  setActiveView("invoice");
                 }}
-                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-cyan-600/20 rounded-lg cursor-pointer transition-all duration-200"
-              >
-                <GerboAIIcon className="w-5 h-5" />
-                <span className="text-sm font-medium">GerboAI Receptionist</span>
-              </div>
-
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <ClipboardList className="w-5 h-5" />
-                    <span className="text-sm font-medium">Work Orders</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={() => {
-                      handleNewJobCard();
-                      setSidebarOpen(false);
-                      setActiveView("invoice");
-                    }}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    Create Work Order
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowJobCardsList(!showJobCardsList);
-                      setSidebarOpen(false);
-                    }}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>All Work Orders</span>
-                      <span className="text-cyan-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedJobCards.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
-                    In Progress
-                  </div>
-                  <div className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200">
-                    Emergency Calls
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-5 h-5" />
-                    <span className="text-sm font-medium">Customers</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </div>
-                <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-4">
-                  <div
-                    onClick={handleAddNewCustomer}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    Add Customer
-                  </div>
-                  <div
-                    onClick={() => {
-                      setShowCustomersListModal(true);
-                      setSidebarOpen(false);
-                    }}
-                    className="px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>All Customers</span>
-                      <span className="text-cyan-300 px-2 py-0.5 rounded-full text-xs font-semibold">
-                        {savedCustomers.length}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => {
-                  setActiveView("templates");
-                  setSidebarOpen(false);
+               
+                handleNewJobCard={() => {
+                  handleNewJobCard();
+                  setActiveView("invoice");
                 }}
-                className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200 mt-2"
-              >
-                <FileText className="w-5 h-5" />
-                <span className="text-sm font-medium">Invoice Templates</span>
-              </div>
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <MapPin className="w-5 h-5" />
-                <span className="text-sm font-medium">Properties</span>
-              </div>
-              <div className="flex items-center space-x-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <Package className="w-5 h-5" />
-                <span className="text-sm font-medium">Parts Inventory</span>
-              </div>
-              <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <div className="flex items-center space-x-3">
-                  <Receipt className="w-5 h-5" />
-                  <span className="text-sm font-medium">Invoices</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-              <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5" />
-                  <span className="text-sm font-medium">Payments</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-              <div className="flex items-center justify-between px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg cursor-pointer transition-all duration-200">
-                <div className="flex items-center space-x-3">
-                  <FileBarChart className="w-5 h-5" />
-                  <span className="text-sm font-medium">Reports</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
-          </nav>
-        </div>
-
-        <div className="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center p-4 md:p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-900 to-transparent backdrop-blur-sm">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="relative group flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-teal-600 rounded-full opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-              <div className="relative w-9 h-9 md:w-11 md:h-11 bg-white rounded-full ring-2 ring-slate-700 shadow-lg group-hover:ring-4 group-hover:ring-cyan-500/50 transition-all duration-300">
-                <img
-                  src={businessInfo.logoUrl}
-                  alt="Business Logo"
-                  className="absolute inset-0 m-auto max-h-[70%] max-w-[70%] object-contain"
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs md:text-sm font-bold text-white bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent truncate">
-                {user?.name || "User"}
-              </div>
-              <div className="text-xs text-slate-400 truncate">
-                {user?.email || "email@example.com"}
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="group text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-700/20 p-2 md:p-2.5 rounded-xl transition-all duration-300 border border-transparent hover:border-red-500/30 flex-shrink-0"
-            >
-              <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-300" />
-            </button>
-          </div>
-        </div>
-      </div>
-
+                setIsWorkOrdersOpen={setIsWorkOrdersOpen}
+                businessInfo={businessInfo}
+                savedCustomers={savedCustomers}
+                documentType={documentType}
+                showCustomersListModal={showCustomersListModal}
+                setShowCustomersListModal={setShowCustomersListModal}
+                handleAddNewCustomer={handleAddNewCustomer}
+                handleLogout={handleLogout}
+                logo={logo}
+                newRequestCount={0}
+                isAdmin={isAdmin}
+      />
       {/* ── Main Content Area ────────────────────────────────────────────── */}
-      <div
-        className={`flex-1 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-2 md:ml-16"}`}
-      >
+     <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         <div className="flex flex-col h-screen">
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onTeamOpen={() => setShowUserManagement(true)}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -1129,6 +839,9 @@ const [stampConfig, setStampConfig] = useState(null);
               existingCustomer={selectedCustomer}
               onCustomerSaved={handleCustomerSaved}
             />
+             {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
 {showStampModal && (
   <StampSignatureModal
     isOpen={showStampModal}

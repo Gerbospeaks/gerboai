@@ -469,7 +469,15 @@ const TechnologyDashboardInner = () => {
     );
     return snap.exists() ? snap.data() : null;
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewInvoice();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleAddNewCustomer = () => {
     setSelectedCustomer(null);
@@ -941,6 +949,8 @@ const TechnologyDashboardInner = () => {
           <AppHeader
             actions={headerActions}
             mobileActions={mobileDashboardActions}
+            onTeamOpen={() => setShowUserManagement(true)}
+            onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
 
@@ -963,6 +973,9 @@ const TechnologyDashboardInner = () => {
               existingCustomer={selectedCustomer}
               onCustomerSaved={handleCustomerSaved}
             />
+            {showUserManagement && (
+                        <SubUserManagement onClose={() => setShowUserManagement(false)} />
+                      )}
             {showStampModal && (
               <StampSignatureModal
                 isOpen={showStampModal}

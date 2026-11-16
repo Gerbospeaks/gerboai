@@ -153,7 +153,7 @@ const RealEstateDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [inputMode, setInputMode] = useState("manual");
-
+  const [showUserManagement, setShowUserManagement] = useState(false);
   // ── Auth ─────────────────────────────────────────────────────────────────
   const { user, authUser } = useAuth();
   const [aiWindowOpen, setAiWindowOpen] = useState(false);
@@ -323,7 +323,15 @@ const [stampConfig, setStampConfig] = useState(null);
     const snapshot = await getDocs(q);
     setSavedInvoices(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
-
+  const handleQuickCreate = ({ view, action }) => {
+    if (action === "newInvoice")  { handleNewInvoice();  setActiveView("invoice"); }
+    if (action === "newQuote")    { handleNewInvoice();    setActiveView("invoice"); }
+    if (action === "newCustomer") {
+      setSelectedCustomer(null);
+      setShowCustomerModal(true);
+    }
+    if (view && !action) { setActiveView(view); }
+  };
   const loadSavedCustomers = async () => {
     if (!user?.uid) return;
     const db = getFirestore();
@@ -735,13 +743,21 @@ const [stampConfig, setStampConfig] = useState(null);
   setSidebarOpen={setSidebarOpen}
   stats={stats}
   businessInfo={businessInfo}
+    handleNewInvoice={() => {
+            handleNewInvoice();
+            setActiveView("invoice");
+          }}
+         
+          handleNewJobCard={() => {
+            handleNewInvoice();
+            setActiveView("invoice");
+          }}
   savedInvoices={savedInvoices}
   savedCustomers={savedCustomers}
   showInvoicesList={showInvoicesList}
   setShowInvoicesList={setShowInvoicesList}
   setShowSettings={setShowSettings}
   setShowCustomersListModal={setShowCustomersListModal}
-  handleNewInvoice={handleNewInvoice}
   handleAddNewCustomer={handleAddNewCustomer}
   handleLogout={handleLogout} 
   newRequestCount={0}  
@@ -749,7 +765,12 @@ const [stampConfig, setStampConfig] = useState(null);
 
         {/* ── Main content ──────────────────────────────────────────────────── */}
         <div className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-4" : "ml-0 md:ml-8"}`}>
-          <AppHeader actions={headerActions} mobileActions={mobileDashboardActions} onSettingsOpen={() => setShowSettings(true)} />
+          <AppHeader 
+          actions={headerActions} 
+          mobileActions={mobileDashboardActions} 
+          onTeamOpen={() => setShowUserManagement(true)}
+          onQuickCreate={handleQuickCreate}
+          onSettingsOpen={() => setShowSettings(true)} />
 
           {/* ── Modals ────────────────────────────────────────────────────── */}
            {showSettings && (
@@ -757,6 +778,9 @@ const [stampConfig, setStampConfig] = useState(null);
           )}
           <CustomersListModal showModal={showCustomersListModal} setShowModal={setShowCustomersListModal} customers={customers} onLoadCustomer={loadCustomer} onEditCustomer={handleEditCustomer} onAddNewCustomer={handleAddNewCustomer} />
           <CustomerModal showModal={showCustomerModal} setShowModal={setShowCustomerModal} existingCustomer={selectedCustomer} onCustomerSaved={handleCustomerSaved} />
+          {showUserManagement && (
+            <SubUserManagement onClose={() => setShowUserManagement(false)} />
+          )}
 {showStampModal && (
   <StampSignatureModal
     isOpen={showStampModal}

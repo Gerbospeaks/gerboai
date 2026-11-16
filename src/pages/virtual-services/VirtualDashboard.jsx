@@ -957,6 +957,7 @@ const VirtualDashboardInner = () => {
             dashboardType="Virtual"
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
+            onTeamOpen={() => setShowUserManagement(true)}
             onQuickCreate={handleQuickCreate}
             onSettingsOpen={() => setShowSettings(true)}
           />
@@ -980,7 +981,9 @@ const VirtualDashboardInner = () => {
               existingCustomer={selectedCustomer}
               onCustomerSaved={handleCustomerSaved}
             />
-
+           {showUserManagement && (
+                       <SubUserManagement onClose={() => setShowUserManagement(false)} />
+                     )}
             {showPaymentModal && selectedForPayment && (
               <PaymentProcessor
                 showModal={showPaymentModal}
