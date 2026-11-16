@@ -198,6 +198,7 @@ export const ProfessionalTemplate = ({
   finishType,
   items,
   subtotal,
+  discount,
   documentType = "invoice",
   vat,
   total,
@@ -361,6 +362,10 @@ export const ProfessionalTemplate = ({
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
           <span>R {(subtotal || 0).toFixed(2)}</span>
+        </div>
+         <div className="flex justify-between py-2 text-gray-600">
+          <span>Discount:</span>
+          <span>R {(discount || 0).toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-2 text-gray-600">
           <span>VAT (15%):</span>
@@ -568,6 +573,10 @@ export const ModernTemplate = (props) => (
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
+         <div className="flex justify-between py-2 text-gray-600">
+          <span>Discount:</span>
+          <span>R {props.discount.toFixed(2)}</span>
+        </div>
         <div className="flex justify-between py-2 text-gray-600">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
@@ -710,6 +719,10 @@ export const CorporateTemplate = (props) => (
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
+           <div className="flex justify-between py-2 text-gray-600">
+          <span>Discount:</span>
+          <span>R {props.discount.toFixed(2)}</span>
+        </div>
           <div className="flex justify-between py-2">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
@@ -884,6 +897,10 @@ export const ContemporaryTemplate = (props) => (
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
+           <div className="flex justify-between py-2 text-gray-600">
+          <span>Discount:</span>
+          <span>R {props.discount.toFixed(2)}</span>
+        </div>
           <div className="flex justify-between py-2 text-gray-600">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
@@ -1086,6 +1103,10 @@ export const DetailedTemplate = (props) => (
         <div className="flex justify-between py-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
+        </div>
+         <div className="flex justify-between py-2 text-gray-600">
+          <span>Discount:</span>
+          <span>R {props.discount.toFixed(2)}</span>
         </div>
         <div className="flex justify-between py-2">
           <span>VAT (15%):</span>

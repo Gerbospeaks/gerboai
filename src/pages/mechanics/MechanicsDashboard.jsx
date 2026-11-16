@@ -204,6 +204,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
   const [useAI, setUseAI] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [vatRate, setVatRate] = useState(0);
+  const [discountRate, setDiscountRate] = useState(0);
   const [isTablet, setIsTablet] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [stats, setStats] = useState({

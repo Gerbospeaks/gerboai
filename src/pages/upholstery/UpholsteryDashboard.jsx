@@ -153,6 +153,8 @@ const UpholsteryDashboard = () => {
   const [selectedTemplate, setSelectedTemplate] = useState("professional");
   const [inputMode, setInputMode] = useState("manual");
   const [selectedQuoteForPayment, setSelectedQuoteForPayment] = useState(null);
+   const [vatRate, setVatRate] = useState(0);
+    const [discountRate, setDiscountRate] = useState(0);
   const [paymentStatus, setPaymentStatus] = useState({
     totalPaid: 0,
     balanceDue: 0,
@@ -203,6 +205,7 @@ const [stampConfig, setStampConfig] = useState(null);
     qty: "",
     workCategory: "Upholstery Labour",
     taxRate: "15",
+    discountRate: "0",
     phase: "Upholstering",
   });
   const [businessInfo, setBusinessInfo] = useState({
@@ -222,8 +225,9 @@ const [stampConfig, setStampConfig] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const subtotal = items.reduce((s, i) => s + i.amount, 0);
+  const totalDiscount = subtotal * (discountRate / 100);
   const totalTax = items.reduce((s, i) => s + i.taxAmount, 0);
-  const total = subtotal + totalTax;
+  const total = (subtotal - totalDiscount) + totalTax;
 
   const steps = [
     { number: 1, title: "Client Info", icon: Users },
@@ -429,7 +433,7 @@ const [stampConfig, setStampConfig] = useState(null);
       finishType,
     },
     items,
-    totals: { subtotal, tax: totalTax, total, paid: 0, due: total },
+    totals: { subtotal, totalDiscount, tax: totalTax, total, paid: 0, due: total },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -531,7 +535,9 @@ const [stampConfig, setStampConfig] = useState(null);
     const rate = Number(newItem.rate) || 0;
     const qty = Number(newItem.qty);
     const taxRate = Number(newItem.taxRate) || 0;
+    const discountRate = Number(newItem.discountRate) || 0;
     const amount = rate * qty;
+    const discount = amount *(discountRate/100);
     const taxAmount = amount * (taxRate / 100);
     setItems((prev) => [
       ...prev,
@@ -542,8 +548,10 @@ const [stampConfig, setStampConfig] = useState(null);
         qty,
         amount,
         taxRate,
+        discountRate,
+        discount,
         taxAmount,
-        totalAmount: amount + taxAmount,
+        totalAmount: (amount - discount) + taxAmount,
         phase: newItem.phase || "Upholstering",
       },
     ]);
@@ -553,6 +561,7 @@ const [stampConfig, setStampConfig] = useState(null);
       qty: "",
       workCategory: "Upholstery Labour",
       taxRate: "15",
+      discountRate: "5",
       phase: "Upholstering",
     });
   };
@@ -644,6 +653,7 @@ const [stampConfig, setStampConfig] = useState(null);
     items,
     subtotal,
     totalTax,
+    totalDiscount,
     total,
     documentType,
     stampText: stampSettings.text,
@@ -1596,6 +1606,21 @@ const [stampConfig, setStampConfig] = useState(null);
                                       className={inputCls}
                                     />
                                   </div>
+                                   <div>
+                                    <label className={labelCls}>DISCOUNT %</label>
+                                    <input
+                                      type="number"
+                                      placeholder="5"
+                                      value={newItem.discountRate}
+                                      onChange={(e) =>
+                                        setNewItem({
+                                          ...newItem,
+                                          discountRate: e.target.value,
+                                        })
+                                      }
+                                      className={inputCls}
+                                    />
+                                  </div>
                                 </div>
                                 <button
                                   onClick={handleAddItem}
@@ -1628,6 +1653,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                             "Rate",
                                             "Qty",
                                             "VAT",
+                                            "Discount",
                                             "Total",
                                             "",
                                           ].map((h) => (
@@ -1668,6 +1694,9 @@ const [stampConfig, setStampConfig] = useState(null);
                                             <td className="px-4 py-3 text-sm text-[#374151]">
                                               R{item.taxAmount.toFixed(2)}
                                             </td>
+                                            <td className="px-4 py-3 text-sm text-[#374151]">
+                                              R{item.discount.toFixed(2)}
+                                            </td>
                                             <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
                                               R{item.totalAmount.toFixed(2)}
                                             </td>
@@ -1693,6 +1722,12 @@ const [stampConfig, setStampConfig] = useState(null);
                                         <span>Subtotal</span>
                                         <span className="font-medium text-[#374151]">
                                           R{subtotal.toFixed(2)}
+                                        </span>
+                                      </div>
+                                       <div className="flex justify-between w-48 text-[#64748b]">
+                                        <span>Discount</span>
+                                        <span className="font-medium text-[#374151]">
+                                          R{totalDiscount.toFixed(2)}
                                         </span>
                                       </div>
                                       <div className="flex justify-between w-48 text-[#64748b]">
@@ -1758,6 +1793,14 @@ const [stampConfig, setStampConfig] = useState(null);
                                     bg: "bg-[#f0fdf4]",
                                     color: "text-[#059669]",
                                   },
+                                  {
+                                    label: "Discount Amount",
+                                    value: `R${totalDiscount.toFixed(2)}`,
+                                    icon: Receipt,
+                                    bg: "bg-[#faf5ff]",
+                                    color: "text-[#7c3aed]",
+                                  },
+                                  
                                   {
                                     label: "VAT Amount",
                                     value: `R${totalTax.toFixed(2)}`,

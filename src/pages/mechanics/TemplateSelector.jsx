@@ -335,6 +335,7 @@ export const DefaultTemplate = ({
   subtotal,
   vat,
   vatRate,
+  discount,
   total,
   issueDate,
   paymentUrl,
@@ -514,6 +515,12 @@ export const DefaultTemplate = ({
             <Money value={subtotal} />
           </span>
         </div>
+         <div className="flex justify-between py-1">
+          <span>Discount:</span>
+          <span>
+            <Money value={discount} />
+          </span>
+        </div>
         <div className="flex justify-between py-1">
           <span>{vatLabel(vatRate)}:</span>
           <span>
@@ -677,11 +684,18 @@ export const ClassicTemplate = (props) => (
           </span>
         </div>
         <div className="flex justify-between py-1">
+          <span>Discount:</span>
+          <span>
+            <Money value={props.discount} />
+          </span>
+        </div>
+        <div className="flex justify-between py-1">
           <span>{vatLabel(props.vatRate)}:</span>
           <span>
             <Money value={props.vat} />
           </span>
         </div>
+        
         <div className="flex justify-between py-2 font-bold bg-gray-800 text-white px-2">
           <span>TOTAL:</span>
           <span>
@@ -824,6 +838,12 @@ export const ModernTemplate = (props) => (
             <Money value={props.subtotal} />
           </span>
         </div>
+         <div className="flex justify-between py-1">
+          <span>Discount:</span>
+          <span>
+            <Money value={props.discount} />
+          </span>
+        </div>
         <div className="flex justify-between py-2 text-gray-600">
           <span>{vatLabel(props.vatRate)}:</span>
           <span>
@@ -949,6 +969,12 @@ export const ElegantTemplate = (props) => (
               <Money value={props.subtotal} />
             </span>
           </div>
+           <div className="flex justify-between py-1">
+          <span>Discount:</span>
+          <span>
+            <Money value={props.discount} />
+          </span>
+        </div>
           <div className="flex justify-between py-2">
             <span>{vatLabel(props.vatRate)}:</span>
             <span>
@@ -1078,6 +1104,12 @@ export const SpeedTemplate = (props) => (
           <span>Subtotal:</span>
           <span>
             <Money value={props.subtotal} />
+          </span>
+        </div>
+         <div className="flex justify-between py-1">
+          <span>Discount:</span>
+          <span>
+            <Money value={props.discount} />
           </span>
         </div>
         <div className="flex justify-between py-2 text-gray-400">
@@ -1252,6 +1284,12 @@ export const DiagnosticTemplate = (props) => (
           <span>Subtotal:</span>
           <span>
             <Money value={props.subtotal} />
+          </span>
+        </div>
+         <div className="flex justify-between py-1">
+          <span>Discount:</span>
+          <span>
+            <Money value={props.discount} />
           </span>
         </div>
         <div className="flex justify-between py-2">
