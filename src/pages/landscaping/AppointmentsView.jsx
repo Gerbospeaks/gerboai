@@ -326,7 +326,7 @@ export default function AppointmentsView({ user }) {
             className="bg-white border border-[#e2e8f0] rounded-xl p-3 shadow-sm"
           >
             <p className="text-xs text-[#64748b] mb-1">{label}</p>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
+            <p className={`text-xl font-bold ${color}`}>{value}</p>
           </div>
         ))}
       </div>

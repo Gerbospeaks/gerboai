@@ -103,7 +103,7 @@ export function StaffScheduleView({ user }) {
                   <p className="text-[10px] font-bold uppercase">{day.slice(0, 3)}</p>
                   <p className={`text-lg font-bold ${isToday ? "text-[#0891b2]" : "text-[#374151]"}`}>{d}</p>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0">
                   {daySchedules.map(s => (
                     <div key={s.id} className="bg-[#dbeafe] text-[#1d4ed8] text-[10px] px-1.5 py-1 rounded truncate border border-[#93c5fd]" title={`${s.staffName} — ${s.shift}`}>
                       {s.staffName}

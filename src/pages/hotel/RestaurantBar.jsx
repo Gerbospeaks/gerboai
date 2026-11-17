@@ -519,7 +519,7 @@ const handleMenuImageUpload = async (e) => {
                 <Icon className={`w-4 h-4 ${color}`} />
               </div>
             </div>
-            <div className="text-2xl font-bold text-[#0f172a]">{value}</div>
+            <div className="text-xl font-bold text-[#0f172a]">{value}</div>
           </div>
         ))}
       </div>
@@ -645,7 +645,7 @@ const handleMenuImageUpload = async (e) => {
                           </button>
                         </div>
                       </div>
-                      <div className="px-4 py-3 space-y-1">
+                      <div className="px-4 py-3 space-y-0">
                         {(order.items || []).map((item, i) => (
                           <div
                             key={i}
@@ -1116,7 +1116,7 @@ const handleMenuImageUpload = async (e) => {
                   <div className="text-xs font-bold text-[#64748b] uppercase tracking-widest mb-2">
                     Order Summary
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-0.5">
                     {orderForm.items.map((item, i) => (
                       <div
                         key={i}

@@ -24,7 +24,7 @@ export default function PayPage({ params }) {
   return (
     <div className="min-h-screen flex items-center justify-content-center bg-gray-50 p-8">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold mb-2">Invoice #{params.invoiceId}</h1>
+        <h1 className="text-xl font-bold mb-2">Invoice #{params.invoiceId}</h1>
         <p className="text-gray-500 mb-6">From {invoice.businessName}</p>
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
           <div className="flex justify-between text-lg font-bold">

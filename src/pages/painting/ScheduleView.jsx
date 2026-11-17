@@ -411,7 +411,7 @@ export default function ScheduleView({ user }) {
       {/* ── Header ───────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-xl font-bold text-white flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
               <Calendar className="w-5 h-5 text-white" />
             </div>
@@ -690,7 +690,7 @@ export default function ScheduleView({ user }) {
                 key={label}
                 className={`bg-gradient-to-br ${color} border rounded-xl p-4 text-center`}
               >
-                <p className="text-2xl font-bold text-white">{value}</p>
+                <p className="text-xl font-bold text-white">{value}</p>
                 <p className="text-xs text-stone-400 mt-0.5">{label}</p>
               </div>
             ))}

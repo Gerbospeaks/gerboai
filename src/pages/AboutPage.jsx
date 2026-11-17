@@ -528,7 +528,7 @@ const AboutPage = () => {
               </h1>
 
               <p
-                className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed animate-slide-up"
+                className="text-xl md:text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed animate-slide-up"
                 style={{ animationDelay: "0.2s" }}
               >
                 We're on a mission to empower businesses worldwide with simple,
@@ -692,7 +692,7 @@ const AboutPage = () => {
                         <div className="flex items-center justify-center w-10 h-10 bg-orange-500/20 rounded-lg text-orange-400">
                           {milestone.icon}
                         </div>
-                        <span className="text-2xl font-bold text-orange-400">
+                        <span className="text-xl font-bold text-orange-400">
                           {milestone.year}
                         </span>
                       </div>

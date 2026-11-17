@@ -258,7 +258,7 @@ export default function MedicalRecords({ user }) {
                 <Icon className={`w-4 h-4 ${color}`} />
               </div>
             </div>
-            <div className="text-2xl font-bold text-[#0f172a]">{value}</div>
+            <div className="text-xl font-bold text-[#0f172a]">{value}</div>
           </div>
         ))}
       </div>

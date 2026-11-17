@@ -261,7 +261,7 @@ const Vehicles = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Vehicles</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-gray-900">
                 {vehicles.length}
               </p>
             </div>
@@ -272,7 +272,7 @@ const Vehicles = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Active</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-xl font-bold text-green-600">
                 {vehicles.filter((v) => v.status === "Active").length}
               </p>
             </div>
@@ -283,7 +283,7 @@ const Vehicles = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">In Service</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-xl font-bold text-blue-600">
                 {vehicles.filter((v) => v.status === "In Service").length}
               </p>
             </div>
@@ -294,7 +294,7 @@ const Vehicles = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Inactive</p>
-              <p className="text-2xl font-bold text-gray-600">
+              <p className="text-xl font-bold text-gray-600">
                 {vehicles.filter((v) => v.status === "Inactive").length}
               </p>
             </div>
@@ -462,7 +462,7 @@ const Vehicles = ({ user }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b flex items-center justify-between">
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-xl font-bold">
                 {editingVehicle ? "Edit Vehicle" : "Add New Vehicle"}
               </h2>
               <button

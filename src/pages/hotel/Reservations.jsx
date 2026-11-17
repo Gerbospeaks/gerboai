@@ -464,7 +464,7 @@ export default function Reservations({ user }) {
                 <Icon className={`w-4 h-4 ${color}`} />
               </div>
             </div>
-            <div className="text-2xl font-bold text-[#0f172a]">{value}</div>
+            <div className="text-xl font-bold text-[#0f172a]">{value}</div>
           </div>
         ))}
       </div>
@@ -1246,7 +1246,7 @@ function InfoBlock({ icon: Icon, label, children }) {
       <div className="flex items-center gap-2 text-xs font-bold text-[#64748b] uppercase tracking-widest mb-3">
         <Icon className="w-3.5 h-3.5" /> {label}
       </div>
-      <div className="space-y-1">{children}</div>
+      <div className="space-y-0">{children}</div>
     </div>
   );
 }

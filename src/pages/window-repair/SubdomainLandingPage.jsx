@@ -860,7 +860,7 @@ function Features({ config }) {
           >
             Features
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">
             Everything your {config.label.toLowerCase()} business needs
           </h2>
           <p className="text-gray-400 mt-3 max-w-xl mx-auto text-sm sm:text-base">
@@ -909,7 +909,7 @@ function Pricing({ config, onRegister }) {
           >
             Pricing
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">
             Simple, honest pricing
           </h2>
           <p className="text-gray-500 mt-3 text-sm sm:text-base">
@@ -1019,7 +1019,7 @@ function Testimonials({ config }) {
           >
             Testimonials
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">
             Trusted by {config.label.toLowerCase()} businesses across SA
           </h2>
         </div>
@@ -1087,7 +1087,7 @@ function FAQ({ config }) {
           >
             FAQ
           </p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">
             Common questions
           </h2>
         </div>
@@ -1138,7 +1138,7 @@ function CTABanner({ config, onRegister }) {
     <section className="py-16 sm:py-20" style={{ background: config.color }}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
         <span className="text-4xl">{config.icon}</span>
-        <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-4 mb-4">
+        <h2 className="text-xl sm:text-4xl font-extrabold text-white mt-4 mb-4">
           Ready to get paid faster?
         </h2>
         <p className="text-white/50 mb-8 text-sm sm:text-base">

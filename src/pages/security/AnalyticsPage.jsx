@@ -203,7 +203,7 @@ export default function AnalyticsPage({ user }) {
             {loading ? (
               <div className="h-7 bg-[#f1f5f9] rounded animate-pulse mb-1 mx-auto w-12" />
             ) : (
-              <p className={`text-2xl font-bold ${color}`}>{value}</p>
+              <p className={`text-xl font-bold ${color}`}>{value}</p>
             )}
             <p className="text-xs text-[#64748b] mt-0.5">{label}</p>
           </div>

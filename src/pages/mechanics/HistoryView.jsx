@@ -303,7 +303,7 @@ export default function HistoryView({ user }) {
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex items-center gap-4 px-5 py-4">
                 <div className="w-9 h-9 bg-[#f1f5f9] rounded-lg animate-pulse flex-shrink-0" />
-                <div className="flex-1 space-y-2">
+                <div className="flex-1 space-y-1">
                   <div className="h-3.5 bg-[#f1f5f9] rounded animate-pulse w-48" />
                   <div className="h-3 bg-[#f1f5f9] rounded animate-pulse w-64" />
                 </div>

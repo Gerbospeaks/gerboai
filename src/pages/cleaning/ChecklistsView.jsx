@@ -109,7 +109,7 @@ export default function ChecklistsView({ user }) {
                   </div>
                 </div>
                 {isOpen && (
-                  <div className="border-t border-[#f1f5f9] px-4 py-3 space-y-1.5">
+                  <div className="border-t border-[#f1f5f9] px-4 py-3 space-y-0.5">
                     {(c.items || []).map(item => (
                       <div key={item.id} onClick={() => toggleItem(c, item.id)}
                         className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${item.done ? "bg-[#f0fdf4]" : "hover:bg-[#f8fafc]"}`}>

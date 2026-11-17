@@ -240,7 +240,7 @@ export default function ExpensesView({ user }) {
                   <h3 className="text-sm font-semibold text-[#1e293b] mb-2">
                     {client.name}
                   </h3>
-                  <div className="space-y-1.5">
+                  <div className="space-y-0.5">
                     {client.email && (
                       <div className="flex items-center gap-1.5 text-xs text-[#64748b]">
                         <Mail className="w-3 h-3 text-[#94a3b8] flex-shrink-0" />

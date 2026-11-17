@@ -58,7 +58,7 @@ export default function PestControlSidebar({
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setSidebarOpen(true)}
         />
       )}
 
@@ -168,7 +168,7 @@ export default function PestControlSidebar({
 
       {/* ── Expanded sidebar ──────────────────────────────────────────── */}
       {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
+        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
           <div className="p-4 md:p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -187,7 +187,7 @@ export default function PestControlSidebar({
             </div>
 
             {/* Nav */}
-            <nav className="space-y-1.5 md:space-y-2">
+            <nav className="space-y-1.5 md:space-y-1">
               <NavItem
                 icon={Home}
                 label="Home"
@@ -204,7 +204,7 @@ export default function PestControlSidebar({
                 color="orange"
               />
 
-              <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50 space-y-1.5 md:space-y-2">
+              <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50 space-y-1.5 md:space-y-1">
                 <NavItem
                   icon={TrendingUp}
                   label="Financial Dashboard"

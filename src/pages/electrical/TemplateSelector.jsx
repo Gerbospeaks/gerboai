@@ -180,7 +180,7 @@ export const DefaultTemplate = ({
 
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">{documentType === "quote" ? "QUOTE" : "INVOICE"}</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">{documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}</span>
               <span>{jobCardNumber}</span>
@@ -208,7 +208,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">
           INVOICE TO
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">
             {customerAddress}
@@ -222,7 +222,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">
           BILL TO
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">
             {customerAddress}
@@ -236,7 +236,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">
           EQUIPMENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="flex justify-between">
             <span className="font-semibold">Type:</span>
             <span>{equipmentType}</span>
@@ -294,11 +294,11 @@ export const DefaultTemplate = ({
     {/* Totals */}
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {(subtotal || 0).toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {(vat || 0).toFixed(2)}</span>
         </div>
@@ -314,7 +314,7 @@ export const DefaultTemplate = ({
       <div className="text-blue-600 font-bold text-xs mb-2">
         BANKING DETAILS
       </div>
-      <div className="text-xs space-y-1">
+      <div className="text-xs space-y-0">
         <div>
           <span className="font-semibold">Bank Name:</span>{" "}
           {businessInfo.bankName || "FNB"}
@@ -385,7 +385,7 @@ export const ClassicTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">{props.documentType === "quote" ? "QUOTE" : "INVOICE"}</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold"> {props.documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}</span>
               <span>{props.jobCardNumber}</span>
@@ -404,7 +404,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">
           CUSTOMER
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>{props.customerName}</div>
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
@@ -415,7 +415,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">
           EQUIPMENT
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>{props.equipmentType}</div>
           <div>
             {props.equipmentManufacturer} {props.equipmentModel}
@@ -428,7 +428,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1">
           SERVICE INFO
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>Date: {new Date().toLocaleDateString()}</div>
           <div>Location: {props.equipmentLocation}</div>
         </div>
@@ -458,11 +458,11 @@ export const ClassicTemplate = (props) => (
 
     <div className="flex justify-end mb-4">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -506,7 +506,7 @@ export const ModernTemplate = (props) => (
             />
           )}
 
-          <div className="text-sm text-gray-600 space-y-1">
+          <div className="text-sm text-gray-600 space-y-0">
             <div>{props.businessInfo.addressLine1}</div>
             <div>
               {props.businessInfo.city}, {props.businessInfo.postalCode}
@@ -516,7 +516,7 @@ export const ModernTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-5xl font-bold text-blue-500 mb-4">{props.documentType === "quote" ? "QUOTE" : "INVOICE"}</div>
-          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+          <div className="bg-blue-50 p-4 rounded-lg space-y-1">
             <div className="text-sm">
               <span className="font-semibold">Invoice #:</span>{" "}
               {props.jobCardNumber}
@@ -591,12 +591,12 @@ export const ModernTemplate = (props) => (
     </table>
 
     <div className="flex justify-end mb-4">
-      <div className="w-80 space-y-2">
-        <div className="flex justify-between py-2 text-gray-600">
+      <div className="w-80 space-y-1">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 text-gray-600">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -640,7 +640,7 @@ export const ElegantTemplate = (props) => (
         <div className="text-sm text-gray-600">
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
         </div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">
+        <div className="text-xl font-serif text-purple-700 mt-4">
           {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
         </div>
         <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
@@ -651,7 +651,7 @@ export const ElegantTemplate = (props) => (
           <div className="font-serif font-bold text-purple-900 mb-2">
             BILLED TO
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-semibold">{props.customerName}</div>
             <div>{props.customerAddress}</div>
             <div>{props.customerEmail}</div>
@@ -661,7 +661,7 @@ export const ElegantTemplate = (props) => (
           <div className="font-serif font-bold text-purple-900 mb-2">
             EQUIPMENT
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div>{props.equipmentType}</div>
             <div>
               {props.equipmentManufacturer} {props.equipmentModel}
@@ -695,11 +695,11 @@ export const ElegantTemplate = (props) => (
 
       <div className="flex justify-end mb-4">
         <div className="w-64">
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>VAT:</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
@@ -862,13 +862,13 @@ export const PremiumTemplate = (props) => (
 
         <div className="flex justify-end mb-6">
           <div className="w-96">
-            <div className="flex justify-between py-2 text-gray-600">
+            <div className="flex justify-between py-2 text-gray-600 px-6">
               <span>Subtotal:</span>
               <span className="font-semibold">
                 R {props.subtotal.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between py-2 text-gray-600">
+            <div className="flex justify-between py-2 text-gray-600 px-6">
               <span>VAT (15%):</span>
               <span className="font-semibold">R {props.vat.toFixed(2)}</span>
             </div>
@@ -933,7 +933,7 @@ export const TechnicalTemplate = (props) => (
                 className="w-20 h-20 object-contain mb-3 brightness-0 invert"
               />
             )}
-            <div className="text-2xl font-bold mb-1">
+            <div className="text-xl font-bold mb-1">
               {props.businessInfo.businessName}
             </div>
             <div className="text-sm opacity-90">
@@ -942,7 +942,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-sm opacity-90">{props.businessInfo.city}</div>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold mb-2">{props.documentType === "quote" ? "QUOTE" : "TECHNICAL SERVICE"}</div>
+            <div className="text-3xl font-bold mb-2">{props.documentType === "quote" ? "QUOTE" : "TECHNICAL SERVICE"}</div>
             <div className="text-3xl font-mono">{props.documentType === "quote" ? "" : "INVOICE"}</div>
             <div className="bg-white text-green-700 px-3 py-1 rounded mt-2 font-mono font-bold">
               {props.jobCardNumber}
@@ -957,7 +957,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-xs font-bold text-green-700 mb-2 uppercase tracking-wide">
               Client Details
             </div>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <div className="font-semibold">{props.customerName}</div>
               <div className="text-xs text-gray-600">
                 {props.customerAddress}
@@ -971,7 +971,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-xs font-bold text-green-700 mb-2 uppercase tracking-wide">
               Equipment Info
             </div>
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-0">
               <div>
                 <span className="font-semibold">Type:</span>{" "}
                 {props.equipmentType}
@@ -995,7 +995,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-xs font-bold text-green-700 mb-2 uppercase tracking-wide">
               Service Details
             </div>
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-0">
               <div>
                 <span className="font-semibold">Date:</span>{" "}
                 {new Date().toLocaleDateString()}

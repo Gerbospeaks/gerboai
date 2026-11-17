@@ -274,19 +274,19 @@ const money = (zar) =>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-cyan-600">
+          <div className="text-xl font-bold text-cyan-600">
             {purchasedTemplates.length}
           </div>
           <div className="text-sm text-gray-600">Templates Owned</div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-xl font-bold text-blue-600">
             {Object.keys(TEMPLATES).length}
           </div>
           <div className="text-sm text-gray-600">Total Available</div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-green-600">
+          <div className="text-xl font-bold text-green-600">
             R
             {Object.values(TEMPLATES)
               .filter((t) => purchasedTemplates.includes(t.id))
@@ -374,7 +374,7 @@ const money = (zar) =>
                   <div className="text-xs font-semibold text-gray-500 mb-2">
                     FEATURES
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-1">
                     {template.features.map((feature, index) => (
                       <li
                         key={index}
@@ -483,7 +483,7 @@ const money = (zar) =>
                 {React.createElement(TEMPLATES[showPreview].icon, {
                   className: "w-6 h-6 text-cyan-600",
                 })}
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-gray-900">
                   {TEMPLATES[showPreview].name}
                 </h2>
               </div>
@@ -500,7 +500,7 @@ const money = (zar) =>
                   {React.createElement(TEMPLATES[showPreview].icon, {
                     className: "w-16 h-16 text-cyan-600 mx-auto mb-4",
                   })}
-                  <h3 className="text-2xl font-bold mb-2">
+                  <h3 className="text-xl font-bold mb-2">
                     {TEMPLATES[showPreview].name}
                   </h3>
                   <p className="text-gray-600 mb-4">

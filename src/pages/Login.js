@@ -100,7 +100,7 @@ export default function Login() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
-            <div className="space-y-1.5">
+            <div className="space-y-0.5">
               <label className="block text-[13px] font-semibold text-[#374151]">
                 Email Address
               </label>
@@ -117,7 +117,7 @@ export default function Login() {
             </div>
 
             {/* Password */}
-            <div className="space-y-1.5">
+            <div className="space-y-0.5">
               <div className="flex items-center justify-between">
                 <label className="block text-[13px] font-semibold text-[#374151]">
                   Password

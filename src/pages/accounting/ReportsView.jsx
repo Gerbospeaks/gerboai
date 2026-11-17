@@ -454,7 +454,7 @@ function BalanceSheet({ db, clientBase, clientName }) {
               </p>
             </div>
             <p
-              className={`text-2xl font-black ${data.netAssets >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
+              className={`text-xl font-black ${data.netAssets >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}
             >
               {fmt(data.netAssets)}
             </p>

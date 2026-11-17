@@ -238,7 +238,7 @@ export default function LegalResearch({ user }) {
               className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm"
             >
               <p className="text-xs text-[#64748b] mb-1">{cat.label}</p>
-              <p className="text-2xl font-bold text-[#1e293b]">
+              <p className="text-xl font-bold text-[#1e293b]">
                 {items.filter((i) => i.category === cat.value).length}
               </p>
             </div>

@@ -264,7 +264,7 @@ export default function ElectricalSidebar({
       </div>
 
       {/* DESKTOP — floats as a rounded card with vertical margin, not full height */}
-      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3 py-3 pl-3">
         {/* Collapsed rail */}
         {!sidebarOpen && (
           <div className="flex flex-col flex-shrink-0 w-16 bg-[#111108] rounded-2xl h-full items-center py-4 gap-2 z-30 shadow-lg">

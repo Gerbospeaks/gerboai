@@ -1397,7 +1397,7 @@ function LogsPanel({ user }) {
           </button>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1">
           {filtered.map((l) => {
             const lc = LOG_TYPES[l.type] || LOG_TYPES.maintenance;
             const LogIcon = lc.icon;

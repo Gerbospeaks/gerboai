@@ -71,11 +71,11 @@ export default function StaffPerformanceView({ user }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
           <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">Avg Rating</p>
-          <p className="text-2xl font-bold text-[#d97706] mt-1">{avgRating} ★</p>
+          <p className="text-xl font-bold text-[#d97706] mt-1">{avgRating} ★</p>
         </div>
         <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
           <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">Total Reviews</p>
-          <p className="text-2xl font-bold text-[#0891b2] mt-1">{records.length}</p>
+          <p className="text-xl font-bold text-[#0891b2] mt-1">{records.length}</p>
         </div>
         <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
           <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">Top Rated</p>

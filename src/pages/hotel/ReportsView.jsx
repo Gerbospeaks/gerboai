@@ -483,7 +483,7 @@ function RevenueReport({ savedInvoices }) {
         {data.topGuests.length === 0 ? (
           <EmptyState text="No guest spend data yet." />
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {data.topGuests.map((g, i) => (
               <div
                 key={g.name}
@@ -631,7 +631,7 @@ function GuestReport({ savedGuests, savedInvoices }) {
           {data.topRepeat.length === 0 ? (
             <EmptyState text="No repeat guests yet." />
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {data.topRepeat.map((g, i) => (
                 <div
                   key={g.name}

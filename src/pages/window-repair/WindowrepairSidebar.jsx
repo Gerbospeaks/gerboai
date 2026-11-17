@@ -411,10 +411,10 @@ export default function WindowRepairSidebar({
       {/* ════════════════════════════════════════════════════════════════
           DESKTOP — collapsed icon rail OR expanded panel
       ════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:flex print:hidden h-full">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
-          <div className="flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 border-r border-blue-700/50 h-full items-center py-4 gap-2 z-30">
+          <div className="flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
             <button
               onClick={() => setSidebarOpen(true)}
               title="Expand"
@@ -523,7 +523,7 @@ export default function WindowRepairSidebar({
 
         {/* Expanded panel */}
         {sidebarOpen && (
-          <div className="flex-shrink-0 w-64 border-r border-blue-700/50 h-full shadow-xl z-30">
+          <div className="flex-shrink-0 w-64 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
             <SidebarContent />
           </div>
         )}

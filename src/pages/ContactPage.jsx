@@ -522,7 +522,7 @@ const ContactPage = () => {
 
                 {/* Social Media */}
                 <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6">
                     Follow Us
                   </h3>
                   <div className="flex gap-4">
@@ -551,7 +551,7 @@ const ContactPage = () => {
                 <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-xl p-8 text-white">
                   <div className="flex items-center gap-3 mb-6">
                     <Clock className="w-6 h-6" />
-                    <h3 className="text-2xl font-bold">Office Hours</h3>
+                    <h3 className="text-xl font-bold">Office Hours</h3>
                   </div>
                   <div className="space-y-3">
                     {officeHours.map((schedule, index) => (

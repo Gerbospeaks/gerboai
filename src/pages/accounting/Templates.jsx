@@ -162,7 +162,7 @@ const money = (zar) =>
             <ShoppingCart className="w-6 h-6" />
             <h2 className="text-xl font-bold">Complete Purchase</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors">✕</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors">✕</button>
         </div>
 
         <div className="p-6">
@@ -365,8 +365,8 @@ const money = (zar) =>
         <div className="flex items-center justify-between pt-4 border-t border-[#f1f5f9]">
           <div>
             {template.price === 0
-              ? <><div className="text-2xl font-bold text-green-600">Free</div><div className="text-xs text-[#9ca3af]">always included</div></>
-              : <><div className="text-2xl font-bold text-[#2563eb]">{money(template.price)}</div><div className="text-xs text-[#9ca3af]">one-time</div></>}
+              ? <><div className="text-xl font-bold text-green-600">Free</div><div className="text-xs text-[#9ca3af]">always included</div></>
+              : <><div className="text-xl font-bold text-[#2563eb]">{money(template.price)}</div><div className="text-xs text-[#9ca3af]">one-time</div></>}
           </div>
           <div className="flex gap-2">
             <button onClick={() => onPreview(template)}

@@ -92,15 +92,15 @@ export default function SuppliesView({ user }) {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
           <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">Total Items</p>
-          <p className="text-2xl font-bold text-[#0891b2] mt-1">{supplies.length}</p>
+          <p className="text-xl font-bold text-[#0891b2] mt-1">{supplies.length}</p>
         </div>
         <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
           <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">Low Stock</p>
-          <p className={`text-2xl font-bold mt-1 ${lowStockItems.length > 0 ? "text-[#dc2626]" : "text-[#059669]"}`}>{lowStockItems.length}</p>
+          <p className={`text-xl font-bold mt-1 ${lowStockItems.length > 0 ? "text-[#dc2626]" : "text-[#059669]"}`}>{lowStockItems.length}</p>
         </div>
         <div className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
           <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">Stock Value</p>
-          <p className="text-2xl font-bold text-[#7c3aed] mt-1">R{totalValue.toFixed(0)}</p>
+          <p className="text-xl font-bold text-[#7c3aed] mt-1">R{totalValue.toFixed(0)}</p>
         </div>
       </div>
 

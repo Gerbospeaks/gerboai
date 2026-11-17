@@ -1097,7 +1097,7 @@ const [stampConfig, setStampConfig] = useState(null);
               </div>
             </div>
             <button
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => setSidebarOpen(true)}
               className="group p-2 text-amber-400 hover:text-white hover:bg-stone-700/50 rounded-xl transition-all duration-300 hover:rotate-90"
               title="Collapse Sidebar"
             >
@@ -1106,11 +1106,11 @@ const [stampConfig, setStampConfig] = useState(null);
           </div>
 
           {/* nav */}
-          <nav className="space-y-1.5 md:space-y-2">
+          <nav className="space-y-1.5 md:space-y-1">
             <div
               onClick={() => {
                 setActiveView("home");
-                setSidebarOpen(false);
+                setSidebarOpen(true);
               }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-cyan-300 hover:text-white hover:bg-gradient-to-r hover:from-stone-600/20 hover:to-stone-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-cyan-500/30"
             >
@@ -1121,7 +1121,7 @@ const [stampConfig, setStampConfig] = useState(null);
             <div
               onClick={() => {
                 setShowSettings(true);
-                setSidebarOpen(false);
+                setSidebarOpen(true);
               }}
               className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-orange-600/20 hover:to-orange-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-orange-500/30"
             >
@@ -1134,7 +1134,7 @@ const [stampConfig, setStampConfig] = useState(null);
               <div
                 onClick={() => {
                   setActiveView("financial-overview");
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-emerald-600/20 hover:to-emerald-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-emerald-500/30"
               >
@@ -1146,7 +1146,7 @@ const [stampConfig, setStampConfig] = useState(null);
               <div
                 onClick={() => {
                   setActiveView("gerbo-ai");
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
                 className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-indigo-500/30"
               >
@@ -1188,7 +1188,7 @@ const [stampConfig, setStampConfig] = useState(null);
                     onClick={() => {
                       handleNewQuote();
                       setActiveView("quote");
-                      if (isMobile) setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(true);
                     }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
@@ -1199,7 +1199,7 @@ const [stampConfig, setStampConfig] = useState(null);
                     onClick={() => {
                       handleNewInvoice();
                       setActiveView("quote");
-                      if (isMobile) setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(true);
                     }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
@@ -1209,7 +1209,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div
                     onClick={() => {
                       setShowQuotesList(!showQuotesList);
-                      if (isMobile) setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(true);
                     }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-amber-400 hover:text-white hover:bg-stone-700/30 rounded-lg cursor-pointer transition-all duration-300"
                   >
@@ -1255,7 +1255,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div
                     onClick={() => {
                       handleAddNewCustomer();
-                      if (isMobile) setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(true);
                     }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300 flex items-center space-x-2"
                   >
@@ -1265,7 +1265,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div
                     onClick={() => {
                       setShowCustomersListModal(true);
-                      if (isMobile) setSidebarOpen(false);
+                      if (isMobile) setSidebarOpen(true);
                     }}
                     className="group px-2 md:px-3 py-2 md:py-2.5 text-xs md:text-sm text-slate-400 hover:text-white hover:bg-slate-700/30 rounded-lg cursor-pointer transition-all duration-300"
                   >
@@ -1288,7 +1288,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div
                     onClick={() => {
                       setActiveView("schedule");
-                      setSidebarOpen(false);
+                      setSidebarOpen(true);
                     }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600/20 hover:to-indigo-700/20 rounded-xl cursor-pointer transition-all duration-300 mt-2 border border-transparent hover:border-indigo-500/30"
                   >
@@ -1432,7 +1432,7 @@ const [stampConfig, setStampConfig] = useState(null);
                     yet
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {savedQuotes.map((quote) => (
                       <div
                         key={quote.id}
@@ -1655,7 +1655,7 @@ const [stampConfig, setStampConfig] = useState(null);
                               <DollarSign className="w-5 h-5 text-amber-600" />
                             </div>
                           </div>
-                          <div className="text-base sm:text-lg md:text-2xl font-bold text-amber-900">
+                          <div className="text-base sm:text-lg md:text-xl font-bold text-amber-900">
                             R{total.toFixed(2)}
                           </div>
                         </div>
@@ -1678,7 +1678,7 @@ const [stampConfig, setStampConfig] = useState(null);
                             </div>
                           </div>
                           <div
-                            className={`text-lg sm:text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
+                            className={`text-lg sm:text-xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
                           >
                             R{paymentStatus.totalPaid.toFixed(2)}
                           </div>
@@ -1702,7 +1702,7 @@ const [stampConfig, setStampConfig] = useState(null);
                             </div>
                           </div>
                           <div
-                            className={`text-lg sm:text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
+                            className={`text-lg sm:text-xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
                           >
                             R{paymentStatus.balanceDue.toFixed(2)}
                           </div>
@@ -2288,7 +2288,7 @@ const [stampConfig, setStampConfig] = useState(null);
                                     <span className="text-slate-900">
                                       Total:
                                     </span>
-                                    <span className="text-amber-700 text-2xl">
+                                    <span className="text-amber-700 text-xl">
                                       R{total.toFixed(2)}
                                     </span>
                                   </div>

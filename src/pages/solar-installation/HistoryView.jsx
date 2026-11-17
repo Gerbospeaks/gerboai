@@ -106,7 +106,7 @@ const HistoryView = ({ jobCardId }) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Job Card History</h2>
+        <h2 className="text-xl font-bold text-gray-800">Job Card History</h2>
         <p className="text-gray-600 mt-1">
           Complete timeline of all activities
         </p>
@@ -123,7 +123,7 @@ const HistoryView = ({ jobCardId }) => {
               <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">
+                    <span className="text-xl">
                       {getActionIcon(item.action)}
                     </span>
                     <h3 className="font-semibold text-gray-800">
@@ -334,7 +334,7 @@ const NotesView = ({ jobCardId }) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Notes</h2>
+        <h2 className="text-xl font-bold text-gray-800">Notes</h2>
         <p className="text-gray-600 mt-1">
           Add important observations and reminders
         </p>

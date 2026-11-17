@@ -919,7 +919,7 @@ export default function ProjectsView({ user, defaultTab = "projects" }) {
                   </div>
 
                   {isExpanded && (
-                    <div className="px-5 py-3 border-t border-[#f1f5f9] bg-[#f8fafc] space-y-2">
+                    <div className="px-5 py-3 border-t border-[#f1f5f9] bg-[#f8fafc] space-y-1">
                       <div className="flex items-center gap-2">
                         <Users className="w-3.5 h-3.5 text-[#94a3b8]" />
                         <span className="text-xs text-[#64748b]">

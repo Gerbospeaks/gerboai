@@ -11,7 +11,7 @@ const TemplatePreviewModal = ({ template, onClose, onSelect, isSelected }) => {
         <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-purple-50">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-slate-900">
+              <h3 className="text-xl font-bold text-slate-900">
                 {template.name}
               </h3>
               <p className="text-sm text-slate-600 mt-1">
@@ -289,7 +289,7 @@ export const TemplateRenderer = ({
       )}
 
       {/* Header Section */}
-      <div className="flex justify-between items-start mb-12 pb-8 border-b-4 border-blue-600">
+      <div className="flex justify-between items-start mb-4 pb-8 border-b-4 border-blue-600">
         <div className="flex-1">
           {businessInfo?.logoUrl ? (
             <img
@@ -298,16 +298,16 @@ export const TemplateRenderer = ({
               className="h-20 w-auto mb-4"
             />
           ) : (
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl font-bold text-white">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mb-2">
+              <span className="text-xl font-bold text-white">
                 {businessInfo?.businessName?.charAt(0) || "B"}
               </span>
             </div>
           )}
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-xl font-bold text-slate-900 mb-2">
             {businessInfo?.businessName || "Your Business Name"}
           </h1>
-          <div className="text-sm text-slate-600 space-y-1">
+          <div className="text-sm text-slate-600 space-y-0">
             <p>{businessInfo?.addressLine1}</p>
             <p>
               {businessInfo?.city}, {businessInfo?.postalCode}
@@ -318,18 +318,11 @@ export const TemplateRenderer = ({
         </div>
 
         <div className="text-right">
-          {documentType !== "quote" && (
-  <PayNowButton
-    invoiceId={invoiceNumber}
-    amount={total}
-    
-    color="#1d4ed8"
-  />
-)}
-          <h2 className="text-4xl font-bold text-blue-600 mb-4">
+        
+          <h2 className="text-3xl font-bold text-blue-600 mb-4">
             {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
           </h2>
-          <div className="space-y-2 text-sm">
+          <div className="space-y-1 text-sm">
             <div className="flex justify-end gap-2">
               <span className="font-semibold text-slate-700">Number:</span>
               <span className="text-slate-900">{invoiceNumber}</span>
@@ -353,12 +346,12 @@ export const TemplateRenderer = ({
       </div>
 
       {/* Bill To / Ship To Section */}
-      <div className="grid grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-2 gap-8 mb-4">
         <div>
           <h3 className="text-sm font-bold text-slate-700 uppercase mb-3 pb-2 border-b-2 border-blue-600">
             Bill To
           </h3>
-          <div className="space-y-1 text-sm">
+          <div className="space-y-0 text-sm">
             <p className="font-bold text-slate-900 text-base">{customerName}</p>
             {taxId && <p className="text-slate-600">Tax ID: {taxId}</p>}
             <p className="text-slate-600">{customerEmail}</p>
@@ -371,7 +364,7 @@ export const TemplateRenderer = ({
           <h3 className="text-sm font-bold text-slate-700 uppercase mb-3 pb-2 border-b-2 border-blue-600">
             Payment To
           </h3>
-          <div className="space-y-1 text-sm">
+          <div className="space-y-0 text-sm">
             <p className="font-bold text-slate-900 text-base">
               {billName || customerName}
             </p>
@@ -383,7 +376,7 @@ export const TemplateRenderer = ({
       </div>
 
       {/* Items Table */}
-      <div className="mb-12">
+      <div className="mb-4">
         <table className="w-full">
           <thead>
             <tr className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
@@ -405,24 +398,24 @@ export const TemplateRenderer = ({
                 key={index}
                 className="border-b border-slate-200 hover:bg-slate-50"
               >
-                <td className="py-4 px-4 text-sm text-slate-900">
+                <td className="py-1 px-4 text-sm text-slate-900">
                   {item.description}
                 </td>
-                <td className="py-4 px-4 text-sm">
+                <td className="py-1 px-4 text-sm">
                   <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
                     {item.category || "Service"}
                   </span>
                 </td>
-                <td className="py-4 px-4 text-sm text-right text-slate-700">
+                <td className="py-1 px-4 text-sm text-right text-slate-700">
                   R{item.rate.toFixed(2)}
                 </td>
-                <td className="py-4 px-4 text-sm text-right text-slate-700">
+                <td className="py-1 px-4 text-sm text-right text-slate-700">
                   {item.qty}
                 </td>
-                <td className="py-4 px-4 text-sm text-right text-slate-700">
+                <td className="py-1 px-4 text-sm text-right text-slate-700">
                   R{item.taxAmount.toFixed(2)}
                 </td>
-                <td className="py-4 px-4 text-sm text-right font-bold text-slate-900">
+                <td className="py-1 px-4 text-sm text-right font-bold text-slate-900">
                   R{item.totalAmount.toFixed(2)}
                 </td>
               </tr>
@@ -435,13 +428,13 @@ export const TemplateRenderer = ({
       <div className="flex justify-end mb-12">
         <div className="w-80">
           <div className="space-y-3">
-            <div className="flex justify-between py-2 border-b border-slate-200">
+            <div className="flex justify-between border-b px-4 border-slate-200">
               <span className="text-slate-700 font-medium">Subtotal:</span>
               <span className="font-bold text-slate-900">
                 R{subtotal.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-slate-200">
+            <div className="flex justify-between border-b px-4 border-slate-200">
               <span className="text-slate-700 font-medium">VAT (15%):</span>
               <span className="font-bold text-slate-900">
                 R{totalTax.toFixed(2)}
@@ -449,7 +442,7 @@ export const TemplateRenderer = ({
             </div>
             <div className="flex justify-between py-4 bg-blue-50 px-4 rounded-lg">
               <span className="text-lg font-bold text-slate-900">Total:</span>
-              <span className="text-2xl font-bold text-blue-600">
+              <span className="text-xl font-bold text-blue-600">
                 R{total.toFixed(2)}
               </span>
             </div>
@@ -461,7 +454,7 @@ export const TemplateRenderer = ({
         <h3 className="text-sm font-bold text-slate-700 uppercase mb-4">
           Payment Terms & Conditions
         </h3>
-        <div className="text-sm text-slate-600 space-y-2">
+        <div className="text-sm text-slate-600 space-y-1">
           <p>• Payment is due within 30 days of invoice date</p>
           <p>• Late payments may incur a 2% monthly interest charge</p>
           <p>• Please reference invoice number in all payments</p>
@@ -520,7 +513,7 @@ export const TemplateRenderer = ({
             <h2 className="text-5xl font-light text-slate-900 mb-6">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
             </h2>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <p className="text-slate-600">{invoiceNumber}</p>
               <p className="text-slate-600">
                 {new Date().toLocaleDateString()}
@@ -587,7 +580,7 @@ export const TemplateRenderer = ({
       {/* Totals */}
       <div className="flex justify-end">
         <div className="w-64">
-          <div className="space-y-2 text-sm mb-4">
+          <div className="space-y-1 text-sm mb-4">
             <div className="flex justify-between">
               <span className="text-slate-700">Subtotal</span>
               <span className="text-slate-900">R{subtotal.toFixed(2)}</span>
@@ -632,7 +625,7 @@ export const TemplateRenderer = ({
                 />
               </div>
             ) : null}
-            <h1 className="text-3xl font-bold mb-2">
+            <h1 className="text-xl font-bold mb-2">
               {businessInfo?.businessName}
             </h1>
             <div className="text-sm opacity-90">
@@ -642,7 +635,7 @@ export const TemplateRenderer = ({
           </div>
 
           <div className="text-right">
-            <h2 className="text-4xl font-bold mb-4">
+            <h2 className="text-3xl font-bold mb-4">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
             </h2>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-sm">
@@ -748,7 +741,7 @@ export const TemplateRenderer = ({
             className="h-20 w-auto mx-auto mb-4"
           />
         )}
-        <h1 className="text-4xl font-serif font-bold text-slate-900 mb-2">
+        <h1 className="text-3xl font-serif font-bold text-slate-900 mb-2">
           {businessInfo?.businessName}
         </h1>
         <p className="text-sm text-slate-600">{businessInfo?.addressLine1}</p>
@@ -759,11 +752,11 @@ export const TemplateRenderer = ({
 
       {/* Invoice Title */}
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-serif font-bold text-slate-900 mb-4">
+        <h2 className="text-xl font-serif font-bold text-slate-900 mb-4">
           {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
         </h2>
         <div className="inline-block border-2 border-slate-800 px-6 py-3">
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div>
               <span className="font-bold">No:</span> {invoiceNumber}
             </div>
@@ -779,7 +772,7 @@ export const TemplateRenderer = ({
       <div className="mb-12">
         <div className="border-2 border-slate-800 p-6">
           <div className="font-serif font-bold text-lg mb-3">Bill To:</div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <p className="font-bold">{customerName}</p>
             <p>{customerAddress}</p>
             <p>{customerEmail}</p>
@@ -819,7 +812,7 @@ export const TemplateRenderer = ({
       {/* Totals */}
       <div className="flex justify-end mb-12">
         <div className="w-80 border-2 border-slate-800 p-6">
-          <div className="space-y-2 text-sm mb-4">
+          <div className="space-y-1 text-sm mb-4">
             <div className="flex justify-between">
               <span className="font-serif">Subtotal:</span>
               <span>R{subtotal.toFixed(2)}</span>
@@ -870,7 +863,7 @@ export const TemplateRenderer = ({
               />
             )}
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-1">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-1">
                 {businessInfo?.businessName}
               </h1>
               <p className="text-sm text-slate-600">{businessInfo?.email}</p>
@@ -878,10 +871,10 @@ export const TemplateRenderer = ({
           </div>
 
           <div className="text-right bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-3">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-3">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
             </h2>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <p className="font-bold text-slate-900">{invoiceNumber}</p>
               <p className="text-slate-600">
                 {new Date().toLocaleDateString()}
@@ -948,7 +941,7 @@ export const TemplateRenderer = ({
                 <span>R{totalTax.toFixed(2)}</span>
               </div>
               <div className="h-px bg-white/30 my-4"></div>
-              <div className="flex justify-between text-2xl font-bold">
+              <div className="flex justify-between text-xl font-bold">
                 <span>Total Due</span>
                 <span>R{total.toFixed(2)}</span>
               </div>
@@ -983,7 +976,7 @@ export const TemplateRenderer = ({
                 />
               </div>
             )}
-            <h1 className="text-2xl font-bold mb-1">
+            <h1 className="text-xl font-bold mb-1">
               {businessInfo?.businessName}
             </h1>
             <div className="text-sm opacity-90 space-y-0.5">
@@ -998,11 +991,11 @@ export const TemplateRenderer = ({
           </div>
 
           <div className="text-right">
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4">
               {documentType === "estimate" ? "ESTIMATE" : "INVOICE"}
             </h2>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-sm">
-              <div className="space-y-1">
+              <div className="space-y-0">
                 <p>
                   <span className="opacity-75">Number:</span>{" "}
                   <span className="font-bold">{invoiceNumber}</span>
@@ -1033,7 +1026,7 @@ export const TemplateRenderer = ({
           <div className="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-2">
             Bill To
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <p className="font-bold text-lg">{customerName}</p>
             {taxId && <p className="text-slate-600">Tax ID: {taxId}</p>}
             <p className="text-slate-600">{customerEmail}</p>
@@ -1046,7 +1039,7 @@ export const TemplateRenderer = ({
           <div className="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">
             Company Details
           </div>
-          <div className="text-sm text-slate-600 space-y-1">
+          <div className="text-sm text-slate-600 space-y-0">
             <p>Registration: {businessInfo?.registrationNumber}</p>
             <p>VAT Number: {businessInfo?.vatNumber}</p>
             <p>Website: {businessInfo?.website}</p>
@@ -1118,13 +1111,13 @@ export const TemplateRenderer = ({
         <div className="w-96">
           <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
             <div className="space-y-3">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm px-4">
                 <span className="text-slate-700">Subtotal:</span>
                 <span className="font-semibold text-slate-900">
                   R{subtotal.toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm  px-4 ">
                 <span className="text-slate-700">VAT (15%):</span>
                 <span className="font-semibold text-slate-900">
                   R{totalTax.toFixed(2)}
@@ -1133,7 +1126,7 @@ export const TemplateRenderer = ({
               <div className="h-px bg-slate-300 my-3"></div>
               <div className="flex justify-between items-center bg-gradient-to-r from-indigo-900 to-blue-900 text-white p-4 rounded-lg">
                 <span className="font-bold text-lg">Total Amount Due:</span>
-                <span className="font-bold text-2xl">R{total.toFixed(2)}</span>
+                <span className="font-bold text-xl">R{total.toFixed(2)}</span>
               </div>
             </div>
           </div>

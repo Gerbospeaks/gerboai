@@ -455,7 +455,7 @@ export default function LogisticsSidebar({
       {/* ════════════════════════════════════════════════════════════════
           DESKTOP — collapsed icon rail OR expanded panel
       ════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:flex print:hidden h-full">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
           <div className="flex flex-col flex-shrink-0 w-16 bg-[#0d1520] border-r border-[#1a2535] h-full items-center py-4 gap-2 z-30">
@@ -615,7 +615,7 @@ export default function LogisticsSidebar({
 
         {/* Expanded panel */}
         {sidebarOpen && (
-          <div className="flex-shrink-0 w-64 bg-[#0d1520] border-r border-[#1a2535] h-full shadow-xl z-30">
+          <div className="flex-shrink-0 w-64 bg-[#0d1520] rounded-3xl h-full shadow-xl z-30 overflow-hidden">
             <SidebarContent />
           </div>
         )}

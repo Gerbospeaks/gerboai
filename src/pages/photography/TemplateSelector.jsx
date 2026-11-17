@@ -202,7 +202,7 @@ export const DefaultTemplate = ({
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{jobCardNumber}</span>
@@ -221,7 +221,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {customerName}
           </div>
@@ -240,7 +240,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           EVENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Type:</span> {eventType}
           </div>
@@ -280,11 +280,11 @@ export const DefaultTemplate = ({
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
@@ -367,7 +367,7 @@ export const ClassicTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{props.jobCardNumber}</span>
@@ -386,7 +386,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -406,7 +406,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           EVENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Type:</span> {props.eventType}
           </div>
@@ -447,11 +447,11 @@ export const ClassicTemplate = (props) => (
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -534,7 +534,7 @@ export const ModernTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{props.jobCardNumber}</span>
@@ -553,7 +553,7 @@ export const ModernTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -573,7 +573,7 @@ export const ModernTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           EVENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Type:</span> {props.eventType}
           </div>
@@ -614,11 +614,11 @@ export const ModernTemplate = (props) => (
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -701,7 +701,7 @@ export const ElegantTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{props.jobCardNumber}</span>
@@ -720,7 +720,7 @@ export const ElegantTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -740,7 +740,7 @@ export const ElegantTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           EVENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Type:</span> {props.eventType}
           </div>
@@ -781,11 +781,11 @@ export const ElegantTemplate = (props) => (
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -868,7 +868,7 @@ export const SpeedTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{props.jobCardNumber}</span>
@@ -887,7 +887,7 @@ export const SpeedTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -907,7 +907,7 @@ export const SpeedTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           EVENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Type:</span> {props.eventType}
           </div>
@@ -948,11 +948,11 @@ export const SpeedTemplate = (props) => (
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -1034,7 +1034,7 @@ export const DiagnosticTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PHOTOGRAPHY INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{props.jobCardNumber}</span>
@@ -1053,7 +1053,7 @@ export const DiagnosticTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -1073,7 +1073,7 @@ export const DiagnosticTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           EVENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Type:</span> {props.eventType}
           </div>
@@ -1114,11 +1114,11 @@ export const DiagnosticTemplate = (props) => (
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>

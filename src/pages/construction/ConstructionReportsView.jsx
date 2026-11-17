@@ -182,7 +182,7 @@ export default function ConstructionReportsView({ user }) {
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-1">
               {label}
             </p>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
+            <p className={`text-xl font-bold ${color}`}>{value}</p>
             <p className="text-xs text-[#94a3b8] mt-1">{sub}</p>
           </div>
         ))}

@@ -346,7 +346,7 @@ const FreightMultiStepForm = ({
           {items && items.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Added Charges</h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {items.map((item, index) => (
                   <div
                     key={index}

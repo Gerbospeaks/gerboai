@@ -114,7 +114,7 @@ export default function AreaCalculatorView() {
     <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+        <h1 className="text-xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
             <Ruler className="w-6 h-6 text-indigo-600" />
           </div>
@@ -423,7 +423,7 @@ export default function AreaCalculatorView() {
                 <span className="text-indigo-100 text-sm">
                   {containerSize}L Containers
                 </span>
-                <span className="font-bold text-2xl">
+                <span className="font-bold text-xl">
                   {results.containersNeeded}
                 </span>
               </div>

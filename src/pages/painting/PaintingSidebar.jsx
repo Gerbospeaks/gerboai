@@ -73,7 +73,7 @@ export default function PaintingSidebar({
 
       {/* ── Collapsed sidebar (icon rail) — flex child, NOT fixed ─────── */}
       {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 md:w-20 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 h-full print:hidden shadow-2xl z-30">
+        <div className="hidden md:flex flex-col flex-shrink-0 w-16 md:w-20 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
           <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6 flex-1">
             {/* Expand toggle */}
             <button
@@ -191,7 +191,7 @@ export default function PaintingSidebar({
 
       {/* ── Expanded sidebar — flex child on desktop, fixed overlay on mobile ── */}
       {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
+        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 rounded-3xl h-full shadow-xl z-30 overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
           <div className="p-4 md:p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -211,7 +211,7 @@ export default function PaintingSidebar({
             </div>
 
             {/* Nav */}
-            <nav className="space-y-1.5 md:space-y-2">
+            <nav className="space-y-1.5 md:space-y-1">
               <NavItem
                 icon={Home}
                 label="Home"
@@ -228,7 +228,7 @@ export default function PaintingSidebar({
                 color="orange"
               />
 
-              <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50 space-y-1.5">
+              <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50 space-y-0.5">
                 <NavItem
                   icon={TrendingUp}
                   label="Financial Dashboard"

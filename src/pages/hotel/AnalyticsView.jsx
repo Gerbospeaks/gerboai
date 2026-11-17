@@ -436,7 +436,7 @@ function GuestInsights({ savedGuests, savedInvoices }) {
           {data.topLTV.length === 0 ? (
             <EmptyState text="No spend history yet." />
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {data.topLTV.map((g, i) => (
                 <div key={g.name} className="flex items-center justify-between py-2 border-b border-[#f1f5f9] last:border-0">
                   <div className="flex items-center gap-2.5 min-w-0">

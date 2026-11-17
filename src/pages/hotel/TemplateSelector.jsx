@@ -201,7 +201,7 @@ export const DefaultHotelTemplate = ({
               <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center"></div>
             )}
             <div>
-              <div className="text-2xl font-bold">
+              <div className="text-xl font-bold">
                 {businessInfo.businessName}
               </div>
               <div className="text-sm text-gray-600">
@@ -226,7 +226,7 @@ export const DefaultHotelTemplate = ({
 
         <div className="text-right">
           <div className="text-3xl font-bold mb-4 text-blue-600">INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{jobCardNumber}</span>
@@ -254,7 +254,7 @@ export const DefaultHotelTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">
           GUEST DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{customerName}</div>
           <div className="text-gray-600">{customerAddress}</div>
           <div>{customerEmail}</div>
@@ -267,7 +267,7 @@ export const DefaultHotelTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-800 px-2 py-1 rounded">
           IDENTIFICATION
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           {guestId && <div>Guest ID: {guestId}</div>}
           {idType && <div>ID Type: {idType}</div>}
           {idNumber && <div>ID Number: {idNumber}</div>}
@@ -279,7 +279,7 @@ export const DefaultHotelTemplate = ({
         <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1 rounded">
           ROOM DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="flex justify-between">
             <span className="font-semibold">Room Number:</span>
             <span className="text-lg font-bold text-blue-600">
@@ -331,11 +331,11 @@ export const DefaultHotelTemplate = ({
     {/* Totals */}
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
@@ -404,7 +404,7 @@ export const ClassicHotelTemplate = (props) => (
               className="w-20 h-20 object-contain mb-3"
             />
           )}
-          <div className="text-2xl font-serif font-bold text-amber-800">
+          <div className="text-xl font-serif font-bold text-amber-800">
             {props.businessInfo.businessName}
           </div>
           <div className="text-sm text-gray-600 italic">
@@ -417,7 +417,7 @@ export const ClassicHotelTemplate = (props) => (
         <div className="text-right">
           <div className="text-4xl font-serif text-amber-700 mb-4">INVOICE</div>
           <div className="bg-amber-50 p-3 rounded border border-amber-200">
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <div>
                 <span className="font-semibold">Invoice #:</span>{" "}
                 {props.jobCardNumber}
@@ -437,7 +437,7 @@ export const ClassicHotelTemplate = (props) => (
         <div className="font-serif font-bold text-amber-800 mb-3">
           GUEST INFORMATION
         </div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div className="font-semibold text-lg">{props.customerName}</div>
           <div>{props.customerAddress}</div>
           <div>{props.customerEmail}</div>
@@ -448,7 +448,7 @@ export const ClassicHotelTemplate = (props) => (
         <div className="font-serif font-bold text-amber-800 mb-3">
           RESERVATION DETAILS
         </div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div>
             <span className="font-semibold">Room:</span> {props.roomNumber} -{" "}
             {props.roomType}
@@ -495,11 +495,11 @@ export const ClassicHotelTemplate = (props) => (
 
     <div className="flex justify-end mb-6">
       <div className="w-80">
-        <div className="flex justify-between py-2">
+        <div className="flex justify-between py-2 px-4">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2">
+        <div className="flex justify-between py-2 px-4">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -514,7 +514,7 @@ export const ClassicHotelTemplate = (props) => (
       <div className="text-amber-800 font-bold text-sm mb-2">
         PAYMENT DETAILS
       </div>
-      <div className="text-xs space-y-1">
+      <div className="text-xs space-y-0">
         <div>
           <span className="font-semibold">Bank:</span>{" "}
           {props.businessInfo.bankName || "N/A"}
@@ -568,7 +568,7 @@ export const ModernHotelTemplate = (props) => (
         <div className="text-right">
           <div className="text-5xl font-bold text-purple-500 mb-4">INVOICE</div>
           <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <div>#{props.jobCardNumber}</div>
               <div>{new Date().toLocaleDateString()}</div>
             </div>
@@ -580,7 +580,7 @@ export const ModernHotelTemplate = (props) => (
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-100 p-5 rounded-lg">
         <div className="text-sm font-bold text-purple-600 mb-3">GUEST</div>
-        <div className="space-y-1">
+        <div className="space-y-0">
           <div className="font-bold text-xl">{props.customerName}</div>
           <div className="text-sm text-gray-600">{props.customerEmail}</div>
           <div className="text-sm text-gray-600">{props.customerPhone}</div>
@@ -634,11 +634,11 @@ export const ModernHotelTemplate = (props) => (
 
     <div className="flex justify-end mb-6">
       <div className="w-80">
-        <div className="flex justify-between py-2 text-gray-600">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 text-gray-600">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>VAT:</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -697,7 +697,7 @@ export const LuxuryHotelTemplate = (props) => (
           <div className="font-serif font-bold text-amber-800 mb-3 text-lg">
             ESTEEMED GUEST
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="font-semibold text-xl">{props.customerName}</div>
             <div className="text-sm text-gray-600">{props.customerAddress}</div>
             <div className="text-sm">{props.customerEmail}</div>
@@ -765,15 +765,15 @@ export const LuxuryHotelTemplate = (props) => (
 
       <div className="flex justify-end mb-6">
         <div className="w-96 bg-white p-4 rounded border-2 border-amber-300">
-          <div className="flex justify-between py-2 text-gray-600">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-2 text-gray-600">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-4 text-2xl font-serif font-bold bg-amber-600 text-gray-800 px-4 rounded">
+          <div className="flex justify-between py-4 text-xl font-serif font-bold bg-amber-600 text-gray-800 px-4 rounded">
             <span>TOTAL DUE:</span>
             <span>R {props.total.toFixed(2)}</span>
           </div>
@@ -812,7 +812,7 @@ export const BusinessHotelTemplate = (props) => (
               className="w-20 h-20 object-contain mb-3"
             />
           )}
-          <div className="text-2xl font-bold text-gray-900">
+          <div className="text-xl font-bold text-gray-900">
             {props.businessInfo.businessName}
           </div>
           <div className="text-sm text-gray-600 mt-1">
@@ -825,7 +825,7 @@ export const BusinessHotelTemplate = (props) => (
         <div className="text-right">
           <div className="text-4xl font-bold text-gray-800 mb-3">INVOICE</div>
           <div className="bg-gray-100 p-3 rounded border-2 border-gray-800">
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <div>
                 <span className="font-semibold">Invoice:</span>{" "}
                 {props.jobCardNumber}
@@ -845,7 +845,7 @@ export const BusinessHotelTemplate = (props) => (
         <div className="text-xs font-bold text-gray-600 mb-2 uppercase">
           Guest Information
         </div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div className="font-semibold">{props.customerName}</div>
           <div className="text-gray-600 text-xs">{props.customerEmail}</div>
           <div className="text-gray-600 text-xs">{props.customerPhone}</div>
@@ -856,7 +856,7 @@ export const BusinessHotelTemplate = (props) => (
         <div className="text-xs font-bold text-gray-600 mb-2 uppercase">
           Accommodation
         </div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div className="flex justify-between">
             <span className="text-gray-600 text-xs">Room:</span>
             <span className="font-bold">{props.roomNumber}</span>
@@ -875,7 +875,7 @@ export const BusinessHotelTemplate = (props) => (
         <div className="text-xs font-bold text-gray-600 mb-2 uppercase">
           Stay Period
         </div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div className="text-xs">
             <span className="text-gray-600">Check-in:</span>
             <div className="font-semibold">{props.checkInDate}</div>
@@ -989,7 +989,7 @@ export const ElegantHotelTemplate = (props) => (
         <div className="text-sm text-gray-600">
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
         </div>
-        <div className="text-2xl font-serif text-teal-700 mt-4">
+        <div className="text-xl font-serif text-teal-700 mt-4">
           GUEST INVOICE
         </div>
         <div className="text-sm text-gray-500 mt-1">#{props.jobCardNumber}</div>
@@ -1000,7 +1000,7 @@ export const ElegantHotelTemplate = (props) => (
           <div className="font-serif font-bold text-teal-800 mb-2">
             HONORED GUEST
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-semibold text-lg">{props.customerName}</div>
             <div className="text-gray-600">{props.customerAddress}</div>
             <div>{props.customerEmail}</div>
@@ -1011,7 +1011,7 @@ export const ElegantHotelTemplate = (props) => (
           <div className="font-serif font-bold text-teal-800 mb-2">
             RESERVATION
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="flex justify-between">
               <span className="text-gray-600">Room:</span>
               <span className="font-bold text-teal-700">
@@ -1061,11 +1061,11 @@ export const ElegantHotelTemplate = (props) => (
 
       <div className="flex justify-end mb-6">
         <div className="w-64">
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
@@ -1143,7 +1143,7 @@ export const PremiumHotelTemplate = (props) => (
               INVOICE
             </div>
             <div className="bg-slate-800 text-gray-800 p-4 rounded">
-              <div className="text-sm space-y-1">
+              <div className="text-sm space-y-0">
                 <div className="font-bold">#{props.jobCardNumber}</div>
                 <div>{new Date().toLocaleDateString()}</div>
               </div>
@@ -1157,7 +1157,7 @@ export const PremiumHotelTemplate = (props) => (
           <div className="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide">
             Guest Details
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="font-bold text-xl text-slate-900">
               {props.customerName}
             </div>
@@ -1175,7 +1175,7 @@ export const PremiumHotelTemplate = (props) => (
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-300">Room Number:</span>
-              <span className="font-bold text-2xl">{props.roomNumber}</span>
+              <span className="font-bold text-xl">{props.roomNumber}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-300">Room Type:</span>

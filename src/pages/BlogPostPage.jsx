@@ -760,7 +760,7 @@ const BlogPostPage = () => {
                       className="w-20 h-20 rounded-full border-4 border-white shadow-lg flex-shrink-0"
                     />
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">
                         {blogPost.author.name}
                       </h3>
                       <p className="text-orange-600 font-semibold mb-3">
@@ -818,7 +818,7 @@ const BlogPostPage = () => {
         {/* Related Posts Section (Mobile) */}
         <section className="lg:hidden py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
           <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-8">
               Related Posts
             </h3>
             <div className="grid gap-6">

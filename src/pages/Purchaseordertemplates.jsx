@@ -56,7 +56,7 @@ export const DefaultPOTemplate = ({
 
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PURCHASE ORDER</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">P.O. NUMBER</span>
               <span>{poNumber}</span>
@@ -82,7 +82,7 @@ export const DefaultPOTemplate = ({
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SUPPLIER / VENDOR</div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{supplierName}</div>
           <div>{supplierContact}</div>
           <div className="h-14 overflow-hidden text-xs leading-tight">{supplierAddress}</div>
@@ -93,7 +93,7 @@ export const DefaultPOTemplate = ({
 
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SHIP / DELIVER TO</div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{deliveryName || businessInfo.businessName}</div>
           <div className="h-14 overflow-hidden text-xs leading-tight">{deliveryAddress || businessInfo.addressLine1}</div>
           {shippingMethod && <div><span className="font-semibold">Method:</span> {shippingMethod}</div>}
@@ -184,7 +184,7 @@ export const ClassicPOTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4">PURCHASE ORDER</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8"><span className="font-semibold">P.O. NO.</span><span>{props.poNumber}</span></div>
             <div className="flex justify-between gap-8"><span className="font-semibold">DATE</span><span>{props.poDate || new Date().toLocaleDateString()}</span></div>
             <div className="flex justify-between gap-8"><span className="font-semibold">DELIVERY DATE</span><span>{props.deliveryDate || "TBD"}</span></div>
@@ -196,7 +196,7 @@ export const ClassicPOTemplate = (props) => (
     <div className="grid grid-cols-2 gap-4 mb-4">
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">SUPPLIER</div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{props.supplierName}</div>
           <div>{props.supplierContact}</div>
           <div>{props.supplierAddress}</div>
@@ -206,7 +206,7 @@ export const ClassicPOTemplate = (props) => (
       </div>
       <div className="bg-gray-200 p-3">
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">DELIVER TO</div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{props.deliveryName || props.businessInfo?.businessName}</div>
           <div>{props.deliveryAddress || props.businessInfo?.addressLine1}</div>
           {props.shippingMethod && <div>Method: {props.shippingMethod}</div>}
@@ -282,7 +282,7 @@ export const ModernPOTemplate = (props) => (
           {props.businessInfo?.logoUrl && (
             <img src={props.businessInfo.logoUrl} alt="Logo" className="w-20 h-20 object-contain mb-3" />
           )}
-          <div className="text-sm text-gray-600 space-y-1">
+          <div className="text-sm text-gray-600 space-y-0">
             <div className="font-semibold">{props.businessInfo?.businessName}</div>
             <div>{props.businessInfo?.addressLine1}</div>
             <div>{props.businessInfo?.city}, {props.businessInfo?.postalCode}</div>
@@ -347,7 +347,7 @@ export const ModernPOTemplate = (props) => (
     </table>
 
     <div className="flex justify-end mb-6">
-      <div className="w-80 space-y-2">
+      <div className="w-80 space-y-1">
         <div className="flex justify-between py-2 text-gray-600"><span>Subtotal:</span><span>R {props.subtotal.toFixed(2)}</span></div>
         <div className="flex justify-between py-2 text-gray-600"><span>VAT (15%):</span><span>R {props.vat.toFixed(2)}</span></div>
         <div className="flex justify-between py-3 text-xl font-bold bg-blue-500 text-white px-4 rounded-lg">
@@ -394,7 +394,7 @@ export const ElegantPOTemplate = (props) => (
         <div className="text-sm text-gray-600">
           {props.businessInfo?.addressLine1} • {props.businessInfo?.city}
         </div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">PURCHASE ORDER</div>
+        <div className="text-xl font-serif text-purple-700 mt-4">PURCHASE ORDER</div>
         <div className="text-sm text-gray-500 mt-1">#{props.poNumber}</div>
         <div className="flex justify-center gap-8 text-xs text-gray-500 mt-2">
           <span><span className="font-semibold">Date:</span> {props.poDate || new Date().toLocaleDateString()}</span>
@@ -406,7 +406,7 @@ export const ElegantPOTemplate = (props) => (
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
           <div className="font-serif font-bold text-purple-900 mb-2">VENDOR / SUPPLIER</div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-semibold">{props.supplierName}</div>
             <div>{props.supplierContact}</div>
             <div>{props.supplierAddress}</div>
@@ -416,7 +416,7 @@ export const ElegantPOTemplate = (props) => (
         </div>
         <div>
           <div className="font-serif font-bold text-purple-900 mb-2">SHIP / DELIVER TO</div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-semibold">{props.deliveryName || props.businessInfo?.businessName}</div>
             <div>{props.deliveryAddress || props.businessInfo?.addressLine1}</div>
             {props.shippingMethod && <div>Method: {props.shippingMethod}</div>}
@@ -500,7 +500,7 @@ export const SpeedPOTemplate = (props) => (
         <div className="text-right">
           <div className="text-5xl font-black text-red-600 mb-1 italic">P.O.</div>
           <div className="text-sm text-red-400 font-black tracking-widest mb-3">PURCHASE ORDER</div>
-          <div className="bg-red-600 p-4 rounded space-y-1">
+          <div className="bg-red-600 p-4 rounded space-y-0">
             <div className="text-sm font-bold">#{props.poNumber}</div>
             <div className="text-sm">{props.poDate || new Date().toLocaleDateString()}</div>
             <div className="text-xs">Delivery: {props.deliveryDate || "TBD"}</div>
@@ -512,7 +512,7 @@ export const SpeedPOTemplate = (props) => (
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-900 p-4 rounded">
         <div className="text-sm font-bold text-red-600 mb-3">SUPPLIER</div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div className="font-bold">{props.supplierName}</div>
           <div className="text-gray-400">{props.supplierContact}</div>
           <div className="text-gray-400">{props.supplierAddress}</div>
@@ -521,7 +521,7 @@ export const SpeedPOTemplate = (props) => (
       </div>
       <div className="bg-gray-900 p-4 rounded">
         <div className="text-sm font-bold text-red-600 mb-3">DELIVER TO</div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div className="font-bold">{props.deliveryName || props.businessInfo?.businessName}</div>
           <div className="text-gray-400">{props.deliveryAddress || props.businessInfo?.addressLine1}</div>
           {props.shippingMethod && <div className="text-gray-400">Method: {props.shippingMethod}</div>}
@@ -602,7 +602,7 @@ export const DiagnosticPOTemplate = (props) => (
           <div className="text-sm text-gray-600">{props.businessInfo?.primaryPhone}</div>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-green-600 mb-4">PURCHASE ORDER</div>
+          <div className="text-3xl font-bold text-green-600 mb-4">PURCHASE ORDER</div>
           <div className="bg-green-50 border-2 border-green-600 p-3 rounded">
             <div className="text-sm"><span className="font-bold">P.O.:</span> {props.poNumber}</div>
             <div className="text-sm"><span className="font-bold">Date:</span> {props.poDate || new Date().toLocaleDateString()}</div>
@@ -616,7 +616,7 @@ export const DiagnosticPOTemplate = (props) => (
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div className="border-2 border-green-600 p-4 rounded">
         <div className="text-sm font-bold text-green-600 mb-3">SUPPLIER DETAILS</div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div><span className="font-semibold">Supplier:</span> {props.supplierName}</div>
           <div><span className="font-semibold">Contact:</span> {props.supplierContact}</div>
           <div><span className="font-semibold">Email:</span> {props.supplierEmail}</div>
@@ -626,7 +626,7 @@ export const DiagnosticPOTemplate = (props) => (
       </div>
       <div className="border-2 border-green-600 p-4 rounded">
         <div className="text-sm font-bold text-green-600 mb-3">DELIVERY DETAILS</div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div><span className="font-semibold">Deliver To:</span> {props.deliveryName || props.businessInfo?.businessName}</div>
           <div><span className="font-semibold">Address:</span> {props.deliveryAddress || props.businessInfo?.addressLine1}</div>
           {props.shippingMethod && <div><span className="font-semibold">Method:</span> {props.shippingMethod}</div>}

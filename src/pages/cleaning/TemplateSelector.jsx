@@ -207,7 +207,7 @@ export const ProfessionalTemplate = ({
                 ? "QUOTE"
                 : "ESTIMATE"}
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             {[
               [
                 documentType === "estimate" ? "QUOTE NO." : "INVOICE NO.",
@@ -236,7 +236,7 @@ export const ProfessionalTemplate = ({
         <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{customerName}</div>
           <div className="h-12 overflow-hidden text-xs leading-tight">
             {customerAddress}
@@ -249,7 +249,7 @@ export const ProfessionalTemplate = ({
         <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">
           BILL TO
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{billName || customerName}</div>
           <div>{billAddress || customerAddress}</div>
           <div>{billEmail || customerEmail}</div>
@@ -261,7 +261,7 @@ export const ProfessionalTemplate = ({
         <div className="font-bold text-xs mb-2 bg-blue-200 px-2 py-1">
           SERVICE DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">
             {serviceLocation || customerAddress}
           </div>
@@ -334,11 +334,11 @@ export const ProfessionalTemplate = ({
     {/* Totals */}
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span><Money value={subtotal} /></span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span><Money value={totalTax} /></span>
         </div>
@@ -362,7 +362,7 @@ export const ProfessionalTemplate = ({
       <div className="text-blue-600 font-bold text-xs mb-2">
         PAYMENT INFORMATION
       </div>
-      <div className="text-xs space-y-1">
+      <div className="text-xs space-y-0">
         <div>
           <span className="font-semibold">Bank Name:</span>{" "}
           {businessInfo?.bankName || "First National Bank"}
@@ -458,7 +458,7 @@ export const ClassicTemplate = ({
                 ? "ESTIMATE"
                 : "INVOICE"}
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
                 {documentType === "estimate" ? "QUOTE NO." : "INVOICE NO."}
@@ -505,7 +505,7 @@ export const ClassicTemplate = ({
           <div className="font-bold text-xs mb-2 bg-gray-800 text-white px-2 py-1">
             {title}
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             {lines.map((l, i) => (
               <div key={i}>{l}</div>
             ))}
@@ -547,11 +547,11 @@ export const ClassicTemplate = ({
 
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span><Money value={subtotal} /></span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span><Money value={totalTax} /></span>
         </div>
@@ -646,7 +646,7 @@ export const ModernTemplate = ({
           <div className="font-bold text-gray-800">
             {businessInfo.businessName}
           </div>
-          <div className="text-sm text-gray-600 space-y-1">
+          <div className="text-sm text-gray-600 space-y-0">
             <div>{businessInfo.addressLine1}</div>
             <div>
               {businessInfo.city}, {businessInfo.postalCode}
@@ -662,7 +662,7 @@ export const ModernTemplate = ({
                 ? "PO"
                 : "INVOICE"}
           </div>
-          <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+          <div className="bg-blue-50 p-4 rounded-lg space-y-1">
             <div className="text-sm">
               <span className="font-semibold">
                 {documentType === "estimate" ? "QUOTE NO." : "INVOICE NO."}
@@ -756,12 +756,12 @@ export const ModernTemplate = ({
     </table>
 
     <div className="flex justify-end mb-6">
-      <div className="w-80 space-y-2">
-        <div className="flex justify-between py-2 text-gray-600">
+      <div className="w-80 space-y-1">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>Subtotal:</span>
           <span><Money value={subtotal} /></span>
         </div>
-        <div className="flex justify-between py-2 text-gray-600">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>VAT (15%):</span>
           <span><Money value={totalTax} /></span>
         </div>
@@ -857,7 +857,7 @@ export const ElegantTemplate = ({
         <div className="text-sm text-gray-600">
           {businessInfo.addressLine1} • {businessInfo.city}
         </div>
-        <div className="text-2xl font-serif text-purple-700 mt-4">
+        <div className="text-xl font-serif text-purple-700 mt-4">
           {documentType === "estimate"
             ? "SERVICE QUOTE"
             : documentType === "purchase_order"
@@ -872,7 +872,7 @@ export const ElegantTemplate = ({
           <div className="font-serif font-bold text-purple-900 mb-2">
             BILLED TO
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-semibold">{customerName}</div>
             <div>{customerAddress}</div>
             <div>{customerEmail}</div>
@@ -883,7 +883,7 @@ export const ElegantTemplate = ({
           <div className="font-serif font-bold text-purple-900 mb-2">
             BILL TO
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-semibold">{billName || customerName}</div>
             <div>{billAddress || customerAddress}</div>
             <div>{billEmail || customerEmail}</div>
@@ -896,7 +896,7 @@ export const ElegantTemplate = ({
           <div className="font-serif font-bold text-purple-900 mb-2">
             SERVICE DETAILS
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div>Location: {serviceLocation || customerAddress}</div>
             <div>Property: {propertyType || "Residential"}</div>
             <div>Date: {serviceDate || new Date().toLocaleDateString()}</div>
@@ -936,11 +936,11 @@ export const ElegantTemplate = ({
 
       <div className="flex justify-end mb-6">
         <div className="w-64">
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>Subtotal:</span>
             <span><Money value={subtotal} /></span>
           </div>
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>VAT (15%):</span>
             <span><Money value={totalTax} /></span>
           </div>
@@ -1053,7 +1053,7 @@ export const ResidentialTemplate = ({
                   ? "PO"
                   : "INVOICE"}
             </div>
-            <div className="bg-green-500 text-white p-4 rounded space-y-1">
+            <div className="bg-green-500 text-white p-4 rounded space-y-0">
               <div className="text-sm font-bold">#{invoiceNumber}</div>
               <div className="text-sm">{new Date().toLocaleDateString()}</div>
             </div>
@@ -1064,7 +1064,7 @@ export const ResidentialTemplate = ({
       <div className="grid grid-cols-3 gap-6 mb-6">
         <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
           <div className="text-sm font-bold text-green-700 mb-3">CLIENT</div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-bold text-gray-900">{customerName}</div>
             <div className="text-gray-600">{customerAddress}</div>
             <div className="text-gray-600">{customerEmail}</div>
@@ -1073,7 +1073,7 @@ export const ResidentialTemplate = ({
         </div>
         <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
           <div className="text-sm font-bold text-blue-700 mb-3">BILL TO</div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-bold text-gray-900">
               {billName || customerName}
             </div>
@@ -1090,7 +1090,7 @@ export const ResidentialTemplate = ({
           <div className="text-sm font-bold text-green-700 mb-3">
             SERVICE LOCATION
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-bold text-gray-900">
               {serviceLocation || customerAddress}
             </div>
@@ -1141,11 +1141,11 @@ export const ResidentialTemplate = ({
 
       <div className="flex justify-end mb-6">
         <div className="w-80">
-          <div className="flex justify-between py-2 text-gray-600">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>Subtotal:</span>
             <span><Money value={subtotal} /></span>
           </div>
-          <div className="flex justify-between py-2 text-gray-600">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>VAT (15%):</span>
             <span><Money value={totalTax} /></span>
           </div>
@@ -1247,7 +1247,7 @@ export const CommercialTemplate = ({
           </div>
         </div>
         <div className="text-right">
-          <div className="text-4xl font-bold text-indigo-600 mb-4">
+          <div className="text-3xl font-bold text-indigo-600 mb-4">
             {documentType === "estimate"
               ? "SERVICE QUOTE"
               : documentType === "purchase_order"
@@ -1272,7 +1272,7 @@ export const CommercialTemplate = ({
         <div className="text-sm font-bold text-indigo-600 mb-3">
           CLIENT DETAILS
         </div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div>
             <span className="font-semibold">Company:</span> {customerName}
           </div>
@@ -1289,7 +1289,7 @@ export const CommercialTemplate = ({
       </div>
       <div className="border-2 border-indigo-600 p-4 rounded">
         <div className="text-sm font-bold text-indigo-600 mb-3">BILL TO</div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div>
             <span className="font-semibold">Name:</span>{" "}
             {billName || customerName}
@@ -1313,7 +1313,7 @@ export const CommercialTemplate = ({
         <div className="text-sm font-bold text-indigo-600 mb-3">
           FACILITY DETAILS
         </div>
-        <div className="text-sm space-y-1">
+        <div className="text-sm space-y-0">
           <div>
             <span className="font-semibold">Location:</span>{" "}
             {serviceLocation || customerAddress}
@@ -1372,11 +1372,11 @@ export const CommercialTemplate = ({
 
     <div className="flex justify-end mb-6">
       <div className="w-80 border-2 border-indigo-600 p-4 rounded">
-        <div className="flex justify-between py-2">
+        <div className="flex justify-between py-2 px-4">
           <span>Subtotal:</span>
           <span><Money value={subtotal} /></span>
         </div>
-        <div className="flex justify-between py-2">
+        <div className="flex justify-between py-2 px-4">
           <span>VAT (15%):</span>
           <span><Money value={totalTax} /></span>
         </div>

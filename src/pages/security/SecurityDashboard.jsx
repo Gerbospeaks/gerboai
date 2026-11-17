@@ -98,6 +98,7 @@ import ReportsPage from "./ReportsPage";
 import AnalyticsPage from "./AnalyticsPage";
 import BusinessOverviewPage from "./BusinessOverviewPage";
 import ShiftCalendarPage from "./ShiftCalendarPage";
+import SecuritySidebar from "./SecuritySidebar";
 
 // ─── Number generation ────────────────────────────────────────────────────────
 const generateIncidentNumber = async (userId) => {
@@ -615,7 +616,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
   // ── Sidebar nav helper ────────────────────────────────────────────────────
   const navigate = (view) => {
     setActiveView(view);
-    if (isMobile) setSidebarOpen(false);
+    if (isMobile) setSidebarOpen(true);
   };
 
   // ── Home view ─────────────────────────────────────────────────────────────
@@ -879,425 +880,41 @@ const mobileNavPad = "pb-24 lg:pb-6";
       )}
       <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
         {/* Sidebar backdrop (mobile) */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* ── Collapsed Sidebar ─────────────────────────────────────────── */}
-        <div
-          className={`${sidebarOpen ? "hidden" : "hidden md:flex"} fixed z-40 w-16 bg-[#0f172a] border-r border-[#1e293b] h-full flex-col items-center py-4 space-y-3 print:hidden`}
-        >
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center">
-            <img src={logo} className="w-full h-full object-contain" />
-          </div>
-          <div className="flex flex-col items-center space-y-2 w-full px-2 pt-2">
-            {[
-              {
-                icon: Home,
-                view: "home",
-                title: "Home",
-                color: "text-[#38bdf8]",
-              },
-              {
-                icon: Settings,
-                view: null,
-                title: "Settings",
-                color: "text-[#64748b]",
-                onClick: () => setShowSettings(true),
-              },
-              {
-                icon: TrendingUp,
-                view: "overview",
-                title: "Overview",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: GerboAIIcon,
-                view: "gerbo-ai",
-                title: "AI Receptionist",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: AlertTriangle,
-                view: null,
-                title: "Incident Reports",
-                color: "text-[#64748b]",
-                onClick: () => {
-                  handleNewIncident();
-                  navigate("invoice");
-                },
-              },
-              {
-                icon: UserCheck,
-                view: "guards",
-                title: "Security Guards",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: Users,
-                view: "clients",
-                title: "Clients",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: Building,
-                view: "sites",
-                title: "Sites",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: MapPin,
-                view: "patrols",
-                title: "Patrol Routes",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: Clock,
-                view: "schedules",
-                title: "Schedules",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: Receipt,
-                view: "invoices",
-                title: "Invoices",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: FileBarChart,
-                view: "reports",
-                title: "Reports",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: Calendar,
-                view: "calendar",
-                title: "Shift Calendar",
-                color: "text-[#64748b]",
-              },
-              {
-                icon: BarChart3,
-                view: "analytics",
-                title: "Analytics",
-                color: "text-[#64748b]",
-              },
-            ].map(
-              ({ icon: Icon, view, title, color, onClick: customOnClick }) => (
-                <button
-                  key={title}
-                  onClick={
-                    customOnClick || (view ? () => navigate(view) : undefined)
-                  }
-                  title={title}
-                  className={`group p-2 ${activeView === view ? "text-[#38bdf8] bg-[#1e3a5f]" : color} hover:text-white hover:bg-[#1e293b] rounded-lg transition-all w-10 h-10 flex items-center justify-center`}
-                >
-                  <Icon className="w-5 h-5" />
-                </button>
-              ),
-            )}
-          </div>
-          <div className="absolute bottom-4">
-            <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155]">
-              {businessInfo.logoUrl ? (
-                <img
-                  src={businessInfo.logoUrl}
-                  className="w-6 h-6 object-contain"
-                />
-              ) : (
-                <Shield className="w-4 h-4 text-[#64748b]" />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Expanded Sidebar ──────────────────────────────────────────── */}
-        <div
-          className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 bg-[#0f172a] border-r border-[#1e293b] transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto flex flex-col`}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#1e293b]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg overflow-hidden">
-                <img src={logo} className="w-full h-full object-contain" />
-              </div>
-              <span className="text-sm font-bold text-white truncate">
-                {businessInfo.businessName || "Elite Security"}
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1.5 text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg transition-all"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Nav */}
-          <nav className="flex-1 p-3 space-y-1">
-            {/* Home */}
-            <div
-              onClick={() => navigate("home")}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium ${activeView === "home" ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}
-            >
-              <Home className="w-4 h-4 flex-shrink-0" />
-              Home
-            </div>
-            {/* Settings */}
-            <div
-              onClick={() => {
-                setShowSettings(true);
-                setSidebarOpen(false);
-              }}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"
-            >
-              <Settings className="w-4 h-4 flex-shrink-0" />
-              Settings
-            </div>
-
-            <div className="pt-3 border-t border-[#1e293b] space-y-1">
-              {/* Business Overview */}
-              <div
-                onClick={() => navigate("overview")}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition-all ${activeView === "overview" ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}
-              >
-                <TrendingUp className="w-4 h-4 flex-shrink-0" />
-                Business Overview
-              </div>
-
-              <div
-                onClick={() => navigate("gerbo-ai")}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm font-medium transition-all ${activeView === "gerbo-ai" ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}
-              >
-                <GerboAIIcon className="w-4 h-4 flex-shrink-0" />
-                AI Receptionist
-              </div>
-
-              {/* Incident Reports dropdown */}
-              <div>
-                <div
-                  onClick={() => setIsIncidentsOpen(!isIncidentsOpen)}
-                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium"
-                >
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                    Incident Reports
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isIncidentsOpen ? "rotate-180" : ""}`}
-                  />
-                </div>
-                <div
-                  className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isIncidentsOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                >
-                  {[
-                    {
-                      label: "New Report",
-                      dot: "bg-[#dc2626]",
-                      onClick: () => {
-                        handleNewIncident();
-                        navigate("invoice");
-                      },
-                    },
-                    {
-                      label: "All Incidents",
-                      dot: "bg-[#7c3aed]",
-                      badge: savedIncidents.length,
-                      onClick: () => {
-                        setShowIncidentsList(!showIncidentsList);
-                        if (isMobile) setSidebarOpen(false);
-                      },
-                    },
-                    {
-                      label: "Under Investigation",
-                      dot: "bg-[#d97706]",
-                      badge: stats.investigating,
-                      onClick: () => {},
-                    },
-                    {
-                      label: "Resolved",
-                      dot: "bg-[#059669]",
-                      onClick: () => {},
-                    },
-                  ].map(({ label, dot, badge, onClick }) => (
-                    <div
-                      key={label}
-                      onClick={onClick}
-                      className="flex items-center justify-between py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${dot}`} />
-                        {label}
-                      </div>
-                      {badge !== undefined && (
-                        <span className="bg-[#2563eb] text-white px-1.5 py-0.5 rounded text-xs font-bold">
-                          {badge}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Direct nav items */}
-              {[
-                { label: "Security Guards", icon: UserCheck, view: "guards" },
-                { label: "Clients", icon: Users, view: "clients" },
-                { label: "Sites", icon: Building, view: "sites" },
-                { label: "Patrol Routes", icon: MapPin, view: "patrols" },
-              ].map(({ label, icon: Icon, view }) => (
-                <div
-                  key={label}
-                  onClick={() => navigate(view)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all ${activeView === view ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  {label}
-                </div>
-              ))}
-
-              {/* Schedules */}
-              <div>
-                <div
-                  onClick={() => setIsSchedulesOpen(!isSchedulesOpen)}
-                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium"
-                >
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-4 h-4 flex-shrink-0" />
-                    Schedules
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isSchedulesOpen ? "rotate-180" : ""}`}
-                  />
-                </div>
-                <div
-                  className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isSchedulesOpen ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}`}
-                >
-                  {[
-                    {
-                      label: "Weekly Schedule",
-                      dot: "bg-[#2563eb]",
-                      onClick: () => navigate("schedules"),
-                    },
-                    {
-                      label: "Shift Calendar",
-                      dot: "bg-[#7c3aed]",
-                      onClick: () => navigate("calendar"),
-                    },
-                  ].map(({ label, dot, onClick }) => (
-                    <div
-                      key={label}
-                      onClick={onClick}
-                      className="flex items-center gap-2 py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all"
-                    >
-                      <div className={`w-1.5 h-1.5 rounded-full ${dot}`} />
-                      {label}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Invoices */}
-              <div>
-                <div
-                  onClick={() => setIsInvoicesOpen(!isInvoicesOpen)}
-                  className="flex items-center justify-between px-3 py-2.5 text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all text-sm font-medium"
-                >
-                  <div className="flex items-center gap-3">
-                    <Receipt className="w-4 h-4 flex-shrink-0" />
-                    Invoices
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isInvoicesOpen ? "rotate-180" : ""}`}
-                  />
-                </div>
-                <div
-                  className={`ml-4 mt-1 space-y-0.5 border-l border-[#1e293b] pl-3 overflow-hidden transition-all duration-200 ${isInvoicesOpen ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}`}
-                >
-                  {[
-                    {
-                      label: "All Invoices",
-                      dot: "bg-[#2563eb]",
-                      onClick: () => navigate("invoices"),
-                    },
-                    {
-                      label: "Invoice Templates",
-                      dot: "bg-[#7c3aed]",
-                      onClick: () => navigate("templates"),
-                    },
-                  ].map(({ label, dot, onClick }) => (
-                    <div
-                      key={label}
-                      onClick={onClick}
-                      className="flex items-center gap-2 py-2 px-2 text-xs text-[#64748b] hover:text-white hover:bg-[#1e293b] rounded-lg cursor-pointer transition-all"
-                    >
-                      <div className={`w-1.5 h-1.5 rounded-full ${dot}`} />
-                      {label}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Reports, Calendar, Analytics */}
-              {[
-                { label: "Reports", icon: FileBarChart, view: "reports" },
-                { label: "Shift Calendar", icon: Calendar, view: "calendar" },
-                { label: "Analytics", icon: BarChart3, view: "analytics" },
-              ].map(({ label, icon: Icon, view }) => (
-                <div
-                  key={label}
-                  onClick={() => navigate(view)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all ${activeView === view ? "bg-[#1e3a5f] text-[#38bdf8]" : "text-[#94a3b8] hover:text-white hover:bg-[#1e293b]"}`}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  {label}
-                </div>
-              ))}
-            </div>
-          </nav>
-
-          {/* Footer */}
-          <div className="p-4 border-t border-[#1e293b]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#1e293b] rounded-full flex items-center justify-center ring-1 ring-[#334155] flex-shrink-0">
-                {businessInfo.logoUrl ? (
-                  <img
-                    src={businessInfo.logoUrl}
-                    className="w-6 h-6 object-contain"
-                  />
-                ) : (
-                  <Shield className="w-4 h-4 text-[#64748b]" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white truncate">
-                  {user?.name || "User"}
-                </div>
-                <div className="text-xs text-[#64748b] truncate">
-                  {user?.email || "email@example.com"}
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-1.5 text-[#64748b] hover:text-[#ef4444] hover:bg-[#1e293b] rounded-lg transition-all"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+       <SecuritySidebar
+       navigate={navigate}
+                 user={user}
+                 activeView={activeView}
+                 setActiveView={setActiveView}
+                 sidebarOpen={sidebarOpen}
+                 setSidebarOpen={setSidebarOpen}
+                 showSettings={showSettings}
+                 setShowSettings={setShowSettings}
+                 handleNewIncident={() => {
+                   handleNewIncident();
+                   setActiveView("invoice");
+                 }}
+                 handleNewQuote={() => {
+                   handleNewIncident();
+                   setActiveView("invoice");
+                 }}
+                 handleNewJobCard={() => {
+                   handleNewIncident();
+                   setActiveView("invoice");
+                 }}
+                 businessInfo={businessInfo}
+                 savedJobCards={savedIncidents}
+                 documentType={documentType}
+                 showIncidentsList={showIncidentsList}
+                 setShowIncidentsList={setShowIncidentsList}
+                 handleLogout={handleLogout}
+                 isMobile={isMobile}
+                 logo={logo}
+                 newRequestCount={0}
+                 isAdmin={isAdmin} />
 
         {/* ── Main content ──────────────────────────────────────────────── */}
         <div
-          className={`flex-1 overflow-hidden flex flex-col min-h-0 transition-all duration-300 ${sidebarOpen ? "ml-0 lg:ml-64" : "ml-0 md:ml-16"}`}
+          className={`flex-1 overflow-hidden flex flex-col min-h-0`}
         >
           <AppHeader
             actions={headerActions}

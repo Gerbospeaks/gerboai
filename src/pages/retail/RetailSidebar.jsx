@@ -184,7 +184,7 @@ export default function RetailSidebar({
             </div>
 
             {/* Nav */}
-            <nav className="space-y-1.5 md:space-y-2">
+            <nav className="space-y-1.5 md:space-y-1">
               <NavItem
                 icon={Home}
                 label="Home"
@@ -201,7 +201,7 @@ export default function RetailSidebar({
                 color="amber"
               />
 
-              <div className="pt-3 mt-3 border-t border-stone-700/50 space-y-1.5">
+              <div className="pt-3 mt-3 border-t border-stone-700/50 space-y-0.5">
                 <NavItem
                   icon={TrendingUp}
                   label="Financial Dashboard"

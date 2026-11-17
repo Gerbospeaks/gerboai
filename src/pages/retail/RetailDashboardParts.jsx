@@ -369,7 +369,7 @@ function StatCard({ label, value, delta, color }) {
       style={{ borderTopColor: color }}
     >
       <div className="text-xs text-slate-500 mb-1">{label}</div>
-      <div className="text-2xl font-bold text-slate-900 truncate">{value}</div>
+      <div className="text-xl font-bold text-slate-900 truncate">{value}</div>
       <div className={`text-[11px] mt-1.5 ${delta.cls}`}>{delta.text}</div>
     </div>
   );
@@ -825,7 +825,7 @@ function CrudView({
               className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
             >
               <div className="text-xs text-slate-500 mb-1">{s.label}</div>
-              <div className="text-2xl font-bold text-slate-900">{s.value}</div>
+              <div className="text-xl font-bold text-slate-900">{s.value}</div>
             </div>
           ))}
         </div>

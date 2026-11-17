@@ -66,7 +66,7 @@ export function FleetView({ user }) {
                 </div>
                 <p className="font-mono text-lg mt-2 text-white">{v.registration}</p>
               </div>
-              <div className="p-4 space-y-1.5">
+              <div className="p-4 space-y-0.5">
                 {v.assignedTo && <p className="text-xs text-[#64748b]">👤 Assigned to: <span className="font-semibold text-[#374151]">{v.assignedTo}</span></p>}
                 {v.odometer && <p className="text-xs text-[#64748b]">🔢 Odometer: {v.odometer} km</p>}
                 {v.lastService && <p className="text-xs text-[#64748b]">🔧 Last service: {v.lastService}</p>}

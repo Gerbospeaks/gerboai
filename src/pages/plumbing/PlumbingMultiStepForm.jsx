@@ -402,7 +402,7 @@ const PlumbingMultiStepForm = ({
 
                 {/* Totals Summary */}
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Subtotal:</span>
                       <span className="font-medium">

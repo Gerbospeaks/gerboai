@@ -405,7 +405,7 @@ function InvoiceModal({ onClose, onSave, bizInfo, existingInv = null }) {
 
               {/* Totals */}
               <div className="flex justify-end mb-4">
-                <div className="w-56 space-y-1.5">
+                <div className="w-56 space-y-0.5">
                   <div className="flex justify-between text-sm text-gray-500">
                     <span>Subtotal</span>
                     <span>{fmt(subtotal)}</span>
@@ -1041,7 +1041,7 @@ export default function RetailDashboard() {
             <div className="text-xs text-gray-500 font-medium mb-1">
               {m.label}
             </div>
-            <div className="text-2xl font-bold text-gray-900">{m.value}</div>
+            <div className="text-xl font-bold text-gray-900">{m.value}</div>
             <div className={`text-xs mt-1 ${m.subCls}`}>{m.sub}</div>
           </div>
         ))}
@@ -1591,7 +1591,7 @@ export default function RetailDashboard() {
               className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm"
             >
               <div className="text-xs text-gray-500 mb-1">{m.label}</div>
-              <div className="text-2xl font-bold text-gray-900">{m.value}</div>
+              <div className="text-xl font-bold text-gray-900">{m.value}</div>
               <div className="text-xs text-gray-400 mt-1">{m.sub}</div>
             </div>
           ))}
@@ -1621,7 +1621,7 @@ export default function RetailDashboard() {
             <div className="text-sm font-semibold text-gray-800 mb-4">
               Top products by price
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {products
                 .slice()
                 .sort((a, b) => b.price - a.price)
@@ -1673,7 +1673,7 @@ export default function RetailDashboard() {
               className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm"
             >
               <div className="text-xs text-gray-500 mb-1">{m.label}</div>
-              <div className={`text-2xl font-bold ${m.cls || "text-gray-900"}`}>
+              <div className={`text-xl font-bold ${m.cls || "text-gray-900"}`}>
                 {m.value}
               </div>
             </div>

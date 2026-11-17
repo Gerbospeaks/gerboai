@@ -317,7 +317,7 @@ export default function ChartOfAccounts({ user, clientId, clientName }) {
               >
                 {type}
               </p>
-              <p className="text-2xl font-black text-[#1e293b] mt-1 leading-none">
+              <p className="text-xl font-black text-[#1e293b] mt-1 leading-none">
                 {accounts.filter((a) => a.type === type).length}
               </p>
               <p className="text-xs text-[#64748b] mt-0.5">

@@ -424,7 +424,7 @@ export default function Reports({ user }) {
             <Building2 className="w-4 h-4 text-[#94a3b8]" />
           </div>
           {loading ? (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}

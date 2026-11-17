@@ -209,7 +209,7 @@ export const DefaultTemplate = ({
           <div className="text-3xl font-bold mb-4">
   {getDocLabels(documentType).title}
 </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
   {getDocLabels(documentType).number}
@@ -230,7 +230,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {customerName}
           </div>
@@ -249,7 +249,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           SERVICE DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Service:</span> {eventType}
           </div>
@@ -378,7 +378,7 @@ export const ClassicTemplate = (props) => (
           <div className="text-3xl font-bold mb-4">
   {getDocLabels(props.documentType).title}
 </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
   {getDocLabels(props.documentType).number}
@@ -399,7 +399,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -419,7 +419,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           SERVICE DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Service:</span> {props.eventType}
           </div>
@@ -549,7 +549,7 @@ export const ModernTemplate = (props) => (
           <div className="text-3xl font-bold mb-4">
   {getDocLabels(props.documentType).title}
 </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
   {getDocLabels(props.documentType).number}
@@ -570,7 +570,7 @@ export const ModernTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -590,7 +590,7 @@ export const ModernTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           SERVICE DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Service:</span> {props.eventType}
           </div>
@@ -720,7 +720,7 @@ export const ElegantTemplate = (props) => (
           <div className="text-3xl font-bold mb-4">
   {getDocLabels(props.documentType).title}
 </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
   {getDocLabels(props.documentType).number}
@@ -741,7 +741,7 @@ export const ElegantTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -761,7 +761,7 @@ export const ElegantTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           SERVICE DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Service:</span> {props.eventType}
           </div>
@@ -891,7 +891,7 @@ export const SpeedTemplate = (props) => (
           <div className="text-3xl font-bold mb-4">
   {getDocLabels(props.documentType).title}
 </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
   {getDocLabels(props.documentType).number}
@@ -912,7 +912,7 @@ export const SpeedTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -932,7 +932,7 @@ export const SpeedTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           SERVICE DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Service:</span> {props.eventType}
           </div>
@@ -1061,7 +1061,7 @@ export const DiagnosticTemplate = (props) => (
           <div className="text-3xl font-bold mb-4">
   {getDocLabels(props.documentType).title}
 </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
   {getDocLabels(props.documentType).number}
@@ -1082,7 +1082,7 @@ export const DiagnosticTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Name:</span> {props.customerName}
           </div>
@@ -1102,7 +1102,7 @@ export const DiagnosticTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
           SERVICE DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Service:</span> {props.eventType}
           </div>

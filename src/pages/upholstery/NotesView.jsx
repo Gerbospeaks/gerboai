@@ -181,7 +181,7 @@ const NotesView = ({ jobCardId }) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Notes</h2>
+        <h2 className="text-xl font-bold text-gray-800">Notes</h2>
         <p className="text-gray-600 mt-1">
           Add important observations and reminders
         </p>

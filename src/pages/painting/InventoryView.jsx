@@ -188,7 +188,7 @@ export default function InventoryView({ user }) {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
+          <h1 className="text-xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">
             <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
               <Package className="w-6 h-6 text-amber-600" />
             </div>
@@ -213,7 +213,7 @@ export default function InventoryView({ user }) {
           <div className="text-sm font-medium text-amber-700 mb-1">
             Total Items
           </div>
-          <div className="text-2xl font-bold text-amber-900">
+          <div className="text-xl font-bold text-amber-900">
             {items.length}
           </div>
         </div>
@@ -232,7 +232,7 @@ export default function InventoryView({ user }) {
             Low Stock
           </div>
           <div
-            className={`text-2xl font-bold ${
+            className={`text-xl font-bold ${
               lowStockCount > 0 ? "text-rose-900" : "text-emerald-900"
             }`}
           >
@@ -243,7 +243,7 @@ export default function InventoryView({ user }) {
           <div className="text-sm font-medium text-stone-700 mb-1">
             Stock Value
           </div>
-          <div className="text-2xl font-bold text-stone-900">
+          <div className="text-xl font-bold text-stone-900">
             R{totalValue.toFixed(2)}
           </div>
         </div>

@@ -126,7 +126,7 @@ const PracticeOverview = ({
             </div>
             <TrendingUp className="w-5 h-5 text-green-500" />
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl font-bold text-gray-900 mb-1">
             {formatCurrency(stats.totalRevenue)}
           </div>
           <div className="text-sm text-gray-500">Total Revenue</div>
@@ -143,7 +143,7 @@ const PracticeOverview = ({
             </div>
             <Activity className="w-5 h-5 text-blue-500" />
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl font-bold text-gray-900 mb-1">
             {stats.totalPatients}
           </div>
           <div className="text-sm text-gray-500">Total Patients</div>
@@ -160,7 +160,7 @@ const PracticeOverview = ({
             </div>
             <BarChart3 className="w-5 h-5 text-purple-500" />
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl font-bold text-gray-900 mb-1">
             {stats.totalInvoices}
           </div>
           <div className="text-sm text-gray-500">Total Invoices</div>
@@ -177,7 +177,7 @@ const PracticeOverview = ({
             </div>
             <AlertCircle className="w-5 h-5 text-orange-500" />
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl font-bold text-gray-900 mb-1">
             {stats.pendingPayments}
           </div>
           <div className="text-sm text-gray-500">Pending Payments</div>

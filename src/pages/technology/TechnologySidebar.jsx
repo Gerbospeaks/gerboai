@@ -556,7 +556,7 @@ export default function TechnologySidebar({
           DESKTOP — collapsed icon rail OR expanded panel, both floating
           as rounded cards with vertical + left margin, not full height.
       ════════════════════════════════════════════════════════════════ */}
-      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3 py-3 pl-3">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
           <div className="flex flex-col flex-shrink-0 w-16 bg-[#0A0E1A] rounded-2xl h-full shadow-lg z-30">

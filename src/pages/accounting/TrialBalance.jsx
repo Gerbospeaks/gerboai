@@ -406,7 +406,7 @@ export default function TrialBalance({ user, clientId, clientName }) {
           </div>
         </div>
         <div
-          className={`text-2xl font-black ${isBalanced ? "text-[#059669]" : "text-[#dc2626]"}`}
+          className={`text-xl font-black ${isBalanced ? "text-[#059669]" : "text-[#dc2626]"}`}
         >
           {isBalanced ? "✓" : `−${fmt(difference)}`}
         </div>

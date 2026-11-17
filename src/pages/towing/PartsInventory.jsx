@@ -206,7 +206,7 @@ const PartsInventory = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-500 mb-1">Total Parts</div>
-              <div className="text-2xl font-semibold">{parts.length}</div>
+              <div className="text-xl font-semibold">{parts.length}</div>
             </div>
             <Package className="w-8 h-8 text-blue-500" />
           </div>
@@ -216,7 +216,7 @@ const PartsInventory = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-500 mb-1">Low Stock</div>
-              <div className="text-2xl font-semibold text-orange-600">
+              <div className="text-xl font-semibold text-orange-600">
                 {getLowStockParts().length}
               </div>
             </div>
@@ -228,7 +228,7 @@ const PartsInventory = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-500 mb-1">Out of Stock</div>
-              <div className="text-2xl font-semibold text-red-600">
+              <div className="text-xl font-semibold text-red-600">
                 {getOutOfStockParts().length}
               </div>
             </div>
@@ -240,7 +240,7 @@ const PartsInventory = ({ user }) => {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-500 mb-1">Total Value</div>
-              <div className="text-2xl font-semibold text-green-600">
+              <div className="text-xl font-semibold text-green-600">
                 R{getTotalInventoryValue().toFixed(2)}
               </div>
             </div>
@@ -408,7 +408,7 @@ const PartsInventory = ({ user }) => {
               </h2>
               <button
                 onClick={resetForm}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-gray-500 hover:text-gray-700 text-xl"
               >
                 ✕
               </button>

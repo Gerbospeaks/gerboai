@@ -2199,19 +2199,19 @@ const money = (zar) =>
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-teal-600">
+          <div className="text-xl font-bold text-teal-600">
             {purchasedTemplates.length}
           </div>
           <div className="text-sm text-gray-600">Templates Owned</div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-cyan-600">
+          <div className="text-xl font-bold text-cyan-600">
             {Object.keys(TEMPLATES).length}
           </div>
           <div className="text-sm text-gray-600">Total Available</div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-green-600">
+          <div className="text-xl font-bold text-green-600">
             R
             {Object.values(TEMPLATES)
               .filter((t) => purchasedTemplates.includes(t.id))
@@ -2301,7 +2301,7 @@ const money = (zar) =>
                   <div className="text-xs font-semibold text-gray-500 mb-2">
                     FEATURES
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-1">
                     {template.features.map((feature, index) => (
                       <li
                         key={index}
@@ -2437,7 +2437,7 @@ const money = (zar) =>
                       <h4 className="font-semibold text-gray-800 mb-3">
                         Template Features
                       </h4>
-                      <ul className="space-y-2">
+                      <ul className="space-y-1">
                         {TEMPLATES[showPreview].features.map(
                           (feature, index) => (
                             <li
@@ -2520,7 +2520,7 @@ const money = (zar) =>
           <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
             <div className="p-6 border-b bg-gradient-to-r from-teal-500 to-cyan-500 text-gray-800 rounded-t-xl">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-2xl font-bold">Complete Purchase</h2>
+                <h2 className="text-xl font-bold">Complete Purchase</h2>
                 <button
                   onClick={() => {
                     setShowPayment(null);
@@ -2550,7 +2550,7 @@ const money = (zar) =>
             <div className="p-6 space-y-4">
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-lg p-4 text-center">
                 <div className="text-sm text-gray-600 mb-1">Total Amount</div>
-                <div className="text-4xl font-bold text-teal-600">
+                <div className="text-3xl font-bold text-teal-600">
                   {money(TEMPLATES[showPayment].price)}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">

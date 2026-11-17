@@ -976,47 +976,7 @@ const addNotification = useCallback(async (
   return (
     <div className="dashboard">
       <div className="dashboard-content">
-        {/* ── Sidebar ────────────────────────────────────────────────────── */}
-        <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-          <div className="sidebar-content">
-            <div className="sidebar-group">
-              <div className="sidebar-title">Dashboard</div>
-              <SidebarItem tab="overview" label="Overview" icon="📊" />
-            </div>
-            <div className="sidebar-group">
-              <div className="sidebar-title">Calls</div>
-              <SidebarItem tab="calls" label="All Calls" icon="📞" />
-              <SidebarItem tab="voicemails" label="Voicemails" icon="🎙️" />
-              <SidebarItem tab="transcripts" label="Transcripts" icon="📄" />
-            </div>
-            <div className="sidebar-group">
-              <div className="sidebar-title">AI Setup</div>
-              <SidebarItem tab="settings" label="Configuration" icon="⚙️" />
-              <SidebarItem tab="knowledge" label="Knowledge Base" icon="📚" />
-              <SidebarItem tab="call-flows" label="Call Flows" icon="🔀" />
-            </div>
-            <div className="sidebar-group">
-              <div className="sidebar-title">Business</div>
-              <SidebarItem tab="analytics" label="Analytics" icon="📈" />
-              <SidebarItem tab="team" label="Team" icon="👥" />
-              <SidebarItem tab="billing" label="Billing" icon="💳" />
-            </div>
-          </div>
-
-          <div className="sidebar-footer">
-            <button
-              className="user-menu-trigger"
-              onClick={signOut}
-              title="Sign out"
-            >
-              <div className="user-avatar">
-                {user?.email?.charAt(0).toUpperCase()}
-              </div>
-              <span className="user-name">{user?.email?.split("@")[0]}</span>
-              <span className="dropdown-arrow">▼</span>
-            </button>
-          </div>
-        </aside>
+       
 
         {/* ── Main area ──────────────────────────────────────────────────── */}
         <main className="main-content">
@@ -3161,6 +3121,47 @@ const addNotification = useCallback(async (
             activeTab === "knowledge" ||
             activeTab === "prompts") }
         </main>
+         {/* ── Sidebar ────────────────────────────────────────────────────── */}
+        <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+          <div className="sidebar-content">
+            <div className="sidebar-group">
+              <div className="sidebar-title">Dashboard</div>
+              <SidebarItem tab="overview" label="Overview" icon="📊" />
+            </div>
+            <div className="sidebar-group">
+              <div className="sidebar-title">Calls</div>
+              <SidebarItem tab="calls" label="All Calls" icon="📞" />
+              <SidebarItem tab="voicemails" label="Voicemails" icon="🎙️" />
+              <SidebarItem tab="transcripts" label="Transcripts" icon="📄" />
+            </div>
+            <div className="sidebar-group">
+              <div className="sidebar-title">AI Setup</div>
+              <SidebarItem tab="settings" label="Configuration" icon="⚙️" />
+              <SidebarItem tab="knowledge" label="Knowledge Base" icon="📚" />
+              <SidebarItem tab="call-flows" label="Call Flows" icon="🔀" />
+            </div>
+            <div className="sidebar-group">
+              <div className="sidebar-title">Business</div>
+              <SidebarItem tab="analytics" label="Analytics" icon="📈" />
+              <SidebarItem tab="team" label="Team" icon="👥" />
+              <SidebarItem tab="billing" label="Billing" icon="💳" />
+            </div>
+          </div>
+
+          <div className="sidebar-footer">
+            <button
+              className="user-menu-trigger"
+              onClick={signOut}
+              title="Sign out"
+            >
+              <div className="user-avatar">
+                {user?.email?.charAt(0).toUpperCase()}
+              </div>
+              <span className="user-name">{user?.email?.split("@")[0]}</span>
+              <span className="dropdown-arrow">▼</span>
+            </button>
+          </div>
+        </aside>
       </div>
 
       {/* Call Details Modal */}

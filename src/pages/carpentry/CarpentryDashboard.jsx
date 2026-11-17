@@ -2121,7 +2121,7 @@ const bottomNavItems = [
                                   <Plus className="w-4 h-4 text-[#2563eb]" />{" "}
                                   Add Work Item
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-1">
                                   <div className="sm:col-span-2">
                                     <label className={labelCls}>
                                       Description

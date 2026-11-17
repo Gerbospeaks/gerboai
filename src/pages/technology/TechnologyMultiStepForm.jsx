@@ -303,7 +303,7 @@ const TechnologyMultiStepForm = ({
               <h3 className="text-base font-semibold mb-4 text-slate-700">
                 Line Items ({items.length})
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {items.map((item, index) => (
                   <div
                     key={index}
@@ -325,7 +325,7 @@ const TechnologyMultiStepForm = ({
                 ))}
 
                 {/* Totals summary */}
-                <div className="mt-4 pt-4 border-t border-gray-200 space-y-1.5">
+                <div className="mt-4 pt-4 border-t border-gray-200 space-y-0.5">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Subtotal</span>
                     <span>

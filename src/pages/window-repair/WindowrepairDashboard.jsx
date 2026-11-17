@@ -2099,7 +2099,7 @@ const handleAddNewCustomer = () => {
                                           {label}
                                         </p>
                                         <p
-                                          className={`text-2xl font-bold ${text}`}
+                                          className={`text-xl font-bold ${text}`}
                                         >
                                           {value}
                                         </p>

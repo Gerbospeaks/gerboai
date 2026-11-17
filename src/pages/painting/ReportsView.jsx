@@ -187,7 +187,7 @@ function StatCard({ icon: Icon, label, value, sub, trend, color = "amber" }) {
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-white leading-none">{value}</p>
+      <p className="text-xl font-bold text-white leading-none">{value}</p>
       <p className="text-xs text-stone-400 mt-1">{label}</p>
       {sub && <p className="text-xs text-stone-500 mt-0.5">{sub}</p>}
     </div>
@@ -364,7 +364,7 @@ export default function ReportsView({ user }) {
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-xl font-bold text-white flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
@@ -467,7 +467,7 @@ export default function ReportsView({ user }) {
           <p className="text-xs text-stone-500 mb-4">Breakdown for period</p>
           <div className="flex items-center gap-4">
             <DonutChart segments={statusBreakdown} />
-            <div className="space-y-2">
+            <div className="space-y-1">
               {statusBreakdown.map((s) => (
                 <div key={s.label} className="flex items-center gap-2">
                   <div
@@ -542,7 +542,7 @@ export default function ReportsView({ user }) {
               No invoices yet
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {recentInvoices.map((inv) => {
                 const meta = STATUS_COLORS[inv.status] || STATUS_COLORS.pending;
                 return (

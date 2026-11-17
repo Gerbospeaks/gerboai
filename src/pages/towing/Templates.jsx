@@ -2606,19 +2606,19 @@ const money = (zar) =>
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-2xl font-bold text-orange-600">
+            <div className="text-xl font-bold text-orange-600">
               {purchasedTemplates.length}
             </div>
             <div className="text-sm text-gray-600">Templates Owned</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-xl font-bold text-blue-600">
               {Object.keys(TEMPLATES).length}
             </div>
             <div className="text-sm text-gray-600">Total Available</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-xl font-bold text-green-600">
               R
               {Object.values(TEMPLATES)
                 .filter((t) => purchasedTemplates.includes(t.id))
@@ -2700,7 +2700,7 @@ const money = (zar) =>
                     <div className="text-xs font-semibold text-gray-500 mb-2">
                       FEATURES
                     </div>
-                    <ul className="space-y-2">
+                    <ul className="space-y-1">
                       {template.features.map((feature, index) => (
                         <li
                           key={index}
@@ -2811,7 +2811,7 @@ const money = (zar) =>
                     </div>
                     <button
                       onClick={() => setShowPreview(null)}
-                      className="text-gray-500 hover:text-gray-700 text-2xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-colors"
+                      className="text-gray-500 hover:text-gray-700 text-xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       ✕
                     </button>
@@ -2834,7 +2834,7 @@ const money = (zar) =>
                 <div className="flex items-center justify-between text-white">
                   <div className="flex items-center gap-3">
                     <ShoppingCart className="w-6 h-6" />
-                    <h2 className="text-2xl font-bold">Complete Purchase</h2>
+                    <h2 className="text-xl font-bold">Complete Purchase</h2>
                   </div>
                   <button
                     onClick={() => {
@@ -2872,7 +2872,7 @@ const money = (zar) =>
                     <span className="text-sm text-gray-600">
                       One-time payment
                     </span>
-                    <span className="text-2xl font-bold text-orange-600">
+                    <span className="text-xl font-bold text-orange-600">
                       {money(TEMPLATES[showPayment].price)}
                     </span>
                   </div>

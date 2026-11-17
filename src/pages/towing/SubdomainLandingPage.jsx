@@ -701,7 +701,7 @@ function Features({ config }) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>Features</p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">
             Everything your {config.label.toLowerCase()} business needs
           </h2>
           <p className="text-gray-400 mt-3 max-w-xl mx-auto text-sm sm:text-base">
@@ -731,7 +731,7 @@ function Pricing({ config, onRegister }) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>Pricing</p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Simple, honest pricing</h2>
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">Simple, honest pricing</h2>
           <p className="text-gray-500 mt-3 text-sm sm:text-base">Start free. Upgrade when you're ready. No hidden fees.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -793,7 +793,7 @@ function Testimonials({ config }) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>Testimonials</p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">
             Trusted by {config.label.toLowerCase()} businesses across SA
           </h2>
         </div>
@@ -844,7 +844,7 @@ function FAQ({ config }) {
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: config.accent }}>FAQ</p>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-gray-900">Common questions</h2>
+          <h2 className="text-xl sm:text-4xl font-extrabold text-gray-900">Common questions</h2>
         </div>
         <div className="space-y-3">
           {config.faqs.map((faq, i) => (

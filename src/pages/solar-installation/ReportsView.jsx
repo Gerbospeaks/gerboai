@@ -419,7 +419,7 @@ export default function ReportsView({
         {/* Header */}
         <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-stone-900">
+            <h1 className="text-xl md:text-3xl font-bold tracking-tight text-stone-900">
               Reports
             </h1>
             <p className="mt-1 text-sm text-stone-600">
@@ -702,7 +702,7 @@ function Kpi({ icon: Icon, label, value, children }) {
         <Icon className="w-4 h-4 text-orange-600" aria-hidden="true" />
         {label}
       </div>
-      <p className="mt-2 truncate text-2xl md:text-3xl font-bold tracking-tight tabular-nums text-stone-900">
+      <p className="mt-2 truncate text-xl md:text-3xl font-bold tracking-tight tabular-nums text-stone-900">
         {value}
       </p>
       <div className="mt-1.5 space-y-0.5 text-xs text-stone-500">

@@ -1046,7 +1046,7 @@ const VirtualDashboardInner = () => {
                         No saved {listModal}s yet
                       </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         {listDocs.map((d) => (
                           <div
                             key={d.id}
@@ -1430,7 +1430,7 @@ const VirtualDashboardInner = () => {
                                   </div>
                                 </div>
                                 <div
-                                  className={`text-2xl font-semibold ${textColor}`}
+                                  className={`text-xl font-semibold ${textColor}`}
                                 >
                                   {value}
                                 </div>

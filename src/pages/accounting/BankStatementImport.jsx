@@ -852,7 +852,7 @@ export default function BankStatementImport({ user, clientId, clientName }) {
                   <span className="text-xs font-semibold text-[#64748b]">{label}</span>
                   <Icon className={`w-4 h-4 ${color}`} />
                 </div>
-                <div className={`text-2xl font-black ${color}`}>{value}</div>
+                <div className={`text-xl font-black ${color}`}>{value}</div>
               </div>
             ))}
           </div>

@@ -947,7 +947,7 @@ const [stampConfig, setStampConfig] = useState(null);
                         No saved invoices yet
                       </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         {savedInvoices.map((invoice) => (
                           <div
                             key={invoice.id}
@@ -1165,7 +1165,7 @@ const [stampConfig, setStampConfig] = useState(null);
                             <div className="text-sm text-gray-500 mb-1">
                               Total Amount
                             </div>
-                            <div className="text-2xl font-semibold text-violet-600">
+                            <div className="text-xl font-semibold text-violet-600">
                               R{total.toFixed(2)}
                             </div>
                           </div>
@@ -1173,7 +1173,7 @@ const [stampConfig, setStampConfig] = useState(null);
                             <div className="text-sm text-gray-500 mb-1">
                               Paid
                             </div>
-                            <div className="text-2xl font-semibold text-green-600">
+                            <div className="text-xl font-semibold text-green-600">
                               R{paymentStatus.totalPaid.toFixed(2)}
                             </div>
                           </div>
@@ -1181,7 +1181,7 @@ const [stampConfig, setStampConfig] = useState(null);
                             <div className="text-sm text-gray-500 mb-1">
                               Balance Due
                             </div>
-                            <div className="text-2xl font-semibold text-red-600">
+                            <div className="text-xl font-semibold text-red-600">
                               R{total.toFixed(2)}
                             </div>
                           </div>
@@ -1210,33 +1210,7 @@ const [stampConfig, setStampConfig] = useState(null);
                           handleAddItem={handleAddItem}
                         />
 
-                        <div className="bg-white border border-gray-200 rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold">
-                              Payment Terms
-                            </h2>
-                          </div>
-                          <div className="space-y-3 text-sm">
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Payment Method:
-                              </span>
-                              <span className="font-medium">EFT/Card/Cash</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                              <span className="text-gray-600">
-                                Deposit Required:
-                              </span>
-                              <span className="font-medium">50% Upfront</span>
-                            </div>
-                            <div className="flex justify-between py-2">
-                              <span className="text-gray-600">
-                                Balance Due:
-                              </span>
-                              <span className="font-medium">Day of Event</span>
-                            </div>
-                          </div>
-                        </div>
+                       
                       </>
                     )}
                   </div>

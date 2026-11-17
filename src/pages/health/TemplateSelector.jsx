@@ -157,7 +157,7 @@ export const DefaultTemplate = ({
               />
             ) : (
               <div className="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
-                <span className="text-blue-600 text-2xl">+</span>
+                <span className="text-blue-600 text-xl">+</span>
               </div>
             )}
             <div>
@@ -185,7 +185,7 @@ export const DefaultTemplate = ({
           <div className="text-3xl font-bold mb-4 text-blue-900">
             MEDICAL INVOICE
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{jobCardNumber}</span>
@@ -209,7 +209,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">
           PATIENT INFORMATION
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{customerName}</div>
           <div className="text-gray-600">Patient ID: {patientId}</div>
           <div className="h-12 overflow-hidden text-xs leading-tight">
@@ -224,7 +224,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">
           PATIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="flex justify-between">
             <span className="font-semibold">Date of Birth:</span>
             <span>{patientDOB}</span>
@@ -244,7 +244,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-gray-50 text-gray-800 px-2 py-1">
           INSURANCE INFORMATION
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="flex justify-between">
             <span className="font-semibold">Provider:</span>
             <span>{insuranceProvider || "Self Pay"}</span>
@@ -263,7 +263,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 text-yellow-800">
           CLINICAL NOTES
         </div>
-        <div className="text-xs space-y-2">
+        <div className="text-xs space-y-1">
           {diagnosis && (
             <div>
               <span className="font-semibold">Diagnosis: </span>
@@ -311,15 +311,15 @@ export const DefaultTemplate = ({
     {/* Totals */}
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-blue-900 text-gray-800 px-2">
+        <div className="flex justify-between py-2 font-bold bg-blue-900 text-white px-2">
           <span>TOTAL DUE:</span>
           <span>R {total.toFixed(2)}</span>
         </div>
@@ -331,7 +331,7 @@ export const DefaultTemplate = ({
       <div className="text-green-800 font-bold text-xs mb-2">
         PAYMENT INFORMATION
       </div>
-      <div className="text-xs space-y-1">
+      <div className="text-xs space-y-0">
         <div>
           <span className="font-semibold">Bank Name:</span>{" "}
           {businessInfo.bankName || "First National Bank"}
@@ -402,7 +402,7 @@ export const ClinicalTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-3xl font-bold mb-4 text-teal-600">INVOICE</div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">INVOICE NO.</span>
               <span>{props.jobCardNumber}</span>
@@ -421,7 +421,7 @@ export const ClinicalTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">
           PATIENT
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{props.customerName}</div>
           <div>DOB: {props.patientDOB}</div>
           <div>ID: {props.patientId}</div>
@@ -432,7 +432,7 @@ export const ClinicalTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">
           INSURANCE
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>{props.insuranceProvider || "Self Pay"}</div>
           <div>Policy: {props.insuranceNumber || "N/A"}</div>
         </div>
@@ -441,7 +441,7 @@ export const ClinicalTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-teal-600 text-gray-800 px-2 py-1">
           VISIT INFO
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>Date: {new Date().toLocaleDateString()}</div>
           <div>Type: {props.serviceType}</div>
         </div>
@@ -471,15 +471,15 @@ export const ClinicalTemplate = (props) => (
 
     <div className="flex justify-end mb-4">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 font-bold bg-teal-900 text-gray-800 px-2">
+        <div className="flex justify-between py-2 font-bold bg-teal-900 text-white px-2">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>
@@ -490,7 +490,7 @@ export const ClinicalTemplate = (props) => (
       <div className="text-green-800 font-bold text-xs mb-2">
         PAYMENT DETAILS
       </div>
-      <div className="text-xs space-y-1">
+      <div className="text-xs space-y-0">
         <div>
           <span className="font-semibold">Bank:</span>{" "}
           {props.businessInfo.bankName || "FNB"}
@@ -535,7 +535,7 @@ export const ModernTemplate = (props) => (
             />
           )}
 
-          <div className="text-sm text-gray-600 space-y-1">
+          <div className="text-sm text-gray-600 space-y-0">
             <div>{props.businessInfo.addressLine1}</div>
             <div>
               {props.businessInfo.city}, {props.businessInfo.postalCode}
@@ -545,7 +545,7 @@ export const ModernTemplate = (props) => (
         </div>
         <div className="text-right">
           <div className="text-5xl font-bold text-indigo-500 mb-4">INVOICE</div>
-          <div className="bg-indigo-50 p-4 rounded-lg space-y-2">
+          <div className="bg-indigo-50 p-4 rounded-lg space-y-1">
             <div className="text-sm">
               <span className="font-semibold">Invoice #:</span>{" "}
               {props.jobCardNumber}
@@ -610,16 +610,16 @@ export const ModernTemplate = (props) => (
     </table>
 
     <div className="flex justify-end mb-6">
-      <div className="w-80 space-y-2">
-        <div className="flex justify-between py-2 text-gray-600">
+      <div className="w-80 space-y-1">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 text-gray-600">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-500 text-gray-800 px-4 rounded-lg">
+        <div className="flex justify-between py-3 text-xl font-bold bg-indigo-500 text-white px-4 rounded-lg">
           <span>TOTAL:</span>
           <span>R {props.total.toFixed(2)}</span>
         </div>

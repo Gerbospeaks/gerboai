@@ -209,7 +209,7 @@ export default function PoolServiceSidebar({
             </div>
 
             {/* Nav */}
-            <nav className="space-y-1.5 md:space-y-2">
+            <nav className="space-y-1.5 md:space-y-1">
               <NavItem
                 icon={Home}
                 label="Home"
@@ -226,7 +226,7 @@ export default function PoolServiceSidebar({
                 color="orange"
               />
 
-              <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50 space-y-1.5">
+              <div className="pt-3 md:pt-4 mt-3 md:mt-4 border-t border-stone-700/50 space-y-0.5">
                 <NavItem
                   icon={TrendingUp}
                   label="Financial Dashboard"

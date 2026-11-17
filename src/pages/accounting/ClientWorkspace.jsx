@@ -361,7 +361,7 @@ function ClientCard({ client, onSelect }) {
         {client.name}
       </h3>
 
-      <div className="space-y-1.5">
+      <div className="space-y-0.5">
         {client.email && (
           <div className="flex items-center gap-1.5 text-xs text-[#64748b]">
             <Mail className="w-3 h-3 flex-shrink-0 text-[#94a3b8]" />

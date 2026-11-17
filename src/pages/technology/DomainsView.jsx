@@ -251,7 +251,7 @@ export default function DomainsView({ user, businessInfo }) {
 
                 {isOpen && (
                   <div className="px-4 pb-4">
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1">
                       <p className="text-xs font-semibold text-slate-600">
                         Add these DNS records at your domain registrar
                       </p>

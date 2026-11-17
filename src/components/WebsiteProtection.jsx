@@ -169,7 +169,7 @@ const ProtectedApp = () => {
                 <h3 className="font-semibold text-blue-900 mb-2">
                   ✅ Active Protections:
                 </h3>
-                <ul className="text-sm text-blue-800 space-y-1">
+                <ul className="text-sm text-blue-800 space-y-0">
                   <li>• Right-click disabled</li>
                   <li>• F12 key blocked</li>
                   <li>• Ctrl+Shift+I (Inspect) blocked</li>
@@ -184,7 +184,7 @@ const ProtectedApp = () => {
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Try These (They're Blocked):
                 </h3>
-                <ul className="text-sm text-gray-700 space-y-1">
+                <ul className="text-sm text-gray-700 space-y-0">
                   <li>• Right-click anywhere on this page</li>
                   <li>• Press F12</li>
                   <li>• Press Ctrl+Shift+I</li>
@@ -196,7 +196,7 @@ const ProtectedApp = () => {
                 <h3 className="font-semibold text-red-900 mb-2">
                   ⚠️ Limitations:
                 </h3>
-                <ul className="text-sm text-red-800 space-y-1">
+                <ul className="text-sm text-red-800 space-y-0">
                   <li>
                     • Users can still access DevTools before the page loads
                   </li>

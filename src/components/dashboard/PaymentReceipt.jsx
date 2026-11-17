@@ -49,7 +49,7 @@ const PaymentReceipt = ({ payment, invoice, businessInfo }) => {
           </h2>
         </div>
         <div className="text-center">
-          <div className="text-4xl font-bold text-emerald-900 mb-2">
+          <div className="text-3xl font-bold text-emerald-900 mb-2">
             R{payment?.amount?.toFixed(2) || "0.00"}
           </div>
           <div className="text-sm text-slate-600">

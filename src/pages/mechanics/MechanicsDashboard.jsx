@@ -3207,7 +3207,7 @@ const handleStampConfirm = async (cfg) => {
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4">
                                     {[
                                       {
                                         label: "Customer Name",
@@ -3268,7 +3268,7 @@ const handleStampConfirm = async (cfg) => {
                                         </div>
                                       ),
                                     )}
-                                    <div className="col-span-1 sm:col-span-2">
+                                    <div className="col-span-1 sm:col-span-2 mb-4">
                                       <label className={labelCls}>
                                         Address{" "}
                                         <span className="text-[#dc2626] normal-case tracking-normal font-normal">
@@ -3305,7 +3305,7 @@ const handleStampConfirm = async (cfg) => {
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4">
                                     {[
                                       {
                                         label: "Billing Name",
@@ -3407,7 +3407,7 @@ const handleStampConfirm = async (cfg) => {
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-4 mb-2">
                                     {[
                                       {
                                         label: "Make",

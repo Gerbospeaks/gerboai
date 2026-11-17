@@ -417,7 +417,7 @@ const AppointmentsCalendar = ({ user }) => {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold">{todayAppointments.length}</div>
+            <div className="text-3xl font-bold">{todayAppointments.length}</div>
             <div className="text-sm text-blue-100">Today's Appointments</div>
           </div>
         </div>
@@ -567,7 +567,7 @@ const AppointmentsCalendar = ({ user }) => {
       {viewMode === "month" && (
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-xl font-bold">
               {currentDate.toLocaleDateString("en-US", {
                 month: "long",
                 year: "numeric",
@@ -660,7 +660,7 @@ const AppointmentsCalendar = ({ user }) => {
       {(viewMode === "day" || viewMode === "week") && (
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-xl font-bold">
               {viewMode === "day"
                 ? selectedDate.toLocaleDateString("en-US", {
                     weekday: "long",
@@ -696,7 +696,7 @@ const AppointmentsCalendar = ({ user }) => {
                 >
                   <div className="flex items-center space-x-4">
                     <div className="w-16 text-center">
-                      <div className="text-2xl font-bold">{apt.time}</div>
+                      <div className="text-xl font-bold">{apt.time}</div>
                       <div className="text-xs text-gray-500">
                         {apt.duration}min
                       </div>
@@ -751,7 +751,7 @@ const AppointmentsCalendar = ({ user }) => {
               <h2 className="text-xl font-semibold">New Appointment</h2>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
+                className="text-gray-500 hover:text-gray-700 text-xl"
               >
                 ✕
               </button>
@@ -950,7 +950,7 @@ const AppointmentsCalendar = ({ user }) => {
               <h2 className="text-xl font-semibold">Appointment Details</h2>
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="text-gray-800 hover:text-gray-200 text-2xl"
+                className="text-gray-800 hover:text-gray-200 text-xl"
               >
                 ✕
               </button>
@@ -959,7 +959,7 @@ const AppointmentsCalendar = ({ user }) => {
             <div className="overflow-auto p-6 space-y-4">
               <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-xl font-bold">
                     {selectedAppointment.patientName}
                   </div>
                   <div className="text-sm text-gray-600 mt-1">

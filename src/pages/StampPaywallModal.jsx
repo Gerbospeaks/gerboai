@@ -92,7 +92,7 @@ export default function StampPaywallModal({
 
           {/* Price */}
           <div className="flex items-baseline justify-center gap-1.5 mb-5">
-            <span className="text-2xl font-bold text-[#1e293b]">{price}</span>
+            <span className="text-xl font-bold text-[#1e293b]">{price}</span>
             <span className="text-xs text-[#94a3b8]">once-off</span>
           </div>
 

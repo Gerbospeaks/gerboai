@@ -1132,7 +1132,7 @@ const bottomNavItems = [
         ].map(({ label, value, color, bg }) => (
           <div key={label} className={`${bg} border border-[#e2e8f0] rounded-xl p-5`}>
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">{label}</p>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
+            <p className={`text-xl font-bold ${color}`}>{value}</p>
           </div>
         ))}
       </div>

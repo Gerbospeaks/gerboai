@@ -57,7 +57,7 @@ export function RemindersView({ user }) {
         </div>
       </div>
  
-      <div className="space-y-2">
+      <div className="space-y-1">
         {loading ? <div className="bg-white border border-[#e2e8f0] rounded-xl py-12 text-center text-sm text-[#94a3b8] shadow-sm">Loading…</div>
           : filtered.length === 0 ? <div className="bg-white border border-[#e2e8f0] rounded-xl py-16 text-center shadow-sm"><Bell className="w-10 h-10 text-[#cbd5e1] mx-auto mb-3" /><p className="text-sm text-[#94a3b8]">No {showDone?"completed":"pending"} reminders</p></div>
           : filtered.map(r => (

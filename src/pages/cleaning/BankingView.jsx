@@ -213,7 +213,7 @@ export default function BankingView({ user }) {
                 <p className="font-mono text-sm text-white/80 mt-0.5">
                   {acct.accountNumber.replace(/(\d{4})(?=\d)/g, "$1 ")}
                 </p>
-                <p className="text-2xl font-bold mt-3">R{balance.toFixed(2)}</p>
+                <p className="text-xl font-bold mt-3">R{balance.toFixed(2)}</p>
                 <p className="text-xs text-white/60 mt-0.5">{acct.accountType}</p>
                 <div className="flex gap-2 mt-3">
                   <button

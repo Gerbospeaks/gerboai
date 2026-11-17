@@ -554,14 +554,14 @@ export function AttendanceModal({
               key={s.label}
               className={`rounded-xl p-3 text-center ${s.color}`}
             >
-              <div className="text-2xl font-800">{s.count}</div>
+              <div className="text-xl font-800">{s.count}</div>
               <div className="text-xs font-600 mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Student list */}
-        <div className="p-6 space-y-2">
+        <div className="p-6 space-y-1">
           {safeStudents.length === 0 && (
             <p className="text-sm text-slate-400 text-center py-6">
               No students found for this class.

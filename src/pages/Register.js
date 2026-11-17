@@ -30,7 +30,7 @@ const slides = [
 /* ─── Form helpers ───────────────────────────────────────────────────────── */
 function Field({ label, children }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-0.5">
       <label className="block text-[13px] font-semibold text-[#374151]">
         {label}
       </label>
@@ -472,7 +472,7 @@ const industry =
           <div className="mt-4 bg-white/[0.06] border border-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
             {industryInfo ? (
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{industryInfo.icon}</span>
+                <span className="text-xl">{industryInfo.icon}</span>
                 <div>
                   <p className="text-[10px] text-white/40 uppercase tracking-widest font-semibold">
                     Your dashboard

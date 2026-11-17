@@ -162,7 +162,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold">{filteredInvoices.length}</div>
+            <div className="text-3xl font-bold">{filteredInvoices.length}</div>
             <div className="text-sm text-orange-100">Outstanding Invoices</div>
           </div>
         </div>
@@ -177,7 +177,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
             </div>
             <AlertCircle className="w-5 h-5 text-orange-500" />
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl font-bold text-gray-900 mb-1">
             {formatCurrency(totalPending)}
           </div>
           <div className="text-sm text-gray-500">Total Amount Due</div>
@@ -189,7 +189,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
               <AlertCircle className="w-6 h-6 text-red-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl font-bold text-gray-900 mb-1">
             {
               filteredInvoices.filter(
                 (inv) => getDaysOverdue(inv.createdAt) > 30,
@@ -205,7 +205,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
               <Calendar className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl font-bold text-gray-900 mb-1">
             {
               filteredInvoices.filter(
                 (inv) => getDaysOverdue(inv.createdAt) <= 7,
@@ -398,7 +398,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
               <h2 className="text-xl font-semibold">Invoice Details</h2>
               <button
                 onClick={() => setShowDetails(false)}
-                className="text-gray-800 hover:text-gray-200 text-2xl"
+                className="text-gray-800 hover:text-gray-200 text-xl"
               >
                 ✕
               </button>
@@ -473,7 +473,7 @@ const PendingPayments = ({ user, savedInvoices, onLoadInvoice }) => {
               {/* Services */}
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-semibold text-lg mb-3">Services</h3>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {selectedInvoice.items?.map((item, index) => (
                     <div
                       key={index}

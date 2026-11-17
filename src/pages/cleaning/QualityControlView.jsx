@@ -54,7 +54,7 @@ export function QualityControlView({ user }) {
         {[{ label: "Pass Rate", value: `${passRate}%`, color: "text-[#059669]" }, { label: "Total Inspections", value: records.length, color: "text-[#0891b2]" }, { label: "Follow-ups", value: records.filter(r => r.followUpRequired).length, color: "text-[#d97706]" }].map(s => (
           <div key={s.label} className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>

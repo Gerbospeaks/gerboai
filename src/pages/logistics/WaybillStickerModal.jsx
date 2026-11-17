@@ -108,7 +108,7 @@ const WaybillStickerModal = ({
                     />
                   ) : (
                     <div className="h-12 flex items-center">
-                      <div className="text-2xl font-black">
+                      <div className="text-xl font-black">
                         {businessInfo?.businessName || "LOGISTICS"}
                       </div>
                     </div>
@@ -134,7 +134,7 @@ const WaybillStickerModal = ({
                 <div className="bg-black text-gray-800 px-2 py-1 font-bold text-sm mb-2">
                   FROM (SHIPPER)
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0">
                   <div className="font-bold text-base">
                     {waybillData.sender?.name || "N/A"}
                   </div>
@@ -155,7 +155,7 @@ const WaybillStickerModal = ({
                 <div className="bg-black text-gray-800 px-2 py-1 font-bold text-sm mb-2">
                   TO (CONSIGNEE) - DELIVER TO:
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0">
                   <div className="font-black text-lg">
                     {waybillData.receiver?.name || "N/A"}
                   </div>

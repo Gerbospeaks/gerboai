@@ -205,7 +205,7 @@ const AccountingMultiStepForm = ({
     <div className="p-6 sm:p-8">
       {/* page header */}
       <div className="mb-7">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
+        <h2 className="text-xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0">
             <Calendar className="w-6 h-6 text-emerald-600" />
           </div>
@@ -285,7 +285,7 @@ const AccountingMultiStepForm = ({
     <div className="p-6 sm:p-8">
       {/* page header */}
       <div className="mb-7">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
+        <h2 className="text-xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
             <FileText className="w-6 h-6 text-blue-600" />
           </div>
@@ -430,7 +430,7 @@ const AccountingMultiStepForm = ({
               <Row label="VAT (15%):" value={`R${vat.toFixed(2)}`} />
               <div className="flex justify-between items-center text-lg font-bold pt-4 border-t-2 border-blue-300">
                 <span className="text-slate-900">Total:</span>
-                <span className="text-blue-700 text-2xl">
+                <span className="text-blue-700 text-xl">
                   R{total.toFixed(2)}
                 </span>
               </div>
@@ -461,7 +461,7 @@ const AccountingMultiStepForm = ({
     <div className="p-6 sm:p-8">
       {/* page header */}
       <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
+        <h2 className="text-xl sm:text-3xl font-bold text-slate-900 flex items-center gap-3">
           <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
             <CreditCard className="w-6 h-6 text-purple-600" />
           </div>

@@ -1098,7 +1098,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
                     yet
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {savedQuotes.map((quote) => (
                       <div
                         key={quote.id}
@@ -1356,7 +1356,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
                               <DollarSign className="w-5 h-5 text-amber-600" />
                             </div>
                           </div>
-                          <div className="text-base sm:text-lg md:text-2xl font-bold text-amber-900">
+                          <div className="text-base sm:text-lg md:text-xl font-bold text-amber-900">
                             R{total.toFixed(2)}
                           </div>
                         </div>
@@ -1379,7 +1379,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
                             </div>
                           </div>
                           <div
-                            className={`text-lg sm:text-2xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
+                            className={`text-lg sm:text-xl font-bold ${paymentStatus.totalPaid > 0 ? "text-emerald-900" : "text-slate-900"}`}
                           >
                             R{paymentStatus.totalPaid.toFixed(2)}
                           </div>
@@ -1403,7 +1403,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
                             </div>
                           </div>
                           <div
-                            className={`text-lg sm:text-2xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
+                            className={`text-lg sm:text-xl font-bold ${paymentStatus.balanceDue <= 0 ? "text-emerald-900" : paymentStatus.totalPaid > 0 ? "text-amber-900" : "text-rose-900"}`}
                           >
                             R{paymentStatus.balanceDue.toFixed(2)}
                           </div>
@@ -1989,7 +1989,7 @@ const mobileNavPad = "pb-24 lg:pb-6";
                                     <span className="text-slate-900">
                                       Total:
                                     </span>
-                                    <span className="text-amber-700 text-2xl">
+                                    <span className="text-amber-700 text-xl">
                                       R{total.toFixed(2)}
                                     </span>
                                   </div>

@@ -632,7 +632,7 @@ function CourtDatesView({ user }) {
               className={`${bg} border ${border} rounded-xl p-3`}
             >
               <p className="text-xs text-[#64748b] mb-1">{label}</p>
-              <p className={`text-2xl font-bold ${text}`}>{value}</p>
+              <p className={`text-xl font-bold ${text}`}>{value}</p>
             </div>
           ))}
         </div>
@@ -804,7 +804,7 @@ function CourtDatesView({ user }) {
                     </div>
                     {isExp && (
                       <div className="px-5 pb-4 grid grid-cols-1 md:grid-cols-2 gap-3 bg-[#f8fafc] border-t border-[#f1f5f9]">
-                        <div className="pt-3 space-y-2">
+                        <div className="pt-3 space-y-1">
                           {e.judge && (
                             <div className="flex gap-2">
                               <span className="text-xs text-[#94a3b8] w-32 flex-shrink-0">
@@ -836,7 +836,7 @@ function CourtDatesView({ user }) {
                             </div>
                           )}
                         </div>
-                        <div className="pt-3 space-y-2">
+                        <div className="pt-3 space-y-1">
                           {e.notes && (
                             <div>
                               <p className="text-xs font-semibold text-[#94a3b8] uppercase tracking-wide mb-1">
@@ -1194,7 +1194,7 @@ function LegalResearchView({ user }) {
               className={`${bg} border ${border} rounded-xl p-3`}
             >
               <p className="text-xs text-[#64748b] mb-1">{label}</p>
-              <p className={`text-2xl font-bold ${text}`}>{value}</p>
+              <p className={`text-xl font-bold ${text}`}>{value}</p>
             </div>
           ))}
         </div>

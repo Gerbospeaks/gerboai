@@ -133,7 +133,7 @@ function IndustryCard({ dashboard, selected, onClick }) {
           <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
         </span>
       )}
-      <span className="text-2xl leading-none">{dashboard.icon}</span>
+      <span className="text-xl leading-none">{dashboard.icon}</span>
       <span
         className={`text-[11px] font-semibold leading-tight text-center transition-colors ${selected ? "text-[#1655e0]" : "text-[#374151] group-hover:text-[#1655e0]"}`}
       >
@@ -184,7 +184,7 @@ function PlanCard({ plan, selected, onClick }) {
         <p className="text-[11px] text-[#9ca3af] mb-1">{plan.period}</p>
       )}
       <div className="border-t border-[#f0f0f0] my-3" />
-      <ul className="space-y-1.5">
+      <ul className="space-y-0.5">
         {plan.features.map((f, i) => (
           <li key={i} className="flex items-start gap-2">
             <Check
@@ -203,7 +203,7 @@ function PlanCard({ plan, selected, onClick }) {
 /* ── Input helpers ── */
 function Field({ label, children }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-0.5">
       <label className="block text-[13px] font-semibold text-[#374151]">
         {label}
       </label>
@@ -295,7 +295,7 @@ function LoginView() {
               />
             </Field>
 
-            <div className="space-y-1.5">
+            <div className="space-y-0.5">
               <div className="flex items-center justify-between">
                 <label className="block text-[13px] font-semibold text-[#374151]">
                   Password

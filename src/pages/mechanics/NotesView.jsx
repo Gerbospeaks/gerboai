@@ -480,7 +480,7 @@ export default function NotesView({ user }) {
             >
               <div className="h-4 bg-[#f1f5f9] rounded animate-pulse w-20" />
               <div className="h-5 bg-[#f1f5f9] rounded animate-pulse w-3/4" />
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div className="h-3 bg-[#f1f5f9] rounded animate-pulse" />
                 <div className="h-3 bg-[#f1f5f9] rounded animate-pulse w-5/6" />
               </div>

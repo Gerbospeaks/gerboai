@@ -53,7 +53,7 @@ export default function SecuritySidebar({
 
   const goTo = (view) => {
     setActiveView(view);
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   return (
@@ -68,7 +68,7 @@ export default function SecuritySidebar({
 
       {/* ── Collapsed sidebar (icon rail) ─────────────────────────────── */}
       {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden shadow-xl z-30">
+        <div className="hidden md:flex flex-col flex-shrink-0 w-16 bg-gradient-to-b from-slate-900 to-slate-800 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
           <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6 flex-1">
             {/* Expand toggle */}
             <button
@@ -187,7 +187,7 @@ export default function SecuritySidebar({
 
       {/* ── Expanded sidebar ──────────────────────────────────────────── */}
       {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-full print:hidden shadow-2xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
+        <div className="flex-shrink-0 w-64 bg-gradient-to-b from-slate-900 to-slate-800 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
           <div className="p-4 md:p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -197,7 +197,7 @@ export default function SecuritySidebar({
                 alt="logo"
               />
               <button
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => setSidebarOpen(true)}
                 className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -217,7 +217,7 @@ export default function SecuritySidebar({
                 label="Settings"
                 onClick={() => {
                   setShowSettings(true);
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
                 color="slate"
               />
@@ -259,7 +259,7 @@ export default function SecuritySidebar({
                       label="New Incident Report"
                       onClick={() => {
                         handleNewIncident();
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem
@@ -267,7 +267,7 @@ export default function SecuritySidebar({
                       badge={savedIncidents?.length ?? 0}
                       onClick={() => {
                         setShowIncidentsList(!showIncidentsList);
-                        setSidebarOpen(false);
+                        setSidebarOpen(true);
                       }}
                     />
                     <SubItem

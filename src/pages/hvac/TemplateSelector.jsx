@@ -215,7 +215,7 @@ export const DefaultTemplate = ({
 
           <div className="text-right">
             <div className="text-3xl font-bold mb-4">{docLabel}</div>
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-0">
               <div className="flex justify-between gap-8">
                 <span className="font-semibold">{numLabel}</span>
                 <span>{jobCardNumber}</span>
@@ -238,7 +238,7 @@ export const DefaultTemplate = ({
           <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
             {docLabel} TO
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div>{customerName}</div>
             <div className="h-16 overflow-hidden text-xs leading-tight">
               {customerAddress}
@@ -251,7 +251,7 @@ export const DefaultTemplate = ({
           <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
             BILL TO
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div>{customerName}</div>
             <div className="h-16 overflow-hidden text-xs leading-tight">
               {customerAddress}
@@ -264,7 +264,7 @@ export const DefaultTemplate = ({
           <div className="font-bold text-xs mb-2 bg-gray-400 px-2 py-1">
             SYSTEM DETAILS
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between">
               <span className="font-semibold">Type:</span>
               <span className="text-right text-[10px]">{equipmentType}</span>
@@ -324,11 +324,11 @@ export const DefaultTemplate = ({
 
       <div className="flex justify-end mb-6">
         <div className="w-64 text-xs">
-          <div className="flex justify-between py-1">
+          <div className="flex justify-between py-1 px-2">
             <span>Subtotal:</span>
             <span>R {subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-1">
+          <div className="flex justify-between py-1 px-2">
             <span>VAT:</span>
             <span>R {vat.toFixed(2)}</span>
           </div>
@@ -344,7 +344,7 @@ export const DefaultTemplate = ({
           <div className="text-blue-600 font-bold text-xs mb-2">
             BANKING DETAILS
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div>
               <span className="font-semibold">Bank Name:</span>{" "}
               {businessInfo.bankName || "FNB"}
@@ -426,7 +426,7 @@ export const ClassicTemplate = (props) => {
             <div className="text-3xl font-bold mb-4 text-blue-600">
               {docLabel}
             </div>
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-0">
               <div className="flex justify-between gap-8">
                 <span className="font-semibold">{numLabel}</span>
                 <span>{props.jobCardNumber}</span>
@@ -445,7 +445,7 @@ export const ClassicTemplate = (props) => {
           <div className="font-bold text-xs mb-2 text-blue-600">
             CUSTOMER INFORMATION
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="font-semibold">{props.customerName}</div>
             <div>{props.customerAddress}</div>
             <div>{props.customerEmail}</div>
@@ -456,7 +456,7 @@ export const ClassicTemplate = (props) => {
           <div className="font-bold text-xs mb-2 text-blue-600">
             HVAC SYSTEM
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div>
               <span className="font-semibold">Type:</span> {props.equipmentType}
             </div>
@@ -505,11 +505,11 @@ export const ClassicTemplate = (props) => {
 
       <div className="flex justify-end mb-4">
         <div className="w-64 text-xs">
-          <div className="flex justify-between py-1">
+          <div className="flex justify-between py-1 px-2">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-1">
+          <div className="flex justify-between py-1 px-2">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
@@ -590,7 +590,7 @@ export const ModernTemplate = (props) => {
                 className="w-20 h-20 object-contain mb-3"
               />
             )}
-            <div className="text-sm text-gray-600 space-y-1">
+            <div className="text-sm text-gray-600 space-y-0">
               <div>{props.businessInfo.addressLine1}</div>
               <div>
                 {props.businessInfo.city}, {props.businessInfo.postalCode}
@@ -602,7 +602,7 @@ export const ModernTemplate = (props) => {
             <div className="text-5xl font-bold text-cyan-500 mb-4">
               {docLabel}
             </div>
-            <div className="bg-cyan-50 p-4 rounded-lg space-y-2">
+            <div className="bg-cyan-50 p-4 rounded-lg space-y-1">
               <div className="text-sm">
                 <span className="font-semibold">{numLabel}</span>{" "}
                 {props.jobCardNumber}
@@ -682,12 +682,12 @@ export const ModernTemplate = (props) => {
       </table>
 
       <div className="flex justify-end">
-        <div className="w-80 space-y-2">
-          <div className="flex justify-between py-2 text-gray-600">
+        <div className="w-80 space-y-1">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-2 text-gray-600">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
@@ -774,7 +774,7 @@ export const ElegantTemplate = (props) => {
           <div className="text-sm text-gray-600">
             {props.businessInfo.addressLine1} • {props.businessInfo.city}
           </div>
-          <div className="text-2xl font-serif text-indigo-700 mt-4">
+          <div className="text-xl font-serif text-indigo-700 mt-4">
             {docLabel}
           </div>
           <div className="text-sm text-gray-500 mt-1">
@@ -790,7 +790,7 @@ export const ElegantTemplate = (props) => {
             <div className="font-serif font-bold text-indigo-900 mb-2">
               BILLED TO
             </div>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <div className="font-semibold">{props.customerName}</div>
               <div>{props.customerAddress}</div>
               <div>{props.customerEmail}</div>
@@ -801,7 +801,7 @@ export const ElegantTemplate = (props) => {
             <div className="font-serif font-bold text-indigo-900 mb-2">
               HVAC SYSTEM
             </div>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <div>
                 <span className="font-semibold">Type:</span>{" "}
                 {props.equipmentType}
@@ -845,11 +845,11 @@ export const ElegantTemplate = (props) => {
 
         <div className="flex justify-end">
           <div className="w-64">
-            <div className="flex justify-between py-2">
+            <div className="flex justify-between py-2 px-4">
               <span>Subtotal:</span>
               <span>R {props.subtotal.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between py-2">
+            <div className="flex justify-between py-2 px-4">
               <span>VAT:</span>
               <span>R {props.vat.toFixed(2)}</span>
             </div>
@@ -950,7 +950,7 @@ export const CoolingTemplate = (props) => {
             <div className="text-5xl font-black text-blue-600 mb-4">
               {docLabel}
             </div>
-            <div className="bg-blue-600 text-white p-4 rounded space-y-1">
+            <div className="bg-blue-600 text-white p-4 rounded space-y-0">
               <div className="text-sm font-bold">
                 {numLabel}: {props.jobCardNumber}
               </div>
@@ -968,7 +968,7 @@ export const CoolingTemplate = (props) => {
           <div className="text-sm font-bold text-blue-600 mb-3">
             CLIENT INFORMATION
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-bold">{props.customerName}</div>
             <div className="text-gray-600">{props.customerAddress}</div>
             <div className="text-gray-600">{props.customerEmail}</div>
@@ -981,7 +981,7 @@ export const CoolingTemplate = (props) => {
           <div className="text-sm font-bold text-blue-600 mb-3">
             SYSTEM DETAILS
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div>
               <span className="font-semibold">System:</span>{" "}
               {props.equipmentType}
@@ -1033,11 +1033,11 @@ export const CoolingTemplate = (props) => {
 
       <div className="flex justify-end">
         <div className="w-80 bg-white rounded-lg shadow p-4">
-          <div className="flex justify-between py-2 text-gray-600">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-2 text-gray-600">
+          <div className="flex justify-between py-2 text-gray-600 px-4">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
@@ -1157,7 +1157,7 @@ export const DiagnosticTemplate = (props) => {
           <div className="text-sm font-bold text-green-600 mb-3">
             CUSTOMER DETAILS
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div>
               <span className="font-semibold">Name:</span> {props.customerName}
             </div>
@@ -1179,7 +1179,7 @@ export const DiagnosticTemplate = (props) => {
           <div className="text-sm font-bold text-green-600 mb-3">
             SYSTEM DETAILS
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div>
               <span className="font-semibold">Type:</span> {props.equipmentType}
             </div>
@@ -1239,11 +1239,11 @@ export const DiagnosticTemplate = (props) => {
 
       <div className="flex justify-end">
         <div className="w-80 border-2 border-green-600 p-4 rounded">
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-2">
+          <div className="flex justify-between py-2 px-4">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>

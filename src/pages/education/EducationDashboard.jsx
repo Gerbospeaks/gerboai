@@ -2139,7 +2139,7 @@ const HomeView = ({
               View full →
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {TIME_SLOTS.slice(0, 4).map((time, i) => {
               const subject = MOCK_TIMETABLE["Grade 2"]?.[dayName]?.[i] || "—";
               const Icon = SUBJECT_ICONS[subject] || BookOpen;
@@ -2217,7 +2217,7 @@ const HomeView = ({
               View all →
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {upcomingEvents.length === 0 ? (
               <div style={{ fontSize: 13, color: "#94a3b8" }}>
                 No upcoming events.
@@ -3080,7 +3080,7 @@ const HomeworkView = ({
               >
                 {labels[priority]}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {items.map((hw) => (
                   <div key={hw.id} className="card p-4 flex items-start gap-3">
                     <div

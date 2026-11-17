@@ -153,7 +153,7 @@ export default function JobCalendarView({ user, businessInfo }) {
           {/* Upcoming */}
           <div className="border-t border-[#e2e8f0] px-4 py-3">
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-2">Upcoming (7 days)</p>
-            <div className="space-y-1.5">
+            <div className="space-y-0.5">
               {jobs.filter(j => {
                 if (!j.date) return false;
                 const d = new Date(j.date); const now = new Date();

@@ -120,7 +120,7 @@ export default function JobsView({ user, businessInfo, openNew = false }) {
         {stats.map(s => (
           <div key={s.label} className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>

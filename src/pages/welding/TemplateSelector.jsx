@@ -184,7 +184,7 @@ export const DefaultTemplate = ({
           <div className="text-3xl font-bold text-orange-600 mb-4">
             {documentType === "quote" ? "WELDING QUOTE" : "WELDING INVOICE"}
           </div>
-          <div className="text-xs space-y-1">
+          <div className="text-xs space-y-0">
             <div className="flex justify-between gap-8">
               <span className="font-semibold">
                 {documentType === "quote" ? "QUOTE NO." : "INVOICE NO."}
@@ -214,7 +214,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-orange-600 text-white px-2 py-1">
           CLIENT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">
             {customerAddress}
@@ -228,7 +228,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-orange-600 text-white px-2 py-1">
           BILLING ADDRESS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{customerName}</div>
           <div className="h-16 overflow-hidden text-xs leading-tight">
             {customerAddress}
@@ -242,7 +242,7 @@ export const DefaultTemplate = ({
         <div className="font-bold text-xs mb-2 bg-orange-600 text-white px-2 py-1">
           PROJECT DETAILS
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="flex justify-between">
             <span className="font-semibold">Type:</span>
             <span>{equipmentType}</span>
@@ -320,7 +320,7 @@ export const DefaultTemplate = ({
       <div className="text-orange-600 font-bold text-xs mb-2">
         BANKING DETAILS
       </div>
-      <div className="text-xs space-y-1">
+      <div className="text-xs space-y-0">
         <div>
           <span className="font-semibold">Bank Name:</span>{" "}
           {businessInfo.bankName || "FNB"}
@@ -420,7 +420,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-stone-800 text-white px-2 py-1 rounded">
           CLIENT
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div className="font-semibold">{props.customerName}</div>
           <div className="text-stone-600">{props.customerAddress}</div>
           <div className="text-stone-600">{props.customerEmail}</div>
@@ -431,7 +431,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-stone-800 text-white px-2 py-1 rounded">
           PROJECT
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>
             <span className="font-semibold">Type:</span> {props.equipmentType}
           </div>
@@ -452,7 +452,7 @@ export const ClassicTemplate = (props) => (
         <div className="font-bold text-xs mb-2 bg-stone-800 text-white px-2 py-1 rounded">
           WORK INFO
         </div>
-        <div className="text-xs space-y-1">
+        <div className="text-xs space-y-0">
           <div>Date: {new Date().toLocaleDateString()}</div>
           <div>Location: {props.equipmentLocation}</div>
           <div>Thickness: {props.equipmentSerial}</div>
@@ -529,10 +529,10 @@ export const ModernTemplate = (props) => (
               className="w-20 h-20 object-contain mb-3"
             />
           )}
-          <div className="text-2xl font-bold text-orange-600 mb-1">
+          <div className="text-xl font-bold text-orange-600 mb-1">
             {props.businessInfo.businessName}
           </div>
-          <div className="text-sm text-gray-600 space-y-1">
+          <div className="text-sm text-gray-600 space-y-0">
             <div>{props.businessInfo.addressLine1}</div>
             <div>
               {props.businessInfo.city}, {props.businessInfo.postalCode}
@@ -628,7 +628,7 @@ export const ModernTemplate = (props) => (
     </table>
 
     <div className="flex justify-end mb-4">
-      <div className="w-80 space-y-2">
+      <div className="w-80 space-y-1">
         <div className="flex justify-between py-2 text-gray-600">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
@@ -674,13 +674,13 @@ export const ElegantTemplate = (props) => (
             className="w-24 h-24 object-contain mx-auto mb-4"
           />
         )}
-        <div className="text-base sm:text-lg md:text-2xl font-bold text-amber-900 mb-1">
+        <div className="text-base sm:text-lg md:text-xl font-bold text-amber-900 mb-1">
           {props.businessInfo.businessName}
         </div>
         <div className="text-sm text-gray-600">
           {props.businessInfo.addressLine1} • {props.businessInfo.city}
         </div>
-        <div className="text-2xl font-serif text-amber-700 mt-4">
+        <div className="text-xl font-serif text-amber-700 mt-4">
           {props.documentType === "quote"
             ? "WELDING QUOTATION"
             : "WELDING INVOICE"}
@@ -693,7 +693,7 @@ export const ElegantTemplate = (props) => (
           <div className="font-serif font-bold text-amber-900 mb-2">
             CLIENT DETAILS
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div className="font-semibold">{props.customerName}</div>
             <div className="text-gray-600">{props.customerAddress}</div>
             <div className="text-gray-600">{props.customerEmail}</div>
@@ -704,7 +704,7 @@ export const ElegantTemplate = (props) => (
           <div className="font-serif font-bold text-amber-900 mb-2">
             PROJECT INFORMATION
           </div>
-          <div className="text-sm space-y-1">
+          <div className="text-sm space-y-0">
             <div>
               <span className="font-semibold">Type:</span> {props.equipmentType}
             </div>
@@ -993,7 +993,7 @@ export const TechnicalTemplate = (props) => (
                 className="w-20 h-20 object-contain mb-3 brightness-0 invert"
               />
             )}
-            <div className="text-2xl font-bold mb-1">
+            <div className="text-xl font-bold mb-1">
               {props.businessInfo.businessName}
             </div>
             <div className="text-sm opacity-90">
@@ -1005,7 +1005,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-sm opacity-90">{props.businessInfo.city}</div>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold mb-2">WELDING</div>
+            <div className="text-3xl font-bold mb-2">WELDING</div>
             <div className="text-3xl font-mono">
               {props.documentType === "quote" ? "QUOTE" : "INVOICE"}
             </div>
@@ -1022,7 +1022,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-xs font-bold text-red-700 mb-2 uppercase tracking-wide">
               Client Details
             </div>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-0">
               <div className="font-semibold">{props.customerName}</div>
               <div className="text-xs text-gray-600">
                 {props.customerAddress}
@@ -1036,7 +1036,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-xs font-bold text-red-700 mb-2 uppercase tracking-wide">
               Project Specs
             </div>
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-0">
               <div>
                 <span className="font-semibold">Type:</span>{" "}
                 {props.equipmentType}
@@ -1060,7 +1060,7 @@ export const TechnicalTemplate = (props) => (
             <div className="text-xs font-bold text-red-700 mb-2 uppercase tracking-wide">
               Work Details
             </div>
-            <div className="text-xs space-y-1">
+            <div className="text-xs space-y-0">
               <div>
                 <span className="font-semibold">Date:</span>{" "}
                 {new Date().toLocaleDateString()}

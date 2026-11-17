@@ -3269,7 +3269,7 @@ export default function Templates({ user }) {
         {["🌟", "🎨", "🏅", "🌸", "🚀", "⭐", "🦁", "💛"].map((e, i) => (
           <span
             key={i}
-            className="absolute text-2xl pointer-events-none select-none"
+            className="absolute text-xl pointer-events-none select-none"
             style={{
               top: `${[10, 25, 5, 60, 15, 50, 70, 35][i]}%`,
               left: `${[5, 90, 45, 8, 75, 55, 88, 22][i]}%`,
@@ -3286,7 +3286,7 @@ export default function Templates({ user }) {
             Certificates
           </div>
           <h1
-            className="text-2xl sm:text-3xl font-bold text-white mb-2"
+            className="text-xl sm:text-3xl font-bold text-white mb-2"
             style={{ textShadow: "0 2px 12px rgba(0,0,0,0.2)" }}
           >
             🎓 Certificate Collection
@@ -3667,7 +3667,7 @@ export default function Templates({ user }) {
             <div className="p-5 space-y-4">
               <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-center">
                 <div className="text-xs text-gray-500 mb-1">Total Amount</div>
-                <div className="text-4xl font-bold text-purple-700">
+                <div className="text-3xl font-bold text-purple-700">
                   R{CERTIFICATES[payment].price}
                 </div>
                 <div className="text-xs text-gray-400 mt-1">

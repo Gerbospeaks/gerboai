@@ -294,7 +294,7 @@ const money = (zar) =>
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-1">
             <FileText className="w-6 h-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-gray-900">
               Invoice Templates
             </h1>
           </div>
@@ -415,14 +415,14 @@ const money = (zar) =>
                     <div>
                       {template.isPremium ? (
                         <>
-                          <div className="text-2xl font-bold text-gray-900">
+                          <div className="text-xl font-bold text-gray-900">
                             {money(template.price)}
                           </div>
                           <div className="text-xs text-gray-400">one-time</div>
                         </>
                       ) : (
                         <>
-                          <div className="text-2xl font-bold text-green-600">
+                          <div className="text-xl font-bold text-green-600">
                             Free
                           </div>
                           <div className="text-xs text-gray-400">included</div>

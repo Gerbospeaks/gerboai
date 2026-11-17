@@ -551,7 +551,7 @@ export default function VirtualSidebar({
       </div>
 
       {/* ═══ DESKTOP — collapsed icon rail OR expanded panel (floating cards) ═══ */}
-      <div className="hidden md:flex print:hidden h-full py-3 pl-3">
+      <div className="hidden md:flex print:hidden h-full py-3 pl-3 py-3 pl-3">
         {/* Collapsed icon rail */}
         {!sidebarOpen && (
           <div className="flex flex-col flex-shrink-0 w-16 bg-[#151a28] rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">

@@ -192,7 +192,7 @@ export default function StaffAttendanceView({ user }) {
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">
               {s.label}
             </p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>

@@ -124,7 +124,7 @@ export default function ChecklistTemplatesView({ user }) {
                   <button onClick={() => handleDelete(t.id)} className="p-1.5 text-[#94a3b8] hover:text-[#dc2626] hover:bg-[#fef2f2] rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
-              <div className="border-t border-[#f1f5f9] px-4 py-3 max-h-40 overflow-y-auto space-y-1">
+              <div className="border-t border-[#f1f5f9] px-4 py-3 max-h-40 overflow-y-auto space-y-0">
                 {(t.items || []).slice(0, 8).map((item, i) => (
                   <div key={item.id || i} className="flex items-center gap-2 text-sm text-[#64748b]">
                     <Circle className="w-3 h-3 text-[#cbd5e1] flex-shrink-0" />

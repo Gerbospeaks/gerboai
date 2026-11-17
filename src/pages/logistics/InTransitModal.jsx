@@ -190,7 +190,7 @@ const InTransitModal = ({
             <div className="flex items-center gap-3">
               <Truck className="w-8 h-8" />
               <div>
-                <h2 className="text-2xl font-bold">Shipments In Transit</h2>
+                <h2 className="text-xl font-bold">Shipments In Transit</h2>
                 <p className="text-sm text-blue-100">
                   Real-time tracking and management
                 </p>
@@ -208,19 +208,19 @@ const InTransitModal = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white bg-opacity-20 rounded-lg p-3">
               <div className="text-sm text-blue-100">Total In Transit</div>
-              <div className="text-2xl font-bold">
+              <div className="text-xl font-bold">
                 {inTransitWaybills.length}
               </div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-lg p-3">
               <div className="text-sm text-blue-100">Pending Pickup</div>
-              <div className="text-2xl font-bold">
+              <div className="text-xl font-bold">
                 {inTransitWaybills.filter((w) => w.status === "pending").length}
               </div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-lg p-3">
               <div className="text-sm text-blue-100">On The Road</div>
-              <div className="text-2xl font-bold">
+              <div className="text-xl font-bold">
                 {
                   inTransitWaybills.filter((w) => w.status === "in-transit")
                     .length
@@ -229,7 +229,7 @@ const InTransitModal = ({
             </div>
             <div className="bg-white bg-opacity-20 rounded-lg p-3">
               <div className="text-sm text-blue-100">Out for Delivery</div>
-              <div className="text-2xl font-bold">
+              <div className="text-xl font-bold">
                 {
                   inTransitWaybills.filter(
                     (w) => w.status === "out-for-delivery",
@@ -379,7 +379,7 @@ const InTransitModal = ({
                         <div className="text-sm text-gray-500">
                           Total Amount
                         </div>
-                        <div className="text-2xl font-bold text-blue-600">
+                        <div className="text-xl font-bold text-blue-600">
                           R {waybill.totals?.total?.toFixed(2) || "0.00"}
                         </div>
                       </div>

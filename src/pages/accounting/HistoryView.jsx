@@ -361,7 +361,7 @@ const HistoryView = ({ user }) => {
             </span>
             <Receipt className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">
+          <div className="text-xl font-bold text-slate-900">
             {stats.totalInvoices}
           </div>
         </div>
@@ -373,7 +373,7 @@ const HistoryView = ({ user }) => {
             </span>
             <FileText className="w-4 h-4 text-purple-600" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">
+          <div className="text-xl font-bold text-slate-900">
             {stats.totalEstimates}
           </div>
         </div>
@@ -383,7 +383,7 @@ const HistoryView = ({ user }) => {
             <span className="text-xs font-semibold text-blue-700">Revenue</span>
             <DollarSign className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="text-2xl font-bold text-blue-900">
+          <div className="text-xl font-bold text-blue-900">
             R{stats.totalRevenue.toFixed(2)}
           </div>
         </div>
@@ -393,7 +393,7 @@ const HistoryView = ({ user }) => {
             <span className="text-xs font-semibold text-emerald-700">Paid</span>
             <CheckCircle className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-bold text-emerald-900">
+          <div className="text-xl font-bold text-emerald-900">
             R{stats.paidAmount.toFixed(2)}
           </div>
         </div>
@@ -405,7 +405,7 @@ const HistoryView = ({ user }) => {
             </span>
             <Clock className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="text-base sm:text-lg md:text-2xl font-bold text-amber-900">
+          <div className="text-base sm:text-lg md:text-xl font-bold text-amber-900">
             R{stats.pendingAmount.toFixed(2)}
           </div>
         </div>
@@ -415,7 +415,7 @@ const HistoryView = ({ user }) => {
             <span className="text-xs font-semibold text-rose-700">Overdue</span>
             <AlertCircle className="w-4 h-4 text-rose-600" />
           </div>
-          <div className="text-2xl font-bold text-rose-900">
+          <div className="text-xl font-bold text-rose-900">
             R{stats.overdueAmount.toFixed(2)}
           </div>
         </div>

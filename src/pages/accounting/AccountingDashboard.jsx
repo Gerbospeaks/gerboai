@@ -1652,27 +1652,27 @@ const bottomNavItems = [
                                             key={i}
                                             className="border-b border-[#f1f5f9] hover:bg-[#f8fafc] transition-colors"
                                           >
-                                            <td className="px-4 py-3 text-sm font-medium text-[#374151]">
+                                            <td className="px-4 py-1 text-sm font-small text-[#374151]">
                                               {item.description}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-1">
                                               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-[#eff6ff] text-[#1d4ed8]">
                                                 {item.category}
                                               </span>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
+                                            <td className="px-4 py-1 text-sm text-[#374151]">
                                               R{item.rate.toFixed(2)}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
+                                            <td className="px-4 py-1 text-sm text-[#374151]">
                                               {item.qty}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-[#374151]">
+                                            <td className="px-4 py-1 text-sm text-[#374151]">
                                               R{item.taxAmount.toFixed(2)}
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-semibold text-[#1e293b]">
+                                            <td className="px-4 py-1 text-sm font-semibold text-[#1e293b]">
                                               R{item.totalAmount.toFixed(2)}
                                             </td>
-                                            <td className="px-4 py-3">
+                                            <td className="px-4 py-1">
                                               <button
                                                 onClick={() =>
                                                   handleRemoveItem(i)

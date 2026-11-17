@@ -235,7 +235,7 @@ export default function PhotographySidebar({
                 className="w-16 h-12 object-contain rounded-lg"
               />
               <button
-                onClick={() => setSidebarOpen(false)}
+                onClick={() => setSidebarOpen(true)}
                 className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all duration-200"
                 title="Collapse Sidebar"
               >
@@ -256,7 +256,7 @@ export default function PhotographySidebar({
                 label="Settings"
                 onClick={() => {
                   setShowSettings(true);
-                  setSidebarOpen(false);
+                  setSidebarOpen(true);
                 }}
                 color="blue"
               />
@@ -294,7 +294,7 @@ export default function PhotographySidebar({
                     badge={savedInvoices?.length ?? 0}
                     onClick={() => {
                       setShowInvoicesList?.((p) => !p);
-                      setSidebarOpen(false);
+                      setSidebarOpen(true);
                     }}
                   />
                   <SubItem
@@ -314,7 +314,7 @@ export default function PhotographySidebar({
                     label="Add Client"
                     onClick={() => {
                       handleAddNewCustomer?.();
-                      setSidebarOpen(false);
+                      setSidebarOpen(true);
                     }}
                   />
                   <SubItem
@@ -322,7 +322,7 @@ export default function PhotographySidebar({
                     badge={savedCustomers?.length ?? 0}
                     onClick={() => {
                       setShowCustomersListModal?.(true);
-                      setSidebarOpen(false);
+                      setSidebarOpen(true);
                     }}
                   />
                 </Accordion>

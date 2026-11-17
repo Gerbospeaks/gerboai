@@ -78,7 +78,7 @@ export default function StaffView({ user, openNew = false }) {
         ].map(s => (
           <div key={s.label} className="bg-white border border-[#e2e8f0] rounded-xl p-4 shadow-sm">
             <p className="text-xs font-semibold text-[#64748b] uppercase tracking-wide">{s.label}</p>
-            <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-bold mt-1 ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -113,7 +113,7 @@ export default function StaffView({ user, openNew = false }) {
                   </div>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded ${STATUS_STYLES[s.status] || "bg-[#f1f5f9] text-[#475569]"}`}>{s.status}</span>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-0">
                   {s.phone && <p className="flex items-center gap-2 text-xs text-[#64748b]"><Phone className="w-3 h-3" />{s.phone}</p>}
                   {s.email && <p className="flex items-center gap-2 text-xs text-[#64748b] truncate"><Mail className="w-3 h-3" />{s.email}</p>}
                   {s.hourlyRate && <p className="flex items-center gap-2 text-xs text-[#059669] font-semibold"><Star className="w-3 h-3" />R{s.hourlyRate}/hr</p>}

@@ -369,7 +369,7 @@ function MainDomainRoot() {
   }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
-  return <UpholsteryDashboard />;
+  return <LandingPage />;
 }
 // ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {

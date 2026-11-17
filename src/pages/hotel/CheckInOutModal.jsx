@@ -666,7 +666,7 @@ function StatTile({ label, value, icon: Icon, accent, chipBg }) {
       <div className="flex items-center justify-between">
         <div>
           <div className="text-xs text-[#94a3b8] font-medium">{label}</div>
-          <div className={`text-2xl font-bold mt-0.5 ${accent}`}>{value}</div>
+          <div className={`text-xl font-bold mt-0.5 ${accent}`}>{value}</div>
         </div>
         <div
           className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${chipBg}`}

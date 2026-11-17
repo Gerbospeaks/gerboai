@@ -282,7 +282,7 @@ const SickNoteModal = ({
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <svg
               className="w-6 h-6"
               fill="none"
