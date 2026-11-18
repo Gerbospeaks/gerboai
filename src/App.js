@@ -372,7 +372,7 @@ function MainDomainRoot() {
   }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
-  return <PublicMarketplace />;
+  return <LandingPage />;
 }
 // ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {

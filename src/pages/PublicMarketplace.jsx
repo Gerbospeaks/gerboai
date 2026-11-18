@@ -2604,7 +2604,7 @@ function RegisterModal({ mode, providerName, onClose }) {
             <div className="mp-modal-trust-score">
               <strong>Rated 4.8</strong>
               <br />
-              by 200+ Gauteng businesses
+              by 200+ African businesses
             </div>
           </div>
 
@@ -2628,7 +2628,7 @@ function RegisterModal({ mode, providerName, onClose }) {
               ? "Sign in to manage your bookings, quotes and service requests."
               : providerName
                 ? `Create a free account to book ${providerName} and receive a quote directly.`
-                : "Join hundreds of Gauteng businesses already using GerboAI to connect with verified service providers."}
+                : "Join hundreds of African businesses already using GerboAI to connect with verified service providers."}
           </p>
 
           <div className="mp-modal-features">
@@ -3164,7 +3164,7 @@ const handleSubmitBooking = useCallback(
               <div className="mp-avail-dot" />
               <span className="mp-avail-text">
                 <strong>Live marketplace</strong> — verified service providers
-                ready to quote across Gauteng right now.
+                ready to quote across Africa right now.
               </span>
               <div className="mp-avail-count">
                 <div className="mp-avail-stat">
@@ -3471,7 +3471,7 @@ const handleSubmitBooking = useCallback(
             <img src={logo} alt="GerboAI" style={{ height: 80 }} />
             <p className="mp-footer-tagline">
               The marketplace for verified trade and professional service
-              providers across Gauteng.
+              providers across Africa.
             </p>
           </div>
           <div className="mp-footer-links-group">

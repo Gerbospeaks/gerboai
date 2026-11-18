@@ -57,7 +57,7 @@ export const INDUSTRY_SEO = {
     faqs: [
       {
         q: "How do I find a reliable service provider in Gauteng?",
-        a: "Browse GerboAI's verified marketplace. Every listed provider has been reviewed by real Gauteng businesses. Filter by industry, check ratings and send a booking request — no middleman needed.",
+        a: "Browse GerboAI's verified marketplace. Every listed provider has been reviewed by real African businesses. Filter by industry, check ratings and send a booking request — no middleman needed.",
       },
       {
         q: "Is GerboAI free to use?",
@@ -514,7 +514,7 @@ function orgSchema() {
     url: MAIN,
     logo: `${MAIN}/logo.png`,
     description:
-      "GerboAI is an invoicing and business management platform for African service providers, with a public marketplace connecting Gauteng businesses with verified tradespeople.",
+      "GerboAI is an invoicing and business management platform for African service providers, with a public marketplace connecting African businesses with verified tradespeople.",
     areaServed: { "@type": "State", name: "Gauteng", addressCountry: "ZA" },
     sameAs: [MAIN, BASE],
   };
