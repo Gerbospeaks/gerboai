@@ -64,7 +64,7 @@ export default function PestControlSidebar({
 
       {/* ── Collapsed sidebar (icon rail) ─────────────────────────────── */}
       {!sidebarOpen && (
-        <div className="hidden md:flex flex-col flex-shrink-0 w-16 md:w-20 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 h-full print:hidden shadow-2xl z-30">
+        <div className="flex flex-col flex-shrink-0 w-16 bg-[#151a28] rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl">
           <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6 flex-1">
             {/* Expand toggle */}
             <button
@@ -168,7 +168,7 @@ export default function PestControlSidebar({
 
       {/* ── Expanded sidebar ──────────────────────────────────────────── */}
       {sidebarOpen && (
-        <div className="flex-shrink-0 w-64 md:w-72 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl overflow-y-auto z-50 md:relative fixed inset-y-0 left-0">
+        <div className="flex-shrink-0 w-64 bg-[#151a28] rounded-3xl h-full shadow-xl z-30 overflow-hidden">
           <div className="p-4 md:p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 md:mb-8">

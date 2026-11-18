@@ -172,7 +172,7 @@ export default function HvacSystems({ user }) {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto">
+    <div className="flex-1 overflow-hidden flex flex-col min-h-0">
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>

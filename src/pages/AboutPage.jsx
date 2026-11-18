@@ -19,8 +19,8 @@ import {
   Lightbulb,
   Rocket,
 } from "lucide-react";
-import logo from "../assets/img/solidflo.png";
-import logo1 from "../assets/img/solidflo-logo.png";
+import logo from "../assets/img/solidlogo.png";
+import logo1 from "../assets/img/solidflo.png";
 import instagram from "../assets/images/instagram.png";
 import facebook from "../assets/images/facebook.png";
 import twitter from "../assets/images/twitter.png";

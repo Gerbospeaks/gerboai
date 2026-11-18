@@ -111,7 +111,7 @@ export default function AreaCalculatorView() {
   }, [walls, openings, coverage, containerSize, wastagePct]);
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="flex-1 overflow-hidden flex flex-col min-h-0">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl md:text-3xl font-bold text-slate-900 flex items-center gap-3">

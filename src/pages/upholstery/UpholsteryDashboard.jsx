@@ -9,7 +9,7 @@ import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
-import logo from "../../assets/img/solidflo-logo.png";
+import logo from "../../assets/img/solidflo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import GerboAIPanel from "../../components/GerboAIPanel";
@@ -784,7 +784,10 @@ const [stampConfig, setStampConfig] = useState(null);
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
           setShowSettings={setShowSettings}
-          handleNewInvoice={handleNewInvoice}
+          handleNewDocument={() => {
+            handleNewInvoice();
+            setActiveView("invoice");
+          }}
           handleNewQuote={handleNewQuote}
           businessInfo={businessInfo}
           savedQuotes={savedQuotes}
@@ -1987,7 +1990,7 @@ const [stampConfig, setStampConfig] = useState(null);
                 </div>
 
                 {/* Scrollable preview canvas */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-hidden p-4">
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{

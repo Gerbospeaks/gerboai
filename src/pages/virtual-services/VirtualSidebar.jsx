@@ -24,7 +24,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Bot as GerboAIIcon } from "lucide-react";
-import logo from "../../assets/img/solidflo-logo.png";
+import logo from "../../assets/img/solidflo.png";
 
 /**
  * VirtualSidebar – navigation for online / virtual service businesses.

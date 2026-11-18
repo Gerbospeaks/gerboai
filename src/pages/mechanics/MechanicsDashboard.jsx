@@ -52,7 +52,7 @@ import {
 import DashboardQuickActions from "./DashboardQuickActions";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import logo from "../../assets/img/solidflo-logo.png";
+import logo from "../../assets/img/solidflo.png";
 import PaymentProcessor from "../../components/dashboard/PaymentProcessor";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCurrency as useAppCurrency } from "../../contexts/CurrencyContext";
@@ -4034,7 +4034,7 @@ const handleStampConfirm = async (cfg) => {
                 </div>
 
                 {/* Scrollable preview canvas */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-hidden p-4">
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{

@@ -1158,9 +1158,7 @@ export const DetailedTemplate = (props) => (
 // Legacy template names for backwards compatibility
 export const ClassicTemplate = (props) => <ProfessionalTemplate {...props} />;
 export const IndustrialTemplate = (props) => <CorporateTemplate {...props} />;
-export const ResidentialTemplate = (props) => (
-  <ContemporaryTemplate {...props} />
-);
+export const ResidentialTemplate = (props) => (<ContemporaryTemplate {...props} />);
 export const CommercialTemplate = (props) => <DetailedTemplate {...props} />;
 
 // Template Renderer

@@ -137,7 +137,7 @@ export default function ColourLibraryView({ user }) {
   });
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="flex-1 overflow-hidden flex flex-col min-h-0">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>

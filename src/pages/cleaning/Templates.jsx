@@ -270,19 +270,9 @@ const money = (zar) =>
   };
 
   return (
-    <div className="min-h-screen bg-gray-300 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg p-8 text-gray-800">
-          <div className="flex items-center gap-3 mb-3">
-            <Sparkles className="w-8 h-8" />
-            <h1 className="text-3xl font-bold">Invoice Templates</h1>
-          </div>
-          <p className="text-blue-50 text-lg">
-            Professional invoice designs crafted specifically for cleaning
-            services and janitorial companies
-          </p>
-        </div>
+    <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+    
+       
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -771,7 +761,7 @@ const money = (zar) =>
             </div>
           </div>
         )}
-      </div>
+     
     </div>
   );
 };

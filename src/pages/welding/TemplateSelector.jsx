@@ -300,11 +300,11 @@ export const DefaultTemplate = ({
     {/* Totals */}
     <div className="flex justify-end mb-6">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>Subtotal:</span>
           <span>R {(subtotal || 0).toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1">
+        <div className="flex justify-between py-1 px-2">
           <span>VAT (15%):</span>
           <span>R {(vat || 0).toFixed(2)}</span>
         </div>
@@ -483,11 +483,11 @@ export const ClassicTemplate = (props) => (
 
     <div className="flex justify-end mb-4">
       <div className="w-64 text-xs">
-        <div className="flex justify-between py-1 border-b border-stone-200">
+        <div className="flex justify-between py-1 border-b border-stone-200 px-2">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-1 border-b border-stone-200">
+        <div className="flex justify-between py-1 border-b border-stone-200 px-2">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -629,11 +629,11 @@ export const ModernTemplate = (props) => (
 
     <div className="flex justify-end mb-4">
       <div className="w-80 space-y-1">
-        <div className="flex justify-between py-2 text-gray-600">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>Subtotal:</span>
           <span>R {props.subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between py-2 text-gray-600">
+        <div className="flex justify-between py-2 text-gray-600 px-4">
           <span>VAT (15%):</span>
           <span>R {props.vat.toFixed(2)}</span>
         </div>
@@ -750,11 +750,11 @@ export const ElegantTemplate = (props) => (
 
       <div className="flex justify-end mb-4">
         <div className="w-64">
-          <div className="flex justify-between py-2 border-b border-gray-300">
+          <div className="flex justify-between py-2 border-b border-gray-300 px-4">
             <span>Subtotal:</span>
             <span>R {props.subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-300">
+          <div className="flex justify-between py-2 border-b border-gray-300 px-4">
             <span>VAT (15%):</span>
             <span>R {props.vat.toFixed(2)}</span>
           </div>
@@ -921,13 +921,13 @@ export const PremiumTemplate = (props) => (
 
         <div className="flex justify-end mb-6">
           <div className="w-96">
-            <div className="flex justify-between py-2 text-gray-600">
+            <div className="flex justify-between py-2 text-gray-600 px-6">
               <span>Subtotal:</span>
               <span className="font-semibold">
                 R {props.subtotal.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between py-2 text-gray-600">
+            <div className="flex justify-between py-2 text-gray-600 px-6">
               <span>VAT (15%):</span>
               <span className="font-semibold">R {props.vat.toFixed(2)}</span>
             </div>

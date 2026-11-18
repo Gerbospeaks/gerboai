@@ -23,7 +23,7 @@ import {
   Flame,
 } from "lucide-react";
 import { Bot as GerboAIIcon } from "lucide-react";
-import logo from "../../assets/img/solidflo-logo.png";
+import logo from "../../assets/img/solidflo.png";
 
 export default function WeldingSidebar({
   navigate,

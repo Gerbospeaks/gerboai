@@ -9,7 +9,7 @@ import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
-import logo from "../../assets/img/solidflo-logo.png";
+import logo from "../../assets/img/solidflo.png";
 import { getAuth, signOut } from "firebase/auth";
 import FinancialOverview from "../FinancialOverview";
 import GerboAIPanel from "../../components/GerboAIPanel";
@@ -975,7 +975,7 @@ const [stampConfig, setStampConfig] = useState(null);
   ].filter(Boolean);
 
   return (
-    <div className="flex h-screen w-screen bg-gradient-to-br from-amber-50 via-orange-50 to-stone-50 overflow-hidden">
+    <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
       {/* ── Mobile Sidebar Backdrop ──────────────────────────────────────── */}
       {sidebarOpen && (
         <div
@@ -986,7 +986,7 @@ const [stampConfig, setStampConfig] = useState(null);
 
       {/* ── Collapsed Sidebar ────────────────────────────────────────────── */}
       <div
-        className={`${sidebarOpen ? "hidden" : "hidden md:block"} fixed z-40 w-16 md:w-20 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 h-full print:hidden transition-all duration-300 shadow-2xl`}
+        className={`${sidebarOpen ? "hidden" : "hidden md:block"} flex flex-col flex-shrink-0 w-16 bg-[#151a28] rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl`}
       >
         <div className="flex flex-col items-center py-4 md:py-6 space-y-4 md:space-y-6">
           {/* expand toggle */}
@@ -1083,7 +1083,7 @@ const [stampConfig, setStampConfig] = useState(null);
 
       {/* ── Expanded Sidebar ─────────────────────────────────────────────── */}
       <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 md:w-72 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 border-r border-stone-700/50 transition-transform duration-300 h-full print:hidden shadow-2xl overflow-y-auto`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed z-50 w-64 md:w-72 bg-gradient-to-b from-stone-900 via-stone-800 to-stone-900 rounded-3xl h-full items-center py-4 gap-2 z-30 shadow-xl`}
       >
         <div className="p-4 md:p-6">
           {/* header */}
@@ -1300,7 +1300,7 @@ const [stampConfig, setStampConfig] = useState(null);
                   <div
                     onClick={() => {
                       setActiveView("reports");
-                      setSidebarOpen(false);
+                      setSidebarOpen(true);
                     }}
                     className="group flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2.5 md:py-3 text-amber-300 hover:text-white hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-blue-700/20 rounded-xl cursor-pointer transition-all duration-300 border border-transparent hover:border-blue-500/30"
                   >
@@ -1348,7 +1348,7 @@ const [stampConfig, setStampConfig] = useState(null);
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
       <div
-        className={`flex-1 transition-all duration-300 flex flex-col overflow-hidden ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
+        className={`flex-1 overflow-hidden flex flex-col min-h-0 ${sidebarOpen ? "ml-0 lg:ml-72" : "ml-2 md:ml-20"}`}
       >
         {/* ── App Header ──────────────────────────────────────────────── */}
         <AppHeader
@@ -2562,7 +2562,7 @@ const [stampConfig, setStampConfig] = useState(null);
                 </div>
 
                 {/* Scrollable preview canvas */}
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-hidden p-4">
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{
@@ -2616,7 +2616,8 @@ const [stampConfig, setStampConfig] = useState(null);
   businessInfo={businessInfo}
 />
       </div>
-    <SolidFloAgent industry="pest-control" /> </div>
+    <SolidFloAgent industry="pest-control" /> 
+    </div>
   );
 };
 

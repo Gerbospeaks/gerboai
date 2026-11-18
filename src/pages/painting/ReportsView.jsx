@@ -364,7 +364,7 @@ export default function ReportsView({ user }) {
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-xl font-bold text-gray flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
@@ -436,8 +436,8 @@ export default function ReportsView({ user }) {
       {/* ── Charts row ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Revenue Bar Chart */}
-        <div className="lg:col-span-2 bg-stone-900 border border-stone-700 rounded-2xl p-6 shadow-xl">
-          <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+        <div className="lg:col-span-2 bg-stone-200 border border-stone-700 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-sm font-bold text-gray mb-1 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-amber-400" />
             Monthly Revenue (6-month trend)
           </h3>
@@ -453,14 +453,14 @@ export default function ReportsView({ user }) {
               data={monthlyData}
               valueKey="revenue"
               labelKey="label"
-              color="#f59e0b"
+              color="#029baf"
             />
           )}
         </div>
 
         {/* Invoice Status Donut */}
-        <div className="bg-stone-900 border border-stone-700 rounded-2xl p-6 shadow-xl">
-          <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+        <div className="bg-stone-200 border border-stone-700 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-sm font-bold text-gray mb-1 flex items-center gap-2">
             <PieChart className="w-4 h-4 text-blue-400" />
             Invoice Status
           </h3>
@@ -491,8 +491,8 @@ export default function ReportsView({ user }) {
       {/* ── Bottom row ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Clients */}
-        <div className="bg-stone-900 border border-stone-700 rounded-2xl p-6 shadow-xl">
-          <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+        <div className="bg-stone-100 border border-stone-700 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-sm font-bold text-gray mb-1 flex items-center gap-2">
             <Users className="w-4 h-4 text-pink-400" />
             Top Clients by Revenue
           </h3>
@@ -531,8 +531,8 @@ export default function ReportsView({ user }) {
         </div>
 
         {/* Recent Invoices */}
-        <div className="bg-stone-900 border border-stone-700 rounded-2xl p-6 shadow-xl">
-          <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+        <div className="bg-stone-100 border border-stone-700 rounded-2xl p-6 shadow-xl">
+          <h3 className="text-sm font-bold text-gray mb-1 flex items-center gap-2">
             <Layers className="w-4 h-4 text-emerald-400" />
             Recent Invoices
           </h3>
@@ -578,7 +578,7 @@ export default function ReportsView({ user }) {
       </div>
 
       {/* ── Summary Footer ─────────────────────────────────────────── */}
-      <div className="bg-gradient-to-r from-stone-900 to-stone-800 border border-stone-700 rounded-2xl p-5 shadow-xl">
+      <div className="bg-gradient-to-r from-stone-100 to-stone-800 border border-stone-700 rounded-2xl p-5 shadow-xl">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           <div>
             <p className="text-stone-500 text-xs mb-1">Total Quotes</p>

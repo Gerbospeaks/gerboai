@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSubdomain } from "../../hooks/useSubdomain";
 import { getIndustryConfig } from "../../config/industryConfig";
-import logo from "../../assets/img/hvac-logo.png";
-import logotop from "../../assets/img/hvac-logo-top.png";
+import logob from "../../assets/img/hvac-logo.png";
+import logo from "../../assets/img/hvac-logo-top.png";
 import { HC, heroFontStyle } from "../../styles/landingTokens";
 import google from "../../assets/google-play.png";
 import Helmet from "react-helmet";
@@ -1556,7 +1556,7 @@ function Footer({ onLogin, onRegister }) {
                   fontSize: 16,
                 }}
               >
-                <img src={logo} alt="" />
+                <img src={logob} alt="" />
               </div>
             </div>
             <p

@@ -112,6 +112,9 @@ import { useSubAccount } from "./hooks/useSubAccount";
 import SubAccountDashboard from "./pages/mechanics/SubAccountDashboard";
 import GuestMenuPage from "./pages/hotel/GuestMenuPage";
 import MenuSignagePage from "./pages/hotel/MenuSignagePage";
+import VapiAssistant from "./pages/VapiAssistant";
+import CallAnswering from "./pages/CallAnswering";
+import ServiceMarketplace from "./pages/ServiceMarketplaceView";
 const IS_SUBDOMAIN = !!getSubdomainFromHost();
 
 const PUBLIC_ROUTES = new Set([
@@ -369,7 +372,7 @@ function MainDomainRoot() {
   }, [loading, user, navigate]);
 
   if (loading) return <AppLoader />;
-  return <LandingPage />;
+  return <PublicMarketplace />;
 }
 // ─── Main App ─────────────────────────────────────────────────────────────────
 function App() {

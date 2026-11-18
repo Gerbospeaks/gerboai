@@ -289,8 +289,8 @@ const money = (zar) =>
     .reduce((sum, t) => sum + t.price, 0);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+    
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-1">
             <FileText className="w-6 h-6 text-blue-600" />
@@ -487,7 +487,7 @@ const money = (zar) =>
             <li>Select any template you own — your invoice updates live.</li>
           </ol>
         </div>
-      </div>
+     
 
       {showPreview && (
         <div

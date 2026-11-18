@@ -238,7 +238,7 @@ export default function CourtDates({ user }) {
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
-      <div className="max-w-5xl mx-auto space-y-5">
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

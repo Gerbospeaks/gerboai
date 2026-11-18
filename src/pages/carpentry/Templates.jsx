@@ -164,12 +164,12 @@ const money = (zar) =>
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setPurchasedTemplates(docSnap.data().purchased || ["professional"]);
+        setPurchasedTemplates(docSnap.data().purchased || ["modern"]);
       } else {
         // Initialize with professional template
         await setDoc(docRef, {
-          purchased: ["professional"],
-          active: "professional",
+          purchased: ["modern"],
+          active: "modern",
           updatedAt: serverTimestamp(),
         });
       }

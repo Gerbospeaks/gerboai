@@ -2164,7 +2164,7 @@ const CarpentrySubAccountDashboard = ({ parentUid, subUser }) => {
                     </button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex-1 overflow-hidden p-4">
                   <div
                     className="bg-white shadow-lg rounded origin-top"
                     style={{

@@ -842,8 +842,8 @@ export const ElegantTemplate = ({
         />
       </div>
     )}
-    <div className="border-4 border-purple-900 p-8">
-      <div className="text-center border-b-2 border-purple-900 pb-6 mb-6">
+    <div className="border-4 border-purple-900 p-4">
+      <div className="text-center border-b-2 border-purple-900 pb-1 mb-2">
         {businessInfo.logoUrl && (
           <img
             src={businessInfo.logoUrl}
@@ -1014,7 +1014,7 @@ export const ResidentialTemplate = ({
 }) => (
   <div
     className="bg-gradient-to-br from-green-50 to-blue-50"
-    style={{ padding: "15mm 20mm" }}
+    style={{ padding: "0mm 0mm" }}
   >
     {showStamp && paymentStatus?.status === "paid" && (
       <div className="absolute top-12 right-12">

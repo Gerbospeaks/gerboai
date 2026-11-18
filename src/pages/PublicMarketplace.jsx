@@ -2828,13 +2828,13 @@ const providers = rawProviders.map(normalizeProvider);
           </div>
 
           <h1>
-            Find Trusted Providers{" "}
+            Find Trusted Service Providers{" "}
             <em key={currentWord}>{WORDS[currentWord]}</em>
           </h1>
 
           <p className="mp-hero-sub">
             Browse, compare and book verified trade and professional service
-            providers across Gauteng. No registration needed to browse.
+            providers near you. No registration needed to browse.
           </p>
 
           <div className="mp-hero-ctas">
@@ -2860,7 +2860,7 @@ const providers = rawProviders.map(normalizeProvider);
             {[
               "No sign-up to browse",
               "Verified professionals",
-              "Gauteng-based",
+              "Near you",
             ].map((t) => (
               <div key={t} className="mp-hero-trust-item">
                 <span className="mp-hero-trust-check">✓</span> {t}

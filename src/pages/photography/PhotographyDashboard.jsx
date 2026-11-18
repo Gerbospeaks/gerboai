@@ -10,7 +10,7 @@ import StampSignatureModal from "../StampSignatureModal";
 import { POTemplateRenderer } from "../Purchaseordertemplates";
 import SubUserManagement from "../SubUserManagement";
 import { serverTimestamp } from "firebase/firestore";
-import logo from "../../assets/img/solidflo-logo.png";
+import logo from "../../assets/img/solidflo.png";
 import { usePermissions } from "../../hooks/usePermissions";
 import Templates from "./Templates";
 import ServiceMarketplaceView from "../ServiceMarketplaceView";
@@ -847,7 +847,7 @@ const [stampConfig, setStampConfig] = useState(null);
   ].filter(Boolean);
 
   return (
-    <div className="flex h-screen w-screen bg-gradient-to-br from-slate-50 via-slate-100 to-gray-100 overflow-hidden">
+    <div className="flex-1 flex overflow-hidden min-h-0 md:gap-3">
       {/* ── Upgrade modal (renders on top of everything) ─────────────────── */}
       <PhotographySidebar 
                 user={user}
@@ -1248,7 +1248,7 @@ const [stampConfig, setStampConfig] = useState(null);
                       </button>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-4">
+                  <div className="flex-1 overflow-hidden p-4">
                     <div
                       className="bg-white shadow-lg rounded origin-top"
                       style={{
